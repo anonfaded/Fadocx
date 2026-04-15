@@ -7,25 +7,6 @@ import 'package:fadocx/core/utils/logger.dart';
 
 /// Service to parse and extract data from various document formats
 class DocumentParserService {
-  /// Parse DOC format (legacy Word)
-  /// Returns plain text content
-  static Future<String> parseDOC(String filePath) async {
-    try {
-      log.i('Parsing DOC file: $filePath');
-      final file = File(filePath);
-      final fileBytes = await file.readAsBytes();
-      
-      // Extract text from DOC binary format
-      // This is a simple approach - extract readable strings from binary
-      final text = _extractTextFromBytes(fileBytes);
-      log.i('DOC extracted: ${text.length} characters');
-      return text;
-    } catch (e, st) {
-      log.e('Error parsing DOC', e, st);
-      rethrow;
-    }
-  }
-
   /// Parse XLS format (legacy Excel)
   /// Returns a simplified table structure as map
   static Future<Map<String, dynamic>> parseXLS(String filePath) async {

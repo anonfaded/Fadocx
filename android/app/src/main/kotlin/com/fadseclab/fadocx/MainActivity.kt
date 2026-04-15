@@ -10,6 +10,8 @@ import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.hwpf.HWPFDocument
+import org.apache.poi.hwpf.extractor.WordExtractor
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -135,6 +137,7 @@ class MainActivity : FlutterActivity() {
                 "XLSX" -> parseXLSX(filePath)
                 "XLS" -> parseXLS(filePath)
                 "CSV" -> parseCSV(filePath)
+                "DOC" -> parseDOC(filePath)
                 else -> throw IllegalArgumentException("Unsupported format: $format")
             }
 
@@ -307,6 +310,34 @@ class MainActivity : FlutterActivity() {
             "format" to "CSV",
             "filePath" to filePath
         )
+    }
+
+    private fun parseDOC(filePath: String): Map<String, Any> {
+        val file = File(filePath)
+        if (!file.exists()) {
+            throw IllegalArgumentException("File not found: $filePath")
+        }
+
+        val fileInputStream = FileInputStream(file)
+        val document = HWPFDocument(fileInputStream)
+        val extractor = WordExtractor(document)
+
+        try {
+            // Extract text content from the document
+            val text = extractor.text
+
+            Log.d(TAG, "Parsed DOC: ${text.length} characters extracted")
+
+            return mapOf(
+                "textContent" to text,
+                "format" to "DOC",
+                "filePath" to filePath
+            )
+        } finally {
+            extractor.close()
+            document.close()
+            fileInputStream.close()
+        }
     }
 }
 

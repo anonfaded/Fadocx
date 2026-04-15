@@ -202,14 +202,15 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
   @override
   Future<ParsedDocumentEntity> parseDOCX(String filePath) async {
-    // Check cache first
+    // Check cache first (skip if format is UNKNOWN or invalid)
     final cached = await getCachedParsing(filePath);
-    if (cached != null) {
+    if (cached != null && cached.format != 'UNKNOWN') {
+      log.i('Using cached DOCX: $filePath');
       return cached;
     }
 
     log.i('Parsing DOCX (Dart): $filePath');
-    
+
     // DOCX: Pure Dart, no native needed - lightweight format
     final textContent = await DocumentParserService.parseDOCX(filePath);
     final result = ParsedDocumentEntity(
@@ -226,26 +227,33 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
   @override
   Future<ParsedDocumentEntity> parseDOC(String filePath) async {
-    // Check cache first
+    // Check cache first (skip if format is UNKNOWN or invalid)
     final cached = await getCachedParsing(filePath);
-    if (cached != null) {
+    if (cached != null && cached.format != 'UNKNOWN') {
+      log.i('Using cached DOC: $filePath');
       return cached;
     }
 
-    log.i('Parsing DOC (Dart): $filePath');
-    
-    // DOC: Legacy Word format, extract text via Dart parser
-    final textContent = await DocumentParserService.parseDOC(filePath);
-    final result = ParsedDocumentEntity(
-      format: 'DOC',
-      sheets: [],
-      sheetCount: 0,
-      parsedAt: DateTime.now(),
-      sourceFilePath: filePath,
-      textContent: textContent,
-    );
-    await cacheParsing(filePath, result);
-    return result;
+    log.i('Parsing DOC (NATIVE, no fallback): $filePath');
+
+    // DOC MUST use native parsing - Dart binary extraction produces garbage
+    try {
+      log.d('Calling native parser channel for DOC...');
+      final nativeResult = await _platformChannel.parseDocumentNative(filePath, 'DOC');
+
+      log.d('Native parser returned: textContent=${(nativeResult['textContent'] as String?)?.length} chars, format=${nativeResult['format']}');
+
+      final result = _toParsedEntity(nativeResult, format: 'DOC');
+
+      log.i('Successfully parsed DOC: ${(result.textContent ?? '').length} characters');
+      await cacheParsing(filePath, result);
+      return result;
+    } catch (e, st) {
+      log.e('NATIVE PARSING FAILED for DOC: $e', e, st);
+      log.d('Failed file path: $filePath');
+      log.d('Native channel may not be available or file may be corrupted');
+      rethrow; // Let it fail - this is critical
+    }
   }
 
   @override

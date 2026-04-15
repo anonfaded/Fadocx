@@ -55,11 +55,12 @@ android {
 }
 
 dependencies {
-    // Apache POI for native Excel parsing
+    // Apache POI for native document parsing
     implementation("org.apache.poi:poi:5.2.3")
     implementation("org.apache.poi:poi-ooxml:5.2.3")
     implementation("org.apache.poi:poi-ooxml-lite:5.2.3")
-    
+    implementation("org.apache.poi:poi-scratchpad:5.2.3")  // HWPF for DOC, HSLF for PPT
+
     // Required transitive dependencies
     implementation("org.apache.xmlbeans:xmlbeans:5.1.1")
     implementation("commons-io:commons-io:2.11.0")
