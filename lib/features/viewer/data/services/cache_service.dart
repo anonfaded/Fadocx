@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:fadocx/core/utils/logger.dart';
 
@@ -200,15 +201,17 @@ class HiveCacheService implements CacheService {
 
   /// Convert parsed data map to JSON string for storage
   String _parsedDataToJson(Map<String, dynamic> data) {
-    // Simple serialization - in production, use proper JSON encoding
-    // But we need to avoid full JSON stringify to keep cache small
-    return data.toString();
+    return jsonEncode(data);
   }
 
   /// Convert JSON string back to parsed data map
   Map<String, dynamic> _jsonToParsedData(String json) {
-    // This is a simplified version - in production use proper deserialization
-    // For now, return an empty map that will be re-parsed
+    final decoded = jsonDecode(json);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+    // Fallback for unexpected types
+    log.w('Unexpected cached data type: ${decoded.runtimeType}');
     return {};
   }
 }
