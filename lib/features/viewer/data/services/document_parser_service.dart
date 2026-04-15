@@ -469,5 +469,41 @@ class DocumentParserService {
       rethrow;
     }
   }
+
+  /// Parse DOCX format (Modern Word)
+  /// Returns text content as string
+  static Future<String> parseDOCX(String filePath) async {
+    try {
+      log.i('Parsing DOCX file: $filePath');
+      final file = File(filePath);
+      final bytes = await file.readAsBytes();
+      
+      // DOCX files are ZIP archives containing XML
+      final archive = ZipDecoder().decodeBytes(bytes);
+      final documentFile = archive.findFile('word/document.xml');
+      
+      if (documentFile == null) {
+        throw Exception('word/document.xml not found in DOCX file');
+      }
+
+      final xmlContent = utf8.decode(documentFile.content as List<int>);
+      final document = XmlDocument.parse(xmlContent);
+
+      // Extract all text nodes from paragraphs and runs
+      final texts = <String>[];
+      for (var elem in document.findAllElements('w:p')) {
+        final pText = elem.innerText.trim();
+        if (pText.isNotEmpty) {
+          texts.add(pText);
+        }
+      }
+
+      log.i('DOCX extracted: ${texts.join().length} characters');
+      return texts.join('\n');
+    } catch (e, st) {
+      log.e('Error parsing DOCX', e, st);
+      rethrow;
+    }
+  }
 }
 

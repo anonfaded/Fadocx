@@ -39,6 +39,18 @@ android {
     }
 }
 
+dependencies {
+    // Apache POI for native Excel parsing
+    implementation("org.apache.poi:poi:5.2.3")
+    implementation("org.apache.poi:poi-ooxml:5.2.3")
+    implementation("org.apache.poi:poi-ooxml-lite:5.2.3")
+    
+    // Required transitive dependencies
+    implementation("org.apache.xmlbeans:xmlbeans:5.1.1")
+    implementation("commons-io:commons-io:2.11.0")
+    implementation("commons-codec:commons-codec:1.15")
+}
+
 flutter {
     source = "../.."
 }

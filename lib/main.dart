@@ -7,6 +7,7 @@ import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
+import 'package:fadocx/features/viewer/data/services/cache_service.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
 
 void main() async {
@@ -22,8 +23,14 @@ void main() async {
     log.i('Initializing local database (Hive)...');
     await HiveDatasource.initialize();
     log.i('✅ Hive initialized successfully');
+
+    // Initialize document cache for spreadsheet parsing
+    log.i('Initializing document cache service...');
+    final cacheService = HiveCacheService();
+    await cacheService.initialize();
+    log.i('✅ Document cache initialized successfully');
   } catch (e, st) {
-    log.e('❌ Failed to initialize Hive', e, st);
+    log.e('❌ Failed to initialize services', e, st);
   }
 
   log.i('🎨 Starting Fadocx UI...');
