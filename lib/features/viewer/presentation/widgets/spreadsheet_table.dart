@@ -5,15 +5,28 @@ import 'package:fadocx/l10n/app_localizations.dart';
 /// - Frozen header row (column names)
 /// - Frozen left column (row numbers)
 /// - Row/column selection with highlighting
-/// - Zoom in/out functionality
+/// - Zoom in/out functionality (30-300%)
+/// - Pinch-to-zoom gesture support
 /// - 2D virtualization for instant rendering
 class SpreadsheetTable extends StatefulWidget {
   final List<List<String>> rows;
   final String sheetName;
+  final double zoomLevel;
+  final int? selectedRow;
+  final int? selectedColumn;
+  final void Function(int)? onRowSelected;
+  final void Function(int)? onColumnSelected;
+  final void Function(double)? onZoomChanged;
 
   const SpreadsheetTable({
     required this.rows,
     required this.sheetName,
+    this.zoomLevel = 1.0,
+    this.selectedRow,
+    this.selectedColumn,
+    this.onRowSelected,
+    this.onColumnSelected,
+    this.onZoomChanged,
     super.key,
   });
 
@@ -24,10 +37,6 @@ class SpreadsheetTable extends StatefulWidget {
 class _SpreadsheetTableState extends State<SpreadsheetTable> {
   late ScrollController _horizontalScrollController;
   late ScrollController _verticalScrollController;
-  
-  int? _selectedRowIndex;
-  int? _selectedColumnIndex;
-  double _zoomLevel = 1.0;
   
   static const double _baseColumnWidth = 100.0;
   static const double _rowNumberColumnWidth = 50.0;
@@ -80,29 +89,29 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
   }
 
   void _selectRow(int rowIndex) {
-    setState(() {
-      _selectedRowIndex = _selectedRowIndex == rowIndex ? null : rowIndex;
-      _selectedColumnIndex = null;
-    });
+    if (widget.selectedRow == rowIndex) {
+      widget.onRowSelected?.call(-1); // Deselect
+    } else {
+      widget.onRowSelected?.call(rowIndex);
+    }
   }
 
   void _selectColumn(int colIndex) {
-    setState(() {
-      _selectedColumnIndex = _selectedColumnIndex == colIndex ? null : colIndex;
-      _selectedRowIndex = null;
-    });
+    if (widget.selectedColumn == colIndex) {
+      widget.onColumnSelected?.call(-1); // Deselect
+    } else {
+      widget.onColumnSelected?.call(colIndex);
+    }
   }
 
   void _zoomIn() {
-    setState(() {
-      _zoomLevel = (_zoomLevel + 0.1).clamp(0.3, 3.0);
-    });
+    final newZoom = (widget.zoomLevel + 0.1).clamp(0.3, 3.0);
+    widget.onZoomChanged?.call(newZoom);
   }
 
   void _zoomOut() {
-    setState(() {
-      _zoomLevel = (_zoomLevel - 0.1).clamp(0.3, 3.0);
-    });
+    final newZoom = (widget.zoomLevel - 0.1).clamp(0.3, 3.0);
+    widget.onZoomChanged?.call(newZoom);
   }
 
   @override
@@ -118,8 +127,8 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
       );
     }
 
-    final columnWidth = _baseColumnWidth * _zoomLevel;
-    final rowHeight = _rowHeight * _zoomLevel;
+    final columnWidth = _baseColumnWidth * widget.zoomLevel;
+    final rowHeight = _rowHeight * widget.zoomLevel;
     final headerColor = isDarkMode ? Colors.grey[800] : Colors.grey[100];
     final borderColor = isDarkMode ? Colors.grey[700] : Colors.grey[300];
     final altRowColor = isDarkMode ? Colors.grey[900] : Colors.grey[50];
@@ -134,9 +143,9 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
         Expanded(
           child: GestureDetector(
             onScaleUpdate: (ScaleUpdateDetails details) {
-              setState(() {
-                _zoomLevel = (_zoomLevel * details.scale).clamp(0.3, 3.0);
-              });
+              final newZoom =
+                  (widget.zoomLevel * details.scale).clamp(0.3, 3.0);
+              widget.onZoomChanged?.call(newZoom);
             },
             child: Row(
             children: [
@@ -176,7 +185,7 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
                             children: List.generate(
                               normalizedRows.length,
                               (rowIndex) {
-                                final isSelected = _selectedRowIndex == rowIndex;
+                                final isSelected = widget.selectedRow == rowIndex;
                                 final isAltRow = rowIndex % 2 == 0;
                                 final row = normalizedRows[rowIndex];
                                 
@@ -240,19 +249,19 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
               // Zoom controls
               IconButton(
                 icon: const Icon(Icons.zoom_out),
-                onPressed: _zoomLevel > 0.3 ? _zoomOut : null,
+                onPressed: widget.zoomLevel > 0.3 ? _zoomOut : null,
                 tooltip: 'Zoom out',
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
-                  '${(_zoomLevel * 100).toStringAsFixed(0)}%',
+                  '${(widget.zoomLevel * 100).toStringAsFixed(0)}%',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.zoom_in),
-                onPressed: _zoomLevel < 3.0 ? _zoomIn : null,
+                onPressed: widget.zoomLevel < 3.0 ? _zoomIn : null,
                 tooltip: 'Zoom in',
               ),
               const SizedBox(width: 8),
@@ -260,11 +269,7 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
               IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: () {
-                  setState(() {
-                    _zoomLevel = 1.0;
-                    _selectedRowIndex = null;
-                    _selectedColumnIndex = null;
-                  });
+                  widget.onZoomChanged?.call(1.0);
                 },
                 tooltip: 'Reset zoom',
               ),
@@ -314,7 +319,7 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
               children: List.generate(
                 rows.length,
                 (rowIndex) {
-                  final isSelected = _selectedRowIndex == rowIndex;
+                  final isSelected = widget.selectedRow == rowIndex;
                   final isAltRow = rowIndex % 2 == 0;
                   
                   return GestureDetector(
@@ -373,13 +378,13 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
           columnCount,
           (colIndex) {
             final columnLabel = String.fromCharCode(65 + (colIndex % 26));
-            final isSelected = _selectedColumnIndex == colIndex;
+            final isSelected = widget.selectedColumn == colIndex;
             
             return GestureDetector(
               onTap: () => _selectColumn(colIndex),
               child: Container(
                 width: columnWidth,
-                height: _rowHeight * _zoomLevel,
+                height: _rowHeight * widget.zoomLevel,
                 decoration: BoxDecoration(
                   color: isSelected
                       ? Colors.blue.withValues(alpha: 0.3)
@@ -436,7 +441,7 @@ class _SpreadsheetTableState extends State<SpreadsheetTable> {
           columnCount,
           (colIndex) {
             final cellValue = colIndex < row.length ? row[colIndex] : '';
-            final isColumnSelected = _selectedColumnIndex == colIndex;
+            final isColumnSelected = widget.selectedColumn == colIndex;
             
             return Container(
               width: columnWidth,
