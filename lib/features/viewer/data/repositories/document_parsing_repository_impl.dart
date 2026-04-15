@@ -257,16 +257,48 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
   }
 
   @override
+  Future<ParsedDocumentEntity> parsePPT(String filePath) async {
+    // Check cache first (skip if format is UNKNOWN or invalid)
+    final cached = await getCachedParsing(filePath);
+    if (cached != null && cached.format != 'UNKNOWN') {
+      log.i('Using cached PPT: $filePath');
+      return cached;
+    }
+
+    final format = filePath.toLowerCase().endsWith('.pptx') ? 'PPTX' : 'PPT';
+    log.i('Parsing $format (NATIVE, no fallback): $filePath');
+
+    // PPT/PPTX MUST use native parsing - Dart binary extraction produces garbage
+    try {
+      log.d('Calling native parser channel for $format...');
+      final nativeResult = await _platformChannel.parseDocumentNative(filePath, format);
+
+      log.d('Native parser returned: textContent length=${(nativeResult['textContent'] as String?)?.length}, slideCount=${nativeResult['slideCount']}, format=${nativeResult['format']}');
+
+      final result = _toParsedEntity(nativeResult, format: format);
+
+      log.i('Successfully parsed $format: slideCount=${result.slideCount}');
+      await cacheParsing(filePath, result);
+      return result;
+    } catch (e, st) {
+      log.e('NATIVE PARSING FAILED for $format: $e', e, st);
+      log.d('Failed file path: $filePath');
+      log.d('Native channel may not be available or file may be corrupted');
+      rethrow; // Let it fail - this is critical
+    }
+  }
+
+  @override
   Future<ParsedDocumentEntity?> getCachedParsing(String filePath) async {
     try {
       final cachedResult = await _cache.getCachedParsing(filePath);
       if (cachedResult != null) {
-        // For now, reconstruct basic entity from cached data
-        // In production, store the full entity serialized
         return ParsedDocumentEntity(
           format: cachedResult['format'] ?? 'UNKNOWN',
           sheets: _buildSheetEntities(cachedResult['sheets'] ?? []),
+          slides: _buildSlideEntities(cachedResult['slides'] ?? []),
           sheetCount: cachedResult['sheetCount'] ?? 0,
+          slideCount: cachedResult['slideCount'] ?? 0,
           parsedAt: DateTime.now(),
           sourceFilePath: filePath,
           textContent: cachedResult['textContent'],
@@ -287,12 +319,19 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       final data = {
         'format': document.format,
         'sheetCount': document.sheetCount,
+        'slideCount': document.slideCount,
         'sheets': document.sheets
             .map((s) => {
                   'name': s.name,
                   'rows': s.rows,
                   'rowCount': s.rowCount,
                   'colCount': s.colCount,
+                })
+            .toList(),
+        'slides': document.slides
+            .map((s) => {
+                  'slideNumber': s.slideNumber,
+                  'text': s.text,
                 })
             .toList(),
         'textContent': document.textContent,
@@ -319,11 +358,14 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
     String? format,
   }) {
     final sheets = _buildSheetEntities(parserResult['sheets'] ?? []);
+    final slides = _buildSlideEntities(parserResult['slides'] ?? []);
 
     return ParsedDocumentEntity(
       format: format ?? parserResult['format'] ?? 'UNKNOWN',
       sheets: sheets,
       sheetCount: parserResult['sheetCount'] ?? sheets.length,
+      slideCount: parserResult['slideCount'] ?? slides.length,
+      slides: slides,
       parsedAt: DateTime.now(),
       sourceFilePath: parserResult['filePath'] ?? '',
       textContent: parserResult['textContent'],
@@ -398,5 +440,21 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
     } else {
       return value;
     }
+  }
+
+  /// Build SlideEntity list from parser result
+  List<SlideEntity> _buildSlideEntities(List<dynamic> slidesData) {
+    return slidesData
+        .map((slideData) {
+          final slide = slideData is Map<String, dynamic>
+              ? slideData
+              : _convertDynamicMapToTyped(slideData as Map);
+
+          return SlideEntity(
+            slideNumber: (slide['slideNumber'] as int?) ?? 0,
+            text: (slide['text'] as String?) ?? '',
+          );
+        })
+        .toList();
   }
 }
