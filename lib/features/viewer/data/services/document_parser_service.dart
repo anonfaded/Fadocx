@@ -1,0 +1,473 @@
+import 'dart:io';
+import 'dart:convert';
+import 'package:archive/archive.dart';
+import 'package:xml/xml.dart';
+import 'package:excel/excel.dart';
+import 'package:fadocx/core/utils/logger.dart';
+
+/// Service to parse and extract data from various document formats
+class DocumentParserService {
+  /// Parse DOC format (legacy Word)
+  /// Returns plain text content
+  static Future<String> parseDOC(String filePath) async {
+    try {
+      log.i('Parsing DOC file: $filePath');
+      final file = File(filePath);
+      final fileBytes = await file.readAsBytes();
+      
+      // Extract text from DOC binary format
+      // This is a simple approach - extract readable strings from binary
+      final text = _extractTextFromBytes(fileBytes);
+      log.i('DOC extracted: ${text.length} characters');
+      return text;
+    } catch (e, st) {
+      log.e('Error parsing DOC', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse XLS format (legacy Excel)
+  /// Returns a simplified table structure as map
+  static Future<Map<String, dynamic>> parseXLS(String filePath) async {
+    try {
+      log.i('Parsing XLS file: $filePath');
+      
+      // Extract basic sheet data from XLS binary format
+      // This returns a placeholder structure since full XLS parsing is complex
+      return {
+        'sheets': [],
+        'content': 'XLS format requires binary parsing. Support coming in Phase 2.',
+        'note': 'For now, consider converting to XLSX for better compatibility',
+      };
+    } catch (e, st) {
+      log.e('Error parsing XLS', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse XLSX format (modern Excel)
+  /// Returns sheets with cell data
+  static Future<Map<String, dynamic>> parseXLSX(String filePath) async {
+    try {
+      log.i('Parsing XLSX file: $filePath');
+      final file = File(filePath);
+      
+      // Ensure file exists before attempting to read
+      if (!await file.exists()) {
+        throw Exception('XLSX file does not exist: $filePath');
+      }
+      
+      final bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
+        throw Exception('XLSX file is empty');
+      }
+      
+      log.i('Read ${bytes.length} bytes from XLSX file');
+      
+      // Parse XLSX using excel package
+      var excel = Excel.decodeBytes(bytes);
+      
+      final sheets = <Map<String, dynamic>>[];
+      
+      // Parse each sheet
+      for (var table in excel.tables.keys) {
+        final sheetData = excel.tables[table];
+        if (sheetData == null) {
+          log.w('Sheet $table is null, skipping');
+          continue;
+        }
+        
+        final rows = <List<String>>[];
+        
+        // Parse rows
+        for (var row in sheetData.rows) {
+          final cells = <String>[];
+          for (var cell in row) {
+            final cellValue = cell?.value?.toString() ?? '';
+            cells.add(cellValue);
+          }
+          if (cells.isNotEmpty) {
+            rows.add(cells);
+          }
+        }
+        
+        sheets.add({
+          'name': table,
+          'rows': rows,
+          'rowCount': rows.length,
+          'colCount': rows.isNotEmpty ? rows.first.length : 0,
+        });
+        
+        log.i('Parsed XLSX sheet: $table (${rows.length} rows, ${rows.isNotEmpty ? rows.first.length : 0} cols)');
+      }
+      
+      if (sheets.isEmpty) {
+        log.w('XLSX file has no readable sheets');
+        return {
+          'sheets': [],
+          'format': 'XLSX',
+          'sheetCount': 0,
+          'error': 'No readable sheets found in XLSX file',
+        };
+      }
+      
+      return {
+        'sheets': sheets,
+        'format': 'XLSX',
+        'sheetCount': sheets.length,
+      };
+    } catch (e, st) {
+      log.e('Error parsing XLSX: $e', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse CSV format
+  /// Returns a single sheet structure
+  static Future<Map<String, dynamic>> parseCSV(String filePath) async {
+    try {
+      log.i('Parsing CSV file: $filePath');
+      final file = File(filePath);
+      final content = await file.readAsString();
+      
+      // Simple CSV parsing - split by newlines and commas
+      final lines = content.split('\n');
+      final rows = <List<String>>[];
+      
+      for (var line in lines) {
+        if (line.trim().isEmpty) continue;
+        
+        // Handle basic CSV parsing (quoted fields, escaped commas)
+        final cells = <String>[];
+        var currentCell = StringBuffer();
+        var inQuotes = false;
+        
+        for (int i = 0; i < line.length; i++) {
+          final char = line[i];
+          
+          if (char == '"') {
+            inQuotes = !inQuotes;
+          } else if (char == ',' && !inQuotes) {
+            cells.add(currentCell.toString().trim());
+            currentCell.clear();
+          } else {
+            currentCell.write(char);
+          }
+        }
+        
+        // Add last cell
+        if (currentCell.isNotEmpty) {
+          cells.add(currentCell.toString().trim());
+        }
+        
+        if (cells.isNotEmpty) {
+          rows.add(cells);
+        }
+      }
+      
+      return {
+        'sheets': [
+          {
+            'name': 'Sheet1',
+            'rows': rows,
+            'rowCount': rows.length,
+            'colCount': rows.isNotEmpty ? rows.first.length : 0,
+          }
+        ],
+        'format': 'CSV',
+        'sheetCount': 1,
+      };
+    } catch (e, st) {
+      log.e('Error parsing CSV', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse ODT format (OpenDocument Text)
+  /// Returns text content
+  static Future<String> parseODT(String filePath) async {
+    try {
+      log.i('Parsing ODT file: $filePath');
+      return await _parseOpenDocumentFormat(filePath, 'ODT');
+    } catch (e, st) {
+      log.e('Error parsing ODT', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse ODS format (OpenDocument Spreadsheet)
+  /// Returns table structure
+  static Future<Map<String, dynamic>> parseODS(String filePath) async {
+    try {
+      log.i('Parsing ODS file: $filePath');
+      return await _parseOpenDocumentSpreadsheet(filePath);
+    } catch (e, st) {
+      log.e('Error parsing ODS', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse ODP format (OpenDocument Presentation)
+  /// Returns slides data
+  static Future<List<Map<String, dynamic>>> parseODP(String filePath) async {
+    try {
+      log.i('Parsing ODP file: $filePath');
+      final file = File(filePath);
+      final bytes = await file.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      final slides = <Map<String, dynamic>>[];
+      
+      // ODP contains slides as XML files
+      for (var i = 1;; i++) {
+        final slideFile = archive.findFile('ppt/slides/slide$i.xml');
+        if (slideFile == null) break;
+
+        try {
+          final slideXml = utf8.decode(slideFile.content as List<int>);
+          final document = XmlDocument.parse(slideXml);
+          
+          // Extract text from slide
+          final texts = <String>[];
+          for (var elem in document.findAllElements('a:t')) {
+            texts.add(elem.innerText);
+          }
+
+          slides.add({
+            'slideNumber': i,
+            'text': texts.join('\n'),
+          });
+          log.d('Parsed ODP slide $i');
+        } catch (e) {
+          log.w('Could not parse ODP slide $i: $e');
+        }
+      }
+
+      log.i('ODP parsed: ${slides.length} slides');
+      return slides;
+    } catch (e, st) {
+      log.e('Error parsing ODP', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse RTF format (Rich Text Format)
+  /// Returns plain text (formatting stripped)
+  static Future<String> parseRTF(String filePath) async {
+    try {
+      log.i('Parsing RTF file: $filePath');
+      final file = File(filePath);
+      final content = await file.readAsString();
+      
+      // Simple RTF text extraction - remove RTF control codes
+      String text = content;
+      
+      // Remove RTF header
+      text = text.replaceFirst(RegExp(r'^\{\\rtf1[^}]*\}'), '');
+      
+      // Remove control words and symbols
+      text = text.replaceAll(RegExp(r'\\[a-z]+\d*\s?'), '');
+      text = text.replaceAll(RegExp(r'\\[^a-z]'), '');
+      text = text.replaceAll(RegExp(r'\{|\}'), '');
+      
+      // Clean up extra whitespace
+      text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+      
+      log.i('RTF extracted: ${text.length} characters');
+      return text;
+    } catch (e, st) {
+      log.e('Error parsing RTF', e, st);
+      rethrow;
+    }
+  }
+
+  // Helper: Parse generic ODF text format (ODT)
+  static Future<String> _parseOpenDocumentFormat(
+    String filePath,
+    String format,
+  ) async {
+    try {
+      final file = File(filePath);
+      final bytes = await file.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      // ODF files are ZIP archives containing XML
+      final contentFile = archive.findFile('content.xml');
+      if (contentFile == null) {
+        throw Exception('content.xml not found in $format file');
+      }
+
+      final xmlContent = utf8.decode(contentFile.content as List<int>);
+      final document = XmlDocument.parse(xmlContent);
+
+      // Extract all text nodes
+      final texts = <String>[];
+      for (var elem in document.findAllElements('text:p')) {
+        texts.add(elem.innerText);
+      }
+
+      log.i('$format parsed: ${texts.join().length} characters');
+      return texts.join('\n');
+    } catch (e) {
+      log.e('Error parsing ODF format $format: $e');
+      rethrow;
+    }
+  }
+
+  // Helper: Parse ODS (spreadsheet)
+  static Future<Map<String, dynamic>> _parseOpenDocumentSpreadsheet(
+    String filePath,
+  ) async {
+    try {
+      final file = File(filePath);
+      final bytes = await file.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      final contentFile = archive.findFile('content.xml');
+      if (contentFile == null) {
+        throw Exception('content.xml not found in ODS file');
+      }
+
+      final xmlContent = utf8.decode(contentFile.content as List<int>);
+      final document = XmlDocument.parse(xmlContent);
+
+      final sheets = <Map<String, dynamic>>[];
+
+      // Parse each table (sheet)
+      for (var table in document.findAllElements('table:table')) {
+        final sheetName =
+            table.getAttribute('table:name') ?? 'Sheet${sheets.length + 1}';
+        final rows = <List<String>>[];
+
+        // Parse rows
+        for (var row in table.findAllElements('table:table-row')) {
+          final cells = <String>[];
+          for (var cell in row.findAllElements('table:table-cell')) {
+            final cellText = cell.innerText;
+            cells.add(cellText);
+          }
+          if (cells.isNotEmpty) {
+            rows.add(cells);
+          }
+        }
+
+        sheets.add({
+          'name': sheetName,
+          'rows': rows,
+        });
+      }
+
+      log.i('ODS parsed: ${sheets.length} sheets');
+      return {
+        'sheets': sheets,
+        'format': 'ODS',
+      };
+    } catch (e) {
+      log.e('Error parsing ODS: $e');
+      rethrow;
+    }
+  }
+
+  // Helper: Extract text from binary data
+  static String _extractTextFromBytes(List<int> bytes) {
+    final buffer = StringBuffer();
+
+    // Simple binary text extraction - looks for readable ASCII sequences
+    var currentWord = StringBuffer();
+
+    for (final byte in bytes) {
+      if (byte >= 32 && byte < 127) {
+        // Printable ASCII
+        currentWord.writeCharCode(byte);
+      } else {
+        if (currentWord.length > 4) {
+          // Only include words with length > 4 to avoid artifacts
+          buffer.write(currentWord.toString());
+          buffer.write('\n');
+        }
+        currentWord.clear();
+      }
+    }
+
+    if (currentWord.length > 4) {
+      buffer.write(currentWord.toString());
+    }
+
+    return buffer.toString();
+  }
+
+  /// Parse PPT format (PowerPoint)
+  /// Returns slides data similar to ODP
+  static Future<List<Map<String, dynamic>>> parsePPT(String filePath) async {
+    try {
+      log.i('Parsing PPT file: $filePath');
+      final file = File(filePath);
+      final bytes = await file.readAsBytes();
+      
+      try {
+        // Try new format (PPTX)
+        return await _parsePPTX(bytes);
+      } catch (e) {
+        log.i('PPT is old format, extracting text from binary: $e');
+        // Fall back to binary text extraction for old PPT format
+        final text = _extractTextFromBytes(bytes);
+        return [
+          {
+            'slideNumber': 1,
+            'text': text.isEmpty ? 'Could not extract text from PPT file' : text,
+          }
+        ];
+      }
+    } catch (e, st) {
+      log.e('Error parsing PPT', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse PPTX format (Modern PowerPoint - essentially same as ODP internally)
+  static Future<List<Map<String, dynamic>>> _parsePPTX(List<int> bytes) async {
+    try {
+      final archive = ZipDecoder().decodeBytes(bytes);
+      final slides = <Map<String, dynamic>>[];
+
+      // PPTX contains slides in ppt/slides/ directory
+      for (var i = 1;; i++) {
+        final slideFile = archive.findFile('ppt/slides/slide$i.xml');
+        if (slideFile == null) break;
+
+        try {
+          final slideXml = utf8.decode(slideFile.content as List<int>);
+          final document = XmlDocument.parse(slideXml);
+
+          // Extract text from slide
+          final texts = <String>[];
+          for (var elem in document.findAllElements('a:t')) {
+            final text = elem.innerText.trim();
+            if (text.isNotEmpty) {
+              texts.add(text);
+            }
+          }
+
+          slides.add({
+            'slideNumber': i,
+            'text': texts.isEmpty ? '[Slide $i - no text]' : texts.join('\n'),
+          });
+          log.d('Parsed PPTX slide $i');
+        } catch (e) {
+          log.w('Could not parse PPTX slide $i: $e');
+        }
+      }
+
+      if (slides.isEmpty) {
+        throw Exception('No slides found in PPTX');
+      }
+
+      log.i('PPTX parsed: ${slides.length} slides');
+      return slides;
+    } catch (e) {
+      log.w('PPTX parsing failed: $e');
+      rethrow;
+    }
+  }
+}
+
