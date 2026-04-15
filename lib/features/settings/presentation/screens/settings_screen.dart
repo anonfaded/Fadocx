@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
@@ -23,7 +24,7 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(AppLocalizations.of(context)!.settingsTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
       ),
       body: settings.when(

@@ -376,6 +376,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fadocx v1.0.0 - Your private document viewer. Built to respect your privacy.'**
   String get aboutDescription;
+
+  /// No description provided for @tableRows.
+  ///
+  /// In en, this message translates to:
+  /// **'rows'**
+  String get tableRows;
+
+  /// No description provided for @tableEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No data to display'**
+  String get tableEmpty;
+
+  /// No description provided for @tableNoContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sheet is empty'**
+  String get tableNoContent;
+
+  /// No description provided for @sheetEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Sheet is empty'**
+  String get sheetEmpty;
+
+  /// No description provided for @noTableData.
+  ///
+  /// In en, this message translates to:
+  /// **'No table data'**
+  String get noTableData;
+
+  /// No description provided for @noSpreadsheetData.
+  ///
+  /// In en, this message translates to:
+  /// **'No spreadsheet data'**
+  String get noSpreadsheetData;
+
+  /// No description provided for @rowsSymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'rows'**
+  String get rowsSymbol;
+
+  /// No description provided for @colsSymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'cols'**
+  String get colsSymbol;
+
+  /// No description provided for @noSlidesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No slides found'**
+  String get noSlidesFound;
+
+  /// No description provided for @slidesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'slides'**
+  String get slidesCount;
+
+  /// No description provided for @pptUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'PPT file parsed but contains no slides'**
+  String get pptUnsupported;
+
+  /// No description provided for @odpUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'ODP file parsed but contains no slides or unreadable content'**
+  String get odpUnsupported;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @noTextContent.
+  ///
+  /// In en, this message translates to:
+  /// **'No text content found'**
+  String get noTextContent;
+
+  /// No description provided for @couldNotParse.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse file'**
+  String get couldNotParse;
+
+  /// No description provided for @file.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get file;
+
+  /// No description provided for @slides.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide'**
+  String get slides;
+
+  /// No description provided for @previewNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview not yet supported'**
+  String get previewNotSupported;
+
+  /// No description provided for @openWithSystemApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open with System App'**
+  String get openWithSystemApp;
+
+  /// No description provided for @systemAppNotImplemented.
+  ///
+  /// In en, this message translates to:
+  /// **'System app opening not yet implemented'**
+  String get systemAppNotImplemented;
+
+  /// No description provided for @type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get type;
+
+  /// No description provided for @fileNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'File not found'**
+  String get fileNotFoundMessage;
+
+  /// No description provided for @fileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'File size exceeds maximum limit (100MB)'**
+  String get fileTooLarge;
+
+  /// No description provided for @errorLoadingFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading file'**
+  String get errorLoadingFile;
+
+  /// No description provided for @docxPreviewNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'DOCX preview not yet fully supported'**
+  String get docxPreviewNotSupported;
+
+  /// No description provided for @docParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse DOC file. Try converting to DOCX.'**
+  String get docParseError;
+
+  /// No description provided for @xlsxParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse XLSX file'**
+  String get xlsxParseError;
+
+  /// No description provided for @xlsParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse XLS file. Try converting to XLSX.'**
+  String get xlsParseError;
+
+  /// No description provided for @csvParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse CSV file'**
+  String get csvParseError;
+
+  /// No description provided for @odtParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse ODT file'**
+  String get odtParseError;
+
+  /// No description provided for @odsParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse ODS file'**
+  String get odsParseError;
+
+  /// No description provided for @odpParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse ODP file'**
+  String get odpParseError;
+
+  /// No description provided for @pptParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse PPT file'**
+  String get pptParseError;
+
+  /// No description provided for @rtfParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not parse RTF file'**
+  String get rtfParseError;
+
+  /// No description provided for @txtFileEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'File is empty'**
+  String get txtFileEmpty;
+
+  /// No description provided for @unsupportedFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'File format is not supported yet'**
+  String get unsupportedFormat;
+
+  /// No description provided for @txtLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'TXT'**
+  String get txtLoaded;
+
+  /// No description provided for @charactersLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'characters'**
+  String get charactersLoaded;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

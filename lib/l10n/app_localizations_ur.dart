@@ -148,4 +148,121 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get aboutDescription => 'Fadocx v1.0.0 - آپ کا نجی دستاویز ویور۔ آپ کی رازداری کو احترام دینے کے لیے بنایا گیا۔';
+
+  @override
+  String get tableRows => 'قطاریں';
+
+  @override
+  String get tableEmpty => 'کوئی ڈیٹا نہیں';
+
+  @override
+  String get tableNoContent => 'شیٹ خالی ہے';
+
+  @override
+  String get sheetEmpty => 'شیٹ خالی ہے';
+
+  @override
+  String get noTableData => 'کوئی ٹیبل ڈیٹا نہیں';
+
+  @override
+  String get noSpreadsheetData => 'کوئی سپریڈ شیٹ ڈیٹا نہیں';
+
+  @override
+  String get rowsSymbol => 'قطاریں';
+
+  @override
+  String get colsSymbol => 'کالم';
+
+  @override
+  String get noSlidesFound => 'کوئی سلائڈز نہیں ملے';
+
+  @override
+  String get slidesCount => 'سلائڈز';
+
+  @override
+  String get pptUnsupported => 'PPT فائل پارس ہوئی لیکن اس میں کوئی سلائڈز نہیں ہیں';
+
+  @override
+  String get odpUnsupported => 'ODP فائل پارس ہوئی لیکن اس میں کوئی سلائڈز یا قابلِ فہم مواد نہیں ہے';
+
+  @override
+  String get next => 'اگلا';
+
+  @override
+  String get previous => 'پچھلا';
+
+  @override
+  String get noTextContent => 'کوئی متن مواد نہیں ملا';
+
+  @override
+  String get couldNotParse => 'فائل پارس نہیں ہو سکی';
+
+  @override
+  String get file => 'فائل';
+
+  @override
+  String get slides => 'سلائڈ';
+
+  @override
+  String get previewNotSupported => 'معائنہ ابھی معاون نہیں ہے';
+
+  @override
+  String get openWithSystemApp => 'سسٹم ایپ کے ساتھ کھولیں';
+
+  @override
+  String get systemAppNotImplemented => 'سسٹم ایپ کھولنا ابھی لاگو نہیں کیا گیا ہے';
+
+  @override
+  String get type => 'قسم';
+
+  @override
+  String get fileNotFoundMessage => 'فائل نہیں ملی';
+
+  @override
+  String get fileTooLarge => 'فائل کی سائز زیادہ سے زیادہ حد (100MB) سے تجاوز کر گئی ہے';
+
+  @override
+  String get errorLoadingFile => 'فائل لوڈ کرنے میں خرابی';
+
+  @override
+  String get docxPreviewNotSupported => 'DOCX معائنہ ابھی مکمل طور پر معاون نہیں ہے';
+
+  @override
+  String get docParseError => 'DOC فائل پارس نہیں ہو سکی۔ DOCX میں تبدیل کرنے کی کوشش کریں۔';
+
+  @override
+  String get xlsxParseError => 'XLSX فائل پارس نہیں ہو سکی';
+
+  @override
+  String get xlsParseError => 'XLS فائل پارس نہیں ہو سکی۔ XLSX میں تبدیل کرنے کی کوشش کریں۔';
+
+  @override
+  String get csvParseError => 'CSV فائل پارس نہیں ہو سکی';
+
+  @override
+  String get odtParseError => 'ODT فائل پارس نہیں ہو سکی';
+
+  @override
+  String get odsParseError => 'ODS فائل پارس نہیں ہو سکی';
+
+  @override
+  String get odpParseError => 'ODP فائل پارس نہیں ہو سکی';
+
+  @override
+  String get pptParseError => 'PPT فائل پارس نہیں ہو سکی';
+
+  @override
+  String get rtfParseError => 'RTF فائل پارس نہیں ہو سکی';
+
+  @override
+  String get txtFileEmpty => 'فائل خالی ہے';
+
+  @override
+  String get unsupportedFormat => 'فائل کی قسم معاون نہیں ہے';
+
+  @override
+  String get txtLoaded => 'ٹی ایکس ٹی';
+
+  @override
+  String get charactersLoaded => 'حروف';
 }

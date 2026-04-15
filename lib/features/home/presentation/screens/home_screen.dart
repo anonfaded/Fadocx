@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -38,7 +39,7 @@ class HomeScreen extends ConsumerWidget {
           log.d('Recent files loaded: ${files.length}');
 
           if (files.isEmpty) {
-            return _buildEmptyState(context);
+            return _buildEmptyState(context, ref);
           }
 
           return _buildRecentFilesList(context, files);
@@ -82,7 +83,7 @@ class HomeScreen extends ConsumerWidget {
         label: Text(AppLocalizations.of(context)!.openFile),
         onPressed: () {
           log.i('Open file button pressed');
-          _showOpenFileDialog(context);
+          _showOpenFileDialog(context, ref);
         },
         tooltip: AppLocalizations.of(context)!.openFileTooltip,
       ),
@@ -90,7 +91,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Build empty state UI
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -118,7 +119,7 @@ class HomeScreen extends ConsumerWidget {
             label: Text(AppLocalizations.of(context)!.startBrowsing),
             onPressed: () {
               log.i('Start browsing pressed from empty state');
-              _showOpenFileDialog(context);
+              _showOpenFileDialog(context, ref);
             },
           ),
         ],
@@ -166,86 +167,140 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Build individual file list tile
+  /// Build individual file list tile with enhanced styling
   Widget _buildFileListTile(
     BuildContext context,
     RecentFile file,
     int index,
     WidgetRef ref,
   ) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: ListTile(
-        leading: _getFileIcon(file.fileType),
-        title: Text(
-          file.fileName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${file.fileType.toUpperCase()} • ${file.formattedSize}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            Text(
-              'Opened: ${_formatDate(file.dateOpened)}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        trailing: PopupMenuButton<String>(
-          itemBuilder: (context) => <PopupMenuEntry<String>>[
-            const PopupMenuItem(
-              value: 'open',
-              child: Row(
-                children: [
-                  Icon(Icons.open_in_new, size: 20),
-                  SizedBox(width: 8),
-                  Text('Open'),
-                ],
-              ),
-            ),
-            const PopupMenuDivider(),
-            const PopupMenuItem(
-              value: 'remove',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, size: 20, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Remove', style: TextStyle(color: Colors.red)),
-                ],
-              ),
-            ),
-          ],
-          onSelected: (value) {
-            if (value == 'open') {
-              log.i('Opening file: ${file.fileName}');
-              _openFile(context, file);
-            } else if (value == 'remove') {
-              log.i('Removing file from recent: ${file.id}');
-              _removeFileWithRef(context, ref, file);
-            }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = Theme.of(context).colorScheme.primary;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            log.i('Tapped file: ${file.fileName}');
+            _openFile(context, ref, file);
           },
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                width: 0.5,
+              ),
+              color: isDark ? Colors.grey[900] : Colors.grey[50],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: accentColor.withValues(alpha: 0.1),
+                    ),
+                    child: Center(
+                      child: _getFileIcon(file.fileType, size: 24),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          file.fileName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text(
+                              file.fileType.toUpperCase(),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: accentColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(Icons.circle, size: 3, color: Colors.grey[500]),
+                            const SizedBox(width: 8),
+                            Text(
+                              file.formattedSize,
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Opened ${_formatDate(file.dateOpened)}',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Colors.grey[600],
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  PopupMenuButton<String>(
+                    icon: Icon(Icons.more_vert, size: 20, color: Colors.grey[600]),
+                    itemBuilder: (context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem(
+                        value: 'open',
+                        child: Row(
+                          children: [
+                            Icon(Icons.open_in_new, size: 18),
+                            SizedBox(width: 8),
+                            Text('Open'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      const PopupMenuItem(
+                        value: 'remove',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, size: 18, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Remove', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onSelected: (value) {
+                      if (value == 'open') {
+                        log.i('Opening file: ${file.fileName}');
+                        _openFile(context, ref, file);
+                      } else if (value == 'remove') {
+                        log.i('Removing file from recent: ${file.id}');
+                        _removeFileWithRef(context, ref, file);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
-        onTap: () {
-          log.i('Tapped file: ${file.fileName}');
-          _openFile(context, file);
-        },
       ),
     );
   }
 
-  /// Get icon for file type
-  Widget _getFileIcon(String fileType) {
+  /// Get icon for file type with size support
+  Widget _getFileIcon(String fileType, {double size = 24}) {
     IconData iconData;
     Color color;
 
@@ -255,10 +310,12 @@ class HomeScreen extends ConsumerWidget {
         color = const Color(0xFFE53935);
         break;
       case 'docx':
+      case 'doc':
         iconData = Icons.description;
         color = const Color(0xFF2196F3);
         break;
       case 'xlsx':
+      case 'xls':
         iconData = Icons.table_chart;
         color = const Color(0xFF43A047);
         break;
@@ -266,12 +323,18 @@ class HomeScreen extends ConsumerWidget {
         iconData = Icons.grid_3x3;
         color = const Color(0xFFFB8C00);
         break;
+      case 'ppt':
+      case 'pptx':
+      case 'odp':
+        iconData = Icons.slideshow;
+        color = const Color(0xFFD32F2F);
+        break;
       default:
         iconData = Icons.insert_drive_file;
         color = const Color(0xFF90A4AE);
     }
 
-    return Icon(iconData, color: color);
+    return Icon(iconData, color: color, size: size);
   }
 
   /// Format date for display
@@ -293,28 +356,57 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Show file picker and handle file selection
-  Future<void> _showOpenFileDialog(BuildContext context) async {
+  Future<void> _showOpenFileDialog(BuildContext context, WidgetRef ref) async {
     log.i('Opening file picker');
     
     try {
-      // Use FilePicker to select files from device  
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['pdf', 'docx', 'xlsx', 'csv', 'txt'],
+        allowedExtensions: [
+          'pdf',
+          'docx', 'doc', 'odt', 'rtf',
+          'xlsx', 'xls', 'ods',
+          'csv',
+          'odp', 'ppt', 'pptx',
+          'txt'
+        ],
         allowMultiple: false,
       );
 
       if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        final filePath = file.path;
-        final fileName = file.name;
+        final pickedFile = result.files.first;
+        final filePath = pickedFile.path;
+        final fileName = pickedFile.name;
         
         if (filePath != null && filePath.isNotEmpty) {
-          log.i('✅ File selected: $fileName');
-          log.d('File path: $filePath');
-          
+          log.i('✅ File selected: $fileName at $filePath');
+
+          // Get file size and save to recent files
+          int fileSizeBytes = pickedFile.size;
+          try {
+            final stat = await File(filePath).stat();
+            fileSizeBytes = stat.size;
+          } catch (_) {}
+
+          final fileExtension = fileName.split('.').last.toLowerCase();
+          final now = DateTime.now();
+          final recentFile = RecentFile(
+            id: filePath, // use path as stable ID to prevent duplicates
+            filePath: filePath,
+            fileName: fileName,
+            fileType: fileExtension,
+            fileSizeBytes: fileSizeBytes,
+            dateOpened: now,
+            dateModified: now,
+            pagePosition: 0,
+            syncStatus: 'local',
+          );
+
+          await ref.read(recentFilesMutatorProvider).addRecentFile(recentFile);
+          ref.invalidate(recentFilesProvider);
+          log.i('Recent file saved: $fileName');
+
           if (context.mounted) {
-            // Navigate to viewer with selected file
             _navigateToViewer(context, filePath, fileName);
           }
         } else {
@@ -347,9 +439,23 @@ class HomeScreen extends ConsumerWidget {
     context.push('${RouteNames.viewer}?path=$filePath&name=$fileName');
   }
 
-  /// Open file from recent files list
-  void _openFile(BuildContext context, RecentFile file) {
+  /// Open file from recent files list — updates dateOpened
+  void _openFile(BuildContext context, WidgetRef ref, RecentFile file) {
     log.i('Opening file: ${file.fileName} from path: ${file.filePath}');
+    // Update dateOpened so it bubbles to the top of the list
+    final updated = RecentFile(
+      id: file.id,
+      filePath: file.filePath,
+      fileName: file.fileName,
+      fileType: file.fileType,
+      fileSizeBytes: file.fileSizeBytes,
+      dateOpened: DateTime.now(),
+      dateModified: file.dateModified,
+      pagePosition: file.pagePosition,
+      syncedAt: file.syncedAt,
+      syncStatus: file.syncStatus,
+    );
+    ref.read(recentFilesMutatorProvider).addRecentFile(updated);
     _navigateToViewer(context, file.filePath, file.fileName);
   }
 
