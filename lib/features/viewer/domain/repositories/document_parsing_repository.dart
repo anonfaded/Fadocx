@@ -39,6 +39,9 @@ abstract class DocumentParsingRepository {
   /// Parse DOC file (legacy Word format)
   Future<ParsedDocumentEntity> parseDOC(String filePath);
 
+  /// Parse PPT/PPTX file (PowerPoint presentation)
+  Future<ParsedDocumentEntity> parsePPT(String filePath);
+
   /// Get cached parsing result if available and file unchanged
   ///
   /// Returns null if:

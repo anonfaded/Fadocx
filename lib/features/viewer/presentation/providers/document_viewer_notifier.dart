@@ -63,9 +63,11 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final repository = await ref.read(documentParsingRepositoryProvider.future);
+      final repository =
+          await ref.read(documentParsingRepositoryProvider.future);
       // Use filePath for extension detection (more reliable than display name)
-      final extension = _extractExtension(_filePath) ?? _extractExtension(_fileName) ?? '';
+      final extension =
+          _extractExtension(_filePath) ?? _extractExtension(_fileName) ?? '';
 
       state = state.copyWith(parsingStatus: 'Loading $extension...');
 
@@ -107,6 +109,14 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         case 'doc':
           log.d('Routing to parseDOC');
           document = await repository.parseDOC(_filePath);
+
+        // Presentation formats (PPT, PPTX, ODP - all require LibreOffice, Coming Soon)
+        case 'ppt':
+        case 'pptx':
+        case 'odp':
+          log.d('Routing to parsePPT');
+          document = await repository.parsePPT(_filePath);
+
         case 'pdf':
           log.d('Routing to PDF viewer');
           document = ParsedDocumentEntity(
@@ -118,8 +128,10 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
           );
 
         default:
-          log.e('Unsupported file format received: "$extension" (path: $_filePath)');
-          throw Exception('Unsupported file format: ${extension.isEmpty ? '(no extension)' : extension}');
+          log.e(
+              'Unsupported file format received: "$extension" (path: $_filePath)');
+          throw Exception(
+              'Unsupported file format: ${extension.isEmpty ? '(no extension)' : extension}');
       }
 
       state = ParsedDocumentState(
@@ -127,7 +139,8 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         isLoading: false,
       );
 
-      log.i('Document loaded successfully: $_fileName (format: ${document.format})');
+      log.i(
+          'Document loaded successfully: $_fileName (format: ${document.format})');
     } catch (e, st) {
       log.e('Error loading document: $e', e, st);
       state = state.copyWith(
@@ -156,6 +169,7 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
 /// final docState = ref.watch(documentViewerProvider);
 /// ```
 final documentViewerProvider =
-    NotifierProvider.autoDispose<DocumentViewerNotifier, ParsedDocumentState>(() {
+    NotifierProvider.autoDispose<DocumentViewerNotifier, ParsedDocumentState>(
+        () {
   return DocumentViewerNotifier();
 });

@@ -5,6 +5,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Aspose repository for Slides, Words, Cells
+repositories {
+    maven {
+        url = uri("https://repository.aspose.com/repo/")
+    }
+}
+
 android {
     namespace = "com.fadseclab.fadocx"
     compileSdk = flutter.compileSdkVersion
@@ -40,31 +47,36 @@ android {
     }
 
     // Exclude duplicate META-INF files from transitive dependencies
-    // Fixes: "2 files found with path 'META-INF/DEPENDENCIES'"
-    // from tika-core and log4j-api
     packaging {
-        excludes += listOf(
-            "META-INF/DEPENDENCIES",
-            "META-INF/LICENSE",
-            "META-INF/LICENSE.txt",
-            "META-INF/NOTICE",
-            "META-INF/NOTICE.txt",
-            "META-INF/INDEX.LIST"
-        )
+        resources {
+            merges += listOf("META-INF/LICENSE.md", "META-INF/NOTICE.md", "META-INF/LICENSE-notice.md")
+            excludes += listOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/INDEX.LIST",
+                "META-INF/*.md",
+                "META-INF/services/*",
+                "META-INF/LICENSE-notice.md"
+            )
+        }
     }
 }
 
 dependencies {
-    // Apache POI for native document parsing
+    // Apache POI for native document parsing (XLSX, XLS, CSV, DOC)
     implementation("org.apache.poi:poi:5.2.3")
     implementation("org.apache.poi:poi-ooxml:5.2.3")
     implementation("org.apache.poi:poi-ooxml-lite:5.2.3")
-    implementation("org.apache.poi:poi-scratchpad:5.2.3")  // HWPF for DOC, HSLF for PPT
+    implementation("org.apache.poi:poi-scratchpad:5.2.3")
 
     // Required transitive dependencies
     implementation("org.apache.xmlbeans:xmlbeans:5.1.1")
     implementation("commons-io:commons-io:2.11.0")
     implementation("commons-codec:commons-codec:1.15")
+    implementation("commons-logging:commons-logging:1.2")
 }
 
 flutter {

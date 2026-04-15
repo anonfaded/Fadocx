@@ -14,10 +14,12 @@ import org.apache.poi.hwpf.HWPFDocument
 import org.apache.poi.hwpf.extractor.WordExtractor
 import java.io.File
 import java.io.FileInputStream
-import java.io.IOException
+import java.io.StringWriter
+import java.io.PrintWriter
 
 /// Native document parser bridge for Flutter
-/// Handles XLSX, XLS, CSV via native libraries
+/// Handles XLSX, XLS, CSV, DOC
+/// PPT/PPTX support: Coming Soon (requires LibreOffice integration)
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.fadseclab.fadocx/document_parser"
     private val FILE_CHANNEL = "com.fadseclab.fadocx/file_intent"
@@ -27,7 +29,6 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        // Document parser channel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -41,7 +42,6 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
-        // File intent channel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, FILE_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -138,6 +138,16 @@ class MainActivity : FlutterActivity() {
                 "XLS" -> parseXLS(filePath)
                 "CSV" -> parseCSV(filePath)
                 "DOC" -> parseDOC(filePath)
+                "PPT", "PPTX", "ODP" -> {
+                    // Coming Soon: PPT/PPTX/ODP requires LibreOffice integration
+                    // For now, return a placeholder
+                    mapOf(
+                        "format" to format.uppercase(),
+                        "filePath" to filePath,
+                        "comingSoon" to true,
+                        "message" to "${format.uppercase()} viewing coming in a future update"
+                    )
+                }
                 else -> throw IllegalArgumentException("Unsupported format: $format")
             }
 
@@ -146,7 +156,9 @@ class MainActivity : FlutterActivity() {
             result.success(parsedData)
         } catch (e: Exception) {
             Log.e(TAG, "Parse error", e)
-            result.error("PARSE_ERROR", e.message, null)
+            val sw = StringWriter()
+            e.printStackTrace(PrintWriter(sw))
+            result.error("PARSE_ERROR", "${e.message}\n${sw.toString()}", null)
         }
     }
 
@@ -323,9 +335,7 @@ class MainActivity : FlutterActivity() {
         val extractor = WordExtractor(document)
 
         try {
-            // Extract text content from the document
             val text = extractor.text
-
             Log.d(TAG, "Parsed DOC: ${text.length} characters extracted")
 
             return mapOf(
@@ -340,4 +350,3 @@ class MainActivity : FlutterActivity() {
         }
     }
 }
-
