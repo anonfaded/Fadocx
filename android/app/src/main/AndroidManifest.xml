@@ -24,6 +24,57 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            
+            <!-- File type handlers: Allow opening files from other apps -->
+            <!-- Spreadsheet formats -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
+                <data android:mimeType="application/vnd.ms-excel"/>
+                <data android:mimeType="text/csv"/>
+                <data android:mimeType="application/vnd.oasis.opendocument.spreadsheet"/>
+            </intent-filter>
+            
+            <!-- Data formats -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="application/json"/>
+                <data android:mimeType="application/xml"/>
+                <data android:mimeType="text/xml"/>
+                <data android:mimeType="application/x-fadrec"/>
+            </intent-filter>
+            
+            <!-- Document formats -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+                <data android:mimeType="application/pdf"/>
+            </intent-filter>
+            
+            <!-- File extension based handlers (fallback for unrecognized MIME types) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <!-- Spreadsheets -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.xlsx"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.xls"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.csv"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.ods"/>
+                <!-- Data formats -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.json"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.xml"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.fadrec"/>
+                <!-- Documents -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.docx"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.pdf"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

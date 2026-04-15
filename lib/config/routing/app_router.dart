@@ -102,10 +102,24 @@ GoRouter createGoRouter() {
       ),
     ],
 
-    // Handle redirects (Phase 2+)
+    // Handle redirects including file intents from other apps
     redirect: (context, state) {
-      log.d('Route: ${state.uri.toString()}');
-      return null; // No redirects needed for MVP
+      final uri = state.uri.toString();
+      
+      // Log route for debugging
+      log.d('Route: $uri');
+      
+      // If URI is a content:// or file:// scheme (file intent from other app),
+      // redirect to viewer with the URI as the file path
+      if (uri.startsWith('content://') || uri.startsWith('file://')) {
+        log.i('File intent detected: $uri');
+        // Navigate to viewer with the content URI directly
+        // The viewer will handle reading the file
+        final encodedPath = Uri.encodeComponent(uri);
+        return '/viewer?path=$encodedPath';
+      }
+      
+      return null; // No redirects for standard routes
     },
 
     // Refresh listenable for reactive navigation (Phase 2+)

@@ -32,13 +32,25 @@ class DocumentParserService {
     try {
       log.i('Parsing XLS file: $filePath');
       
-      // Extract basic sheet data from XLS binary format
-      // This returns a placeholder structure since full XLS parsing is complex
-      return {
-        'sheets': [],
-        'content': 'XLS format requires binary parsing. Support coming in Phase 2.',
-        'note': 'For now, consider converting to XLSX for better compatibility',
-      };
+      // XLS is a complex binary format - native parser on Android handles this
+      // For Dart fallback, we can only extract basic info
+      final file = File(filePath);
+      final fileBytes = await file.readAsBytes();
+      
+      // Basic check for OLE2 compound file signature
+      if (fileBytes.length >= 8) {
+        final signature = String.fromCharCodes(fileBytes.take(8));
+        if (signature == '\u00D0\u00CF\u0011\u00E0\u00A1\u00B1\u001A') {
+          log.i('Valid OLE2 compound file detected for XLS');
+          return {
+            'sheets': [],
+            'format': 'XLS',
+            'note': 'Native parser required for full XLS support. Basic structure detected.',
+          };
+        }
+      }
+      
+      throw Exception('Invalid or unsupported XLS file format');
     } catch (e, st) {
       log.e('Error parsing XLS', e, st);
       rethrow;
@@ -502,6 +514,145 @@ class DocumentParserService {
       return texts.join('\n');
     } catch (e, st) {
       log.e('Error parsing DOCX', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse JSON format - converts to tabular representation
+  /// Returns sheets with data as rows
+  static Future<Map<String, dynamic>> parseJSON(String filePath) async {
+    try {
+      log.i('Parsing JSON file: $filePath');
+      final file = File(filePath);
+      final content = await file.readAsString();
+      
+      final jsonData = jsonDecode(content);
+      
+      // Convert JSON to tabular format
+      if (jsonData is List) {
+        // Array of objects → table
+        if (jsonData.isEmpty) {
+          return {
+            'sheets': [],
+            'format': 'JSON',
+            'sheetCount': 0,
+          };
+        }
+        
+        // Get all keys from first object
+        if (jsonData.first is! Map) {
+          throw Exception('JSON array must contain objects');
+        }
+        
+        final firstRow = jsonData.first as Map;
+        final columnNames = firstRow.keys.toList();
+        
+        final rows = <List<String>>[];
+        
+        // Header row
+        rows.add(columnNames.cast<String>());
+        
+        // Data rows
+        for (var item in jsonData) {
+          if (item is! Map) continue;
+          final row = <String>[];
+          for (var key in columnNames) {
+            row.add((item[key]?.toString()) ?? '');
+          }
+          rows.add(row);
+        }
+        
+        return {
+          'sheets': [
+            {
+              'name': 'Data',
+              'rows': rows,
+              'rowCount': rows.length,
+              'colCount': columnNames.length,
+            }
+          ],
+          'format': 'JSON',
+          'sheetCount': 1,
+          'textContent': content,
+        };
+      } else if (jsonData is Map) {
+        // Object → single row or nested sheets
+        final rows = <List<String>>[];
+        rows.add(['Key', 'Value']);
+        
+        jsonData.forEach((key, value) {
+          rows.add([key.toString(), value.toString()]);
+        });
+        
+        return {
+          'sheets': [
+            {
+              'name': 'Data',
+              'rows': rows,
+              'rowCount': rows.length,
+              'colCount': 2,
+            }
+          ],
+          'format': 'JSON',
+          'sheetCount': 1,
+          'textContent': content,
+        };
+      } else {
+        throw Exception('JSON must be an object or array');
+      }
+    } catch (e, st) {
+      log.e('Error parsing JSON', e, st);
+      rethrow;
+    }
+  }
+
+  /// Parse XML format
+  /// Returns raw XML content and basic structure info
+  static Future<Map<String, dynamic>> parseXML(String filePath) async {
+    try {
+      log.i('Parsing XML file: $filePath');
+      final file = File(filePath);
+      
+      if (!await file.exists()) {
+        throw Exception('XML file does not exist: $filePath');
+      }
+      
+      final content = await file.readAsString();
+      
+      if (content.trim().isEmpty) {
+        throw Exception('XML file is empty');
+      }
+      
+      // Try to parse and validate XML structure
+      try {
+        final document = XmlDocument.parse(content);
+        final rootName = document.rootElement.name.local;
+        final elementCount = document.rootElement.descendants.length;
+        
+        log.i('XML parsed successfully. Root: $rootName, Elements: $elementCount');
+        
+        return {
+          'content': content,
+          'textContent': content,
+          'format': 'XML',
+          'rootElement': rootName,
+          'elementCount': elementCount,
+          'isValid': true,
+        };
+      } catch (parseError) {
+        log.w('XML parsing failed: $parseError. Returning raw content.');
+        
+        // Return raw content even if parsing failed
+        return {
+          'content': content,
+          'textContent': content,
+          'format': 'XML',
+          'isValid': false,
+          'parseError': parseError.toString(),
+        };
+      }
+    } catch (e, st) {
+      log.e('Error reading XML file', e, st);
       rethrow;
     }
   }

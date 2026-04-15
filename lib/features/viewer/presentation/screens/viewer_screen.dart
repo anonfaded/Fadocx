@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fadocx/l10n/app_localizations.dart';
-import 'package:fadocx/features/viewer/presentation/widgets/spreadsheet_table.dart';
+import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
 import 'package:fadocx/features/viewer/presentation/providers/spreadsheet_ui_notifier.dart';
 
@@ -28,7 +27,7 @@ class ViewerScreen extends ConsumerWidget {
     // Watch spreadsheet UI state (zoom, selection)
     final uiState = ref.watch(spreadsheetUIProvider);
 
-    // Load document on first build
+    // Load document on first build (autoDispose provider ensures clean state per screen)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!docState.isLoading && docState.document == null && !docState.hasError) {
         ref
@@ -53,21 +52,26 @@ class ViewerScreen extends ConsumerWidget {
       body: docState.isLoading
           ? _buildLoadingState(context, docState)
           : docState.hasError
-              ? _buildErrorState(context, docState)
+              ? _buildErrorState(context, ref, docState)
               : docState.document != null
                   ? _buildDocumentContent(context, ref, docState, uiState)
                   : const Center(child: Text('No content')),
     );
   }
 
-  /// Loading state with optional parsing status
+  /// Loading state with animated progress indicator
   Widget _buildLoadingState(BuildContext context, ParsedDocumentState state) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          Text(
+            'Parsing document...',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 12),
           if (state.parsingStatus != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -76,6 +80,17 @@ class ViewerScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                'This may take a moment for large files...',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
+              ),
             ),
         ],
       ),
@@ -83,7 +98,7 @@ class ViewerScreen extends ConsumerWidget {
   }
 
   /// Error state with retry option
-  Widget _buildErrorState(BuildContext context, ParsedDocumentState state) {
+  Widget _buildErrorState(BuildContext context, WidgetRef ref, ParsedDocumentState state) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -99,7 +114,17 @@ class ViewerScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 32),
-          ElevatedButton(
+          ElevatedButton.icon(
+            onPressed: () {
+              ref
+                  .read(documentViewerProvider.notifier)
+                  .initializeAndLoad(filePath, fileName);
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Go Back'),
           ),
@@ -117,120 +142,10 @@ class ViewerScreen extends ConsumerWidget {
   ) {
     final doc = docState.document!;
 
-    if (doc.isSpreadsheet) {
-      return _buildSpreadsheetViewer(context, ref, docState, uiState);
-    } else if (doc.isText) {
-      return _buildTextViewer(context, doc);
-    } else {
-      return Center(
-        child: Text('Format ${doc.format} not yet supported for preview'),
-      );
-    }
-  }
-
-  /// Spreadsheet viewer with professional UI
-  Widget _buildSpreadsheetViewer(
-    BuildContext context,
-    WidgetRef ref,
-    ParsedDocumentState docState,
-    SpreadsheetUIState uiState,
-  ) {
-    final sheets = docState.document!.sheets;
-
-    if (sheets.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)?.tableNoContent ?? 'No sheets'),
-      );
-    }
-
-    // Single sheet view
-    if (sheets.length == 1) {
-      final sheet = sheets.first;
-      return GestureDetector(
-        onScaleUpdate: (details) {
-          ref.read(spreadsheetUIProvider.notifier).setZoomLevel(
-                uiState.zoomLevel * details.scale,
-              );
-        },
-        child: SpreadsheetTable(
-          rows: sheet.rows,
-          sheetName: sheet.name,
-          zoomLevel: uiState.zoomLevel,
-          selectedRow: uiState.selectedRow,
-          selectedColumn: uiState.selectedColumn,
-          onRowSelected: (rowIndex) {
-            ref.read(spreadsheetUIProvider.notifier).selectRow(rowIndex);
-          },
-          onColumnSelected: (colIndex) {
-            ref.read(spreadsheetUIProvider.notifier).selectColumn(colIndex);
-          },
-          onZoomChanged: (zoom) {
-            ref.read(spreadsheetUIProvider.notifier).setZoomLevel(zoom);
-          },
-        ),
-      );
-    }
-
-    // Multiple sheets: tabbed view
-    return DefaultTabController(
-      length: sheets.length,
-      child: Column(
-        children: [
-          TabBar(
-            tabs: sheets
-                .map((sheet) => Tab(text: sheet.name))
-                .toList(),
-          ),
-          Expanded(
-            child: TabBarView(
-              children: sheets
-                  .map((sheet) =>
-                      GestureDetector(
-                        onScaleUpdate: (details) {
-                          ref.read(spreadsheetUIProvider.notifier).setZoomLevel(
-                            uiState.zoomLevel * details.scale,
-                          );
-                        },
-                        child: SpreadsheetTable(
-                          rows: sheet.rows,
-                          sheetName: sheet.name,
-                          zoomLevel: uiState.zoomLevel,
-                          selectedRow: uiState.selectedRow,
-                          selectedColumn: uiState.selectedColumn,
-                          onRowSelected: (rowIndex) {
-                            ref.read(spreadsheetUIProvider.notifier).selectRow(rowIndex);
-                          },
-                          onColumnSelected: (colIndex) {
-                            ref.read(spreadsheetUIProvider.notifier).selectColumn(colIndex);
-                          },
-                          onZoomChanged: (zoom) {
-                            ref.read(spreadsheetUIProvider.notifier).setZoomLevel(zoom);
-                          },
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Text document viewer with lazy loading
-  Widget _buildTextViewer(BuildContext context, document) {
-    final text = document.textContent ?? '';
-    final lines = text.split('\n');
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: lines.length,
-      itemExtent: 22.0,
-      itemBuilder: (context, index) {
-        return Text(
-          lines[index],
-          style: Theme.of(context).textTheme.bodyMedium,
-        );
-      },
+    // Use DocumentViewerFactory for all format routing
+    return DocumentViewerFactory.createViewer(
+      document: doc,
+      filePath: filePath,
     );
   }
 }

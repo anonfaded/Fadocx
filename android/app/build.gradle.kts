@@ -17,6 +17,7 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
+        freeCompilerArgs = listOf("-Xlint:-options")
     }
 
     defaultConfig {
@@ -24,7 +25,7 @@ android {
         applicationId = "com.fadseclab.fadocx"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 26  // Required for Apache POI and log4j compatibility
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -36,6 +37,20 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+
+    // Exclude duplicate META-INF files from transitive dependencies
+    // Fixes: "2 files found with path 'META-INF/DEPENDENCIES'"
+    // from tika-core and log4j-api
+    packaging {
+        excludes += listOf(
+            "META-INF/DEPENDENCIES",
+            "META-INF/LICENSE",
+            "META-INF/LICENSE.txt",
+            "META-INF/NOTICE",
+            "META-INF/NOTICE.txt",
+            "META-INF/INDEX.LIST"
+        )
     }
 }
 

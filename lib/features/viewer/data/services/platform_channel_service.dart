@@ -17,16 +17,18 @@ class PlatformChannelException implements Exception {
   String toString() => 'PlatformChannelException: [$code] $message\nOriginal: $originalError';
 }
 
-/// Handles cross-platform communication for native Excel parsing
+/// Handles cross-platform communication for native document parsing
 /// 
 /// This service abstracts the platform channel logic and provides
-/// a clean API for calling native Excel parsers on Android/iOS
+/// a clean API for calling native parsers on Android/iOS
+/// Single source of truth: all parsing done natively when available
 abstract class PlatformChannelService {
-  /// Parse XLSX file using native platform parser
+  /// Parse document file using native platform parser
   /// 
+  /// Supports: XLSX, XLS, CSV, DOCX, ODS, JSON, and more
   /// Returns parsed sheets as `Map<String, dynamic>`
   /// Throws PlatformChannelException on platform errors
-  Future<Map<String, dynamic>> parseExcelNative(String filePath);
+  Future<Map<String, dynamic>> parseDocumentNative(String filePath, String format);
 
   /// Check if native Excel parsing is available on this platform
   Future<bool> isNativeParsingAvailable();
@@ -34,7 +36,7 @@ abstract class PlatformChannelService {
 
 /// Concrete implementation using Flutter's MethodChannel
 class MethodChannelService implements PlatformChannelService {
-  static const _channelName = 'com.fadocx/excel_parser';
+  static const _channelName = 'com.fadseclab.fadocx/document_parser';
   late final MethodChannel _channel;
 
   MethodChannelService() {
@@ -54,13 +56,13 @@ class MethodChannelService implements PlatformChannelService {
   }
 
   @override
-  Future<Map<String, dynamic>> parseExcelNative(String filePath) async {
+  Future<Map<String, dynamic>> parseDocumentNative(String filePath, String format) async {
     try {
-      log.i('Calling native Excel parser for: $filePath');
+      log.i('Calling native parser for: $filePath (format: $format)');
       
       final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
-        'parseExcel',
-        {'filePath': filePath},
+        'parseDocument',
+        {'filePath': filePath, 'format': format},
       );
 
       if (result == null) {
@@ -70,8 +72,8 @@ class MethodChannelService implements PlatformChannelService {
         );
       }
 
-      // Convert dynamic map to typed map
-      final typedResult = Map<String, dynamic>.from(result);
+      // Recursively convert dynamic map to typed map
+      final typedResult = _convertDynamicToTyped(result) as Map<String, dynamic>;
       
       log.i('Native parsing completed: ${typedResult['sheetCount']} sheets');
       return typedResult;
@@ -86,6 +88,26 @@ class MethodChannelService implements PlatformChannelService {
         message: 'Unexpected error during native parsing',
         originalError: e,
       );
+    }
+  }
+
+  /// Recursively convert Map with dynamic type params to Map with String keys
+  /// and List with dynamic elements with proper type handling
+  dynamic _convertDynamicToTyped(dynamic value) {
+    if (value is Map) {
+      // Convert map keys to String and recursively convert values
+      return Map<String, dynamic>.from(
+        value.map((key, val) => MapEntry(
+          key.toString(),
+          _convertDynamicToTyped(val),
+        )),
+      );
+    } else if (value is List) {
+      // Recursively convert list elements
+      return value.map(_convertDynamicToTyped).toList();
+    } else {
+      // Return primitive types as-is
+      return value;
     }
   }
 }

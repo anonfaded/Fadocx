@@ -21,8 +21,23 @@ abstract class DocumentParsingRepository {
   /// Parse CSV file
   Future<ParsedDocumentEntity> parseCSV(String filePath);
 
+  /// Parse ODS (OpenDocument Spreadsheet) file
+  Future<ParsedDocumentEntity> parseODS(String filePath);
+
+  /// Parse JSON file
+  Future<ParsedDocumentEntity> parseJSON(String filePath);
+
+  /// Parse FADREC custom format (JSON-based)
+  Future<ParsedDocumentEntity> parseFadrec(String filePath);
+
+  /// Parse XML file
+  Future<ParsedDocumentEntity> parseXML(String filePath);
+
   /// Parse DOCX file
   Future<ParsedDocumentEntity> parseDOCX(String filePath);
+
+  /// Parse DOC file (legacy Word format)
+  Future<ParsedDocumentEntity> parseDOC(String filePath);
 
   /// Get cached parsing result if available and file unchanged
   ///

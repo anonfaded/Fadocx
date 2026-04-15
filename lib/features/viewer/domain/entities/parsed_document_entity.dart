@@ -19,10 +19,13 @@ class ParsedDocumentEntity {
   });
 
   /// Check if this is a spreadsheet format
-  bool get isSpreadsheet => ['XLSX', 'CSV', 'XLS'].contains(format);
+  bool get isSpreadsheet => ['XLSX', 'XLS', 'CSV', 'ODS'].contains(format);
 
-  /// Check if this is a text format
+  /// Check if this is a text/data format
   bool get isText => ['DOCX', 'DOC', 'TXT'].contains(format);
+
+  /// Check if this is a data format (JSON, XML, FADREC)
+  bool get isData => ['JSON', 'XML', 'FADREC'].contains(format);
 
   /// Create a copy with optional changes
   ParsedDocumentEntity copyWith({
