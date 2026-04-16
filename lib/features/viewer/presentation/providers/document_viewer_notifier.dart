@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fadocx/core/utils/logger.dart';
+import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/data/providers/repository_providers.dart';
 
@@ -141,6 +142,14 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
 
       log.i(
           'Document loaded successfully: $_fileName (format: ${document.format})');
+
+      // Auto-cache document to fadocx_docs folder
+      try {
+        await StorageService.cacheDocument(_filePath, _fileName);
+        log.i('Document cached: $_fileName');
+      } catch (e) {
+        log.w('Failed to cache document: $e');
+      }
     } catch (e, st) {
       log.e('Error loading document: $e', e, st);
       state = state.copyWith(

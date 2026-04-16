@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +18,10 @@ import 'package:fadocx/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Store root isolate token for background isolates to access platform channels
+  // This must happen before any plugins try to use platform channels
+  RootIsolateToken.instance;
 
   try {
     await HiveDatasource.initialize();

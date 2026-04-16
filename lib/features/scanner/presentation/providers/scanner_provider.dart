@@ -1,0 +1,349 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:camera/camera.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:fadocx/core/utils/logger.dart';
+import 'package:fadocx/core/services/camera_service.dart';
+import 'package:fadocx/core/services/scan_processor.dart';
+import 'package:fadocx/core/services/isolate_processor.dart';
+import 'package:fadocx/core/services/tesseract_service.dart';
+
+/// Processing step enum — drives UI step-by-step animation.
+enum ProcessingStep {
+  idle,
+  capturing,
+  preparing,
+  ocr,
+  done,
+}
+
+/// Scanner state class - holds all scanner-related state
+class ScannerState {
+  final bool cameraInitialized;
+  final String? cameraError;
+  final bool isProcessing;
+  final bool hasScannedImage;
+  final String extractedText;
+  final bool torchEnabled;
+  final String? capturedImagePath;
+  final String? displayedImagePath;
+  final ProcessingStep processingStep;
+  final double ocrConfidence;
+  final List<TextBlock> textBlocks;
+  final int? ocrImageWidth;
+  final int? ocrImageHeight;
+
+  const ScannerState({
+    this.cameraInitialized = false,
+    this.cameraError,
+    this.isProcessing = false,
+    this.hasScannedImage = false,
+    this.extractedText = '',
+    this.torchEnabled = false,
+    this.capturedImagePath,
+    this.displayedImagePath,
+    this.processingStep = ProcessingStep.idle,
+    this.ocrConfidence = 0.0,
+    this.textBlocks = const [],
+    this.ocrImageWidth,
+    this.ocrImageHeight,
+  });
+
+  ScannerState copyWith({
+    bool? cameraInitialized,
+    String? cameraError,
+    bool? isProcessing,
+    bool? hasScannedImage,
+    String? extractedText,
+    bool? torchEnabled,
+    String? capturedImagePath,
+    String? displayedImagePath,
+    ProcessingStep? processingStep,
+    double? ocrConfidence,
+    List<TextBlock>? textBlocks,
+    int? ocrImageWidth,
+    int? ocrImageHeight,
+  }) {
+    return ScannerState(
+      cameraInitialized: cameraInitialized ?? this.cameraInitialized,
+      cameraError: cameraError ?? this.cameraError,
+      isProcessing: isProcessing ?? this.isProcessing,
+      hasScannedImage: hasScannedImage ?? this.hasScannedImage,
+      extractedText: extractedText ?? this.extractedText,
+      torchEnabled: torchEnabled ?? this.torchEnabled,
+      capturedImagePath: capturedImagePath ?? this.capturedImagePath,
+      displayedImagePath: displayedImagePath ?? this.displayedImagePath,
+      processingStep: processingStep ?? this.processingStep,
+      ocrConfidence: ocrConfidence ?? this.ocrConfidence,
+      textBlocks: textBlocks ?? this.textBlocks,
+      ocrImageWidth: ocrImageWidth ?? this.ocrImageWidth,
+      ocrImageHeight: ocrImageHeight ?? this.ocrImageHeight,
+    );
+  }
+
+  /// Whether a given step is completed based on current processingStep.
+  bool isStepCompleted(ProcessingStep step) {
+    const order = [
+      ProcessingStep.idle,
+      ProcessingStep.capturing,
+      ProcessingStep.preparing,
+      ProcessingStep.ocr,
+      ProcessingStep.done,
+    ];
+    final current = order.indexOf(processingStep);
+    final target = order.indexOf(step);
+    return current > target;
+  }
+
+  /// Whether a given step is currently active.
+  bool isStepActive(ProcessingStep step) => processingStep == step;
+}
+
+/// Notifier to manage scanner state
+class ScannerNotifier extends Notifier<ScannerState> {
+  late CameraService _cameraService;
+
+  @override
+  ScannerState build() {
+    _cameraService = CameraService();
+    _initializeCameraAsync();
+    return const ScannerState();
+  }
+
+  void _initializeCameraAsync() async {
+    final success = await _cameraService.initialize();
+    if (success) {
+      state = state.copyWith(cameraInitialized: true);
+    } else {
+      state = state.copyWith(
+        cameraInitialized: false,
+        cameraError: _cameraService.initError,
+      );
+    }
+  }
+
+  CameraService getCameraService() => _cameraService;
+
+  Future<void> retryCameraInitialization() async {
+    state = state.copyWith(cameraError: null);
+    await _cameraService.initialize();
+    final success = _cameraService.isInitialized;
+    if (success) {
+      state = state.copyWith(cameraInitialized: true);
+    } else {
+      state = state.copyWith(
+        cameraInitialized: false,
+        cameraError: _cameraService.initError,
+      );
+    }
+  }
+
+  Future<void> toggleTorch() async {
+    if (!state.cameraInitialized || _cameraService.controller == null) return;
+    try {
+      final newTorchState = !state.torchEnabled;
+      await _cameraService.controller!.setFlashMode(
+        newTorchState ? FlashMode.torch : FlashMode.off,
+      );
+      state = state.copyWith(torchEnabled: newTorchState);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> disableTorch() async {
+    if (state.torchEnabled && _cameraService.controller != null) {
+      try {
+        await _cameraService.controller!.setFlashMode(FlashMode.off);
+        state = state.copyWith(torchEnabled: false);
+      } catch (e) {
+        rethrow;
+      }
+    }
+  }
+
+  /// Capture and process image, emitting per-step state updates.
+  Future<void> captureAndProcess() async {
+    if (state.isProcessing) return;
+
+    try {
+      // Step: capturing
+      state = state.copyWith(
+        isProcessing: true,
+        processingStep: ProcessingStep.capturing,
+      );
+
+      final capturedImage = await _cameraService.capturePhoto();
+      if (capturedImage == null) {
+        throw Exception('Failed to capture image');
+      }
+
+      await disableTorch();
+
+      state = state.copyWith(
+        capturedImagePath: capturedImage.path,
+        displayedImagePath: capturedImage.path,
+        processingStep: ProcessingStep.preparing,
+      );
+
+      final rootIsolateToken = RootIsolateToken.instance!;
+
+      final message = IsolateMessage(
+        rootIsolateToken: rootIsolateToken,
+        imagePath: capturedImage.path,
+      );
+
+      // Step 1: OpenCV image processing in background isolate (safe — no ServicesBinding).
+      final processedPath = await compute(
+        processImageInBackgroundIsolate,
+        message,
+      );
+
+      // Step 2: OCR on main isolate — flutter_tesseract_ocr requires ServicesBinding.
+      state = state.copyWith(processingStep: ProcessingStep.ocr);
+      final ocrInputPath = processedPath ?? capturedImage.path;
+      final ocrResult = await TesseractService.extractFromImage(ocrInputPath);
+
+      final extractedText = ocrResult?.plainText ?? '';
+      final confidence = ocrResult?.averageConfidence ?? 0.0;
+      final textBlocks = ocrResult?.lines ?? const <TextBlock>[];
+
+      log.i(
+          'Processing done: ${extractedText.length} chars, confidence: ${confidence.toStringAsFixed(2)}');
+
+      final scanResult = ScanResult(
+        imagePath: capturedImage.path,
+        extractedText: extractedText,
+        timestamp: DateTime.now(),
+        processedImagePath: processedPath,
+        ocrConfidence: confidence,
+        textBlocks: textBlocks,
+        ocrImageWidth: ocrResult?.imageWidth,
+        ocrImageHeight: ocrResult?.imageHeight,
+      );
+      await ScanProcessor.saveScanMetadata(scanResult);
+      state = state.copyWith(
+        hasScannedImage: true,
+        extractedText: extractedText,
+        ocrConfidence: confidence,
+        textBlocks: textBlocks,
+        displayedImagePath: ocrInputPath,
+        ocrImageWidth: ocrResult?.imageWidth,
+        ocrImageHeight: ocrResult?.imageHeight,
+        processingStep: ProcessingStep.done,
+        isProcessing: false,
+      );
+    } catch (e, st) {
+      log.e('captureAndProcess error', e, st);
+      state = state.copyWith(
+        isProcessing: false,
+        processingStep: ProcessingStep.idle,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> pickAndProcessImage() async {
+    if (state.isProcessing) return;
+
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
+      final imagePath = result?.files.single.path;
+      if (imagePath == null || imagePath.isEmpty) return;
+
+      await _processExistingImage(imagePath);
+    } catch (e, st) {
+      log.e('pickAndProcessImage error', e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> _processExistingImage(String imagePath) async {
+    state = state.copyWith(
+      isProcessing: true,
+      processingStep: ProcessingStep.preparing,
+      capturedImagePath: imagePath,
+      displayedImagePath: imagePath,
+      extractedText: '',
+      ocrConfidence: 0.0,
+      textBlocks: const [],
+    );
+
+    try {
+      final rootIsolateToken = RootIsolateToken.instance!;
+      final message = IsolateMessage(
+        rootIsolateToken: rootIsolateToken,
+        imagePath: imagePath,
+      );
+
+      final processedPath = await compute(
+        processImageInBackgroundIsolate,
+        message,
+      );
+
+      state = state.copyWith(processingStep: ProcessingStep.ocr);
+      final ocrInputPath = processedPath ?? imagePath;
+      final ocrResult = await TesseractService.extractFromImage(ocrInputPath);
+
+      final extractedText = ocrResult?.plainText ?? '';
+      final confidence = ocrResult?.averageConfidence ?? 0.0;
+      final textBlocks = ocrResult?.lines ?? const <TextBlock>[];
+
+      final scanResult = ScanResult(
+        imagePath: imagePath,
+        extractedText: extractedText,
+        timestamp: DateTime.now(),
+        processedImagePath: processedPath,
+        ocrConfidence: confidence,
+        textBlocks: textBlocks,
+        ocrImageWidth: ocrResult?.imageWidth,
+        ocrImageHeight: ocrResult?.imageHeight,
+      );
+      await ScanProcessor.saveScanMetadata(scanResult);
+
+      state = state.copyWith(
+        hasScannedImage: true,
+        extractedText: extractedText,
+        ocrConfidence: confidence,
+        textBlocks: textBlocks,
+        displayedImagePath: ocrInputPath,
+        ocrImageWidth: ocrResult?.imageWidth,
+        ocrImageHeight: ocrResult?.imageHeight,
+        processingStep: ProcessingStep.done,
+        isProcessing: false,
+      );
+    } catch (e, st) {
+      log.e('_processExistingImage error', e, st);
+      state = state.copyWith(
+        isProcessing: false,
+        processingStep: ProcessingStep.idle,
+      );
+      rethrow;
+    }
+  }
+
+  void resetScanner() {
+    state = ScannerState(cameraInitialized: state.cameraInitialized);
+  }
+
+  void dispose() {
+    _cameraService.dispose();
+  }
+}
+
+/// Provider for camera service
+final cameraServiceProvider = Provider<CameraService>((ref) {
+  final service = CameraService();
+  ref.onDispose(() => service.dispose());
+  return service;
+});
+
+/// Provider for scanner state
+final scannerProvider =
+    NotifierProvider.autoDispose<ScannerNotifier, ScannerState>(
+  ScannerNotifier.new,
+);

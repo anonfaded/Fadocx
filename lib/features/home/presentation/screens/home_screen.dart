@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/config/routing/app_router.dart';
+import 'package:fadocx/features/home/presentation/widgets/bottom_nav_dock.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
@@ -21,7 +22,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56), // Compact dock height
+        preferredSize: const Size.fromHeight(56),
         child: Material(
           elevation: 0,
           color: Colors.transparent,
@@ -51,34 +52,18 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    // App name/title - expand to fill
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16),
-                        child: Text(
-                          AppLocalizations.of(context)!.appName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                        ),
-                      ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Center(
+                    child: Text(
+                      AppLocalizations.of(context)!.appName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
-                    // Settings button
-                    IconButton(
-                      icon: const Icon(Icons.settings),
-                      tooltip: AppLocalizations.of(context)!.settings,
-                      onPressed: () {
-                        log.d('Opening settings');
-                        context.go(RouteNames.settings);
-                      },
-                      iconSize: 20,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -93,7 +78,7 @@ class HomeScreen extends ConsumerWidget {
             return _buildEmptyState(context, ref);
           }
 
-          return _buildRecentFilesList(context, files);
+          return _buildRecentFilesList(context, files, ref);
         },
         loading: () {
           log.d('Loading recent files...');
@@ -138,6 +123,9 @@ class HomeScreen extends ConsumerWidget {
         },
         tooltip: AppLocalizations.of(context)!.openFileTooltip,
       ),
+      bottomNavigationBar: BottomNavDock(
+        currentRoute: RouteNames.home,
+      ),
     );
   }
 
@@ -179,9 +167,164 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Build recent files list
-  Widget _buildRecentFilesList(BuildContext context, List<RecentFile> files) {
+  Widget _buildRecentFilesList(
+      BuildContext context, List<RecentFile> files, WidgetRef ref) {
     return Column(
       children: [
+        // BROWSE SECTION
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .primaryContainer
+                  .withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  log.i('Browse files button pressed');
+                  _showOpenFileDialog(context, ref);
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.folder_open,
+                        size: 24,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Browse Files',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Open documents from your device',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        // SCANNER SECTION
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .tertiaryContainer
+                  .withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiary
+                    .withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  log.i('Scan documents button pressed');
+                  context.go('/scanner');
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.camera_alt_outlined,
+                        size: 24,
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Scan Documents',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Use camera to scan and extract text',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // RECENT FILES SECTION
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(

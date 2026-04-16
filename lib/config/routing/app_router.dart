@@ -4,12 +4,14 @@ import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/features/home/presentation/screens/home_screen.dart';
 import 'package:fadocx/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fadocx/features/viewer/presentation/screens/viewer_screen.dart';
+import 'package:fadocx/features/scanner/presentation/screens/scanner_screen.dart';
 
 /// Route names constant
 class RouteNames {
   static const String home = '/';
   static const String viewer = '/viewer';
   static const String settings = '/settings';
+  static const String scanner = '/scanner';
 }
 
 /// Global router instance - singleton to prevent navigation reset on rebuild
@@ -110,6 +112,16 @@ GoRouter createGoRouter() {
         builder: (context, state) {
           log.d('Navigating to settings');
           return const SettingsScreen();
+        },
+      ),
+
+      // Scanner screen
+      GoRoute(
+        path: RouteNames.scanner,
+        name: 'scanner',
+        builder: (context, state) {
+          log.d('Navigating to scanner');
+          return const ScannerScreen();
         },
       ),
     ],

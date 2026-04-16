@@ -13,12 +13,17 @@ class DocumentViewerFactory {
     required ParsedDocumentEntity document,
     required String filePath,
     String? fileName,
+    bool invertColors = false,
+    bool textMode = false,
+    VoidCallback? onInvertToggle,
+    VoidCallback? onTextModeToggle,
   }) {
     return switch (document.format.toUpperCase()) {
       'JSON' || 'FADREC' => _buildJsonViewer(document),
       'XML' => _buildXmlViewer(document),
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
-      'PDF' => _buildPdfViewer(filePath, fileName),
+      'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
+          onInvertToggle, onTextModeToggle),
       'DOCX' || 'DOC' => _buildDocxViewer(document),
       'PPT' || 'PPTX' || 'ODP' => _buildPptViewer(document),
       _ => _buildUnsupportedViewer(document.format),
@@ -97,8 +102,22 @@ class DocumentViewerFactory {
     return ProfessionalSheetViewer(sheet: sheet);
   }
 
-  static Widget _buildPdfViewer(String filePath, String? fileName) {
-    return ModernPdfViewer(filePath: filePath, fileName: fileName);
+  static Widget _buildPdfViewer(
+    String filePath,
+    String? fileName,
+    bool invertColors,
+    bool textMode,
+    VoidCallback? onInvertToggle,
+    VoidCallback? onTextModeToggle,
+  ) {
+    return ModernPdfViewer(
+      filePath: filePath,
+      fileName: fileName,
+      invertColors: invertColors,
+      textMode: textMode,
+      onInvertToggle: onInvertToggle,
+      onTextModeToggle: onTextModeToggle,
+    );
   }
 
   static Widget _buildDocxViewer(ParsedDocumentEntity document) {
