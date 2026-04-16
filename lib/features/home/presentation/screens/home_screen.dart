@@ -20,19 +20,70 @@ class HomeScreen extends ConsumerWidget {
     final recentFiles = ref.watch(recentFilesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.appName),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: AppLocalizations.of(context)!.settings,
-            onPressed: () {
-              log.d('Opening settings');
-              context.go(RouteNames.settings);
-            },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56), // Compact dock height
+        child: Material(
+          elevation: 0,
+          color: Colors.transparent,
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surface
+                      .withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // App name/title - expand to fill
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: Text(
+                          AppLocalizations.of(context)!.appName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              Theme.of(context).textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                    ),
+                    // Settings button
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      tooltip: AppLocalizations.of(context)!.settings,
+                      onPressed: () {
+                        log.d('Opening settings');
+                        context.go(RouteNames.settings);
+                      },
+                      iconSize: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ],
+        ),
       ),
       body: recentFiles.when(
         data: (files) {
@@ -143,8 +194,8 @@ class HomeScreen extends ConsumerWidget {
               Text(
                 '${files.length}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
               ),
             ],
           ),
@@ -176,7 +227,7 @@ class HomeScreen extends ConsumerWidget {
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accentColor = Theme.of(context).colorScheme.primary;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Material(
@@ -221,22 +272,27 @@ class HomeScreen extends ConsumerWidget {
                           file.fileName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             Text(
                               file.fileType.toUpperCase(),
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
                                     color: accentColor,
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
                             const SizedBox(width: 8),
-                            Icon(Icons.circle, size: 3, color: Colors.grey[500]),
+                            Icon(Icons.circle,
+                                size: 3, color: Colors.grey[500]),
                             const SizedBox(width: 8),
                             Text(
                               file.formattedSize,
@@ -247,16 +303,18 @@ class HomeScreen extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           'Opened ${_formatDate(file.dateOpened)}',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
                   PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert, size: 20, color: Colors.grey[600]),
+                    icon: Icon(Icons.more_vert,
+                        size: 20, color: Colors.grey[600]),
                     itemBuilder: (context) => <PopupMenuEntry<String>>[
                       const PopupMenuItem(
                         value: 'open',
@@ -358,16 +416,23 @@ class HomeScreen extends ConsumerWidget {
   /// Show file picker and handle file selection
   Future<void> _showOpenFileDialog(BuildContext context, WidgetRef ref) async {
     log.i('Opening file picker');
-    
+
     try {
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: [
           'pdf',
-          'docx', 'doc', 'odt', 'rtf',
-          'xlsx', 'xls', 'ods',
+          'docx',
+          'doc',
+          'odt',
+          'rtf',
+          'xlsx',
+          'xls',
+          'ods',
           'csv',
-          'odp', 'ppt', 'pptx',
+          'odp',
+          'ppt',
+          'pptx',
           'txt'
         ],
         allowMultiple: false,
@@ -377,7 +442,7 @@ class HomeScreen extends ConsumerWidget {
         final pickedFile = result.files.first;
         final filePath = pickedFile.path;
         final fileName = pickedFile.name;
-        
+
         if (filePath != null && filePath.isNotEmpty) {
           log.i('✅ File selected: $fileName at $filePath');
 
@@ -434,7 +499,8 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Navigate to viewer screen
-  void _navigateToViewer(BuildContext context, String filePath, String fileName) {
+  void _navigateToViewer(
+      BuildContext context, String filePath, String fileName) {
     log.d('Navigating to viewer: $filePath');
     context.push('${RouteNames.viewer}?path=$filePath&name=$fileName');
   }
@@ -467,13 +533,13 @@ class HomeScreen extends ConsumerWidget {
   ) async {
     try {
       log.i('Removing file from recent: ${file.id}');
-      
+
       // Call the mutator to delete the file
       await ref.read(recentFilesMutatorProvider).removeRecentFile(file.id);
-      
+
       // Refresh the recent files list
       ref.invalidate(recentFilesProvider);
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -482,7 +548,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
       }
-      
+
       log.i('✅ File removed successfully: ${file.id}');
     } catch (e, st) {
       log.e('Error removing file', e, st);

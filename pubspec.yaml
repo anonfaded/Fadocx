@@ -12,6 +12,19 @@ dependencies:
     sdk: flutter
 
   # =========================
+  # SCANNING & OCR (Open Source)
+  # =========================
+  camera: ^0.12.0+1
+  image_picker: ^1.2.1
+  flutter_tesseract_ocr: ^0.4.30
+  
+  # =========================
+  # IMAGE PROCESSING
+  # =========================
+  image: ^4.8.0
+  opencv_dart: ^2.2.1+4
+
+  # =========================
   # STATE MANAGEMENT
   # =========================
   flutter_riverpod: ^3.3.1
