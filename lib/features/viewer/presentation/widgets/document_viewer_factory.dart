@@ -312,35 +312,54 @@ class _PdfDocumentViewer extends StatefulWidget {
 }
 
 class _PdfDocumentViewerState extends State<_PdfDocumentViewer> {
-  late final PdfControllerPinch _controller;
+  PdfControllerPinch? _controller;
   late final ValueNotifier<int> _currentPageNotifier;
   late final ValueNotifier<int> _totalPagesNotifier;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _currentPageNotifier = ValueNotifier<int>(1);
     _totalPagesNotifier = ValueNotifier<int>(0);
-    _controller = PdfControllerPinch(
-      document: PdfDocument.openFile(widget.filePath),
-    );
+    // Defer PDF loading to after first frame to avoid blocking UI
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPdf());
+  }
+
+  Future<void> _loadPdf() async {
+    if (!mounted) return;
+    try {
+      final doc = PdfDocument.openFile(widget.filePath);
+      final ctrl = PdfControllerPinch(document: doc);
+      if (!mounted) return;
+      setState(() {
+        _controller = ctrl;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
   void dispose() {
     _currentPageNotifier.dispose();
     _totalPagesNotifier.dispose();
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading || _controller == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Column(
       children: [
         Expanded(
           child: PdfViewPinch(
-            controller: _controller,
+            controller: _controller!,
             builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
               options: const DefaultBuilderOptions(),
               documentLoaderBuilder: (_) =>
@@ -385,11 +404,11 @@ class _PdfDocumentViewerState extends State<_PdfDocumentViewer> {
         _PdfControlBar(
           currentPageNotifier: _currentPageNotifier,
           totalPagesNotifier: _totalPagesNotifier,
-          onPreviousPage: () => _controller.previousPage(
+          onPreviousPage: () => _controller?.previousPage(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
           ),
-          onNextPage: () => _controller.nextPage(
+          onNextPage: () => _controller?.nextPage(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
           ),
@@ -608,7 +627,7 @@ class _SlideView extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         child: Column(
@@ -617,7 +636,8 @@ class _SlideView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                color:
+                    theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12),
                 ),
@@ -663,7 +683,7 @@ class _SlideView extends StatelessWidget {
                               Icons.hide_image,
                               size: 64,
                               color: theme.colorScheme.onSurfaceVariant
-                                  .withOpacity(0.5),
+                                  .withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -677,7 +697,7 @@ class _SlideView extends StatelessWidget {
                               'No text content',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant
-                                    .withOpacity(0.7),
+                                    .withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -754,7 +774,7 @@ class _PresentationControlBar extends StatelessWidget {
                           color: currentSlide > 1
                               ? theme.colorScheme.onPrimaryContainer
                               : theme.colorScheme.onSurfaceVariant
-                                  .withOpacity(0.5),
+                                  .withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -805,7 +825,7 @@ class _PresentationControlBar extends StatelessWidget {
                           color: currentSlide < totalSlides
                               ? theme.colorScheme.onPrimaryContainer
                               : theme.colorScheme.onSurfaceVariant
-                                  .withOpacity(0.5),
+                                  .withValues(alpha: 0.5),
                         ),
                       ),
                     ),
