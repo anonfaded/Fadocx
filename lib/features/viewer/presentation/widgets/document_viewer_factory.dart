@@ -12,12 +12,13 @@ class DocumentViewerFactory {
   static Widget createViewer({
     required ParsedDocumentEntity document,
     required String filePath,
+    String? fileName,
   }) {
     return switch (document.format.toUpperCase()) {
       'JSON' || 'FADREC' => _buildJsonViewer(document),
       'XML' => _buildXmlViewer(document),
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
-      'PDF' => _buildPdfViewer(filePath),
+      'PDF' => _buildPdfViewer(filePath, fileName),
       'DOCX' || 'DOC' => _buildDocxViewer(document),
       'PPT' || 'PPTX' || 'ODP' => _buildPptViewer(document),
       _ => _buildUnsupportedViewer(document.format),
@@ -96,8 +97,8 @@ class DocumentViewerFactory {
     return ProfessionalSheetViewer(sheet: sheet);
   }
 
-  static Widget _buildPdfViewer(String filePath) {
-    return ModernPdfViewer(filePath: filePath);
+  static Widget _buildPdfViewer(String filePath, String? fileName) {
+    return ModernPdfViewer(filePath: filePath, fileName: fileName);
   }
 
   static Widget _buildDocxViewer(ParsedDocumentEntity document) {

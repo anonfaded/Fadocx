@@ -33,47 +33,139 @@ class ViewerScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(fileName, maxLines: 1, overflow: TextOverflow.ellipsis),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+      appBar: PreferredSize(
+        preferredSize: Size.zero,
+        child: Container(),
+      ),
+      body: Stack(
+        children: [
+          // Main content - fills entire screen
+          docState.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : docState.hasError
+                  ? _buildErrorState(context, ref, docState)
+                  : docState.document != null
+                      ? DocumentViewerFactory.createViewer(
+                          document: docState.document!,
+                          filePath: filePath,
+                        )
+                      : const Center(child: Text('No content')),
+
+          // Top floating dock - back + filename
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 16,
+            right: 16,
+            child: _buildTopDock(context, ref),
+          ),
+
+          // Right floating dock - invert + text-mode
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            right: 16,
+            child: _buildControlDock(context, ref),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopDock(BuildContext context, WidgetRef ref) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
         ),
-        actions: [
-          // Theme toggle - switch dark/light without leaving viewer
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () => context.pop(),
+            tooltip: 'Back',
+            iconSize: 22,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                fileName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ),
           IconButton(
             icon: Icon(
               Theme.of(context).brightness == Brightness.dark
                   ? Icons.light_mode_outlined
                   : Icons.dark_mode_outlined,
             ),
-            tooltip: Theme.of(context).brightness == Brightness.dark
-                ? 'Switch to light'
-                : 'Switch to dark',
+            tooltip: 'Theme',
             onPressed: () async {
               final notifier = ref.read(themeModeProvider.notifier);
               notifier.toggleThemeMode();
-              // Persist to Hive
               final mode = ref.read(themeModeProvider);
               final box =
                   Hive.box<HiveAppSettings>(HiveDatasource.settingsBoxName);
               final settings = box.values.firstOrNull ?? HiveAppSettings();
               await box.put(0, settings.copyWith(theme: mode.value));
             },
+            iconSize: 20,
           ),
         ],
       ),
-      body: docState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : docState.hasError
-              ? _buildErrorState(context, ref, docState)
-              : docState.document != null
-                  ? DocumentViewerFactory.createViewer(
-                      document: docState.document!,
-                      filePath: filePath,
-                    )
-                  : const Center(child: Text('No content')),
+    );
+  }
+
+  Widget _buildControlDock(BuildContext context, WidgetRef ref) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.invert_colors),
+            tooltip: 'Invert colors',
+            onPressed: () {},
+            iconSize: 20,
+          ),
+          IconButton(
+            icon: const Icon(Icons.text_snippet),
+            tooltip: 'Text mode',
+            onPressed: () {},
+            iconSize: 20,
+          ),
+        ],
+      ),
     );
   }
 
