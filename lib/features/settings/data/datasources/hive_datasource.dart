@@ -9,21 +9,24 @@ class HiveDatasource {
   static const String recentFilesBoxName = 'fadocx_recent_files';
   static const String deviceInfoBoxName = 'fadocx_device_info';
 
-  /// Initialize Hive and register adapters
+  /// Initialize Hive, register adapters, and pre-open all boxes
   static Future<void> initialize() async {
     try {
-      log.i('Initializing Hive database...');
-
-      // Initialize Hive with Flutter support (sets up storage path)
       await Hive.initFlutter();
-      log.d('Hive Flutter initialized with storage path');
-
-      // Register adapters for type-safe storage
       Hive.registerAdapter(HiveRecentFileAdapter());
       Hive.registerAdapter(HiveAppSettingsAdapter());
       Hive.registerAdapter(HiveDeviceInfoAdapter());
 
-      log.d('Hive adapters registered successfully');
+      // Pre-open all boxes so providers don't hit lazy-open lag
+      if (!Hive.isBoxOpen(settingsBoxName)) {
+        await Hive.openBox<HiveAppSettings>(settingsBoxName);
+      }
+      if (!Hive.isBoxOpen(recentFilesBoxName)) {
+        await Hive.openBox<HiveRecentFile>(recentFilesBoxName);
+      }
+      if (!Hive.isBoxOpen(deviceInfoBoxName)) {
+        await Hive.openBox<HiveDeviceInfo>(deviceInfoBoxName);
+      }
     } catch (e, st) {
       log.e('Error initializing Hive', e, st);
       rethrow;
@@ -82,7 +85,8 @@ class HiveDatasource {
       final box = await getSettingsBox();
       // Store single settings object in box[0]
       await box.put(0, settings);
-      log.i('Settings saved: theme=${settings.theme}, language=${settings.language}');
+      log.i(
+          'Settings saved: theme=${settings.theme}, language=${settings.language}');
     } catch (e, st) {
       log.e('Error saving settings', e, st);
       rethrow;
@@ -162,7 +166,9 @@ class HiveDatasource {
         await box.put(0, HiveAppSettings());
       }
       log.d('Started watching settings');
-      return box.watch().map((_) => box.values.isNotEmpty ? box.values.first : null);
+      return box
+          .watch()
+          .map((_) => box.values.isNotEmpty ? box.values.first : null);
     } catch (e, st) {
       log.e('Error watching settings', e, st);
       rethrow;
