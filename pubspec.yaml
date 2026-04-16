@@ -99,3 +99,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true  # Enable l10n code generation
+  
+  assets:
+    - assets/tessdata/
+    - assets/tessdata_config.json

@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
+import 'package:fadocx/config/routing/app_router.dart';
+import 'package:fadocx/features/home/presentation/widgets/bottom_nav_dock.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
 
-/// Settings screen - comprehensive app configuration
+/// Settings screen - comprehensive app configuration with card-based layout
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -21,7 +23,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56), // Compact dock height
+        preferredSize: const Size.fromHeight(56),
         child: Material(
           elevation: 0,
           color: Colors.transparent,
@@ -53,9 +55,8 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    // Back button
                     IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      icon: const Icon(Icons.chevron_left),
                       onPressed: () {
                         try {
                           if (Navigator.canPop(context)) {
@@ -71,7 +72,6 @@ class SettingsScreen extends ConsumerWidget {
                       tooltip: 'Back',
                       iconSize: 20,
                     ),
-                    // Settings title - expand to fill
                     Expanded(
                       child: Center(
                         child: Text(
@@ -85,7 +85,6 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    // Empty space to balance back button
                     SizedBox(
                       width: 48,
                       child: Container(),
@@ -104,44 +103,91 @@ class SettingsScreen extends ConsumerWidget {
               child: CircularProgressIndicator(),
             );
           }
-          return ListView(
-            children: [
-              // THEME SECTION
-              _buildSectionHeader(context, 'Appearance'),
-              _buildThemeSelector(context, ref, themeMode),
-              const Divider(),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // APPEARANCE SECTION
+                _buildSectionTitle(context, 'Appearance'),
+                _buildThemeCard(context, ref, themeMode),
+                const SizedBox(height: 24),
 
-              // LANGUAGE SECTION
-              _buildSectionHeader(context, 'Language & Region'),
-              _buildLanguageSelector(context, ref, appSettings),
-              const Divider(),
+                // LANGUAGE & REGION SECTION
+                _buildSectionTitle(context, 'Language & Region'),
+                _buildLanguageCard(context, ref, appSettings),
+                const SizedBox(height: 24),
 
-              // NOTIFICATIONS SECTION
-              _buildSectionHeader(context, 'Notifications'),
-              _buildNotificationToggle(context, ref, appSettings),
-              const Divider(),
+                // NOTIFICATIONS SECTION
+                _buildSectionTitle(context, 'Notifications'),
+                _buildNotificationCard(context, ref, appSettings),
+                const SizedBox(height: 24),
 
-              // ABOUT SECTION
-              _buildSectionHeader(context, 'About'),
-              _buildAboutTile(context, appSettings),
-              _buildCredits(context),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  AppLocalizations.of(context)!.privacyDescription,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  textAlign: TextAlign.center,
+                // ABOUT SECTION
+                _buildSectionTitle(context, 'About'),
+                _buildAboutCard(context, appSettings),
+                const SizedBox(height: 24),
+
+                // DATA MANAGEMENT SECTION
+                _buildSectionTitle(context, 'Data Management'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
+                        icon: Icons.history,
+                        title: 'Clear Recent',
+                        description: 'Remove all recent files',
+                        onTap: () => _showClearConfirmDialog(
+                          context,
+                          'Clear Recent Files',
+                          'This will remove all recent files from your list.',
+                          () {
+                            log.i('Clearing recent files');
+                            ref
+                                .read(recentFilesMutatorProvider)
+                                .clearAllRecentFiles();
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Recent files cleared'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
+                        icon: Icons.restore,
+                        title: 'Reset Settings',
+                        description: 'Restore defaults',
+                        onTap: () => _showClearConfirmDialog(
+                          context,
+                          'Reset All Settings',
+                          'This will reset all app settings to defaults.',
+                          () {
+                            log.i('Resetting all settings');
+                            ref.read(settingsMutatorProvider).clearSettings();
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Settings reset to defaults'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              // DATA MANAGEMENT SECTION
-              _buildSectionHeader(context, 'Data Management'),
-              _buildClearRecentFilesButton(context, ref),
-              _buildClearSettingsButton(context, ref),
-
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 32),
+              ],
+            ),
           );
         },
         loading: () => const Center(
@@ -168,13 +214,16 @@ class SettingsScreen extends ConsumerWidget {
           );
         },
       ),
+      bottomNavigationBar: BottomNavDock(
+        currentRoute: RouteNames.settings,
+      ),
     );
   }
 
-  /// Build section header
-  Widget _buildSectionHeader(BuildContext context, String title) {
+  /// Build section title
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -185,42 +234,40 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// Build theme selector
-  Widget _buildThemeSelector(
+  /// Build theme card with button options
+  Widget _buildThemeCard(
       BuildContext context, WidgetRef ref, ThemeMode currentTheme) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.theme,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              Text(
-                currentTheme.displayName,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
-            ],
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.theme,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 12),
+          Row(
             children: [
               _buildThemeButton(context, ref, ThemeMode.dark, currentTheme),
+              const SizedBox(width: 8),
               _buildThemeButton(context, ref, ThemeMode.light, currentTheme),
+              const SizedBox(width: 8),
               _buildThemeButton(context, ref, ThemeMode.system, currentTheme),
             ],
           ),
-        ),
-        const SizedBox(height: 8),
-      ],
+        ],
+      ),
     );
   }
 
@@ -233,57 +280,62 @@ class SettingsScreen extends ConsumerWidget {
   ) {
     final isSelected = currentTheme == mode;
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: FilledButton.tonal(
-          onPressed: () async {
-            try {
-              log.i('Changing theme to: ${mode.displayName}');
-              // Update provider (UI changes instantly)
-              ref.read(themeModeProvider.notifier).setThemeMode(mode);
-              // Save to persistent storage (non-blocking)
-              await ref.read(settingsMutatorProvider).updateTheme(mode.value);
-              log.i('✅ Theme changed to ${mode.displayName}');
-            } catch (e, st) {
-              log.e('Error changing theme', e, st);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('Error: $e'), backgroundColor: Colors.red),
-                );
-              }
+      child: FilledButton.tonal(
+        onPressed: () async {
+          try {
+            log.i('Changing theme to: ${mode.displayName}');
+            ref.read(themeModeProvider.notifier).setThemeMode(mode);
+            await ref.read(settingsMutatorProvider).updateTheme(mode.value);
+            log.i('✅ Theme changed to ${mode.displayName}');
+          } catch (e, st) {
+            log.e('Error changing theme', e, st);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text('Error: $e'), backgroundColor: Colors.red),
+              );
             }
-          },
-          style: FilledButton.styleFrom(
-            backgroundColor: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.surface,
-            foregroundColor: isSelected
-                ? Theme.of(context).colorScheme.onPrimary
-                : Theme.of(context).colorScheme.onSurface,
-          ),
-          child: Text(mode.displayName),
+          }
+        },
+        style: FilledButton.styleFrom(
+          backgroundColor: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.surface,
+          foregroundColor: isSelected
+              ? Theme.of(context).colorScheme.onPrimary
+              : Theme.of(context).colorScheme.onSurface,
         ),
+        child: Text(mode.displayName),
       ),
     );
   }
 
-  /// Build language selector with real-time switching
-  Widget _buildLanguageSelector(
+  /// Build language selector card
+  Widget _buildLanguageCard(
     BuildContext context,
     WidgetRef ref,
     AppSettings appSettings,
   ) {
     final currentLocale = ref.watch(localeProvider);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             AppLocalizations.of(context)!.language,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           DropdownButton<String>(
             value: currentLocale.languageCode,
@@ -301,14 +353,8 @@ class SettingsScreen extends ConsumerWidget {
               if (value != null && value != currentLocale.languageCode) {
                 try {
                   log.i('Changing language to: $value');
-
-                  // Update locale in real-time
                   ref.read(localeProvider.notifier).setLocale(value);
-
-                  // Update settings (non-blocking)
                   await ref.read(settingsMutatorProvider).updateLanguage(value);
-
-                  // Show confirmation
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -339,20 +385,30 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// Build notification toggle
-  Widget _buildNotificationToggle(
+  /// Build notification toggle card
+  Widget _buildNotificationCard(
     BuildContext context,
     WidgetRef ref,
     AppSettings appSettings,
   ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'Enable Notifications (Phase 2)',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           Switch(
             value: appSettings.enableNotifications,
@@ -366,16 +422,26 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// Build about tile
-  Widget _buildAboutTile(BuildContext context, AppSettings appSettings) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  /// Build about section card
+  Widget _buildAboutCard(BuildContext context, AppSettings appSettings) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             AppLocalizations.of(context)!.appVersion,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -384,21 +450,12 @@ class SettingsScreen extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
           ),
-        ],
-      ),
-    );
-  }
-
-  /// Build credits section
-  Widget _buildCredits(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          const SizedBox(height: 16),
           Text(
             'About Fadocx',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -408,7 +465,9 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Built with:',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -419,63 +478,69 @@ class SettingsScreen extends ConsumerWidget {
             '• All Open Source',
             style: Theme.of(context).textTheme.bodySmall,
           ),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context)!.privacyDescription,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       ),
     );
   }
 
-  /// Build clear recent files button
-  Widget _buildClearRecentFilesButton(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: FilledButton.tonal(
-        onPressed: () {
-          _showClearConfirmDialog(
-            context,
-            'Clear Recent Files',
-            'This will remove all recent files from your list.',
-            () {
-              log.i('Clearing recent files');
-              ref.read(recentFilesMutatorProvider).clearAllRecentFiles();
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Recent files cleared'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-          );
-        },
-        child: Text(AppLocalizations.of(context)!.clearRecentFiles),
+  /// Build action card (for Clear Recent, Reset Settings)
+  Widget _buildActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String description,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
-    );
-  }
-
-  /// Build clear settings button (Phase 2+)
-  Widget _buildClearSettingsButton(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: FilledButton.tonal(
-        onPressed: () {
-          _showClearConfirmDialog(
-            context,
-            'Reset All Settings',
-            'This will reset all app settings to defaults.',
-            () {
-              log.i('Resetting all settings');
-              ref.read(settingsMutatorProvider).clearSettings();
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Settings reset to defaults'),
-                  duration: Duration(seconds: 2),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-              );
-            },
-          );
-        },
-        child: const Text('Reset All Settings'),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

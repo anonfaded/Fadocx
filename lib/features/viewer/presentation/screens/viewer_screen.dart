@@ -8,7 +8,7 @@ import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_fact
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-class ViewerScreen extends ConsumerWidget {
+class ViewerScreen extends ConsumerStatefulWidget {
   final String filePath;
   final String fileName;
 
@@ -19,18 +19,31 @@ class ViewerScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final docState = ref.watch(documentViewerProvider);
+  ConsumerState<ViewerScreen> createState() => _ViewerScreenState();
+}
 
+class _ViewerScreenState extends ConsumerState<ViewerScreen> {
+  bool _invertColors = false;
+  bool _textMode = false;
+
+  @override
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final docState = ref.read(documentViewerProvider);
       if (!docState.isLoading &&
           docState.document == null &&
           !docState.hasError) {
         ref
             .read(documentViewerProvider.notifier)
-            .initializeAndLoad(filePath, fileName);
+            .initializeAndLoad(widget.filePath, widget.fileName);
       }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final docState = ref.watch(documentViewerProvider);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -39,7 +52,7 @@ class ViewerScreen extends ConsumerWidget {
       ),
       body: Stack(
         children: [
-          // Main content - fills entire screen
+          // Main content
           docState.isLoading
               ? const Center(child: CircularProgressIndicator())
               : docState.hasError
@@ -47,11 +60,19 @@ class ViewerScreen extends ConsumerWidget {
                   : docState.document != null
                       ? DocumentViewerFactory.createViewer(
                           document: docState.document!,
-                          filePath: filePath,
+                          filePath: widget.filePath,
+                          invertColors: _invertColors,
+                          textMode: _textMode,
+                          onInvertToggle: () {
+                            setState(() => _invertColors = !_invertColors);
+                          },
+                          onTextModeToggle: () {
+                            setState(() => _textMode = !_textMode);
+                          },
                         )
                       : const Center(child: Text('No content')),
 
-          // Top floating dock - back + filename
+          // Top floating dock
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             left: 16,
@@ -59,11 +80,11 @@ class ViewerScreen extends ConsumerWidget {
             child: _buildTopDock(context, ref),
           ),
 
-          // Right floating dock - invert + text-mode
+          // Right floating dock
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             right: 16,
-            child: _buildControlDock(context, ref),
+            child: _buildControlDock(context),
           ),
         ],
       ),
@@ -100,7 +121,7 @@ class ViewerScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                fileName,
+                widget.fileName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -132,7 +153,7 @@ class ViewerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildControlDock(BuildContext context, WidgetRef ref) {
+  Widget _buildControlDock(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
@@ -153,15 +174,23 @@ class ViewerScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.invert_colors),
+            icon: Icon(
+              _invertColors ? Icons.brightness_high : Icons.brightness_low,
+            ),
             tooltip: 'Invert colors',
-            onPressed: () {},
+            onPressed: () {
+              setState(() => _invertColors = !_invertColors);
+            },
             iconSize: 20,
           ),
           IconButton(
-            icon: const Icon(Icons.text_snippet),
-            tooltip: 'Text mode',
-            onPressed: () {},
+            icon: Icon(
+              _textMode ? Icons.picture_as_pdf : Icons.text_snippet,
+            ),
+            tooltip: _textMode ? 'PDF mode' : 'Text mode',
+            onPressed: () {
+              setState(() => _textMode = !_textMode);
+            },
             iconSize: 20,
           ),
         ],
@@ -190,7 +219,7 @@ class ViewerScreen extends ConsumerWidget {
             onPressed: () {
               ref
                   .read(documentViewerProvider.notifier)
-                  .initializeAndLoad(filePath, fileName);
+                  .initializeAndLoad(widget.filePath, widget.fileName);
             },
             icon: const Icon(Icons.refresh),
             label: const Text('Retry'),

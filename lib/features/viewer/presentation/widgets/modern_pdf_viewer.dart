@@ -5,10 +5,18 @@ import 'package:pdfrx/pdfrx.dart';
 class ModernPdfViewer extends StatefulWidget {
   final String filePath;
   final String? fileName;
+  final bool invertColors;
+  final bool textMode;
+  final VoidCallback? onInvertToggle;
+  final VoidCallback? onTextModeToggle;
 
   const ModernPdfViewer({
     required this.filePath,
     this.fileName,
+    this.invertColors = false,
+    this.textMode = false,
+    this.onInvertToggle,
+    this.onTextModeToggle,
     super.key,
   });
 
@@ -22,8 +30,6 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
 
   bool _showControls = true;
   bool _showSidebar = false;
-  bool _invertColors = false;
-  bool _textMode = false;
   int _currentPage = 1;
   int _totalPages = 0;
   PdfDocument? _document;
@@ -145,7 +151,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
       ),
     );
 
-    if (_invertColors) {
+    if (widget.invertColors) {
       return ColorFiltered(
         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.difference),
         child: viewer,
@@ -803,10 +809,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
                 setState(() => _showControls = !_showControls);
               }
             },
-            child: _textMode ? _buildTextMode() : _buildPdfViewer(),
+            child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
           ),
           // Bottom dock - navigation and menu
-          if (_showControls && !_textMode)
+          if (_showControls && !widget.textMode)
             Positioned(
               bottom: 16,
               left: 16,
