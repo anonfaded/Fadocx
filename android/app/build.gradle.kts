@@ -72,6 +72,9 @@ dependencies {
     implementation("org.apache.poi:poi-ooxml-lite:5.2.3")
     implementation("org.apache.poi:poi-scratchpad:5.2.3")
 
+    // PDFBox for PDF text extraction
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+
     // Required transitive dependencies
     implementation("org.apache.xmlbeans:xmlbeans:5.1.1")
     implementation("commons-io:commons-io:2.11.0")

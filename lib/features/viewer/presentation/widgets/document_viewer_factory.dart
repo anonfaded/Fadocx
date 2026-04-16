@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:pdfx/pdfx.dart';
-import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
 import 'professional_sheet_viewer.dart';
+import 'modern_pdf_viewer.dart';
 
 /// Returns embedded viewer content only.
 /// The owning screen provides the outer Scaffold/AppBar.
@@ -98,7 +97,7 @@ class DocumentViewerFactory {
   }
 
   static Widget _buildPdfViewer(String filePath) {
-    return _PdfDocumentViewer(filePath: filePath);
+    return ModernPdfViewer(filePath: filePath);
   }
 
   static Widget _buildDocxViewer(ParsedDocumentEntity document) {
@@ -302,182 +301,7 @@ class _JsonDocumentView extends StatelessWidget {
   }
 }
 
-class _PdfDocumentViewer extends StatefulWidget {
-  final String filePath;
-
-  const _PdfDocumentViewer({required this.filePath});
-
-  @override
-  State<_PdfDocumentViewer> createState() => _PdfDocumentViewerState();
-}
-
-class _PdfDocumentViewerState extends State<_PdfDocumentViewer> {
-  PdfControllerPinch? _controller;
-  late final ValueNotifier<int> _currentPageNotifier;
-  late final ValueNotifier<int> _totalPagesNotifier;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentPageNotifier = ValueNotifier<int>(1);
-    _totalPagesNotifier = ValueNotifier<int>(0);
-    // Defer PDF loading to after first frame to avoid blocking UI
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPdf());
-  }
-
-  Future<void> _loadPdf() async {
-    if (!mounted) return;
-    try {
-      final doc = PdfDocument.openFile(widget.filePath);
-      final ctrl = PdfControllerPinch(document: doc);
-      if (!mounted) return;
-      setState(() {
-        _controller = ctrl;
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    _currentPageNotifier.dispose();
-    _totalPagesNotifier.dispose();
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading || _controller == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    return Column(
-      children: [
-        Expanded(
-          child: PdfViewPinch(
-            controller: _controller!,
-            builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
-              options: const DefaultBuilderOptions(),
-              documentLoaderBuilder: (_) =>
-                  const Center(child: CircularProgressIndicator()),
-              pageLoaderBuilder: (_) => const Center(
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-              errorBuilder: (_, error) {
-                log.e('pdfx failed to load PDF: ${widget.filePath}', error);
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          size: 64, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text('Failed to load PDF',
-                          style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          error.toString(),
-                          style: Theme.of(context).textTheme.bodySmall,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            onDocumentLoaded: (doc) =>
-                _totalPagesNotifier.value = doc.pagesCount,
-            onPageChanged: (page) => _currentPageNotifier.value = page,
-          ),
-        ),
-        _PdfControlBar(
-          currentPageNotifier: _currentPageNotifier,
-          totalPagesNotifier: _totalPagesNotifier,
-          onPreviousPage: () => _controller?.previousPage(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-          ),
-          onNextPage: () => _controller?.nextPage(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PdfControlBar extends StatelessWidget {
-  final ValueNotifier<int> currentPageNotifier;
-  final ValueNotifier<int> totalPagesNotifier;
-  final VoidCallback onPreviousPage;
-  final VoidCallback onNextPage;
-
-  const _PdfControlBar({
-    required this.currentPageNotifier,
-    required this.totalPagesNotifier,
-    required this.onPreviousPage,
-    required this.onNextPage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: ValueListenableBuilder<int>(
-          valueListenable: currentPageNotifier,
-          builder: (context, currentPage, _) {
-            return ValueListenableBuilder<int>(
-              valueListenable: totalPagesNotifier,
-              builder: (context, totalPages, _) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: currentPage > 1 ? onPreviousPage : null,
-                      icon: const Icon(Icons.chevron_left),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Page $currentPage / ${totalPages == 0 ? '-' : totalPages}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: totalPages > 0 && currentPage < totalPages
-                          ? onNextPage
-                          : null,
-                      icon: const Icon(Icons.chevron_right),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
 /// Professional presentation slide viewer with PageView carousel
-/// Similar to PDF viewer with slide navigation and controls
 class _PresentationViewer extends StatefulWidget {
   final List<SlideEntity> slides;
 

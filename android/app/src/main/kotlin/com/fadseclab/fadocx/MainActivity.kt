@@ -1,8 +1,12 @@
 package com.fadseclab.fadocx
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.view.Surface
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -12,22 +16,35 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.hwpf.HWPFDocument
 import org.apache.poi.hwpf.extractor.WordExtractor
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.text.TextPosition
 import java.io.File
 import java.io.FileInputStream
 import java.io.StringWriter
 import java.io.PrintWriter
+import java.io.ByteArrayOutputStream
 
 /// Native document parser bridge for Flutter
-/// Handles XLSX, XLS, CSV, DOC
+/// Handles XLSX, XLS, CSV, DOC, PDF rendering and text extraction
 /// PPT/PPTX support: Coming Soon (requires LibreOffice integration)
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.fadseclab.fadocx/document_parser"
     private val FILE_CHANNEL = "com.fadseclab.fadocx/file_intent"
+    private val PDF_CHANNEL = "com.fadseclab.fadocx/pdf"
     private val TAG = "Fadocx.DocumentParser"
     private var pendingFileIntent: String? = null
+    
+    // Cache for PDF renderers
+    private val pdfRenderers = mutableMapOf<String, PdfRenderer>()
+    private val pdfDescriptors = mutableMapOf<String, ParcelFileDescriptor>()
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
+        // Initialize PDFBox
+        PDFBoxResourceLoader.init(applicationContext)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
@@ -56,8 +73,58 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+            
+        // PDF platform channel for rendering and text extraction
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PDF_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "renderPage" -> {
+                        val filePath = call.argument<String>("filePath")
+                        val pageNumber = call.argument<Int>("pageNumber") ?: 0
+                        val width = call.argument<Int>("width") ?: 800
+                        renderPdfPage(filePath, pageNumber, width, result)
+                    }
+                    "openPdf" -> {
+                        val filePath = call.argument<String>("filePath")
+                        openPdf(filePath, result)
+                    }
+                    "closePdf" -> {
+                        val filePath = call.argument<String>("filePath")
+                        closePdf(filePath, result)
+                    }
+                    "getPageCount" -> {
+                        val filePath = call.argument<String>("filePath")
+                        getPdfPageCount(filePath, result)
+                    }
+                    "extractPageText" -> {
+                        val filePath = call.argument<String>("filePath")
+                        val pageNumber = call.argument<Int>("pageNumber") ?: 1
+                        extractPdfPageText(filePath, pageNumber, result)
+                    }
+                    "extractTextWithPositions" -> {
+                        val filePath = call.argument<String>("filePath")
+                        val pageNumber = call.argument<Int>("pageNumber") ?: 1
+                        extractTextWithPositions(filePath, pageNumber, result)
+                    }
+                    "getPageSize" -> {
+                        val filePath = call.argument<String>("filePath")
+                        val pageNumber = call.argument<Int>("pageNumber") ?: 0
+                        getPageSize(filePath, pageNumber, result)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
 
         handleFileIntent(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up PDF renderers
+        pdfRenderers.values.forEach { it.close() }
+        pdfDescriptors.values.forEach { it.close() }
+        pdfRenderers.clear()
+        pdfDescriptors.clear()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -120,6 +187,253 @@ class MainActivity : FlutterActivity() {
             null
         }
     }
+    
+    // ── PDF Rendering with Android Native PdfRenderer ───────────────────
+    
+    private fun openPdf(filePath: String?, result: MethodChannel.Result) {
+        try {
+            if (filePath == null) {
+                return result.error("INVALID_ARGS", "Missing filePath", null)
+            }
+            
+            // Close existing if any
+            pdfRenderers[filePath]?.close()
+            pdfDescriptors[filePath]?.close()
+            
+            val file = File(filePath)
+            if (!file.exists()) {
+                return result.error("FILE_NOT_FOUND", "File not found: $filePath", null)
+            }
+            
+            val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            val renderer = PdfRenderer(descriptor)
+            
+            pdfDescriptors[filePath] = descriptor
+            pdfRenderers[filePath] = renderer
+            
+            result.success(mapOf(
+                "pageCount" to renderer.pageCount,
+                "filePath" to filePath
+            ))
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening PDF", e)
+            result.error("PDF_ERROR", e.message, null)
+        }
+    }
+    
+    private fun closePdf(filePath: String?, result: MethodChannel.Result) {
+        try {
+            if (filePath == null) {
+                return result.error("INVALID_ARGS", "Missing filePath", null)
+            }
+            
+            pdfRenderers[filePath]?.close()
+            pdfDescriptors[filePath]?.close()
+            pdfRenderers.remove(filePath)
+            pdfDescriptors.remove(filePath)
+            
+            result.success(true)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error closing PDF", e)
+            result.error("PDF_ERROR", e.message, null)
+        }
+    }
+    
+    private fun renderPdfPage(filePath: String?, pageNumber: Int, width: Int, result: MethodChannel.Result) {
+        try {
+            if (filePath == null) {
+                return result.error("INVALID_ARGS", "Missing filePath", null)
+            }
+            
+            var renderer = pdfRenderers[filePath]
+            
+            // Open if not already open
+            if (renderer == null) {
+                val file = File(filePath)
+                if (!file.exists()) {
+                    return result.error("FILE_NOT_FOUND", "File not found: $filePath", null)
+                }
+                
+                val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+                renderer = PdfRenderer(descriptor)
+                pdfDescriptors[filePath] = descriptor
+                pdfRenderers[filePath] = renderer
+            }
+            
+            if (pageNumber < 0 || pageNumber >= renderer.pageCount) {
+                return result.error("INVALID_PAGE", "Invalid page number: $pageNumber", null)
+            }
+            
+            val page = renderer.openPage(pageNumber)
+            
+            // Calculate height maintaining aspect ratio
+            // Use higher quality by rendering at higher DPI (2x scale)
+            val dpiScale = 2.0f
+            val renderWidth = (width * dpiScale).toInt()
+            val scale = renderWidth.toFloat() / page.width
+            val renderHeight = (page.height * scale).toInt()
+            
+            val bitmap = Bitmap.createBitmap(renderWidth, renderHeight, Bitmap.Config.ARGB_8888)
+            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+            page.close()
+            
+            // Convert to PNG bytes (100% quality)
+            val stream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val bytes = stream.toByteArray()
+            bitmap.recycle()
+            
+            result.success(mapOf(
+                "bytes" to bytes,
+                "width" to renderWidth,
+                "height" to renderHeight,
+                "pageNumber" to pageNumber
+            ))
+        } catch (e: Exception) {
+            Log.e(TAG, "Error rendering PDF page", e)
+            result.error("PDF_RENDER_ERROR", e.message, null)
+        }
+    }
+    
+    private fun getPageSize(filePath: String?, pageNumber: Int, result: MethodChannel.Result) {
+        try {
+            if (filePath == null) {
+                return result.error("INVALID_ARGS", "Missing filePath", null)
+            }
+            
+            var renderer = pdfRenderers[filePath]
+            
+            if (renderer == null) {
+                val file = File(filePath)
+                if (!file.exists()) {
+                    return result.error("FILE_NOT_FOUND", "File not found: $filePath", null)
+                }
+                
+                val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+                renderer = PdfRenderer(descriptor)
+                pdfDescriptors[filePath] = descriptor
+                pdfRenderers[filePath] = renderer
+            }
+            
+            if (pageNumber < 0 || pageNumber >= renderer.pageCount) {
+                return result.error("INVALID_PAGE", "Invalid page number: $pageNumber", null)
+            }
+            
+            val page = renderer.openPage(pageNumber)
+            val width = page.width
+            val height = page.height
+            page.close()
+            
+            result.success(mapOf(
+                "width" to width,
+                "height" to height
+            ))
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting page size", e)
+            result.error("PDF_ERROR", e.message, null)
+        }
+    }
+    
+    // ── PDF Text Extraction with PDFBox ────────────────────────────────
+    
+    private fun getPdfPageCount(filePath: String?, result: MethodChannel.Result) {
+        try {
+            if (filePath == null) {
+                return result.error("INVALID_ARGS", "Missing filePath", null)
+            }
+            val file = File(filePath)
+            if (!file.exists()) {
+                return result.error("FILE_NOT_FOUND", "File not found: $filePath", null)
+            }
+            
+            // Try Android PdfRenderer first (faster for just counting)
+            val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            val renderer = PdfRenderer(descriptor)
+            val count = renderer.pageCount
+            renderer.close()
+            descriptor.close()
+            
+            result.success(count)
+        } catch (e: Exception) {
+            Log.e(TAG, "PDF page count error", e)
+            result.error("PDF_ERROR", e.message, null)
+        }
+    }
+    
+    private fun extractPdfPageText(filePath: String?, pageNumber: Int, result: MethodChannel.Result) {
+        try {
+            if (filePath == null) {
+                return result.error("INVALID_ARGS", "Missing filePath", null)
+            }
+            val file = File(filePath)
+            if (!file.exists()) {
+                return result.error("FILE_NOT_FOUND", "File not found: $filePath", null)
+            }
+            
+            val document = PDDocument.load(file)
+            val textStripper = PDFTextStripper()
+            textStripper.startPage = pageNumber
+            textStripper.endPage = pageNumber
+            val text = textStripper.getText(document)
+            document.close()
+            
+            result.success(mapOf(
+                "pageNumber" to pageNumber,
+                "text" to text
+            ))
+        } catch (e: Exception) {
+            Log.e(TAG, "PDF page text extraction error", e)
+            result.error("PDF_ERROR", e.message, null)
+        }
+    }
+    
+    // Extract text with character positions for text selection overlay
+    private fun extractTextWithPositions(filePath: String?, pageNumber: Int, result: MethodChannel.Result) {
+        try {
+            if (filePath == null) {
+                return result.error("INVALID_ARGS", "Missing filePath", null)
+            }
+            val file = File(filePath)
+            if (!file.exists()) {
+                return result.error("FILE_NOT_FOUND", "File not found: $filePath", null)
+            }
+            
+            val document = PDDocument.load(file)
+            
+            // Use custom stripper that captures positions
+            val stripper = object : PDFTextStripper() {
+                val characters = mutableListOf<Map<String, Any>>()
+                
+                override fun writeString(text: String, textPositions: List<TextPosition>) {
+                    for (pos in textPositions) {
+                        characters.add(mapOf(
+                            "text" to pos.unicode,
+                            "x" to pos.xDirAdj,
+                            "y" to pos.yDirAdj,
+                            "width" to pos.widthDirAdj,
+                            "height" to pos.heightDir,
+                            "fontSize" to pos.fontSize
+                        ))
+                    }
+                    super.writeString(text, textPositions)
+                }
+            }
+            
+            stripper.startPage = pageNumber
+            stripper.endPage = pageNumber
+            val text = stripper.getText(document)
+            document.close()
+            
+            result.success(mapOf(
+                "pageNumber" to pageNumber,
+                "text" to text,
+                "characters" to stripper.characters
+            ))
+        } catch (e: Exception) {
+            Log.e(TAG, "PDF text position extraction error", e)
+            result.error("PDF_ERROR", e.message, null)
+        }
+    }
 
     private fun handleParseDocument(filePath: String?, format: String?, result: MethodChannel.Result) {
         try {
@@ -138,9 +452,8 @@ class MainActivity : FlutterActivity() {
                 "XLS" -> parseXLS(filePath)
                 "CSV" -> parseCSV(filePath)
                 "DOC" -> parseDOC(filePath)
+                "PDF" -> parsePDF(filePath)
                 "PPT", "PPTX", "ODP" -> {
-                    // Coming Soon: PPT/PPTX/ODP requires LibreOffice integration
-                    // For now, return a placeholder
                     mapOf(
                         "format" to format.uppercase(),
                         "filePath" to filePath,
@@ -348,5 +661,27 @@ class MainActivity : FlutterActivity() {
             document.close()
             fileInputStream.close()
         }
+    }
+    
+    private fun parsePDF(filePath: String): Map<String, Any> {
+        val file = File(filePath)
+        if (!file.exists()) {
+            throw IllegalArgumentException("File not found: $filePath")
+        }
+
+        // Use Android PdfRenderer for page count (fast)
+        val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        val renderer = PdfRenderer(descriptor)
+        val pageCount = renderer.pageCount
+        renderer.close()
+        descriptor.close()
+
+        Log.d(TAG, "Parsed PDF: $pageCount pages")
+
+        return mapOf(
+            "format" to "PDF",
+            "filePath" to filePath,
+            "pageCount" to pageCount
+        )
     }
 }

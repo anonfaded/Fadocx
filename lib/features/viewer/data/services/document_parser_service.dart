@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
-import 'package:excel/excel.dart';
 import 'package:fadocx/core/utils/logger.dart';
 
 /// Service to parse and extract data from various document formats
@@ -12,12 +11,12 @@ class DocumentParserService {
   static Future<Map<String, dynamic>> parseXLS(String filePath) async {
     try {
       log.i('Parsing XLS file: $filePath');
-      
+
       // XLS is a complex binary format - native parser on Android handles this
       // For Dart fallback, we can only extract basic info
       final file = File(filePath);
       final fileBytes = await file.readAsBytes();
-      
+
       // Basic check for OLE2 compound file signature
       if (fileBytes.length >= 8) {
         final signature = String.fromCharCodes(fileBytes.take(8));
@@ -26,11 +25,12 @@ class DocumentParserService {
           return {
             'sheets': [],
             'format': 'XLS',
-            'note': 'Native parser required for full XLS support. Basic structure detected.',
+            'note':
+                'Native parser required for full XLS support. Basic structure detected.',
           };
         }
       }
-      
+
       throw Exception('Invalid or unsupported XLS file format');
     } catch (e, st) {
       log.e('Error parsing XLS', e, st);
@@ -39,80 +39,17 @@ class DocumentParserService {
   }
 
   /// Parse XLSX format (modern Excel)
-  /// Returns sheets with cell data
+  ///
+  /// XLSX is fully handled by the native Android parser via Apache POI
+  /// (platform channel: PlatformChannelService.parseDocument).
+  /// This stub exists only so call-sites compile on all platforms — it always
+  /// throws [UnsupportedError] to force callers onto the native path.
   static Future<Map<String, dynamic>> parseXLSX(String filePath) async {
-    try {
-      log.i('Parsing XLSX file: $filePath');
-      final file = File(filePath);
-      
-      // Ensure file exists before attempting to read
-      if (!await file.exists()) {
-        throw Exception('XLSX file does not exist: $filePath');
-      }
-      
-      final bytes = await file.readAsBytes();
-      if (bytes.isEmpty) {
-        throw Exception('XLSX file is empty');
-      }
-      
-      log.i('Read ${bytes.length} bytes from XLSX file');
-      
-      // Parse XLSX using excel package
-      var excel = Excel.decodeBytes(bytes);
-      
-      final sheets = <Map<String, dynamic>>[];
-      
-      // Parse each sheet
-      for (var table in excel.tables.keys) {
-        final sheetData = excel.tables[table];
-        if (sheetData == null) {
-          log.w('Sheet $table is null, skipping');
-          continue;
-        }
-        
-        final rows = <List<String>>[];
-        
-        // Parse rows
-        for (var row in sheetData.rows) {
-          final cells = <String>[];
-          for (var cell in row) {
-            final cellValue = cell?.value?.toString() ?? '';
-            cells.add(cellValue);
-          }
-          if (cells.isNotEmpty) {
-            rows.add(cells);
-          }
-        }
-        
-        sheets.add({
-          'name': table,
-          'rows': rows,
-          'rowCount': rows.length,
-          'colCount': rows.isNotEmpty ? rows.first.length : 0,
-        });
-        
-        log.i('Parsed XLSX sheet: $table (${rows.length} rows, ${rows.isNotEmpty ? rows.first.length : 0} cols)');
-      }
-      
-      if (sheets.isEmpty) {
-        log.w('XLSX file has no readable sheets');
-        return {
-          'sheets': [],
-          'format': 'XLSX',
-          'sheetCount': 0,
-          'error': 'No readable sheets found in XLSX file',
-        };
-      }
-      
-      return {
-        'sheets': sheets,
-        'format': 'XLSX',
-        'sheetCount': sheets.length,
-      };
-    } catch (e, st) {
-      log.e('Error parsing XLSX: $e', e, st);
-      rethrow;
-    }
+    log.w('Dart-side parseXLSX stub called for $filePath — use native parser');
+    throw UnsupportedError(
+      'XLSX parsing requires the native Android parser. '
+      'Use PlatformChannelService.parseDocument() for XLSX files.',
+    );
   }
 
   /// Parse CSV format
@@ -122,22 +59,22 @@ class DocumentParserService {
       log.i('Parsing CSV file: $filePath');
       final file = File(filePath);
       final content = await file.readAsString();
-      
+
       // Simple CSV parsing - split by newlines and commas
       final lines = content.split('\n');
       final rows = <List<String>>[];
-      
+
       for (var line in lines) {
         if (line.trim().isEmpty) continue;
-        
+
         // Handle basic CSV parsing (quoted fields, escaped commas)
         final cells = <String>[];
         var currentCell = StringBuffer();
         var inQuotes = false;
-        
+
         for (int i = 0; i < line.length; i++) {
           final char = line[i];
-          
+
           if (char == '"') {
             inQuotes = !inQuotes;
           } else if (char == ',' && !inQuotes) {
@@ -147,17 +84,17 @@ class DocumentParserService {
             currentCell.write(char);
           }
         }
-        
+
         // Add last cell
         if (currentCell.isNotEmpty) {
           cells.add(currentCell.toString().trim());
         }
-        
+
         if (cells.isNotEmpty) {
           rows.add(cells);
         }
       }
-      
+
       return {
         'sheets': [
           {
@@ -210,7 +147,7 @@ class DocumentParserService {
       final archive = ZipDecoder().decodeBytes(bytes);
 
       final slides = <Map<String, dynamic>>[];
-      
+
       // ODP contains slides as XML files
       for (var i = 1;; i++) {
         final slideFile = archive.findFile('ppt/slides/slide$i.xml');
@@ -219,7 +156,7 @@ class DocumentParserService {
         try {
           final slideXml = utf8.decode(slideFile.content as List<int>);
           final document = XmlDocument.parse(slideXml);
-          
+
           // Extract text from slide
           final texts = <String>[];
           for (var elem in document.findAllElements('a:t')) {
@@ -251,21 +188,21 @@ class DocumentParserService {
       log.i('Parsing RTF file: $filePath');
       final file = File(filePath);
       final content = await file.readAsString();
-      
+
       // Simple RTF text extraction - remove RTF control codes
       String text = content;
-      
+
       // Remove RTF header
       text = text.replaceFirst(RegExp(r'^\{\\rtf1[^}]*\}'), '');
-      
+
       // Remove control words and symbols
       text = text.replaceAll(RegExp(r'\\[a-z]+\d*\s?'), '');
       text = text.replaceAll(RegExp(r'\\[^a-z]'), '');
       text = text.replaceAll(RegExp(r'\{|\}'), '');
-      
+
       // Clean up extra whitespace
       text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
-      
+
       log.i('RTF extracted: ${text.length} characters');
       return text;
     } catch (e, st) {
@@ -396,7 +333,7 @@ class DocumentParserService {
       log.i('Parsing PPT file: $filePath');
       final file = File(filePath);
       final bytes = await file.readAsBytes();
-      
+
       try {
         // Try new format (PPTX)
         return await _parsePPTX(bytes);
@@ -407,7 +344,8 @@ class DocumentParserService {
         return [
           {
             'slideNumber': 1,
-            'text': text.isEmpty ? 'Could not extract text from PPT file' : text,
+            'text':
+                text.isEmpty ? 'Could not extract text from PPT file' : text,
           }
         ];
       }
@@ -470,11 +408,11 @@ class DocumentParserService {
       log.i('Parsing DOCX file: $filePath');
       final file = File(filePath);
       final bytes = await file.readAsBytes();
-      
+
       // DOCX files are ZIP archives containing XML
       final archive = ZipDecoder().decodeBytes(bytes);
       final documentFile = archive.findFile('word/document.xml');
-      
+
       if (documentFile == null) {
         throw Exception('word/document.xml not found in DOCX file');
       }
@@ -506,9 +444,9 @@ class DocumentParserService {
       log.i('Parsing JSON file: $filePath');
       final file = File(filePath);
       final content = await file.readAsString();
-      
+
       final jsonData = jsonDecode(content);
-      
+
       // Convert JSON to tabular format
       if (jsonData is List) {
         // Array of objects → table
@@ -519,20 +457,20 @@ class DocumentParserService {
             'sheetCount': 0,
           };
         }
-        
+
         // Get all keys from first object
         if (jsonData.first is! Map) {
           throw Exception('JSON array must contain objects');
         }
-        
+
         final firstRow = jsonData.first as Map;
         final columnNames = firstRow.keys.toList();
-        
+
         final rows = <List<String>>[];
-        
+
         // Header row
         rows.add(columnNames.cast<String>());
-        
+
         // Data rows
         for (var item in jsonData) {
           if (item is! Map) continue;
@@ -542,7 +480,7 @@ class DocumentParserService {
           }
           rows.add(row);
         }
-        
+
         return {
           'sheets': [
             {
@@ -560,11 +498,11 @@ class DocumentParserService {
         // Object → single row or nested sheets
         final rows = <List<String>>[];
         rows.add(['Key', 'Value']);
-        
+
         jsonData.forEach((key, value) {
           rows.add([key.toString(), value.toString()]);
         });
-        
+
         return {
           'sheets': [
             {
@@ -593,25 +531,26 @@ class DocumentParserService {
     try {
       log.i('Parsing XML file: $filePath');
       final file = File(filePath);
-      
+
       if (!await file.exists()) {
         throw Exception('XML file does not exist: $filePath');
       }
-      
+
       final content = await file.readAsString();
-      
+
       if (content.trim().isEmpty) {
         throw Exception('XML file is empty');
       }
-      
+
       // Try to parse and validate XML structure
       try {
         final document = XmlDocument.parse(content);
         final rootName = document.rootElement.name.local;
         final elementCount = document.rootElement.descendants.length;
-        
-        log.i('XML parsed successfully. Root: $rootName, Elements: $elementCount');
-        
+
+        log.i(
+            'XML parsed successfully. Root: $rootName, Elements: $elementCount');
+
         return {
           'content': content,
           'textContent': content,
@@ -622,7 +561,7 @@ class DocumentParserService {
         };
       } catch (parseError) {
         log.w('XML parsing failed: $parseError. Returning raw content.');
-        
+
         // Return raw content even if parsing failed
         return {
           'content': content,
@@ -638,4 +577,3 @@ class DocumentParserService {
     }
   }
 }
-

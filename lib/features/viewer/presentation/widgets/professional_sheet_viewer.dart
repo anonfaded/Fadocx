@@ -23,7 +23,7 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
   bool _syncingV = false;
 
   double _zoom = 1.0;
-  static const _minZoom = 0.5;
+  static const _minZoom = 0.1; // Changed: 10% minimum zoom
   static const _maxZoom = 3.0;
   late AnimationController _zoomAnim;
 
@@ -246,20 +246,23 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
 
   // ── Column resize ──────────────────────────────────────
   void _onColResizeStart(int ci, double startX) {
-    _resizingCol = ci;
-    _resizeStartX = startX;
-    _resizeStartW = _colWidths[ci];
+    setState(() {
+      _resizingCol = ci;
+      _resizeStartX = startX;
+      _resizeStartW = _colWidths[ci];
+    });
   }
 
   void _onColResizeUpdate(double globalX) {
     if (_resizingCol == null) return;
     final dx = (globalX - _resizeStartX) / _zoom;
-    final newW = (_resizeStartW + dx).clamp(40.0, 400.0);
+    final newW =
+        (_resizeStartW + dx).clamp(40.0, 800.0); // Max 800 for wide cols
     setState(() => _colWidths[_resizingCol!] = newW);
   }
 
   void _onColResizeEnd() {
-    _resizingCol = null;
+    setState(() => _resizingCol = null);
   }
 
   @override
@@ -286,20 +289,22 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
     final totalW = _totalW;
 
     // Font size scales with zoom
-    final fontSize = (12.0 * _zoom).clamp(8.0, 24.0);
-    final hdrFontSize = (11.0 * _zoom).clamp(7.0, 20.0);
+    final fontSize = (12.0 * _zoom).clamp(4.0, 24.0); // Min 4px at 10% zoom
+    final hdrFontSize = (11.0 * _zoom).clamp(4.0, 20.0);
 
     return Column(
       children: [
         _toolbar(colors),
         Expanded(
           child: GestureDetector(
+            // Global drag handler when resizing
             onHorizontalDragUpdate: _resizingCol != null
                 ? (d) => _onColResizeUpdate(d.globalPosition.dx)
                 : null,
             onHorizontalDragEnd:
                 _resizingCol != null ? (_) => _onColResizeEnd() : null,
             onTap: _clearSelection,
+            behavior: HitTestBehavior.translucent,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -457,6 +462,9 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
               fontSize: fontSize,
               onTap: () => _toggleCol(i),
               onResizeStart: (dx) => _onColResizeStart(i, dx),
+              onResizeUpdate: _resizingCol == i ? _onColResizeUpdate : null,
+              onResizeEnd: _resizingCol == i ? _onColResizeEnd : null,
+              isResizing: _resizingCol == i,
             );
           }),
         ),
@@ -561,8 +569,8 @@ class _RowHdrCell extends StatelessWidget {
       );
 }
 
-// ── Column header cell with resize handle ────────────────
-class _ColHdrCell extends StatelessWidget {
+// ── Column header cell with RESIZABLE and VISIBLE handle ────────────────
+class _ColHdrCell extends StatefulWidget {
   final String label;
   final double w;
   final double h;
@@ -571,6 +579,9 @@ class _ColHdrCell extends StatelessWidget {
   final double fontSize;
   final VoidCallback onTap;
   final void Function(double globalX) onResizeStart;
+  final void Function(double globalX)? onResizeUpdate;
+  final VoidCallback? onResizeEnd;
+  final bool isResizing;
 
   const _ColHdrCell({
     required this.label,
@@ -581,47 +592,86 @@ class _ColHdrCell extends StatelessWidget {
     required this.fontSize,
     required this.onTap,
     required this.onResizeStart,
+    required this.onResizeUpdate,
+    required this.onResizeEnd,
+    required this.isResizing,
   });
 
   @override
-  Widget build(_) => GestureDetector(
-        onTap: onTap,
-        onHorizontalDragStart: (d) => onResizeStart(d.globalPosition.dx),
-        child: Stack(
-          children: [
-            Container(
-              width: w,
-              height: h,
+  State<_ColHdrCell> createState() => _ColHdrCellState();
+}
+
+class _ColHdrCellState extends State<_ColHdrCell> {
+  bool _hovering = false;
+
+  @override
+  Widget build(_) => Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Main cell - tap to select column
+          GestureDetector(
+            onTap: widget.onTap,
+            child: Container(
+              width: widget.w,
+              height: widget.h,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: sel ? colors.selRowBg : colors.header,
+                color:
+                    widget.sel ? widget.colors.selRowBg : widget.colors.header,
                 border: Border(
-                  right: BorderSide(color: colors.border, width: 0.5),
-                  bottom: BorderSide(color: colors.border, width: 0.5),
+                  right: BorderSide(color: widget.colors.border, width: 0.5),
+                  bottom: BorderSide(color: widget.colors.border, width: 0.5),
                 ),
               ),
-              child: Text(label,
+              child: Text(widget.label,
                   style: TextStyle(
-                    color: sel ? colors.selCellFg : colors.headerText,
+                    color: widget.sel
+                        ? widget.colors.selCellFg
+                        : widget.colors.headerText,
                     fontWeight: FontWeight.w700,
-                    fontSize: fontSize,
+                    fontSize: widget.fontSize,
                   )),
             ),
-            // Resize handle (right edge)
-            Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.resizeColumn,
+          ),
+          // PROMINENT resize handle on right edge - vertical line with hover effect
+          Positioned(
+            right: -8, // Extend beyond the cell for easier grabbing
+            top: 0,
+            bottom: 0,
+            child: MouseRegion(
+              onEnter: (_) => setState(() => _hovering = true),
+              onExit: (_) => setState(() => _hovering = false),
+              cursor: SystemMouseCursors.resizeColumn,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onHorizontalDragStart: (d) =>
+                    widget.onResizeStart(d.globalPosition.dx),
+                onHorizontalDragUpdate: widget.onResizeUpdate != null
+                    ? (d) => widget.onResizeUpdate!(d.globalPosition.dx)
+                    : null,
+                onHorizontalDragEnd: widget.onResizeEnd != null
+                    ? (_) => widget.onResizeEnd!()
+                    : null,
                 child: Container(
-                  width: 6,
-                  color: Colors.transparent,
+                  width: 16, // Wider touch area (16px)
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    width: 4,
+                    height: widget.h * 0.6,
+                    decoration: BoxDecoration(
+                      color: widget.isResizing
+                          ? widget.colors.selCellFg
+                          : (_hovering
+                              ? widget.colors.selCellFg.withValues(alpha: 0.8)
+                              : widget.colors.border.withValues(alpha: 0.5)),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
 }
 

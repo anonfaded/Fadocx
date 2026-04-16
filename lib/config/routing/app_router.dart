@@ -12,12 +12,24 @@ class RouteNames {
   static const String settings = '/settings';
 }
 
+/// Global router instance - singleton to prevent navigation reset on rebuild
+GoRouter? _routerInstance;
+
+/// Current route location preserved across rebuilds
+String _currentLocation = RouteNames.home;
+
 /// GoRouter configuration provider
 GoRouter createGoRouter() {
+  // Return existing instance if available to prevent navigation reset
+  if (_routerInstance != null) {
+    log.d('Reusing existing GoRouter instance at: $_currentLocation');
+    return _routerInstance!;
+  }
+
   log.i('Creating GoRouter...');
 
-  return GoRouter(
-    initialLocation: RouteNames.home,
+  _routerInstance = GoRouter(
+    initialLocation: _currentLocation,
     debugLogDiagnostics: false, // Set to true for debugging
     errorBuilder: (context, state) {
       log.e('Route error: ${state.error}');
@@ -58,7 +70,7 @@ GoRouter createGoRouter() {
         builder: (context, state) {
           final filePath = state.uri.queryParameters['path'];
           final fileName = state.uri.queryParameters['name'];
-          
+
           if (filePath == null || filePath.isEmpty) {
             log.w('Document path is empty, redirecting to home');
             return Scaffold(
@@ -80,10 +92,10 @@ GoRouter createGoRouter() {
               ),
             );
           }
-          
+
           log.d('Navigating to viewer: $filePath');
           final displayName = fileName ?? (filePath.split('/').last);
-          
+
           return ViewerScreen(
             filePath: filePath,
             fileName: displayName,
@@ -105,10 +117,10 @@ GoRouter createGoRouter() {
     // Handle redirects including file intents from other apps
     redirect: (context, state) {
       final uri = state.uri.toString();
-      
+
       // Log route for debugging
       log.d('Route: $uri');
-      
+
       // If URI is a content:// or file:// scheme (file intent from other app),
       // redirect to viewer with the URI as the file path
       if (uri.startsWith('content://') || uri.startsWith('file://')) {
@@ -118,11 +130,19 @@ GoRouter createGoRouter() {
         final encodedPath = Uri.encodeComponent(uri);
         return '/viewer?path=$encodedPath';
       }
-      
+
       return null; // No redirects for standard routes
     },
 
     // Refresh listenable for reactive navigation (Phase 2+)
     refreshListenable: null,
   );
+
+  // Update current location when route changes
+  _routerInstance!.routerDelegate.addListener(() {
+    // ignore: unnecessary_non_null_assertion
+    _currentLocation = _routerInstance!.state!.uri.toString();
+  });
+
+  return _routerInstance!;
 }

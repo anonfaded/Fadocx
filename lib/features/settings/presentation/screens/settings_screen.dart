@@ -24,7 +24,18 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(AppLocalizations.of(context)!.settingsTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            try {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              } else {
+                context.go('/');
+              }
+            } catch (e) {
+              log.e('Error navigating back', e);
+              context.go('/');
+            }
+          },
         ),
       ),
       body: settings.when(
@@ -108,15 +119,16 @@ class SettingsScreen extends ConsumerWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
 
   /// Build theme selector
-  Widget _buildThemeSelector(BuildContext context, WidgetRef ref, ThemeMode currentTheme) {
+  Widget _buildThemeSelector(
+      BuildContext context, WidgetRef ref, ThemeMode currentTheme) {
     return Column(
       children: [
         Padding(
@@ -131,8 +143,8 @@ class SettingsScreen extends ConsumerWidget {
               Text(
                 currentTheme.displayName,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
               ),
             ],
           ),
@@ -177,7 +189,8 @@ class SettingsScreen extends ConsumerWidget {
               log.e('Error changing theme', e, st);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                  SnackBar(
+                      content: Text('Error: $e'), backgroundColor: Colors.red),
                 );
               }
             }
@@ -203,7 +216,7 @@ class SettingsScreen extends ConsumerWidget {
     AppSettings appSettings,
   ) {
     final currentLocale = ref.watch(localeProvider);
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -229,13 +242,13 @@ class SettingsScreen extends ConsumerWidget {
               if (value != null && value != currentLocale.languageCode) {
                 try {
                   log.i('Changing language to: $value');
-                  
+
                   // Update locale in real-time
                   ref.read(localeProvider.notifier).setLocale(value);
-                  
+
                   // Update settings (non-blocking)
                   await ref.read(settingsMutatorProvider).updateLanguage(value);
-                  
+
                   // Show confirmation
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -253,7 +266,9 @@ class SettingsScreen extends ConsumerWidget {
                   log.e('Error changing language', e, st);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                      SnackBar(
+                          content: Text('Error: $e'),
+                          backgroundColor: Colors.red),
                     );
                   }
                 }
@@ -307,8 +322,8 @@ class SettingsScreen extends ConsumerWidget {
           Text(
             'Fadocx v1.0.0 (Build 1)',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
         ],
       ),

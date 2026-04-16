@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/config/theme/app_theme.dart';
@@ -48,16 +49,20 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   StreamSubscription<String>? _fileIntentSub;
+  late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
+    // Create router ONCE - prevents navigation reset on theme change
+    _router = createGoRouter();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fileIntentSub = FileIntentService.fileIntentStream.listen((filePath) {
         if (!mounted) return;
-        final router = createGoRouter();
         final encodedPath = Uri.encodeComponent(filePath);
-        router
+        // Use the same router instance
+        _router
             .push('/viewer?path=$encodedPath&name=${filePath.split('/').last}');
       }, onError: (e) => log.e('File intent error: $e'));
     });
@@ -88,7 +93,8 @@ class _MyAppState extends ConsumerState<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: createGoRouter(),
+      // Use the pre-created router - never changes on rebuild
+      routerConfig: _router,
     );
   }
 }
