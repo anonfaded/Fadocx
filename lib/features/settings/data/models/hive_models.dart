@@ -54,9 +54,10 @@ class HiveRecentFile {
     this.pagePosition = 0,
     this.syncedAt,
     this.syncStatus = 'pending',
-    this.isDeleted = false,
+    bool? isDeleted,
     this.deletedAt,
-  }) : id = id ?? const Uuid().v4();
+  }) : id = id ?? const Uuid().v4(),
+       isDeleted = isDeleted ?? false;
 
   /// Create copy with modifications (immutability pattern)
   HiveRecentFile copyWith({

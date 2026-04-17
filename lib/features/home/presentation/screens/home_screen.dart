@@ -421,29 +421,26 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
       return;
     }
 
-    // Trigger thumbnail generation once via side effect
-    log.d(
-        '🖼️  [Thumbnail Widget] Scheduling thumbnail generation via post-frame callback');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      log.d(
-          '🖼️  [Thumbnail Widget] Post-frame callback executing, triggering generation');
-      ref.read(generateAndCacheThumbnailProvider(
-        (
-          fileId: widget.file.id,
-          filePath: widget.file.filePath,
-          fileName: widget.file.fileName,
-          fileType: widget.file.fileType,
-        ),
-      ));
-    });
+    // Watching the generation provider in build() will auto-trigger generation
+    log.d('🖼️  [Thumbnail Widget] Generation will be triggered via provider watch');
   }
 
   @override
   Widget build(BuildContext context) {
     final isPresentation = _isPresentationFormat(widget.file.fileType);
 
-    // Only watch the cache provider, don't trigger generation here
+    // Watch BOTH: the cache and the generation provider
+    // This way when generation completes and saves, we automatically refresh
     final thumbnail = ref.watch(thumbnailProvider(widget.file.id));
+    // Watch generation provider to auto-refresh when thumbnail generation completes
+    ref.watch(generateAndCacheThumbnailProvider(
+      (
+        fileId: widget.file.id,
+        filePath: widget.file.filePath,
+        fileName: widget.file.fileName,
+        fileType: widget.file.fileType,
+      ),
+    ));
 
     return thumbnail.when(
       data: (bytes) {
