@@ -41,18 +41,31 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   int _totalPages = 0;
   late AnimationController _menuController;
   late AnimationController _sidebarController;
+  late AnimationController _topBarController;
+  late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
   Offset? _pointerDownPosition;
   bool _pointerMoved = false;
 
   void _toggleControls() {
+    final willBeVisible = !_controlsVisible;
     setState(() {
-      _controlsVisible = !_controlsVisible;
-      if (!_controlsVisible) {
+      _controlsVisible = willBeVisible;
+      if (!willBeVisible) {
+        _sidebarOpen = false;
         _bottomMenuExpanded = false;
-        _menuController.reverse();
       }
     });
+    // Animate top/bottom together
+    if (willBeVisible) {
+      _topBarController.forward();
+      _bottomPanelController.forward();
+    } else {
+      _topBarController.reverse();
+      _bottomPanelController.reverse();
+      _sidebarController.reverse();
+      _menuController.reverse();
+    }
   }
 
   void _handleViewerPointerDown(PointerDownEvent event) {
@@ -197,6 +210,22 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       duration: const Duration(milliseconds: 250),
       vsync: this,
     );
+    _topBarController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+    _bottomPanelController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+
+    // Set initial values NOW in constructor (before first build)
+    // This ensures controls visible on first frame
+    _topBarController.value = 1.0;
+    _bottomPanelController.value = 1.0;
+    _sidebarController.value = 0.0;
+
+    // Load document if not already loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final docState = ref.read(documentViewerProvider);
       if (!docState.isLoading &&
@@ -213,6 +242,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   void dispose() {
     _menuController.dispose();
     _sidebarController.dispose();
+    _topBarController.dispose();
+    _bottomPanelController.dispose();
     super.dispose();
   }
 
@@ -259,7 +290,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     parent: _sidebarController,
                     curve: Curves.easeOutCubic,
                   )),
-                  child: _controlsVisible
+                  child: _sidebarOpen && _controlsVisible
                       ? _buildSidebarDrawer(context, isDark)
                       : const SizedBox.shrink(),
                 ),
@@ -267,21 +298,49 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             },
           ),
 
-          if (_controlsVisible)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: _buildFloatingTopBar(context, isDark),
-            ),
+          // Always show top/bottom panels - let controller handle visibility
+          AnimatedBuilder(
+            animation: _topBarController,
+            builder: (context, child) {
+              return Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, -1.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _topBarController,
+                    curve: Curves.easeOutCubic,
+                  )),
+                  child: _buildFloatingTopBar(context, isDark),
+                ),
+              );
+            },
+          ),
 
-          if (_controlsVisible)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _buildFloatingBottomPanel(context, isDark),
-            ),
+          // Bottom panel with slide animation
+          AnimatedBuilder(
+            animation: _bottomPanelController,
+            builder: (context, child) {
+              return Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 1.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _bottomPanelController,
+                    curve: Curves.easeOutCubic,
+                  )),
+                  child: _buildFloatingBottomPanel(context, isDark),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -355,7 +414,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             bottomRight: Radius.circular(16),
           ),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(
               decoration: BoxDecoration(
                 color: isDark
@@ -456,7 +515,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             topRight: Radius.circular(16),
           ),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(
               decoration: BoxDecoration(
                 color: isDark
@@ -503,7 +562,7 @@ mainAxisSize: MainAxisSize.min,
                                 children: [
                                   AnimatedHamburgerIcon(
                                     onPressed: _toggleSidebar,
-                                    isOpen: _showSidebarDrawer,
+                                    isOpen: _sidebarOpen,
                                     color: Theme.of(context).colorScheme.primary,
                                   ),
                                   const SizedBox(width: 4),
@@ -774,7 +833,7 @@ mainAxisSize: MainAxisSize.min,
             bottomRight: Radius.circular(16),
           ),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Material(
               color: Colors.transparent,
               child: Container(
