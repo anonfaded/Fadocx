@@ -32,22 +32,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildAppBarContent(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
+            // Icon on left with natural width
             Image.asset(
               'assets/fadocx_header_landscape_png.png',
               height: 32,
-              width: 80,
               fit: BoxFit.contain,
             ),
-            const SizedBox(width: 8),
-            Text(
-              'Fadocx',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            // Text right next to icon
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: 'Fadocx'.split('').map((letter) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    letter,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
+                        ),
                   ),
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -149,7 +158,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         // Section header
         Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.only(bottom: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -173,7 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final file = entry.value;
             return Padding(
               padding: EdgeInsets.only(
-                bottom: index < recentList.length - 1 ? 12 : 0,
+                bottom: index < recentList.length - 1 ? 8 : 0,
               ),
               child: _buildRecentFileItem(context, file),
             );
@@ -203,68 +212,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             color: Theme.of(context).colorScheme.surface,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             child: Row(
               children: [
                 // Thumbnail
-                Consumer(
-                  builder: (context, ref, _) {
-                    final thumbnail = ref.watch(thumbnailProvider(file.id));
-                    return thumbnail.when(
-                      data: (bytes) {
-                        if (bytes != null) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.memory(
-                              bytes,
-                              width: 40,
-                              height: 56,
-                              fit: BoxFit.cover,
-                            ),
-                          );
-                        }
-                        // Generate thumbnail
-                        ref.watch(generateThumbnailProvider({
-                          'fileId': file.id,
-                          'filePath': file.filePath,
-                          'fileName': file.fileName,
-                          'fileType': file.fileType,
-                        }));
-                        return _buildThumbPlaceholder();
-                      },
-                      loading: () => _buildThumbPlaceholder(),
-                      error: (_, __) => _buildThumbPlaceholder(),
-                    );
-                  },
-                ),
-                const SizedBox(width: 12),
+                _RecentFileThumbnail(file: file),
+                const SizedBox(width: 8),
                 // File info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         file.fileName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelMedium,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         '${file.fileType.toUpperCase()} • ${file.formattedSize}',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurfaceVariant,
+                              fontSize: 11,
                             ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                IconButton(
+                  icon: Icon(Icons.more_vert,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  onPressed: () => _showFileActionBottomSheet(context, file),
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 40, minHeight: 40),
                 ),
               ],
             ),
@@ -274,16 +262,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildThumbPlaceholder() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        width: 40,
-        height: 56,
-        color: Theme.of(context)
-            .colorScheme
-            .primaryContainer
-            .withValues(alpha: 0.3),
+  void _softDeleteRecentFile(RecentFile file) {
+    ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${file.fileName} moved to trash'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            // Delete action
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: ListTile(
+                leading: const Icon(Icons.delete_outline,
+                    color: Colors.red, size: 20),
+                title:
+                    const Text('Delete', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _softDeleteRecentFile(file);
+                },
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }
@@ -317,5 +350,112 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
     );
+  }
+}
+
+/// Helper widget to display and trigger thumbnail generation for recent files
+class _RecentFileThumbnail extends ConsumerStatefulWidget {
+  final RecentFile file;
+
+  const _RecentFileThumbnail({required this.file});
+
+  @override
+  ConsumerState<_RecentFileThumbnail> createState() =>
+      _RecentFileThumbnailState();
+}
+
+class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
+  @override
+  void initState() {
+    super.initState();
+    // Skip thumbnail generation for presentation formats (not yet supported)
+    final type = widget.file.fileType.toLowerCase();
+    if (type == 'ppt' || type == 'pptx' || type == 'odp') {
+      return;
+    }
+    // Trigger thumbnail generation once via side effect
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(generateAndCacheThumbnailProvider(
+        (
+          fileId: widget.file.id,
+          filePath: widget.file.filePath,
+          fileName: widget.file.fileName,
+          fileType: widget.file.fileType,
+        ),
+      ));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPresentation = _isPresentationFormat(widget.file.fileType);
+
+    // Only watch the cache provider, don't trigger generation here
+    final thumbnail = ref.watch(thumbnailProvider(widget.file.id));
+
+    return thumbnail.when(
+      data: (bytes) {
+        if (bytes != null && !isPresentation) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.memory(
+              bytes,
+              width: 40,
+              height: 56,
+              fit: BoxFit.cover,
+            ),
+          );
+        }
+        // No thumbnail available or presentation format
+        return _buildThumbPlaceholder(isPresentation);
+      },
+      loading: () => _buildThumbPlaceholder(isPresentation),
+      error: (_, __) => _buildThumbPlaceholder(isPresentation),
+    );
+  }
+
+  Widget _buildThumbPlaceholder(bool isPresentation) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            width: 40,
+            height: 56,
+            color: Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3),
+          ),
+        ),
+        if (isPresentation)
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: Colors.black.withValues(alpha: 0.4),
+              ),
+              child: Tooltip(
+                message: 'Coming Soon',
+                child: Center(
+                  child: Text(
+                    '○',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.surface,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  bool _isPresentationFormat(String fileType) {
+    final type = fileType.toLowerCase();
+    return type == 'ppt' || type == 'pptx' || type == 'odp';
   }
 }

@@ -4,6 +4,7 @@ import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/features/home/presentation/screens/home_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/documents_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/browse_screen.dart';
+import 'package:fadocx/features/home/presentation/screens/trash_screen.dart';
 import 'package:fadocx/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fadocx/features/viewer/presentation/screens/viewer_screen.dart';
 import 'package:fadocx/features/scanner/presentation/screens/scanner_screen.dart';
@@ -13,6 +14,7 @@ class RouteNames {
   static const String home = '/';
   static const String documents = '/documents';
   static const String browse = '/browse';
+  static const String trash = '/trash';
   static const String viewer = '/viewer';
   static const String settings = '/settings';
   static const String scanner = '/scanner';
@@ -86,6 +88,16 @@ GoRouter createGoRouter() {
         builder: (context, state) {
           log.d('Navigating to browse');
           return const BrowseScreen();
+        },
+      ),
+
+      // Trash screen
+      GoRoute(
+        path: RouteNames.trash,
+        name: 'trash',
+        builder: (context, state) {
+          log.d('Navigating to trash');
+          return const TrashScreen();
         },
       ),
 

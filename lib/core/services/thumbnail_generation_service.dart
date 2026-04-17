@@ -50,7 +50,7 @@ class ThumbnailGenerationService {
 
       // Convert to PNG
       final pngBytes = img.encodePng(image);
-      log.i('Thumbnail generated: ${pngBytes.length} bytes');
+      log.d('Thumbnail generated: ${pngBytes.length} bytes for $fileName');
 
       return pngBytes;
     } catch (e) {

@@ -1,0 +1,472 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fadocx/config/theme/app_theme.dart';
+import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
+import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
+
+/// Trash screen - displays deleted/soft-deleted files
+class TrashScreen extends ConsumerStatefulWidget {
+  const TrashScreen({super.key});
+
+  @override
+  ConsumerState<TrashScreen> createState() => _TrashScreenState();
+}
+
+class _TrashScreenState extends ConsumerState<TrashScreen> {
+  final Set<String> _selectedFiles = {};
+  bool _isSelectionMode = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text('Trash'),
+        centerTitle: false,
+      ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    final trashFiles = ref.watch(trashFilesProvider);
+
+    return trashFiles.when(
+      data: (files) => files.isEmpty
+          ? _buildEmptyState(context)
+          : _buildTrashList(context, files),
+      error: (error, st) => _buildErrorState(context, error),
+      loading: () => _buildSkeletonLoader(),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+      children: [
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.delete_outline,
+                size: 64,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Trash is empty',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Deleted files will appear here',
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, Object error) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      children: [
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error loading trash: $error'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTrashList(BuildContext context, List<RecentFile> files) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        // Header with selection toggle
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${files.length} ${_isSelectionMode ? 'selected' : 'files'}',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            if (_isSelectionMode)
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedFiles.clear();
+                        _isSelectionMode = false;
+                      });
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton.tonalIcon(
+                    icon: const Icon(Icons.delete_forever),
+                    label: const Text('Delete'),
+                    onPressed: _selectedFiles.isEmpty
+                        ? null
+                        : () => _showPermanentDeleteConfirmation(context),
+                  ),
+                ],
+              )
+            else
+              FilledButton.tonal(
+                onPressed: () {
+                  setState(() {
+                    _isSelectionMode = true;
+                  });
+                },
+                child: const Text('Select'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Trash files list
+        Column(
+          children: files.asMap().entries.map((entry) {
+            final index = entry.key;
+            final file = entry.value;
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: index < files.length - 1 ? 8 : 0,
+              ),
+              child: _buildTrashItem(context, file),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTrashItem(BuildContext context, RecentFile file) {
+    final isSelected = _selectedFiles.contains(file.id);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _isSelectionMode
+            ? () {
+                setState(() {
+                  if (isSelected) {
+                    _selectedFiles.remove(file.id);
+                  } else {
+                    _selectedFiles.add(file.id);
+                  }
+                  if (_selectedFiles.isEmpty) {
+                    _isSelectionMode = false;
+                  }
+                });
+              }
+            : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.2),
+              width: isSelected ? 2 : 1,
+            ),
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                : Theme.of(context).colorScheme.surface,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                if (_isSelectionMode)
+                  Icon(
+                    isSelected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                else
+                  const SizedBox(width: 0),
+                if (_isSelectionMode) const SizedBox(width: 8),
+                // File icon
+                _buildFileIcon(file.fileType),
+                const SizedBox(width: 8),
+                // File info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        file.fileName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${file.fileType.toUpperCase()} • ${file.formattedSize}',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Actions - only visible when not in selection mode
+                if (!_isSelectionMode)
+                  IconButton(
+                    icon: Icon(Icons.more_vert,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    onPressed: () => _showFileActionBottomSheet(context, file),
+                    padding: EdgeInsets.zero,
+                    constraints:
+                        const BoxConstraints(minWidth: 40, minHeight: 40),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFileIcon(String fileType) {
+    IconData iconData;
+    Color color;
+
+    switch (fileType.toLowerCase()) {
+      case 'pdf':
+        iconData = Icons.picture_as_pdf;
+        color = AppColors.categoryPdf;
+        break;
+      case 'docx':
+      case 'doc':
+      case 'odt':
+      case 'rtf':
+      case 'txt':
+        iconData = Icons.description;
+        color = AppColors.categoryDoc;
+        break;
+      case 'xlsx':
+      case 'xls':
+      case 'ods':
+      case 'csv':
+        iconData = Icons.table_chart;
+        color = AppColors.categorySheet;
+        break;
+      case 'ppt':
+      case 'pptx':
+      case 'odp':
+        iconData = Icons.slideshow;
+        color = AppColors.categorySlide;
+        break;
+      default:
+        iconData = Icons.insert_drive_file;
+        color = AppColors.categoryDefault;
+    }
+
+    return Icon(iconData, color: color, size: 24);
+  }
+
+  Widget _buildSkeletonLoader() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: List.generate(
+        6,
+        (index) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Container(
+            height: 70,
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _restoreFile(String fileId) async {
+    final mutator = ref.read(recentFilesMutatorProvider);
+    await mutator.restoreFromTrash(fileId);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('File restored successfully')),
+      );
+    }
+  }
+
+  void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            // Restore action
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ListTile(
+                leading: const Icon(Icons.restore, size: 20),
+                title: const Text('Restore'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _restoreFile(file.id);
+                },
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
+            ),
+            // Delete permanently action
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ListTile(
+                leading: const Icon(Icons.delete_forever,
+                    color: Colors.red, size: 20),
+                title: const Text('Delete Permanently',
+                    style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showPermanentDeleteConfirmation(context, file);
+                },
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPermanentDeleteConfirmation(BuildContext context,
+      [RecentFile? singleFile]) {
+    final filesCount = singleFile != null ? 1 : _selectedFiles.length;
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Permanently?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'You are about to permanently delete $filesCount file${filesCount > 1 ? 's' : ''}. This action cannot be undone.',
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Type DELETE in capital letters to confirm:',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'DELETE',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              controller.dispose();
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+          FilledButton.tonalIcon(
+            icon: const Icon(Icons.delete_forever),
+            label: const Text('Delete Permanently'),
+            onPressed: controller.text == 'DELETE'
+                ? () async {
+                    Navigator.pop(context);
+                    await _permanentlyDeleteFiles(singleFile);
+                  }
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _permanentlyDeleteFiles(RecentFile? singleFile) async {
+    final mutator = ref.read(recentFilesMutatorProvider);
+    final fileIds =
+        singleFile != null ? [singleFile.id] : _selectedFiles.toList();
+
+    for (final fileId in fileIds) {
+      await mutator.permanentlyDeleteFile(fileId);
+    }
+
+    if (mounted) {
+      setState(() {
+        _selectedFiles.clear();
+        _isSelectionMode = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${fileIds.length} file${fileIds.length > 1 ? 's' : ''} permanently deleted',
+          ),
+        ),
+      );
+    }
+  }
+}

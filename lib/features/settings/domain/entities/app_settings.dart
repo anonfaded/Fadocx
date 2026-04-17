@@ -13,6 +13,8 @@ class RecentFile {
   final int pagePosition;
   final DateTime? syncedAt;
   final String syncStatus;
+  final bool isDeleted;
+  final DateTime? deletedAt;
 
   RecentFile({
     required this.id,
@@ -25,6 +27,8 @@ class RecentFile {
     required this.pagePosition,
     this.syncedAt,
     required this.syncStatus,
+    this.isDeleted = false,
+    this.deletedAt,
   });
 
   /// Format file size to human-readable string
@@ -63,7 +67,8 @@ class RecentFile {
   }
 
   @override
-  String toString() => 'RecentFile(id: $id, fileName: $fileName, fileType: $fileType)';
+  String toString() =>
+      'RecentFile(id: $id, fileName: $fileName, fileType: $fileType)';
 }
 
 /// Business logic entity for app settings
@@ -102,6 +107,6 @@ class AppSettings {
   }
 
   @override
-  String toString() => 'AppSettings(id: $id, theme: $theme, language: $language)';
+  String toString() =>
+      'AppSettings(id: $id, theme: $theme, language: $language)';
 }
-
