@@ -21,11 +21,11 @@ class SettingsScreen extends ConsumerWidget {
       appBarContent: SafeArea(
         bottom: false,
         child: Center(
-          child: Image.asset(
-            'assets/app_icon.png',
-            height: 48,
-            width: 48,
-            fit: BoxFit.contain,
+          child: Text(
+            AppLocalizations.of(context)!.settingsTitle,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ),
       ),
@@ -36,7 +36,7 @@ class SettingsScreen extends ConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           }
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
+            padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
             children: [
               _buildSectionHeader(context, 'Appearance'),
               _buildSettingsGroup(context, [
