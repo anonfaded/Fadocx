@@ -148,14 +148,6 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _divider(context),
                 _SettingsRow(
-                  icon: Icons.email_outlined,
-                  title: 'Contact',
-                  value: 'contact@fadseclab.com',
-                  onTap: () =>
-                      _copyToClipboard(context, 'contact@fadseclab.com'),
-                ),
-                _divider(context),
-                _SettingsRow(
                   icon: Icons.shield_outlined,
                   title: 'Privacy Policy',
                   onTap: () => _showPrivacyPolicy(context),
