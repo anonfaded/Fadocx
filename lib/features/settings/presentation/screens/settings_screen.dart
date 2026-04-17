@@ -95,31 +95,7 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Documents Size',
                   value: '~12.4 MB',
                   showChevron: false,
-                  onTap: () {},
-                ),
-                _divider(context),
-                _SettingsRow(
-                  icon: Icons.picture_as_pdf,
-                  title: 'PDFs',
-                  value: '3 files',
-                  showChevron: false,
-                  onTap: null,
-                ),
-                _divider(context),
-                _SettingsRow(
-                  icon: Icons.table_chart,
-                  title: 'Spreadsheets',
-                  value: '2 files',
-                  showChevron: false,
-                  onTap: null,
-                ),
-                _divider(context),
-                _SettingsRow(
-                  icon: Icons.settings_backup_restore,
-                  title: 'Custom Storage',
-                  value: 'Coming Soon',
-                  isComingSoon: true,
-                  onTap: null,
+                  onTap: () => _showStorageInfo(context),
                 ),
               ]),
               const SizedBox(height: 24),
@@ -283,6 +259,95 @@ class SettingsScreen extends ConsumerWidget {
           content: Text('Copied: $text'), duration: const Duration(seconds: 2)),
     );
   }
+
+  void _showStorageInfo(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: _bottomSheetDecoration(context),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _handle(context),
+              const SizedBox(height: 8),
+              Text('Storage',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              _infoRow(context, Icons.folder, 'Documents', '~12.4 MB'),
+              _infoRow(context, Icons.picture_as_pdf, 'PDFs', '3 files'),
+              _infoRow(context, Icons.table_chart, 'Spreadsheets', '2 files'),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.lock_outline,
+                        color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Documents are stored in a private folder, hidden from other apps and file managers. Only Fadocx can access them.',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline,
+                        size: 20, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Delete documents from Danger Zone in Settings',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(BuildContext context, IconData i, String t, String v) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(children: [
+          Icon(i, size: 20, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 16),
+          Expanded(child: Text(t)),
+          Text(v,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w600)),
+        ]),
+      );
 
   void _showThemePicker(
       BuildContext context, WidgetRef ref, ThemeMode current) {
