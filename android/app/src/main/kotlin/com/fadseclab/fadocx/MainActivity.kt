@@ -51,15 +51,20 @@ class MainActivity : FlutterActivity() {
                             "parseDocument" -> {
                                 val filePath = call.argument<String>("filePath")
                                 val format = call.argument<String>("format")
-                                // NativeDocumentParser handles Apache POI to keep MainActivity small
-                                val parser = NativeDocumentParser(TAG)
-                                parser.handleParseDocument(filePath, format, result, this)
+                                
+                                // LAZY LOAD via reflection to keep classloader create time low
+                                val parserClass = Class.forName("com.fadseclab.fadocx.NativeDocumentParser")
+                                val parserInstance = parserClass.getConstructor(String::class.java).newInstance(TAG)
+                                val method = parserClass.getDeclaredMethod("handleParseDocument", 
+                                    String::class.java, String::class.java, MethodChannel.Result::class.java, android.app.Activity::class.java)
+                                method.invoke(parserInstance, filePath, format, result, this@MainActivity)
                             }
                             "isAvailable" -> runOnUiThread { result.success(true) }
                             else -> runOnUiThread { result.notImplemented() }
                         }
                     } catch (e: Exception) {
-                        runOnUiThread { result.error("THREAD_ERROR", e.message, null) }
+                        Log.e(TAG, "Reflection load failed", e)
+                        runOnUiThread { result.error("REFLECTION_ERROR", e.message, null) }
                     }
                 }.start()
             }
@@ -81,8 +86,28 @@ class MainActivity : FlutterActivity() {
                     "openPdf" -> openPdf(call.argument("filePath"), result)
                     "closePdf" -> closePdf(call.argument("filePath"), result)
                     "getPageCount" -> getPdfPageCount(call.argument("filePath"), result)
-                    "extractPageText" -> Thread { PdfTextExtractor(TAG).extractPdfPageText(call.argument("filePath"), call.argument("pageNumber") ?: 1, result, this) }.start()
-                    "extractTextWithPositions" -> Thread { PdfTextExtractor(TAG).extractTextWithPositions(call.argument("filePath"), call.argument("pageNumber") ?: 1, result, this) }.start()
+                    "extractPageText" -> Thread { 
+                        try {
+                            val extractorClass = Class.forName("com.fadseclab.fadocx.PdfTextExtractor")
+                            val extractorInstance = extractorClass.getConstructor(String::class.java).newInstance(TAG)
+                            val method = extractorClass.getDeclaredMethod("extractPdfPageText", 
+                                String::class.java, Int::class.java, MethodChannel.Result::class.java, android.app.Activity::class.java)
+                            method.invoke(extractorInstance, call.argument<String>("filePath"), call.argument<Int>("pageNumber") ?: 1, result, this@MainActivity)
+                        } catch (e: Exception) {
+                            runOnUiThread { result.error("REFLECTION_ERROR", e.message, null) }
+                        }
+                    }.start()
+                    "extractTextWithPositions" -> Thread { 
+                        try {
+                            val extractorClass = Class.forName("com.fadseclab.fadocx.PdfTextExtractor")
+                            val extractorInstance = extractorClass.getConstructor(String::class.java).newInstance(TAG)
+                            val method = extractorClass.getDeclaredMethod("extractTextWithPositions", 
+                                String::class.java, Int::class.java, MethodChannel.Result::class.java, android.app.Activity::class.java)
+                            method.invoke(extractorInstance, call.argument<String>("filePath"), call.argument<Int>("pageNumber") ?: 1, result, this@MainActivity)
+                        } catch (e: Exception) {
+                            runOnUiThread { result.error("REFLECTION_ERROR", e.message, null) }
+                        }
+                    }.start()
                     "getPageSize" -> getPageSize(call.argument("filePath"), call.argument("pageNumber") ?: 0, result)
                     else -> result.notImplemented()
                 }
