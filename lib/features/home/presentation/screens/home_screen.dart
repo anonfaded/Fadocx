@@ -19,133 +19,84 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool _readyToLoad = false;
+  bool _dataLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    // Defer loading until after first frame to let splash screen disappear ASAP
+    // OPTIMIZATION: Defer recent files loading to after first frame to avoid blocking UI
+    // This allows the skeleton loader to show immediately while data loads in background
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() => _readyToLoad = true);
-      }
+      setState(() => _dataLoaded = true);
+      // Trigger provider watch here to load data in background
+      ref.read(recentFilesProvider);
     });
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return const PreferredSize(
+        preferredSize: Size.fromHeight(56),
+        child: _AppBarContent(),
+      );
+  }
+
+  Widget _buildErrorState(BuildContext context, Object error) {
+    log.e('Error loading recent files', error);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text('Error: $error'),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => ref.invalidate(recentFilesProvider),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    log.d('Building HomeScreen (ready=$_readyToLoad)');
-
-    // Don't even watch the provider until the first frame is out
-    final AsyncValue<List<RecentFile>> recentFiles = _readyToLoad 
-        ? ref.watch(recentFilesProvider)
-        : const AsyncValue.loading();
-
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: Material(
-          elevation: 0,
-          color: Colors.transparent,
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surface
-                      .withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.1),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Center(
-                    child: Text(
-                      AppLocalizations.of(context)!.appName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-      body: recentFiles.when(
-        data: (files) {
-          log.d('Recent files loaded: ${files.length}');
+      appBar: _buildAppBar(context),
+      body: _buildBody(),
+      floatingActionButton: const _FloatingActionButtonContent(),
+      bottomNavigationBar: BottomNavDock(currentRoute: RouteNames.home),
+    );
+  }
 
-          if (files.isEmpty) {
-            return _buildEmptyState(context);
-          }
+  Widget _buildBody() {
+    if (!_dataLoaded) {
+      // Show skeleton loader immediately (fast, non-blocking)
+      return _buildSkeletonList();
+    }
 
-          return _buildRecentFilesList(context, files);
-        },
-        loading: () {
-          log.d('Loading recent files...');
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Loading recent files...'),
-              ],
-            ),
-          );
-        },
-        error: (error, st) {
-          log.e('Error loading recent files', error, st);
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text('Error: $error'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    ref.invalidate(recentFilesProvider);
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.add_circle),
-        label: Text(AppLocalizations.of(context)!.openFile),
-        onPressed: () {
-          log.i('Open file button pressed');
-          _showOpenFileDialog(context);
-        },
-        tooltip: AppLocalizations.of(context)!.openFileTooltip,
-      ),
-      bottomNavigationBar: BottomNavDock(
-        currentRoute: RouteNames.home,
+    // Once first frame is rendered, show actual data with proper async handling
+    return Consumer(
+      builder: (context, ref, _) {
+        final recentFiles = ref.watch(recentFilesProvider);
+        return recentFiles.when(
+          data: (files) => files.isEmpty 
+              ? _buildEmptyState(context) 
+              : _buildRecentFilesList(context, files),
+          error: (error, st) => _buildErrorState(context, error),
+          loading: () => _buildSkeletonList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildSkeletonList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 6,
+      itemBuilder: (context, index) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: _SkeletonFileItem(),
       ),
     );
   }
@@ -450,8 +401,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                             ),
                             const SizedBox(width: 8),
-                            Icon(Icons.circle,
-                                size: 3, color: Colors.grey[500]),
+                            const Icon(Icons.circle,
+                                size: 3, color: Colors.grey),
                             const SizedBox(width: 8),
                             Text(
                               file.formattedSize,
@@ -474,8 +425,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   PopupMenuButton<String>(
                     icon: Icon(Icons.more_vert,
                         size: 20, color: Colors.grey[600]),
-                    itemBuilder: (context) => <PopupMenuEntry<String>>[
-                      const PopupMenuItem(
+                    itemBuilder: (context) => const <PopupMenuEntry<String>>[
+                      PopupMenuItem(
                         value: 'open',
                         child: Row(
                           children: [
@@ -485,8 +436,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ],
                         ),
                       ),
-                      const PopupMenuDivider(),
-                      const PopupMenuItem(
+                      PopupMenuDivider(),
+                      PopupMenuItem(
                         value: 'remove',
                         child: Row(
                           children: [
@@ -719,5 +670,125 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       }
     }
+  }
+}
+
+/// Extracted const widget for AppBar to avoid rebuilds
+class _AppBarContent extends StatelessWidget {
+  const _AppBarContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 0,
+      color: Colors.transparent,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surface
+                  .withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context)
+                    .colorScheme
+                    .outline
+                    .withValues(alpha: 0.1),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.appName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Extracted const widget for FloatingActionButton to avoid rebuilds
+class _FloatingActionButtonContent extends ConsumerWidget {
+  const _FloatingActionButtonContent();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return FloatingActionButton.extended(
+      icon: const Icon(Icons.add_circle),
+      label: Text(AppLocalizations.of(context)!.openFile),
+      onPressed: () async {
+        final homeState =
+            context.findAncestorStateOfType<_HomeScreenState>();
+        if (homeState != null) {
+          await homeState._showOpenFileDialog(context);
+        }
+      },
+    );
+  }
+}
+
+/// Skeleton loader widget for smooth loading experience
+class _SkeletonFileItem extends StatefulWidget {
+  const _SkeletonFileItem();
+
+  @override
+  State<_SkeletonFileItem> createState() => _SkeletonFileItemState();
+}
+
+class _SkeletonFileItemState extends State<_SkeletonFileItem>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: _controller.value * 0.5 + 0.5,
+      child: Container(
+        height: 72,
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
   }
 }
