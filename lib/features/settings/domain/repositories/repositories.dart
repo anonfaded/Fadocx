@@ -43,6 +43,18 @@ abstract class RecentFilesRepository {
   /// Clear all recent files
   Future<Result<void>> clearRecentFiles();
 
+  /// Get deleted/trash files
+  Future<Result<List<RecentFile>>> getTrashFiles();
+
+  /// Soft delete a file (move to trash)
+  Future<Result<void>> softDeleteFile(String fileId);
+
+  /// Restore a file from trash
+  Future<Result<void>> restoreFromTrash(String fileId);
+
+  /// Permanently delete a file
+  Future<Result<void>> permanentlyDeleteFile(String fileId);
+
   /// Get recent files as stream for reactive updates
   Stream<Result<List<RecentFile>>> watchRecentFiles();
 

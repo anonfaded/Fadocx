@@ -30,7 +30,8 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       return ResultSuccess(domainSettings);
     } catch (e, st) {
       log.e('Failed to get settings', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to get settings: $e'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to get settings: $e'));
     }
   }
 
@@ -72,7 +73,8 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       return const ResultSuccess(null);
     } catch (e, st) {
       log.e('Failed to update language', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to update language'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update language'));
     }
   }
 
@@ -93,7 +95,8 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       return const ResultSuccess(null);
     } catch (e, st) {
       log.e('Failed to update notifications', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to update notifications'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update notifications'));
     }
   }
 
@@ -102,9 +105,10 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
     try {
       // Try to load from Hive, but yield default first if slow
       final box = await _datasource.getSettingsBox();
-      
+
       if (box.values.isNotEmpty) {
-        yield ResultSuccess(SettingsMapper.fromHiveAppSettings(box.values.first));
+        yield ResultSuccess(
+            SettingsMapper.fromHiveAppSettings(box.values.first));
       } else {
         // No settings yet - yield default
         final now = DateTime.now();
@@ -178,7 +182,8 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       return ResultSuccess(domainFiles);
     } catch (e, st) {
       log.e('Failed to get recent files', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to get recent files'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to get recent files'));
     }
   }
 
@@ -191,12 +196,14 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       return const ResultSuccess(null);
     } catch (e, st) {
       log.e('Failed to add recent file', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to add recent file'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to add recent file'));
     }
   }
 
   @override
-  Future<Result<void>> updatePagePosition(String fileId, int pagePosition) async {
+  Future<Result<void>> updatePagePosition(
+      String fileId, int pagePosition) async {
     try {
       final existing = await _datasource.getRecentFile(fileId);
       if (existing != null) {
@@ -207,7 +214,8 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       return const ResultSuccess(null);
     } catch (e, st) {
       log.e('Failed to update page position', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to update page position'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update page position'));
     }
   }
 
@@ -219,7 +227,8 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       return const ResultSuccess(null);
     } catch (e, st) {
       log.e('Failed to remove recent file', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to remove recent file'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to remove recent file'));
     }
   }
 
@@ -231,7 +240,76 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       return const ResultSuccess(null);
     } catch (e, st) {
       log.e('Failed to clear recent files', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to clear recent files'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to clear recent files'));
+    }
+  }
+
+  @override
+  Future<Result<List<RecentFile>>> getTrashFiles() async {
+    try {
+      final hiveFiles = await _datasource.getRecentFiles();
+      // Get only deleted files
+      final deletedFiles = hiveFiles.where((f) => f.isDeleted).toList();
+      final domainFiles =
+          deletedFiles.map(SettingsMapper.fromHiveRecentFile).toList();
+      log.d('Retrieved ${domainFiles.length} trash files');
+      return ResultSuccess(domainFiles);
+    } catch (e, st) {
+      log.e('Failed to get trash files', e, st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to get trash files'));
+    }
+  }
+
+  @override
+  Future<Result<void>> softDeleteFile(String fileId) async {
+    try {
+      final existing = await _datasource.getRecentFile(fileId);
+      if (existing != null) {
+        final deleted = existing.copyWith(
+          isDeleted: true,
+          deletedAt: DateTime.now(),
+        );
+        await _datasource.updateRecentFile(deleted);
+        log.i('Soft deleted file: $fileId');
+      }
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to soft delete file', e, st);
+      return ResultFailure(UnknownFailure(message: 'Failed to delete file'));
+    }
+  }
+
+  @override
+  Future<Result<void>> restoreFromTrash(String fileId) async {
+    try {
+      final existing = await _datasource.getRecentFile(fileId);
+      if (existing != null && existing.isDeleted) {
+        final restored = existing.copyWith(
+          isDeleted: false,
+          deletedAt: null,
+        );
+        await _datasource.updateRecentFile(restored);
+        log.i('Restored file from trash: $fileId');
+      }
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to restore file from trash', e, st);
+      return ResultFailure(UnknownFailure(message: 'Failed to restore file'));
+    }
+  }
+
+  @override
+  Future<Result<void>> permanentlyDeleteFile(String fileId) async {
+    try {
+      await _datasource.deleteRecentFile(fileId);
+      log.i('Permanently deleted file: $fileId');
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to permanently delete file', e, st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to permanently delete file'));
     }
   }
 
@@ -242,10 +320,10 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       // This prevents blocking the UI thread on Hive box opening (~1 second)
       log.d('watchRecentFiles: yielding empty list immediately');
       yield const ResultSuccess([]);
-      
+
       // Now open box on background thread - doesn't block UI
       final box = await _datasource.getRecentFilesBox();
-      
+
       // Yield initial values (processed in background)
       final hiveFiles = box.values.toList();
       final initialDomainFiles = await compute(_processRecentFiles, hiveFiles);
@@ -254,15 +332,16 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
 
       final stream = await _datasource.watchRecentFiles();
       await for (final updatedHiveFiles in stream) {
-        final domainFiles = await compute(_processRecentFiles, updatedHiveFiles);
+        final domainFiles =
+            await compute(_processRecentFiles, updatedHiveFiles);
         yield ResultSuccess(domainFiles);
       }
     } catch (e, st) {
       log.e('Error watching recent files', e, st);
-      yield ResultFailure(UnknownFailure(message: 'Error watching recent files'));
+      yield ResultFailure(
+          UnknownFailure(message: 'Error watching recent files'));
     }
   }
-
 
   @override
   Future<Result<void>> syncRecentFiles() async {
@@ -281,7 +360,8 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       return ResultFailure(FileNotFoundFailure(filePath: fileId));
     } catch (e, st) {
       log.e('Failed to get sync status', e, st);
-      return ResultFailure(UnknownFailure(message: 'Failed to get sync status'));
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to get sync status'));
     }
   }
 }
@@ -291,7 +371,10 @@ List<RecentFile> _processRecentFiles(List<HiveRecentFile> hiveFiles) {
   // 1. Sort by date opened (descending)
   final sorted = List<HiveRecentFile>.from(hiveFiles)
     ..sort((a, b) => b.dateOpened.compareTo(a.dateOpened));
-  
-  // 2. Map to domain entities
-  return sorted.map(SettingsMapper.fromHiveRecentFile).toList();
+
+  // 2. Filter out soft-deleted files
+  final notDeleted = sorted.where((file) => !file.isDeleted).toList();
+
+  // 3. Map to domain entities
+  return notDeleted.map(SettingsMapper.fromHiveRecentFile).toList();
 }

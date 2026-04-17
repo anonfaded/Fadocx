@@ -37,6 +37,12 @@ class HiveRecentFile {
   @HiveField(9)
   final String syncStatus; // "pending", "synced", "conflict", "failed"
 
+  @HiveField(10)
+  final bool isDeleted; // Soft delete flag
+
+  @HiveField(11)
+  final DateTime? deletedAt; // When the file was soft deleted
+
   HiveRecentFile({
     String? id,
     required this.filePath,
@@ -48,6 +54,8 @@ class HiveRecentFile {
     this.pagePosition = 0,
     this.syncedAt,
     this.syncStatus = 'pending',
+    this.isDeleted = false,
+    this.deletedAt,
   }) : id = id ?? const Uuid().v4();
 
   /// Create copy with modifications (immutability pattern)
@@ -62,6 +70,8 @@ class HiveRecentFile {
     int? pagePosition,
     DateTime? syncedAt,
     String? syncStatus,
+    bool? isDeleted,
+    DateTime? deletedAt,
   }) {
     return HiveRecentFile(
       id: id ?? this.id,
@@ -74,6 +84,8 @@ class HiveRecentFile {
       pagePosition: pagePosition ?? this.pagePosition,
       syncedAt: syncedAt ?? this.syncedAt,
       syncStatus: syncStatus ?? this.syncStatus,
+      isDeleted: isDeleted ?? this.isDeleted,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 

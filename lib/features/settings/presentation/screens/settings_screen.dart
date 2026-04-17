@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
@@ -21,11 +22,23 @@ class SettingsScreen extends ConsumerWidget {
       appBarContent: SafeArea(
         bottom: false,
         child: Center(
-          child: Text(
-            AppLocalizations.of(context)!.settingsTitle,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: AppLocalizations.of(context)!
+                .settingsTitle
+                .split('')
+                .map((letter) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Text(
+                  letter,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0,
+                      ),
                 ),
+              );
+            }).toList(),
           ),
         ),
       ),
@@ -109,17 +122,12 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               _buildSectionHeader(context, 'Danger Zone', color: Colors.red),
               _buildDangerGroup(context, [
-                _DangerRow(
+                _SettingsArrowRow(
                   icon: Icons.delete_outline,
-                  title: 'Clear Recent Files',
-                  subtitle: 'Remove all recent files',
-                  confirmText: 'DELETE',
-                  onConfirm: () {
-                    ref.read(recentFilesMutatorProvider).clearAllRecentFiles();
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Recent files cleared')),
-                    );
+                  title: 'Trash',
+                  subtitle: 'View and manage deleted files',
+                  onTap: () {
+                    context.push(RouteNames.trash);
                   },
                 ),
                 _divider(context),
@@ -759,6 +767,65 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 }
+
+/// Settings arrow row - navigates to another screen
+class _SettingsArrowRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _SettingsArrowRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 24),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Icon(Icons.arrow_forward_ios, size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 class AnimatedListView extends StatelessWidget {
   final List<Widget> children;

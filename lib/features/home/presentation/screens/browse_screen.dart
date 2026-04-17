@@ -50,11 +50,20 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     return SafeArea(
       bottom: false,
       child: Center(
-        child: Text(
-          'Browse & Import',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: 'Browse & Import'.split('').map((letter) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              child: Text(
+                letter,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0,
+                    ),
               ),
+            );
+          }).toList(),
         ),
       ),
     );

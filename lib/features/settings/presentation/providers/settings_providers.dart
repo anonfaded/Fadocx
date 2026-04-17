@@ -122,6 +122,21 @@ final recentFilesProvider = StreamProvider<List<RecentFile>>((ref) async* {
   }
 });
 
+/// Trash files provider - FutureProvider for trash files list
+final trashFilesProvider = FutureProvider<List<RecentFile>>((ref) async {
+  final repository = ref.watch(recentFilesRepositoryProvider);
+  log.d('Fetching trash files...');
+
+  final result = await repository.getTrashFiles();
+  return result.fold(
+    (failure) {
+      log.e('Failed to fetch trash files: ${failure.message}');
+      return [];
+    },
+    (files) => files,
+  );
+});
+
 // ============================================================================
 // RECENT FILES MUTATION PROVIDER
 // ============================================================================
@@ -170,6 +185,34 @@ class RecentFilesMutator {
     result.fold(
       (failure) => log.e('Failed to clear recent files: ${failure.message}'),
       (success) => log.i('All recent files cleared'),
+    );
+  }
+
+  Future<void> softDeleteFile(String fileId) async {
+    log.i('Soft deleting file: $fileId');
+    final result = await _repository.softDeleteFile(fileId);
+    result.fold(
+      (failure) => log.e('Failed to delete file: ${failure.message}'),
+      (success) => log.i('File moved to trash'),
+    );
+  }
+
+  Future<void> restoreFromTrash(String fileId) async {
+    log.i('Restoring file from trash: $fileId');
+    final result = await _repository.restoreFromTrash(fileId);
+    result.fold(
+      (failure) => log.e('Failed to restore file: ${failure.message}'),
+      (success) => log.i('File restored from trash'),
+    );
+  }
+
+  Future<void> permanentlyDeleteFile(String fileId) async {
+    log.i('Permanently deleting file: $fileId');
+    final result = await _repository.permanentlyDeleteFile(fileId);
+    result.fold(
+      (failure) =>
+          log.e('Failed to permanently delete file: ${failure.message}'),
+      (success) => log.i('File permanently deleted'),
     );
   }
 }

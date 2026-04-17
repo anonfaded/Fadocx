@@ -39,11 +39,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     return SafeArea(
       bottom: false,
       child: Center(
-        child: Text(
-          'Documents',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: 'Documents'.split('').map((letter) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                letter,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0,
+                    ),
               ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -137,85 +146,94 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           .toList();
     }
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
-      children: [
-        // Category filter tabs
-        SizedBox(
-          height: 50,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _buildCategoryChip(context, 'all', 'All', Icons.apps),
-              _buildCategoryChip(context, 'pdf', 'PDF', Icons.picture_as_pdf),
-              _buildCategoryChip(
-                  context, 'documents', 'Docs', Icons.description),
-              _buildCategoryChip(
-                  context, 'spreadsheets', 'Sheets', Icons.table_chart),
-              _buildCategoryChip(context, 'other', 'Other', Icons.file_present),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // View toggle + sort
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${filteredFiles.length} ${_selectedCategory == 'all' ? 'Documents' : 'Files'}',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            Row(
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Invalidate the provider to force a refresh
+        ref.invalidate(recentFilesProvider);
+        // Wait for the new data to be fetched
+        await ref.read(recentFilesProvider.future);
+      },
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
+        children: [
+          // Category filter tabs
+          SizedBox(
+            height: 50,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
               children: [
-                IconButton(
-                  icon: Icon(isGridView ? Icons.grid_view : Icons.list),
-                  onPressed: () {
-                    ref
-                        .read(gridViewPreferenceProvider.notifier)
-                        .toggleViewMode();
-                  },
-                ),
+                _buildCategoryChip(context, 'all', 'All', Icons.apps),
+                _buildCategoryChip(context, 'pdf', 'PDF', Icons.picture_as_pdf),
+                _buildCategoryChip(
+                    context, 'documents', 'Docs', Icons.description),
+                _buildCategoryChip(
+                    context, 'spreadsheets', 'Sheets', Icons.table_chart),
+                _buildCategoryChip(
+                    context, 'other', 'Other', Icons.file_present),
               ],
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-
-        // Documents grid/list
-        if (filteredFiles.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            child: Center(
-              child: Text(
-                'No ${_selectedCategory == 'all' ? 'documents' : _selectedCategory} found',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ),
-          )
-        else if (isGridView)
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.75,
-            ),
-            itemCount: filteredFiles.length,
-            itemBuilder: (context, index) =>
-                _buildFileGridItem(context, filteredFiles[index]),
-          )
-        else
-          Column(
-            children: filteredFiles
-                .asMap()
-                .entries
-                .map((e) => _buildFileListItem(context, e.value, e.key))
-                .toList(),
           ),
-      ],
+          const SizedBox(height: 8),
+
+          // View toggle + sort
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${filteredFiles.length} ${_selectedCategory == 'all' ? 'Documents' : 'Files'}',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(isGridView ? Icons.grid_view : Icons.list),
+                    onPressed: () {
+                      ref
+                          .read(gridViewPreferenceProvider.notifier)
+                          .toggleViewMode();
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Documents grid/list
+          if (filteredFiles.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              child: Center(
+                child: Text(
+                  'No ${_selectedCategory == 'all' ? 'documents' : _selectedCategory} found',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+            )
+          else if (isGridView)
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 0.75,
+              ),
+              itemCount: filteredFiles.length,
+              itemBuilder: (context, index) =>
+                  _buildFileGridItem(context, filteredFiles[index]),
+            )
+          else
+            Column(
+              children: filteredFiles
+                  .asMap()
+                  .entries
+                  .map((e) => _buildFileListItem(context, e.value, e.key))
+                  .toList(),
+            ),
+        ],
+      ),
     );
   }
 
@@ -267,56 +285,104 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Thumbnail
+              // Thumbnail section
               Expanded(
-                child: Consumer(
-                  builder: (context, ref, _) {
-                    final thumbnail = ref.watch(thumbnailProvider(file.id));
-                    return thumbnail.when(
-                      data: (bytes) {
-                        if (bytes != null) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(12),
-                                topRight: Radius.circular(12),
-                              ),
-                            ),
-                            child: Image.memory(
-                              bytes,
-                              fit: BoxFit.cover,
-                            ),
-                          );
-                        }
-                        // No cached thumbnail - generate one
-                        return _buildThumbnailPlaceholder(context, file);
+                child: Stack(
+                  children: [
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final thumbnail = ref.watch(thumbnailProvider(file.id));
+                        return thumbnail.when(
+                          data: (bytes) {
+                            if (bytes != null) {
+                              return ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  topRight: Radius.circular(12),
+                                ),
+                                child: Image.memory(
+                                  bytes,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
+                              );
+                            }
+                            return _buildThumbnailPlaceholder(context, file);
+                          },
+                          loading: () =>
+                              _buildThumbnailPlaceholder(context, file),
+                          error: (err, st) =>
+                              _buildThumbnailPlaceholder(context, file),
+                        );
                       },
-                      loading: () => _buildThumbnailPlaceholder(context, file),
-                      error: (err, st) =>
-                          _buildThumbnailPlaceholder(context, file),
-                    );
-                  },
+                    ),
+                    // File type icon overlay (bottom right)
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .withValues(alpha: 0.9),
+                          shape: BoxShape.circle,
+                        ),
+                        child: _getFileIcon(file.fileType, size: 16),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              // File info
+              // Info and actions section
               Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.all(8),
+                child: Row(
                   children: [
-                    Text(
-                      file.fileName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      file.formattedSize,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            file.fileName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
                           ),
+                          const SizedBox(height: 2),
+                          Text(
+                            file.formattedSize,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  fontSize: 11,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.more_vert,
+                          size: 18,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant),
+                      onPressed: () =>
+                          _showFileActionBottomSheet(context, file),
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
                     ),
                   ],
                 ),
@@ -328,51 +394,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  Widget _buildThumbnailPlaceholder(BuildContext context, RecentFile file) {
-    return Consumer(
-      builder: (context, ref, _) {
-        // Trigger thumbnail generation
-        ref.watch(generateThumbnailProvider({
-          'fileId': file.id,
-          'filePath': file.filePath,
-          'fileName': file.fileName,
-          'fileType': file.fileType,
-        }));
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
-            ),
-            color: Theme.of(context)
-                .colorScheme
-                .primaryContainer
-                .withValues(alpha: 0.3),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _getFileIcon(file.fileType, size: 40),
-                const SizedBox(height: 8),
-                Text(
-                  file.fileType.toUpperCase(),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildFileListItem(BuildContext context, RecentFile file, int index) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -390,50 +414,48 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               color: Theme.of(context).colorScheme.surface,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                  _getFileIcon(file.fileType, size: 32),
-                  const SizedBox(width: 12),
+                  _getFileIcon(file.fileType, size: 24),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           file.fileName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              file.fileType.toUpperCase(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w500,
                                   ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '•',
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              file.formattedSize,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${file.fileType.toUpperCase()} • ${file.formattedSize}',
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontSize: 11,
+                                  ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right, size: 20),
+                  IconButton(
+                    icon: Icon(Icons.more_vert,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    onPressed: () => _showFileActionBottomSheet(context, file),
+                    padding: EdgeInsets.zero,
+                    constraints:
+                        const BoxConstraints(minWidth: 40, minHeight: 40),
+                  ),
                 ],
               ),
             ),
@@ -441,6 +463,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildThumbnailPlaceholder(BuildContext context, RecentFile file) {
+    return _ThumbnailPlaceholder(file: file);
   }
 
   String _getCategoryFromFileType(String fileType) {
@@ -511,6 +537,65 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         '${RouteNames.viewer}?path=${file.filePath}&name=${file.fileName}');
   }
 
+  void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            // Delete action
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: ListTile(
+                leading: const Icon(Icons.delete_outline,
+                    color: Colors.red, size: 20),
+                title:
+                    const Text('Delete', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _softDeleteFile(file);
+                },
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _softDeleteFile(RecentFile file) {
+    ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${file.fileName} moved to trash'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   Widget _buildSkeletonLoader() {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
@@ -533,3 +618,150 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 }
+
+/// Helper widget to trigger thumbnail generation once via side effect
+class _ThumbnailPlaceholder extends ConsumerStatefulWidget {
+  final RecentFile file;
+
+  const _ThumbnailPlaceholder({required this.file});
+
+  @override
+  ConsumerState<_ThumbnailPlaceholder> createState() =>
+      _ThumbnailPlaceholderState();
+}
+
+class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
+  @override
+  void initState() {
+    super.initState();
+    // Skip thumbnail generation for presentation formats (not yet supported)
+    final type = widget.file.fileType.toLowerCase();
+    if (type == 'ppt' || type == 'pptx' || type == 'odp') {
+      return;
+    }
+    // Trigger thumbnail generation once via side effect
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(generateAndCacheThumbnailProvider(
+        (
+          fileId: widget.file.id,
+          filePath: widget.file.filePath,
+          fileName: widget.file.fileName,
+          fileType: widget.file.fileType,
+        ),
+      ));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPresentation = _isPresentationFormat(widget.file.fileType);
+
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            color: Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildThumbnailIcon(widget.file.fileType),
+                const SizedBox(height: 8),
+                Text(
+                  widget.file.fileType.toUpperCase(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Coming Soon badge for presentations
+        if (isPresentation)
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                color: Colors.black.withValues(alpha: 0.4),
+              ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Coming Soon',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  bool _isPresentationFormat(String fileType) {
+    final type = fileType.toLowerCase();
+    return type == 'ppt' || type == 'pptx' || type == 'odp';
+  }
+
+  Widget _buildThumbnailIcon(String fileType) {
+    IconData iconData;
+    Color color;
+
+    switch (fileType.toLowerCase()) {
+      case 'pdf':
+        iconData = Icons.picture_as_pdf;
+        color = AppColors.categoryPdf;
+        break;
+      case 'docx':
+      case 'doc':
+      case 'odt':
+      case 'rtf':
+      case 'txt':
+        iconData = Icons.description;
+        color = AppColors.categoryDoc;
+        break;
+      case 'xlsx':
+      case 'xls':
+      case 'ods':
+      case 'csv':
+        iconData = Icons.table_chart;
+        color = AppColors.categorySheet;
+        break;
+      case 'ppt':
+      case 'pptx':
+      case 'odp':
+        iconData = Icons.slideshow;
+        color = AppColors.categorySlide;
+        break;
+      default:
+        iconData = Icons.insert_drive_file;
+        color = AppColors.categoryDefault;
+    }
+
+    return Icon(iconData, color: color, size: 40);
+  }
+}
+
+extension _DocumentsScreenStateExtension on _DocumentsScreenState {}
