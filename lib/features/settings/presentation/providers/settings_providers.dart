@@ -173,3 +173,28 @@ class RecentFilesMutator {
     );
   }
 }
+
+// ============================================================================
+// UI PREFERENCE PROVIDERS
+// ============================================================================
+
+/// Grid view preference - true for grid, false for list (stored in memory)
+final gridViewPreferenceProvider = NotifierProvider<GridViewNotifier, bool>(
+  GridViewNotifier.new,
+);
+
+/// Notifier for managing grid/list view preference
+class GridViewNotifier extends Notifier<bool> {
+  @override
+  bool build() => true; // Default to grid view
+
+  void toggleViewMode() {
+    state = !state;
+    log.i('Toggled view mode to: ${state ? 'grid' : 'list'}');
+  }
+
+  void setGridView(bool isGrid) {
+    state = isGrid;
+    log.i('Set view mode to: ${isGrid ? 'grid' : 'list'}');
+  }
+}

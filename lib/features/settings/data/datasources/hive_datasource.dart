@@ -8,6 +8,7 @@ class HiveDatasource {
   static const String settingsBoxName = 'fadocx_settings';
   static const String recentFilesBoxName = 'fadocx_recent_files';
   static const String deviceInfoBoxName = 'fadocx_device_info';
+  static const String thumbnailCacheBoxName = 'fadocx_thumbnail_cache';
 
   /// Initialize Hive, register adapters, and pre-open essential boxes
   static Future<void> initialize() async {
@@ -16,6 +17,7 @@ class HiveDatasource {
       Hive.registerAdapter(HiveRecentFileAdapter());
       Hive.registerAdapter(HiveAppSettingsAdapter());
       Hive.registerAdapter(HiveDeviceInfoAdapter());
+      Hive.registerAdapter(HiveThumbnailAdapter());
 
       // Pre-open both settings and recent files boxes to avoid blocking UI during home screen render
       if (!Hive.isBoxOpen(settingsBoxName)) {
@@ -24,8 +26,9 @@ class HiveDatasource {
       if (!Hive.isBoxOpen(recentFilesBoxName)) {
         await Hive.openBox<HiveRecentFile>(recentFilesBoxName);
       }
-      
-      log.i('Hive initialization complete (settings + recent files boxes opened)');
+
+      log.i(
+          'Hive initialization complete (settings + recent files boxes opened)');
     } catch (e, st) {
       log.e('Error initializing Hive', e, st);
       rethrow;
@@ -175,7 +178,9 @@ class HiveDatasource {
     try {
       final box = await getSettingsBox();
       log.d('Started watching settings');
-      return box.watch().map((_) => box.values.isNotEmpty ? box.values.first : null);
+      return box
+          .watch()
+          .map((_) => box.values.isNotEmpty ? box.values.first : null);
     } catch (e, st) {
       log.e('Error watching settings', e, st);
       rethrow;
@@ -197,11 +202,11 @@ class HiveDatasource {
 
       // Combine initial values with stream of updates
       return box.watch().map((_) => getSorted()).asBroadcastStream(
-            onListen: (sub) {
-              // Note: Hive.watch doesn't emit initial value,
-              // but Riverpod StreamProvider handles it by continuing from await for.
-            },
-          );
+        onListen: (sub) {
+          // Note: Hive.watch doesn't emit initial value,
+          // but Riverpod StreamProvider handles it by continuing from await for.
+        },
+      );
     } catch (e, st) {
       log.e('Error watching recent files', e, st);
       rethrow;
@@ -215,6 +220,71 @@ class HiveDatasource {
       return box.get(fileId);
     } catch (e, st) {
       log.e('Error getting recent file', e, st);
+      rethrow;
+    }
+  }
+
+  /// Open/get thumbnail cache box (lazy load)
+  Future<Box<HiveThumbnail>> getThumbnailCacheBox() async {
+    try {
+      if (Hive.isBoxOpen(thumbnailCacheBoxName)) {
+        return Hive.box<HiveThumbnail>(thumbnailCacheBoxName);
+      }
+      return await Hive.openBox<HiveThumbnail>(thumbnailCacheBoxName);
+    } catch (e, st) {
+      log.e('Error opening thumbnail cache box', e, st);
+      rethrow;
+    }
+  }
+
+  /// Save thumbnail for a file
+  Future<void> saveThumbnail(String fileId, List<int> pngBytes) async {
+    try {
+      final box = await getThumbnailCacheBox();
+      final thumbnail = HiveThumbnail(
+        fileId: fileId,
+        pngBytes: pngBytes,
+        generatedAt: DateTime.now(),
+      );
+      await box.put(fileId, thumbnail);
+      log.d('Thumbnail saved for file: $fileId');
+    } catch (e, st) {
+      log.e('Error saving thumbnail', e, st);
+      rethrow;
+    }
+  }
+
+  /// Get thumbnail for a file
+  Future<HiveThumbnail?> getThumbnail(String fileId) async {
+    try {
+      final box = await getThumbnailCacheBox();
+      return box.get(fileId);
+    } catch (e, st) {
+      log.e('Error getting thumbnail', e, st);
+      rethrow;
+    }
+  }
+
+  /// Remove thumbnail from cache
+  Future<void> removeThumbnail(String fileId) async {
+    try {
+      final box = await getThumbnailCacheBox();
+      await box.delete(fileId);
+      log.d('Thumbnail removed for file: $fileId');
+    } catch (e, st) {
+      log.e('Error removing thumbnail', e, st);
+      rethrow;
+    }
+  }
+
+  /// Clear all thumbnails from cache
+  Future<void> clearThumbnailCache() async {
+    try {
+      final box = await getThumbnailCacheBox();
+      await box.clear();
+      log.i('Thumbnail cache cleared');
+    } catch (e, st) {
+      log.e('Error clearing thumbnail cache', e, st);
       rethrow;
     }
   }

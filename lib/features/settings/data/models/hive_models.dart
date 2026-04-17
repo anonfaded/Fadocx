@@ -78,7 +78,8 @@ class HiveRecentFile {
   }
 
   @override
-  String toString() => 'HiveRecentFile(id: $id, fileName: $fileName, fileType: $fileType)';
+  String toString() =>
+      'HiveRecentFile(id: $id, fileName: $fileName, fileType: $fileType)';
 }
 
 /// App settings model - stores user preferences
@@ -145,7 +146,8 @@ class HiveAppSettings {
   }
 
   @override
-  String toString() => 'HiveAppSettings(id: $id, theme: $theme, language: $language)';
+  String toString() =>
+      'HiveAppSettings(id: $id, theme: $theme, language: $language)';
 }
 
 /// Device info for cloud sync (Phase 2+)
@@ -182,6 +184,38 @@ class HiveDeviceInfo {
       deviceName: deviceName ?? this.deviceName,
       osVersion: osVersion ?? this.osVersion,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+    );
+  }
+}
+
+/// Thumbnail cache model - stores generated thumbnail PNG bytes by file ID
+/// Keyed by file ID for quick lookup when displaying document list
+@HiveType(typeId: 3)
+class HiveThumbnail {
+  @HiveField(0)
+  final String fileId; // References HiveRecentFile.id
+
+  @HiveField(1)
+  final List<int> pngBytes; // PNG image data
+
+  @HiveField(2)
+  final DateTime generatedAt;
+
+  HiveThumbnail({
+    required this.fileId,
+    required this.pngBytes,
+    required this.generatedAt,
+  });
+
+  HiveThumbnail copyWith({
+    String? fileId,
+    List<int>? pngBytes,
+    DateTime? generatedAt,
+  }) {
+    return HiveThumbnail(
+      fileId: fileId ?? this.fileId,
+      pngBytes: pngBytes ?? this.pngBytes,
+      generatedAt: generatedAt ?? this.generatedAt,
     );
   }
 }
