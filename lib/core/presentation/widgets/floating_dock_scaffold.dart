@@ -155,32 +155,18 @@ class _FloatingDock extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
         child: Stack(
+          clipBehavior: Clip.none, // Allow shadows to extend outside
           children: [
-            // Strong shadows (top, bottom, sides)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    // Top shadow
-                    BoxShadow(
-                      color: isDark
-                          ? Colors.black.withValues(alpha: 0.6)
-                          : Colors.black.withValues(alpha: 0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, -8),
-                      spreadRadius: 4,
-                    ),
-                    // Bottom shadow
-                    BoxShadow(
-                      color: isDark
-                          ? Colors.black.withValues(alpha: 0.7)
-                          : Colors.black.withValues(alpha: 0.5),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                      spreadRadius: 6,
-                    ),
-                  ],
+            // Shadow layer - positioned to extend beyond dock
+            Positioned(
+              bottom: -60, // Extend shadow further down
+              left: -20, // Extend shadow to left
+              right: -20, // Extend shadow to right
+              height: 140, // Taller height to contain shadow blur
+              child: CustomPaint(
+                painter: _DockShadowPainter(
+                  isDark: isDark,
+                  borderRadius: 16,
                 ),
               ),
             ),
@@ -296,5 +282,72 @@ class _FloatingDock extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Custom painter for dock shadow - only on bottom and sides, NOT on top
+class _DockShadowPainter extends CustomPainter {
+  final bool isDark;
+  final double borderRadius;
+
+  _DockShadowPainter({
+    required this.isDark,
+    required this.borderRadius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shadowColor = isDark
+        ? Colors.black.withValues(alpha: 0.80)
+        : Colors.white.withValues(alpha: 0.89);
+
+    // Draw bottom shadow with rectangle for uniform darkness
+    final shadowPaint = Paint()
+      ..color = shadowColor
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28);
+
+    // Draw shadow twice for darker effect (not 3 times)
+    for (int i = 0; i < 2; i++) {
+      // Draw large bottom shadow as a stretched rectangle for even coverage
+      canvas.drawRect(
+        Rect.fromLTWH(
+          -10, // Extend left beyond bounds
+          50, // Start further down (below dock top, no shadow on top)
+          size.width + 20, // Full width plus overflow for sides
+          80, // Height to cover blur
+        ),
+        shadowPaint,
+      );
+    }
+
+    // Draw left side shadow that extends down - optional, can comment out
+    // to only have bottom shadow
+    shadowPaint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 24);
+    canvas.drawRect(
+      Rect.fromLTWH(
+        -5,
+        50, // Start further down
+        25,
+        size.height - 50,
+      ),
+      shadowPaint,
+    );
+
+    // Draw right side shadow that extends down - optional
+    canvas.drawRect(
+      Rect.fromLTWH(
+        size.width - 20,
+        50, // Start further down
+        25,
+        size.height - 50,
+      ),
+      shadowPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_DockShadowPainter oldDelegate) {
+    return oldDelegate.isDark != isDark ||
+        oldDelegate.borderRadius != borderRadius;
   }
 }
