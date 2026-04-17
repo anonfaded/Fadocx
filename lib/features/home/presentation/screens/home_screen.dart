@@ -685,59 +685,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// Extracted const widget for AppBar to avoid rebuilds
-class _AppBarContent extends StatelessWidget {
-  const _AppBarContent();
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      elevation: 0,
-      color: Colors.transparent,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Container(
-            decoration: BoxDecoration(
-              color:
-                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .outline
-                    .withValues(alpha: 0.1),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Center(
-                child: Text(
-                  AppLocalizations.of(context)!.appName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Extracted const widget for FloatingActionButton to avoid rebuilds
 class _FloatingActionButtonContent extends ConsumerWidget {
   const _FloatingActionButtonContent();
