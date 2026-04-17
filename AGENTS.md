@@ -57,6 +57,128 @@ When updating app branding or icons, follow this workflow:
 - Both commands modify native platform files; regenerate after any asset changes
 - Test on both Android and iOS after regeneration to ensure correct scaling
 
+## Flutter Animation Best Practices
+
+### The Golden Rule: Never Use TweenAnimationBuilder for Prop-Driven Animations
+`TweenAnimationBuilder` is a **StatelessWidget wrapper** — when the parent calls `setState()`, the widget is recreated from scratch, and the animation starts fresh from `begin`. It appears as an "instant swap" instead of animating.
+
+### Correct Pattern: StatefulWidget + AnimationController + didUpdateWidget
+
+Use this pattern when an animation responds to a **parent prop change** (e.g., `isOpen`, `isExpanded`, `isVisible`):
+
+```dart
+class AnimatedHamburgerIcon extends StatefulWidget {
+  final bool isOpen;  // Prop that drives animation
+  final VoidCallback onPressed;
+  
+  const AnimatedHamburgerIcon({
+    super.key,
+    required this.isOpen,
+    required this.onPressed,
+  });
+}
+
+class _AnimatedHamburgerIconState extends State<AnimatedHamburgerIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+      value: widget.isOpen ? 1.0 : 0.0,  // Start at correct value!
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void didUpdateWidget(AnimatedHamburgerIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isOpen != widget.isOpen) {
+      if (widget.isOpen) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        // Use _animation.value (0.0-1.0) to drive your animation
+        final factor = 0.35 + (_animation.value * 0.35);
+        return CustomPaint(
+          painter: HamburgerPainter(bottomLineFactor: factor),
+        );
+      },
+    );
+  }
+}
+```
+
+### Why This Works
+- `didUpdateWidget` fires when the parent rebuilds but the widget instance is **reused** (same key, same type)
+- The `AnimationController` lives in the widget's State and **persists** through parent rebuilds
+- When prop changes, `didUpdateWidget` calls `.forward()` or `.reverse()` on the existing controller — smooth animation from current value
+
+### Common Pitfall: Race Condition with Child State
+If you read the animation state from a child widget via `GlobalKey.currentState` in a getter, there's a race condition:
+```dart
+bool get _showSidebarDrawer {
+  // Bug: reading child's state before child has rebuilt
+  final viewerState = _pdfViewerKey.currentState as dynamic;
+  return viewerState?.showSidebar ?? false;
+}
+```
+Fix: Track the state directly in the parent as a simple `bool` field, updated atomically.
+
+### Animation Performance Tips
+1. **Reduce BackdropFilter sigma**: Keep blur at 8 or below (20 is very expensive)
+2. **Wrap animated widgets in RepaintBoundary**: Prevents repainting the entire parent tree
+3. **Avoid calling heavy build functions during animation**: Use early returns for zero values
+4. **Use TickerProviderStateMixin (not SingleTickerProviderStateMixin)** when you need multiple AnimationControllers
+5. **Always wrap third-party widgets with internal state in RepaintBoundary**: This prevents their expensive internal rebuilds when parent calls setState
+
+### pdfrx Null Check Error (LayoutBuilder)
+If you see `Null check operator used on a null value` in pdfrx's LayoutBuilder, it's because pdfrx's internal state is being destroyed when the parent rebuilds. Fix by:
+
+1. Use `GlobalKey<State<ModernPdfViewer>>` (not ValueKey) - the GlobalKey persists state across rebuilds
+2. Wrap the viewer in `RepaintBoundary` to isolate its repaints
+
+```dart
+late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
+
+@override
+void initState() {
+  super.initState();
+  _pdfViewerKey = GlobalKey<State<ModernPdfViewer>>();
+}
+
+Widget _buildContentViewer() {
+  return RepaintBoundary(
+    child: ModernPdfViewer(
+      key: _pdfViewerKey,
+      // ...
+    ),
+  );
+}
+```
+
 **Agent Workflow Rules**
 
 - **Todo First**: Always create a detailed, long todo list before starting work on any bug or feature; include edge cases, assumptions, and explicit context-gathering steps.
