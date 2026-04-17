@@ -9,6 +9,8 @@ class ModernPdfViewer extends StatefulWidget {
   final bool textMode;
   final VoidCallback? onInvertToggle;
   final VoidCallback? onTextModeToggle;
+  final VoidCallback? onTap;
+  final Function(int currentPage, int totalPages)? onPageChanged;
 
   const ModernPdfViewer({
     required this.filePath,
@@ -17,6 +19,8 @@ class ModernPdfViewer extends StatefulWidget {
     this.textMode = false,
     this.onInvertToggle,
     this.onTextModeToggle,
+    this.onTap,
+    this.onPageChanged,
     super.key,
   });
 
@@ -27,8 +31,8 @@ class ModernPdfViewer extends StatefulWidget {
 class _ModernPdfViewerState extends State<ModernPdfViewer> {
   final _controller = PdfViewerController();
   final _searchController = TextEditingController();
+  final ValueNotifier<int> _drawerVersion = ValueNotifier<int>(0);
 
-  bool _showControls = true;
   bool _showSidebar = false;
   int _currentPage = 1;
   int _totalPages = 0;
@@ -46,15 +50,101 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
   // Sidebar tabs: 0=Pages, 1=Search, 2=TOC
   int _sidebarTab = 0;
 
+   // Public getters for parent access
+   int get currentPage => _currentPage;
+   int get totalPages => _totalPages;
+   bool get showSidebar => _showSidebar;
+
+  @override
+  void setState(VoidCallback fn) {
+    if (!mounted) {
+      return;
+    }
+    super.setState(fn);
+    _drawerVersion.value++;
+  }
+
+  /// Build drawer content for display in ViewerScreen's sidebar.
+  Widget buildDrawerContent(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: _drawerVersion,
+      builder: (context, _, __) {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildSidebarTab(context, 'Pages', Icons.pages, 0),
+                          _buildSidebarTab(context, 'Search', Icons.search, 1),
+                          _buildSidebarTab(context, 'TOC', Icons.list, 2),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: _sidebarTab == 0
+                  ? _buildPagesTab()
+                  : _sidebarTab == 1
+                      ? _buildSearchTab()
+                      : _buildTocTab(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
+    _drawerVersion.dispose();
     super.dispose();
   }
 
   void _goToPage(int page) {
     if (page < 1 || page > _totalPages) return;
     _controller.goToPage(pageNumber: page);
+    // Notify parent about page change
+    widget.onPageChanged?.call(_currentPage, _totalPages);
+  }
+
+  // Public methods for parent to call
+  void goToFirstPage() {
+    _goToPage(1);
+  }
+
+  void goToPreviousPage() {
+    if (_currentPage > 1) {
+      _goToPage(_currentPage - 1);
+    }
+  }
+
+  void goToNextPage() {
+    if (_currentPage < _totalPages) {
+      _goToPage(_currentPage + 1);
+    }
+  }
+
+  void goToLastPage() {
+    _goToPage(_totalPages);
+  }
+
+  void goToPage(int page) {
+    _goToPage(page);
+  }
+
+  void toggleSidebar() {
+    setState(() => _showSidebar = !_showSidebar);
   }
 
   Future<void> _performSearch(String query) async {
@@ -146,6 +236,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
         onPageChanged: (pageNumber) {
           if (pageNumber != null) {
             setState(() => _currentPage = pageNumber);
+            // Notify parent about page change
+            widget.onPageChanged?.call(_currentPage, _totalPages);
           }
         },
       ),
@@ -598,6 +690,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
     );
   }
 
+   // ignore: unused_element
   Widget _buildBottomDock() {
     return SafeArea(
       top: false,
@@ -681,65 +774,6 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
     );
   }
 
-  Widget _buildSidebar() {
-    return Material(
-      elevation: 0,
-      color: Colors.transparent,
-      child: GestureDetector(
-        onTap: () {}, // Prevent sidebar from closing on tap
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.8,
-            minWidth: 280,
-          ),
-          color: Theme.of(context).colorScheme.surface,
-          child: Column(
-            children: [
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              _buildSidebarTab(
-                                  context, 'Pages', Icons.pages, 0),
-                              _buildSidebarTab(
-                                  context, 'Search', Icons.search, 1),
-                              _buildSidebarTab(context, 'TOC', Icons.list, 2),
-                            ],
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => setState(() => _showSidebar = false),
-                        iconSize: 20,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: _sidebarTab == 0
-                    ? _buildPagesTab()
-                    : _sidebarTab == 1
-                        ? _buildSearchTab()
-                        : _buildTocTab(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildSidebarTab(
       BuildContext context, String label, IconData icon, int index) {
     final isActive = _sidebarTab == index;
@@ -801,32 +835,23 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
       appBar: PreferredSize(preferredSize: Size.zero, child: Container()),
       body: Stack(
         children: [
-          // Main content - PDF/Text viewer fills entire screen
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              if (!_showSidebar) {
-                setState(() => _showControls = !_showControls);
-              }
-            },
-            child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
-          ),
-          // Bottom dock - navigation and menu
-          if (_showControls && !widget.textMode)
-            Positioned(
-              bottom: 16,
-              left: 16,
-              right: 16,
-              child: _buildBottomDock(),
-            ),
-          // Sidebar overlay
-          if (_showSidebar)
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: _buildSidebar(),
-            ),
+           // Main content - PDF/Text viewer fills entire screen
+           // NOTE: Tap handling is now done by parent ViewerScreen via Listener
+           // We don't use GestureDetector here to avoid interference with scrolling
+           Container(
+             color: Colors.transparent,
+             child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
+           ),
+           // Bottom dock - navigation and menu (DISABLED - controlled by parent ViewerScreen)
+           // if (_showControls && !widget.textMode)
+           //   Positioned(
+           //     bottom: 16,
+           //     left: 16,
+           //     right: 16,
+           //     child: _buildBottomDock(),
+           //   ),
+          // Sidebar overlay is rendered by ViewerScreen so taps do not
+          // interfere with the viewer-wide tap gesture.
         ],
       ),
     );
