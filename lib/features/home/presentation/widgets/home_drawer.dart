@@ -8,11 +8,13 @@ import 'package:fadocx/features/settings/presentation/providers/settings_provide
 class CustomHamburgerIcon extends StatelessWidget {
   final VoidCallback onPressed;
   final Color? color;
+  final bool sidebarOpen;
 
   const CustomHamburgerIcon({
     super.key,
     required this.onPressed,
     this.color,
+    this.sidebarOpen = false,
   });
 
   @override
@@ -25,12 +27,25 @@ class CustomHamburgerIcon extends StatelessWidget {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(4),
         child: SizedBox(
-          width: 36,
-          height: 32,
+          width: 24,
+          height: 28,
           child: Center(
-            child: CustomPaint(
-              size: const Size(20, 14),
-              painter: HamburgerPainter(color: iconColor),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(
+                begin: sidebarOpen ? 0.35 : 0.7,
+                end: sidebarOpen ? 0.7 : 0.35,
+              ),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              builder: (context, value, child) {
+                return CustomPaint(
+                  size: const Size(14, 10),
+                  painter: HamburgerPainter(
+                    color: iconColor,
+                    bottomLineFactor: value,
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -42,8 +57,12 @@ class CustomHamburgerIcon extends StatelessWidget {
 /// Painter for custom hamburger icon
 class HamburgerPainter extends CustomPainter {
   final Color color;
+  final double bottomLineFactor;
 
-  HamburgerPainter({required this.color});
+  HamburgerPainter({
+    required this.color,
+    this.bottomLineFactor = 0.35,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -52,25 +71,28 @@ class HamburgerPainter extends CustomPainter {
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
 
-    const lineSpacing = 6.5; // Gap between lines
+    const lineSpacing = 6.5;
+    const yOffset = 2.0;
 
     // Top line - 70% width
     canvas.drawLine(
-      const Offset(0, 0),
-      Offset(size.width * 0.7, 0),
+      Offset(0, yOffset),
+      Offset(size.width * 0.7, yOffset),
       paint,
     );
 
-    // Bottom line - 35% width (much shorter, more from right)
+    // Bottom line - animated width
     canvas.drawLine(
-      const Offset(0, lineSpacing),
-      Offset(size.width * 0.35, lineSpacing),
+      Offset(0, lineSpacing + yOffset),
+      Offset(size.width * bottomLineFactor, lineSpacing + yOffset),
       paint,
     );
   }
 
   @override
-  bool shouldRepaint(HamburgerPainter oldDelegate) => false;
+  bool shouldRepaint(HamburgerPainter oldDelegate) =>
+      oldDelegate.bottomLineFactor != bottomLineFactor ||
+      oldDelegate.color != color;
 }
 
 /// Side drawer widget

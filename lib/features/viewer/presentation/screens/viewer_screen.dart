@@ -387,18 +387,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                                 ),
                           ),
                         ),
-                        // Menu icon to open options
-                        IconButton(
-                          icon: const Icon(Icons.menu),
-                          onPressed: _toggleBottomMenu,
-                          tooltip: 'Options',
-                          iconSize: 20,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                          padding: EdgeInsets.zero,
-                        ),
                       ],
                     ),
                   ),
@@ -484,13 +472,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                CustomHamburgerIcon(
-                                  onPressed: _toggleSidebar,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                const SizedBox(width: 4),
+mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CustomHamburgerIcon(
+                                    onPressed: _toggleSidebar,
+                                    sidebarOpen: _showSidebarDrawer,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 4),
                                 SizedBox(
                                   width: 32,
                                   height: 32,
@@ -630,8 +619,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                                   padding: const EdgeInsets.all(4),
                                   child: Icon(
                                     _bottomMenuExpanded
-                                        ? Icons.expand_less
-                                        : Icons.expand_more,
+                                        ? Icons.expand_more
+                                        : Icons.expand_less,
                                     size: 20,
                                     color: Theme.of(context)
                                         .colorScheme
