@@ -84,8 +84,8 @@ class HomeDrawer extends ConsumerStatefulWidget {
 class _HomeDrawerState extends ConsumerState<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: SafeArea(
+    return SafeArea(
+      child: Drawer(
         child: Column(
           children: [
             // Header
