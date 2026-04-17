@@ -27,7 +27,7 @@ class ViewerScreen extends ConsumerStatefulWidget {
 }
 
 class _ViewerScreenState extends ConsumerState<ViewerScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   static const double _kTapMovementThreshold = 5;
   static const double _kSidebarTopOffset = 56;
   static const double _kSidebarBottomOffset = 88;
@@ -36,9 +36,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   bool _textMode = false;
   bool _controlsVisible = true;
   bool _bottomMenuExpanded = false;
+  bool _sidebarOpen = false;
   int _currentPage = 1;
   int _totalPages = 0;
   late AnimationController _menuController;
+  late AnimationController _sidebarController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
   Offset? _pointerDownPosition;
   bool _pointerMoved = false;
@@ -46,8 +48,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   void _toggleControls() {
     setState(() {
       _controlsVisible = !_controlsVisible;
-      _bottomMenuExpanded = false;
-      _menuController.reverse();
+      if (!_controlsVisible) {
+        _bottomMenuExpanded = false;
+        _menuController.reverse();
+      }
     });
   }
 
@@ -98,10 +102,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     _pointerMoved = false;
   }
 
-  bool get _showSidebarDrawer {
-    final viewerState = _pdfViewerKey.currentState as dynamic;
-    return _controlsVisible && (viewerState?.showSidebar ?? false);
-  }
+  bool get _showSidebarDrawer => _controlsVisible && _sidebarOpen;
 
   void _toggleBottomMenu() {
     setState(() {
@@ -116,8 +117,13 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   void _toggleSidebar() {
     (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
-    if (mounted) {
-      setState(() {});
+    setState(() {
+      _sidebarOpen = !_sidebarOpen;
+    });
+    if (_sidebarOpen) {
+      _sidebarController.forward();
+    } else {
+      _sidebarController.reverse();
     }
   }
 
@@ -187,6 +193,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
+    _sidebarController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final docState = ref.read(documentViewerProvider);
       if (!docState.isLoading &&
@@ -202,6 +212,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   @override
   void dispose() {
     _menuController.dispose();
+    _sidebarController.dispose();
     super.dispose();
   }
 
@@ -232,13 +243,29 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             ),
           ),
 
-          if (_showSidebarDrawer)
-            Positioned(
-              top: _kSidebarTopOffset,
-              bottom: _kSidebarBottomOffset,
-              left: 0,
-              child: _buildSidebarDrawer(context, isDark),
-            ),
+          // Sidebar with slide-in animation
+          AnimatedBuilder(
+            animation: _sidebarController,
+            builder: (context, child) {
+              return Positioned(
+                top: _kSidebarTopOffset,
+                bottom: _kSidebarBottomOffset,
+                left: 0,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(-1.0, 0.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _sidebarController,
+                    curve: Curves.easeOutCubic,
+                  )),
+                  child: _controlsVisible
+                      ? _buildSidebarDrawer(context, isDark)
+                      : const SizedBox.shrink(),
+                ),
+              );
+            },
+          ),
 
           if (_controlsVisible)
             Positioned(
@@ -474,9 +501,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                             Row(
 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  CustomHamburgerIcon(
+                                  AnimatedHamburgerIcon(
                                     onPressed: _toggleSidebar,
-                                    sidebarOpen: _showSidebarDrawer,
+                                    isOpen: _showSidebarDrawer,
                                     color: Theme.of(context).colorScheme.primary,
                                   ),
                                   const SizedBox(width: 4),
@@ -633,7 +660,15 @@ mainAxisSize: MainAxisSize.min,
                         ),
                       ),
                     ),
-                    if (_bottomMenuExpanded) ...[
+                    SizeTransition(
+                      sizeFactor: CurvedAnimation(
+                        parent: _menuController,
+                        curve: Curves.easeInOutCubic,
+                      ),
+                      axisAlignment: -1.0,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                       Divider(
                         height: 1,
                         indent: 16,
@@ -706,7 +741,9 @@ mainAxisSize: MainAxisSize.min,
                               settings.copyWith(theme: mode.value));
                         },
                       ),
-                    ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
