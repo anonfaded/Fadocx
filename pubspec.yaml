@@ -12,6 +12,11 @@ dependencies:
     sdk: flutter
 
   # =========================
+  # UI COMPONENTS
+  # =========================
+  fl_chart: ^1.2.0
+
+  # =========================
   # SCANNING & OCR (Open Source)
   # =========================
   camera: ^0.12.0+1
