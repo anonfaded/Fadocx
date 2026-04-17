@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:fadocx/core/errors/failures.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
@@ -149,7 +150,8 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   Future<Result<List<RecentFile>>> getRecentFiles() async {
     try {
       final hiveFiles = await _datasource.getRecentFiles();
-      final domainFiles = hiveFiles.map(SettingsMapper.fromHiveRecentFile).toList();
+      // Offload to background isolate for production performance
+      final domainFiles = await compute(_processRecentFiles, hiveFiles);
       log.d('Retrieved ${domainFiles.length} recent files');
       return ResultSuccess(domainFiles);
     } catch (e, st) {
@@ -214,16 +216,23 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   @override
   Stream<Result<List<RecentFile>>> watchRecentFiles() async* {
     try {
+      // CRITICAL FIX: Yield empty list immediately, then load data in background
+      // This prevents blocking the UI thread on Hive box opening (~1 second)
+      log.d('watchRecentFiles: yielding empty list immediately');
+      yield const ResultSuccess([]);
+      
+      // Now open box on background thread - doesn't block UI
       final box = await _datasource.getRecentFilesBox();
       
-      // Yield initial values
-      final initialHiveFiles = box.values.toList();
-      initialHiveFiles.sort((a, b) => b.dateOpened.compareTo(a.dateOpened));
-      yield ResultSuccess(initialHiveFiles.map(SettingsMapper.fromHiveRecentFile).toList());
+      // Yield initial values (processed in background)
+      final hiveFiles = box.values.toList();
+      final initialDomainFiles = await compute(_processRecentFiles, hiveFiles);
+      log.d('watchRecentFiles: yielding ${initialDomainFiles.length} files');
+      yield ResultSuccess(initialDomainFiles);
 
       final stream = await _datasource.watchRecentFiles();
-      await for (final hiveFiles in stream) {
-        final domainFiles = hiveFiles.map(SettingsMapper.fromHiveRecentFile).toList();
+      await for (final updatedHiveFiles in stream) {
+        final domainFiles = await compute(_processRecentFiles, updatedHiveFiles);
         yield ResultSuccess(domainFiles);
       }
     } catch (e, st) {
@@ -231,6 +240,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       yield ResultFailure(UnknownFailure(message: 'Error watching recent files'));
     }
   }
+
 
   @override
   Future<Result<void>> syncRecentFiles() async {
@@ -252,4 +262,14 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       return ResultFailure(UnknownFailure(message: 'Failed to get sync status'));
     }
   }
+}
+
+/// TOP LEVEL FUNCTION for compute()
+List<RecentFile> _processRecentFiles(List<HiveRecentFile> hiveFiles) {
+  // 1. Sort by date opened (descending)
+  final sorted = List<HiveRecentFile>.from(hiveFiles)
+    ..sort((a, b) => b.dateOpened.compareTo(a.dateOpened));
+  
+  // 2. Map to domain entities
+  return sorted.map(SettingsMapper.fromHiveRecentFile).toList();
 }

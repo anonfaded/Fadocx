@@ -15,9 +15,11 @@ dart run pdfrx:remove_wasm_modules --revert
 ```
 
 ## Startup Optimization Best Practices
-1. **Native Classloading:** Keep `MainActivity.kt` small. Use reflection or separate classes for heavy libraries (Apache POI, PDFBox) to avoid 2s+ `onCreate` delays.
-2. **Hive Boxes:** Only open `settings` box in `main()`. Defer `recent_files` and `cache` boxes until needed.
-3. **UI Deferral:** In `HomeScreen`, use `WidgetsBinding.instance.addPostFrameCallback` to defer data loading until the first frame is rendered.
+1. **Zero-Dependency MainActivity:** Ensure `MainActivity.kt` has ZERO direct imports of heavy third-party libraries (POI, PDFBox). Use reflection for initialization and method channel handlers to keep the classloader from hitting bottlenecks.
+2. **Reflection-based Lazy Loading:** Load heavy parser classes only when their specific MethodChannel is called.
+3. **Optimized Gradle Properties:** Use `android.enableR8.fullMode=true` and `org.gradle.jvmargs` with sufficient memory to speed up DEXing and shrinking.
+4. **Hive Boxes:** Only open `settings` box in `main()`. Defer `recent_files` and `cache` boxes until needed.
+5. **UI Deferral:** In `HomeScreen`, use `WidgetsBinding.instance.addPostFrameCallback` to defer data loading until the first frame is rendered.
 
 ## Flutter Best Practices
 1. **State Management:** Use Riverpod `Notifier` or `AsyncNotifier`. Avoid legacy `StateNotifier`.
