@@ -73,7 +73,6 @@ dependencies {
     // Apache POI for native document parsing (XLSX, XLS, CSV, DOC)
     implementation("org.apache.poi:poi:5.2.3")
     implementation("org.apache.poi:poi-ooxml:5.2.3")
-    implementation("org.apache.poi:poi-ooxml-lite:5.2.3")
     implementation("org.apache.poi:poi-scratchpad:5.2.3")
 
     // PDFBox for PDF text extraction

@@ -17,12 +17,15 @@ class HiveDatasource {
       Hive.registerAdapter(HiveAppSettingsAdapter());
       Hive.registerAdapter(HiveDeviceInfoAdapter());
 
-      // ONLY pre-open settings box as it is needed for theme initialization
+      // Pre-open both settings and recent files boxes to avoid blocking UI during home screen render
       if (!Hive.isBoxOpen(settingsBoxName)) {
         await Hive.openBox<HiveAppSettings>(settingsBoxName);
       }
+      if (!Hive.isBoxOpen(recentFilesBoxName)) {
+        await Hive.openBox<HiveRecentFile>(recentFilesBoxName);
+      }
       
-      log.i('Hive basic initialization complete (settings box opened)');
+      log.i('Hive initialization complete (settings + recent files boxes opened)');
     } catch (e, st) {
       log.e('Error initializing Hive', e, st);
       rethrow;

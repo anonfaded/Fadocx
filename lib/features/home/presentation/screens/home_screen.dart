@@ -28,8 +28,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // This allows the skeleton loader to show immediately while data loads in background
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => _dataLoaded = true);
-      // Trigger provider watch here to load data in background
-      ref.read(recentFilesProvider);
+      // Load on background thread to avoid blocking main thread
+      Future.microtask(() => ref.read(recentFilesProvider));
     });
   }
 

@@ -1,49 +1,24 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/config/theme/app_theme.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
-import 'package:fadocx/features/settings/data/models/hive_models.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
 import 'package:fadocx/services/file_intent_service.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
+import 'dart:async';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Store root isolate token for background isolates
-  RootIsolateToken.instance;
+  // Initialize Hive in background - pre-opens boxes
+  HiveDatasource.initialize();
 
-  try {
-    // 1. Parallelize initial dependency loading
-    // HiveDatasource.initialize() now only opens the essential settings box
-    await Future.wait([
-      HiveDatasource.initialize(),
-      FileIntentService.initialize(),
-    ]);
-
-    // 2. Fast-read theme (synchronous if box is already open in HiveDatasource.initialize)
-    final savedTheme = Hive.box<HiveAppSettings>(HiveDatasource.settingsBoxName)
-            .values
-            .firstOrNull
-            ?.theme ??
-        'dark';
-
-    runApp(ProviderScope(
-      overrides: [initialThemeProvider.overrideWithValue(savedTheme)],
-      child: const MyApp(),
-    ));
-  } catch (e, st) {
-    log.e('Failed to initialize', e, st);
-    runApp(const ProviderScope(child: MyApp()));
-  }
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends ConsumerStatefulWidget {

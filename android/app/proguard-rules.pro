@@ -5,16 +5,20 @@
 -keep class com.fadseclab.fadocx.NativeDocumentParser { *; }
 -keep class com.fadseclab.fadocx.PdfTextExtractor { *; }
 
-# Apache POI
--keep class org.apache.poi.** { *; }
--keep class org.apache.xmlbeans.** { *; }
--keep class com.microsoft.schemas.** { *; }
--dontwarn org.apache.poi.**
--dontwarn org.apache.xmlbeans.**
+# Apache POI - Surgical keep to reduce class load time
+-keep class org.apache.poi.ss.usermodel.WorkbookFactory { *; }
+-keep class org.apache.poi.ss.usermodel.CellType { *; }
+-keep class org.apache.poi.hssf.usermodel.HSSFWorkbook { *; }
+-keep class org.apache.poi.hwpf.** { *; }
 
 # PDFBox
 -keep class com.tom_roush.pdfbox.** { *; }
+
+# Prevent warnings for unused transitive dependencies
+-dontwarn org.apache.poi.**
+-dontwarn org.apache.xmlbeans.**
 -dontwarn com.tom_roush.pdfbox.**
+-dontwarn org.apache.commons.logging.**
 
 # Flutter
 -keep class io.flutter.app.** { *; }
