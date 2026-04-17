@@ -787,7 +787,6 @@ class _SettingsRow extends StatelessWidget {
   final String title;
   final String? value;
   final VoidCallback? onTap;
-  final bool showChevron;
   final bool isComingSoon;
 
   const _SettingsRow({
@@ -795,7 +794,6 @@ class _SettingsRow extends StatelessWidget {
     required this.title,
     this.value,
     this.onTap,
-    this.showChevron = true,
     this.isComingSoon = false,
   });
 
@@ -856,7 +854,7 @@ class _SettingsRow extends StatelessWidget {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
-              if (showChevron && onTap != null && !isComingSoon)
+              if (true && onTap != null && !isComingSoon)
                 Padding(
                   padding: const EdgeInsets.only(left: 8),
                   child: Icon(

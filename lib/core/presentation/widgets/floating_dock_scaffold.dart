@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:fadocx/features/home/presentation/widgets/bottom_nav_dock.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fadocx/config/routing/app_router.dart';
 
 /// Floating overlay scaffold that places app bar and bottom dock as transparent
 /// overlays, allowing content to scroll behind them like iOS/macOS style.
@@ -149,59 +150,150 @@ class _FloatingDock extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Stack(
-      children: [
-        // Shadow above the bottom dock
-        Positioned(
-          top: -8,
-          left: 0,
-          right: 0,
-          height: 8,
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withValues(alpha: 0.3)
-                      : Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, -4),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+        child: Stack(
+          children: [
+            // Shadows (above, left, right, bottom)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    // Top shadow
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.3)
+                          : Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 12,
+                      offset: const Offset(0, -4),
+                      spreadRadius: 2,
+                    ),
+                    // Bottom shadow
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.25)
+                          : Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                      spreadRadius: 2,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        // Main dock
-        ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface
-                    .withValues(alpha: 0.8),
-                border: Border(
-                  top: BorderSide(
+            // Main dock with blur and buttons
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  decoration: BoxDecoration(
                     color: Theme.of(context)
                         .colorScheme
-                        .outline
-                        .withValues(alpha: 0.15),
-                    width: 1,
+                        .surface
+                        .withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.15),
+                      width: 1,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        _buildDockItem(
+                          context,
+                          icon: Icons.home,
+                          label: 'Home',
+                          isActive: currentRoute == RouteNames.home,
+                          onTap: () {
+                            if (currentRoute != RouteNames.home) {
+                              context.go(RouteNames.home);
+                            }
+                          },
+                        ),
+                        _buildDockItem(
+                          context,
+                          icon: Icons.history,
+                          label: 'Recents',
+                          isActive: false,
+                          onTap: () {
+                            if (currentRoute != RouteNames.home) {
+                              context.go(RouteNames.home);
+                            }
+                          },
+                        ),
+                        _buildDockItem(
+                          context,
+                          icon: Icons.settings,
+                          label: 'Settings',
+                          isActive: currentRoute == RouteNames.settings,
+                          onTap: () {
+                            if (currentRoute != RouteNames.settings) {
+                              context.go(RouteNames.settings);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  BottomNavDock(currentRoute: currentRoute),
-                  SizedBox(height: bottomPadding),
-                ],
-              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDockItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: isActive
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: isActive
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                    ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
