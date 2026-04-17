@@ -485,6 +485,51 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     );
   }
 
+  Widget _buildIconButton(
+    BuildContext context,
+    IconData icon,
+    VoidCallback? onTap,
+  ) {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Icon(
+            icon,
+            size: 16,
+            color: onTap != null
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPageIndicator(BuildContext context) {
+    return GestureDetector(
+      onTap: _totalPages > 1 ? _showGoToPageDialog : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          '$_currentPage/$_totalPages',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFloatingBottomPanel(BuildContext context, bool isDark) {
     return Stack(
       children: [
@@ -554,166 +599,52 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                           horizontal: 16,
                           vertical: 12,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+child: Row(
                           children: [
-                            Row(
-mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AnimatedHamburgerIcon(
-                                    onPressed: _toggleSidebar,
-                                    isOpen: _sidebarOpen,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 4),
-                                SizedBox(
-                                  width: 32,
-                                  height: 32,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap:
-                                          _currentPage > 1 ? _goToFirstPage : null,
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Icon(
-                                        Icons.first_page,
-                                        size: 16,
-                                        color: _currentPage > 1
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant
-                                                .withValues(alpha: 0.5),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 32,
-                                  height: 32,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: _currentPage > 1
-                                          ? _goToPreviousPage
-                                          : null,
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Icon(
-                                        Icons.chevron_left,
-                                        size: 16,
-                                        color: _currentPage > 1
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant
-                                                .withValues(alpha: 0.5),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap:
-                                      _totalPages > 1 ? _showGoToPageDialog : null,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primaryContainer
-                                          .withValues(alpha: 0.3),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      '$_currentPage/$_totalPages',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 32,
-                                  height: 32,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: _currentPage < _totalPages
-                                          ? _goToNextPage
-                                          : null,
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Icon(
-                                        Icons.chevron_right,
-                                        size: 16,
-                                        color: _currentPage < _totalPages
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant
-                                                .withValues(alpha: 0.5),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 32,
-                                  height: 32,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: _currentPage < _totalPages
-                                          ? _goToLastPage
-                                          : null,
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Icon(
-                                        Icons.last_page,
-                                        size: 16,
-                                        color: _currentPage < _totalPages
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant
-                                                .withValues(alpha: 0.5),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            // Left: hamburger
+                            AnimatedHamburgerIcon(
+                              onPressed: _toggleSidebar,
+                              isOpen: _sidebarOpen,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: _toggleBottomMenu,
-                                borderRadius: BorderRadius.circular(8),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Icon(
-                                    _bottomMenuExpanded
-                                        ? Icons.expand_more
-                                        : Icons.expand_less,
-                                    size: 20,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                            // Center: nav controls in Expanded
+                            Expanded(
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildIconButton(
+                                      context,
+                                      Icons.first_page,
+                                      _currentPage > 1 ? _goToFirstPage : null,
+                                    ),
+                                    _buildIconButton(
+                                      context,
+                                      Icons.chevron_left,
+                                      _currentPage > 1 ? _goToPreviousPage : null,
+                                    ),
+                                    _buildPageIndicator(context),
+                                    _buildIconButton(
+                                      context,
+                                      Icons.chevron_right,
+                                      _currentPage < _totalPages ? _goToNextPage : null,
+                                    ),
+                                    _buildIconButton(
+                                      context,
+                                      Icons.last_page,
+                                      _currentPage < _totalPages ? _goToLastPage : null,
+                                    ),
+                                  ],
                                 ),
                               ),
+                            ),
+                            // Right: expand button
+                            _buildIconButton(
+                              context,
+                              _bottomMenuExpanded
+                                  ? Icons.expand_more
+                                  : Icons.expand_less,
+                              _toggleBottomMenu,
                             ),
                           ],
                         ),
