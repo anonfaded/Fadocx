@@ -11,14 +11,35 @@ import 'package:fadocx/features/settings/presentation/providers/settings_provide
 import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Home screen - displays recent files and navigation
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    log.d('Building HomeScreen');
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
 
-    final recentFiles = ref.watch(recentFilesProvider);
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _readyToLoad = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Defer loading until after first frame to let splash screen disappear ASAP
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _readyToLoad = true);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    log.d('Building HomeScreen (ready=$_readyToLoad)');
+
+    // Don't even watch the provider until the first frame is out
+    final AsyncValue<List<RecentFile>> recentFiles = _readyToLoad 
+        ? ref.watch(recentFilesProvider)
+        : const AsyncValue.loading();
 
     return Scaffold(
       appBar: PreferredSize(
@@ -75,10 +96,10 @@ class HomeScreen extends ConsumerWidget {
           log.d('Recent files loaded: ${files.length}');
 
           if (files.isEmpty) {
-            return _buildEmptyState(context, ref);
+            return _buildEmptyState(context);
           }
 
-          return _buildRecentFilesList(context, files, ref);
+          return _buildRecentFilesList(context, files);
         },
         loading: () {
           log.d('Loading recent files...');
@@ -119,7 +140,7 @@ class HomeScreen extends ConsumerWidget {
         label: Text(AppLocalizations.of(context)!.openFile),
         onPressed: () {
           log.i('Open file button pressed');
-          _showOpenFileDialog(context, ref);
+          _showOpenFileDialog(context);
         },
         tooltip: AppLocalizations.of(context)!.openFileTooltip,
       ),
@@ -130,7 +151,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Build empty state UI
-  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -158,7 +179,7 @@ class HomeScreen extends ConsumerWidget {
             label: Text(AppLocalizations.of(context)!.startBrowsing),
             onPressed: () {
               log.i('Start browsing pressed from empty state');
-              _showOpenFileDialog(context, ref);
+              _showOpenFileDialog(context);
             },
           ),
         ],
@@ -168,7 +189,7 @@ class HomeScreen extends ConsumerWidget {
 
   /// Build recent files list
   Widget _buildRecentFilesList(
-      BuildContext context, List<RecentFile> files, WidgetRef ref) {
+      BuildContext context, List<RecentFile> files) {
     return Column(
       children: [
         // BROWSE SECTION
@@ -194,7 +215,7 @@ class HomeScreen extends ConsumerWidget {
               child: InkWell(
                 onTap: () {
                   log.i('Browse files button pressed');
-                  _showOpenFileDialog(context, ref);
+                  _showOpenFileDialog(context);
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
@@ -344,16 +365,12 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         Expanded(
-          child: Consumer(
-            builder: (context, ref, _) {
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                itemCount: files.length,
-                itemBuilder: (context, index) {
-                  final file = files[index];
-                  return _buildFileListTile(context, file, index, ref);
-                },
-              );
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            itemCount: files.length,
+            itemBuilder: (context, index) {
+              final file = files[index];
+              return _buildFileListTile(context, file, index);
             },
           ),
         ),
@@ -366,7 +383,6 @@ class HomeScreen extends ConsumerWidget {
     BuildContext context,
     RecentFile file,
     int index,
-    WidgetRef ref,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accentColor = Theme.of(context).colorScheme.primary;
@@ -378,7 +394,7 @@ class HomeScreen extends ConsumerWidget {
         child: InkWell(
           onTap: () {
             log.i('Tapped file: ${file.fileName}');
-            _openFile(context, ref, file);
+            _openFile(context, file);
           },
           borderRadius: BorderRadius.circular(12),
           child: Container(
@@ -484,10 +500,10 @@ class HomeScreen extends ConsumerWidget {
                     onSelected: (value) {
                       if (value == 'open') {
                         log.i('Opening file: ${file.fileName}');
-                        _openFile(context, ref, file);
+                        _openFile(context, file);
                       } else if (value == 'remove') {
                         log.i('Removing file from recent: ${file.id}');
-                        _removeFileWithRef(context, ref, file);
+                        _removeFileWithRef(context, file);
                       }
                     },
                   ),
@@ -557,7 +573,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Show file picker and handle file selection
-  Future<void> _showOpenFileDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showOpenFileDialog(BuildContext context) async {
     log.i('Opening file picker');
 
     try {
@@ -649,7 +665,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Open file from recent files list — updates dateOpened
-  void _openFile(BuildContext context, WidgetRef ref, RecentFile file) {
+  void _openFile(BuildContext context, RecentFile file) {
     log.i('Opening file: ${file.fileName} from path: ${file.filePath}');
     // Update dateOpened so it bubbles to the top of the list
     final updated = RecentFile(
@@ -671,7 +687,6 @@ class HomeScreen extends ConsumerWidget {
   /// Remove file from recent files (with WidgetRef)
   Future<void> _removeFileWithRef(
     BuildContext context,
-    WidgetRef ref,
     RecentFile file,
   ) async {
     try {
