@@ -410,13 +410,23 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
   @override
   void initState() {
     super.initState();
+    log.d(
+        '🖼️  [Thumbnail Widget] Initializing for file: ${widget.file.fileName}');
+
     // Skip thumbnail generation for presentation formats (not yet supported)
     final type = widget.file.fileType.toLowerCase();
     if (type == 'ppt' || type == 'pptx' || type == 'odp') {
+      log.d(
+          '🖼️  [Thumbnail Widget] Skipping generation for presentation format: $type');
       return;
     }
+
     // Trigger thumbnail generation once via side effect
+    log.d(
+        '🖼️  [Thumbnail Widget] Scheduling thumbnail generation via post-frame callback');
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      log.d(
+          '🖼️  [Thumbnail Widget] Post-frame callback executing, triggering generation');
       ref.read(generateAndCacheThumbnailProvider(
         (
           fileId: widget.file.id,
@@ -438,6 +448,8 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
     return thumbnail.when(
       data: (bytes) {
         if (bytes != null && !isPresentation) {
+          log.d(
+              '🖼️  [Thumbnail Widget] ✓ Displaying thumbnail for ${widget.file.fileName} (${bytes.length} bytes)');
           return ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: Image.memory(
@@ -449,10 +461,18 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
           );
         }
         // No thumbnail available or presentation format
+        log.d(
+            '🖼️  [Thumbnail Widget] ⚠️  No thumbnail available or presentation format, showing placeholder');
         return _buildThumbPlaceholder(isPresentation);
       },
-      loading: () => _buildThumbPlaceholder(isPresentation),
-      error: (_, __) => _buildThumbPlaceholder(isPresentation),
+      loading: () {
+        log.d('🖼️  [Thumbnail Widget] Loading thumbnail...');
+        return _buildThumbPlaceholder(isPresentation);
+      },
+      error: (error, stack) {
+        log.e('🖼️  [Thumbnail Widget] Error loading thumbnail: $error');
+        return _buildThumbPlaceholder(isPresentation);
+      },
     );
   }
 
