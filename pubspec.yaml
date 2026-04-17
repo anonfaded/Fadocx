@@ -127,6 +127,11 @@ flutter:
   assets:
     - assets/tessdata/
     - assets/tessdata_config.json
-    - assets/app_icon.png
     - assets/fadocx.png
     - assets/fadocx_header_landscape_png.png
+  
+  fonts:
+    - family: Ubuntu
+      fonts:
+        - asset: assets/ubuntu_regular.ttf
+          weight: 400

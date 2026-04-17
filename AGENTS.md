@@ -34,6 +34,29 @@ dart run pdfrx:remove_wasm_modules --revert
 3. **Manifest:** Ensure all `intent-filter` configurations are precise to avoid unnecessary app launches.
 4. **Permissions:** Check and request permissions (Camera, Storage) via Flutter's `permission_handler` before calling native code.
 
+## App Icon & Splash Screen Update Workflow
+When updating app branding or icons, follow this workflow:
+
+### 1. Update App Launcher Icon
+- **File:** `assets/fadocx.png` (1:1 square ratio, minimum 1024x1024px recommended)
+- **After update:** Run `flutter pub run flutter_launcher_icons` to generate platform-specific launcher icons
+- **Generates:** Android `mipmap-*` directories and iOS `AppIcon.appiconset`
+
+### 2. Update App Bar & Splash Screen Icon
+- **File:** `assets/fadocx_header_landscape_png.png` (2:1 landscape ratio, e.g., 1024x512px)
+- **Usage:** App bar header (80x32px in app) and splash screen background
+- **After update:** Run `flutter pub run flutter_native_splash:create` to regenerate native splash screen
+- **Generates:** Native Android and iOS splash screen assets
+
+### 3. Configuration References
+- **Launcher icons config:** `pubspec.yaml` → `flutter_launcher_icons` section
+- **Splash screen config:** `pubspec.yaml` → `flutter_native_splash` section
+
+### Important Notes
+- Always update icons BEFORE running `flutter build` or `flutter pub get`
+- Both commands modify native platform files; regenerate after any asset changes
+- Test on both Android and iOS after regeneration to ensure correct scaling
+
 **Agent Workflow Rules**
 
 - **Todo First**: Always create a detailed, long todo list before starting work on any bug or feature; include edge cases, assumptions, and explicit context-gathering steps.
