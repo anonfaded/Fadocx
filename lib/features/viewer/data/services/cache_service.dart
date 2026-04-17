@@ -67,18 +67,19 @@ class HiveCacheService implements CacheService {
   late Box<String> _cacheBox;
   bool _isInitialized = false;
 
-  /// Initialize Hive box - call once on app startup
-  Future<void> initialize() async {
+  /// Initialize Hive box - called lazily on first access
+  Future<void> _initialize() async {
     if (_isInitialized) return;
     
     try {
       if (!Hive.isBoxOpen(CachedParsedSheet.boxName)) {
+        log.d('Lazy opening cache box: ${CachedParsedSheet.boxName}');
         _cacheBox = await Hive.openBox<String>(CachedParsedSheet.boxName);
       } else {
         _cacheBox = Hive.box<String>(CachedParsedSheet.boxName);
       }
       _isInitialized = true;
-      log.i('HiveCacheService initialized');
+      log.i('HiveCacheService initialized lazily');
     } catch (e) {
       log.e('Failed to initialize Hive cache: $e');
       rethrow;
@@ -88,7 +89,7 @@ class HiveCacheService implements CacheService {
   @override
   Future<Map<String, dynamic>?> getCachedParsing(String filePath) async {
     try {
-      await _ensureInitialized();
+      await _initialize();
 
       final cachedJson = _cacheBox.get(filePath);
       if (cachedJson == null) {
@@ -141,7 +142,7 @@ class HiveCacheService implements CacheService {
     Map<String, dynamic> parsedData,
   ) async {
     try {
-      await _ensureInitialized();
+      await _initialize();
 
       final file = File(filePath);
       if (!await file.exists()) {
@@ -170,7 +171,7 @@ class HiveCacheService implements CacheService {
   @override
   Future<void> clearCache() async {
     try {
-      await _ensureInitialized();
+      await _initialize();
       await _cacheBox.clear();
       log.i('Cleared all cached parsings');
     } catch (e) {
@@ -189,13 +190,6 @@ class HiveCacheService implements CacheService {
     } catch (e) {
       log.w('Error checking cache validity: $e');
       return false;
-    }
-  }
-
-  /// Ensure box is initialized before use
-  Future<void> _ensureInitialized() async {
-    if (!_isInitialized) {
-      await initialize();
     }
   }
 

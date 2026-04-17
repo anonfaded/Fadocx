@@ -12,28 +12,29 @@ import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
 import 'package:fadocx/features/settings/data/models/hive_models.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
-import 'package:fadocx/features/viewer/data/services/cache_service.dart';
 import 'package:fadocx/services/file_intent_service.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Store root isolate token for background isolates to access platform channels
-  // This must happen before any plugins try to use platform channels
+  // Store root isolate token for background isolates
   RootIsolateToken.instance;
 
   try {
-    await HiveDatasource.initialize();
+    // 1. Parallelize initial dependency loading
+    // HiveDatasource.initialize() now only opens the essential settings box
+    await Future.wait([
+      HiveDatasource.initialize(),
+      FileIntentService.initialize(),
+    ]);
 
-    // Restore saved theme before runApp to avoid dark-mode flash
-    final settingsBox =
-        Hive.box<HiveAppSettings>(HiveDatasource.settingsBoxName);
-    final savedTheme = settingsBox.values.firstOrNull?.theme ?? 'dark';
-
-    final cacheService = HiveCacheService();
-    await cacheService.initialize();
-    await FileIntentService.initialize();
+    // 2. Fast-read theme (synchronous if box is already open in HiveDatasource.initialize)
+    final savedTheme = Hive.box<HiveAppSettings>(HiveDatasource.settingsBoxName)
+            .values
+            .firstOrNull
+            ?.theme ??
+        'dark';
 
     runApp(ProviderScope(
       overrides: [initialThemeProvider.overrideWithValue(savedTheme)],

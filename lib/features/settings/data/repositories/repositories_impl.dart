@@ -99,6 +99,13 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
   @override
   Stream<Result<AppSettings>> watchSettings() async* {
     try {
+      final box = await _datasource.getSettingsBox();
+      
+      // Yield initial values
+      if (box.values.isNotEmpty) {
+        yield ResultSuccess(SettingsMapper.fromHiveAppSettings(box.values.first));
+      }
+
       final stream = await _datasource.watchSettings();
       await for (final settings in stream) {
         if (settings != null) {
@@ -207,6 +214,13 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   @override
   Stream<Result<List<RecentFile>>> watchRecentFiles() async* {
     try {
+      final box = await _datasource.getRecentFilesBox();
+      
+      // Yield initial values
+      final initialHiveFiles = box.values.toList();
+      initialHiveFiles.sort((a, b) => b.dateOpened.compareTo(a.dateOpened));
+      yield ResultSuccess(initialHiveFiles.map(SettingsMapper.fromHiveRecentFile).toList());
+
       final stream = await _datasource.watchRecentFiles();
       await for (final hiveFiles in stream) {
         final domainFiles = hiveFiles.map(SettingsMapper.fromHiveRecentFile).toList();

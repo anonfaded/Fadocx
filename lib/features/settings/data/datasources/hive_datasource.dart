@@ -9,7 +9,7 @@ class HiveDatasource {
   static const String recentFilesBoxName = 'fadocx_recent_files';
   static const String deviceInfoBoxName = 'fadocx_device_info';
 
-  /// Initialize Hive, register adapters, and pre-open all boxes
+  /// Initialize Hive, register adapters, and pre-open essential boxes
   static Future<void> initialize() async {
     try {
       await Hive.initFlutter();
@@ -17,16 +17,12 @@ class HiveDatasource {
       Hive.registerAdapter(HiveAppSettingsAdapter());
       Hive.registerAdapter(HiveDeviceInfoAdapter());
 
-      // Pre-open all boxes so providers don't hit lazy-open lag
+      // ONLY pre-open settings box as it is needed for theme initialization
       if (!Hive.isBoxOpen(settingsBoxName)) {
         await Hive.openBox<HiveAppSettings>(settingsBoxName);
       }
-      if (!Hive.isBoxOpen(recentFilesBoxName)) {
-        await Hive.openBox<HiveRecentFile>(recentFilesBoxName);
-      }
-      if (!Hive.isBoxOpen(deviceInfoBoxName)) {
-        await Hive.openBox<HiveDeviceInfo>(deviceInfoBoxName);
-      }
+      
+      log.i('Hive basic initialization complete (settings box opened)');
     } catch (e, st) {
       log.e('Error initializing Hive', e, st);
       rethrow;
@@ -34,7 +30,7 @@ class HiveDatasource {
   }
 
   /// Open/get settings box
-  static Future<Box<HiveAppSettings>> getSettingsBox() async {
+  Future<Box<HiveAppSettings>> getSettingsBox() async {
     try {
       if (Hive.isBoxOpen(settingsBoxName)) {
         return Hive.box<HiveAppSettings>(settingsBoxName);
@@ -46,15 +42,30 @@ class HiveDatasource {
     }
   }
 
-  /// Open/get recent files box
-  static Future<Box<HiveRecentFile>> getRecentFilesBox() async {
+  /// Open/get recent files box (lazy load)
+  Future<Box<HiveRecentFile>> getRecentFilesBox() async {
     try {
       if (Hive.isBoxOpen(recentFilesBoxName)) {
         return Hive.box<HiveRecentFile>(recentFilesBoxName);
       }
+      log.d('Lazy opening recent files box...');
       return await Hive.openBox<HiveRecentFile>(recentFilesBoxName);
     } catch (e, st) {
       log.e('Error opening recent files box', e, st);
+      rethrow;
+    }
+  }
+
+  /// Open/get device info box (lazy load)
+  Future<Box<HiveDeviceInfo>> getDeviceInfoBox() async {
+    try {
+      if (Hive.isBoxOpen(deviceInfoBoxName)) {
+        return Hive.box<HiveDeviceInfo>(deviceInfoBoxName);
+      }
+      log.d('Lazy opening device info box...');
+      return await Hive.openBox<HiveDeviceInfo>(deviceInfoBoxName);
+    } catch (e, st) {
+      log.e('Error opening device info box', e, st);
       rethrow;
     }
   }
@@ -156,19 +167,12 @@ class HiveDatasource {
     }
   }
 
-  /// Watch settings changes (reactive) - creates defaults on first access
+  /// Watch settings changes (reactive)
   Future<Stream<HiveAppSettings?>> watchSettings() async {
     try {
       final box = await getSettingsBox();
-      // Ensure defaults exist before watching
-      if (box.isEmpty) {
-        log.d('Initializing defaults for watchSettings');
-        await box.put(0, HiveAppSettings());
-      }
       log.d('Started watching settings');
-      return box
-          .watch()
-          .map((_) => box.values.isNotEmpty ? box.values.first : null);
+      return box.watch().map((_) => box.values.isNotEmpty ? box.values.first : null);
     } catch (e, st) {
       log.e('Error watching settings', e, st);
       rethrow;
@@ -180,11 +184,21 @@ class HiveDatasource {
     try {
       final box = await getRecentFilesBox();
       log.d('Started watching recent files');
-      return box.watch().map((_) {
+
+      // Helper to get and sort current values
+      List<HiveRecentFile> getSorted() {
         final files = box.values.toList();
         files.sort((a, b) => b.dateOpened.compareTo(a.dateOpened));
         return files;
-      });
+      }
+
+      // Combine initial values with stream of updates
+      return box.watch().map((_) => getSorted()).asBroadcastStream(
+            onListen: (sub) {
+              // Note: Hive.watch doesn't emit initial value,
+              // but Riverpod StreamProvider handles it by continuing from await for.
+            },
+          );
     } catch (e, st) {
       log.e('Error watching recent files', e, st);
       rethrow;

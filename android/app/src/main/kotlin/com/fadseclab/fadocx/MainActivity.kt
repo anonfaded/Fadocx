@@ -43,20 +43,39 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         
-        // Initialize PDFBox
-        PDFBoxResourceLoader.init(applicationContext)
+        // Initialize PDFBox in a background thread to avoid blocking UI
+        Thread {
+            try {
+                PDFBoxResourceLoader.init(applicationContext)
+                Log.i(TAG, "PDFBox initialized in background")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize PDFBox", e)
+            }
+        }.start()
 
+        setupMethodChannels(flutterEngine)
+        handleFileIntent(intent)
+    }
+
+    private fun setupMethodChannels(flutterEngine: FlutterEngine) {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
-                when (call.method) {
-                    "parseDocument" -> {
-                        val filePath = call.argument<String>("filePath")
-                        val format = call.argument<String>("format")
-                        handleParseDocument(filePath, format, result)
+                // Offload heavy parsing to background threads
+                Thread {
+                    try {
+                        when (call.method) {
+                            "parseDocument" -> {
+                                val filePath = call.argument<String>("filePath")
+                                val format = call.argument<String>("format")
+                                handleParseDocument(filePath, format, result)
+                            }
+                            "isAvailable" -> runOnUiThread { result.success(true) }
+                            else -> runOnUiThread { result.notImplemented() }
+                        }
+                    } catch (e: Exception) {
+                        runOnUiThread { result.error("THREAD_ERROR", e.message, null) }
                     }
-                    "isAvailable" -> result.success(true)
-                    else -> result.notImplemented()
-                }
+                }.start()
             }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, FILE_CHANNEL)
@@ -77,6 +96,8 @@ class MainActivity : FlutterActivity() {
         // PDF platform channel for rendering and text extraction
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PDF_CHANNEL)
             .setMethodCallHandler { call, result ->
+                // Rendering is done on main thread for PdfRenderer (UI-safe)
+                // but text extraction should be on background thread
                 when (call.method) {
                     "renderPage" -> {
                         val filePath = call.argument<String>("filePath")
@@ -99,12 +120,12 @@ class MainActivity : FlutterActivity() {
                     "extractPageText" -> {
                         val filePath = call.argument<String>("filePath")
                         val pageNumber = call.argument<Int>("pageNumber") ?: 1
-                        extractPdfPageText(filePath, pageNumber, result)
+                        Thread { extractPdfPageText(filePath, pageNumber, result) }.start()
                     }
                     "extractTextWithPositions" -> {
                         val filePath = call.argument<String>("filePath")
                         val pageNumber = call.argument<Int>("pageNumber") ?: 1
-                        extractTextWithPositions(filePath, pageNumber, result)
+                        Thread { extractTextWithPositions(filePath, pageNumber, result) }.start()
                     }
                     "getPageSize" -> {
                         val filePath = call.argument<String>("filePath")
@@ -114,8 +135,6 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
-
-        handleFileIntent(intent)
     }
 
     override fun onDestroy() {
@@ -363,11 +382,11 @@ class MainActivity : FlutterActivity() {
     private fun extractPdfPageText(filePath: String?, pageNumber: Int, result: MethodChannel.Result) {
         try {
             if (filePath == null) {
-                return result.error("INVALID_ARGS", "Missing filePath", null)
+                return runOnUiThread { result.error("INVALID_ARGS", "Missing filePath", null) }
             }
             val file = File(filePath)
             if (!file.exists()) {
-                return result.error("FILE_NOT_FOUND", "File not found: $filePath", null)
+                return runOnUiThread { result.error("FILE_NOT_FOUND", "File not found: $filePath", null) }
             }
             
             val document = PDDocument.load(file)
@@ -377,13 +396,15 @@ class MainActivity : FlutterActivity() {
             val text = textStripper.getText(document)
             document.close()
             
-            result.success(mapOf(
-                "pageNumber" to pageNumber,
-                "text" to text
-            ))
+            runOnUiThread {
+                result.success(mapOf(
+                    "pageNumber" to pageNumber,
+                    "text" to text
+                ))
+            }
         } catch (e: Exception) {
             Log.e(TAG, "PDF page text extraction error", e)
-            result.error("PDF_ERROR", e.message, null)
+            runOnUiThread { result.error("PDF_ERROR", e.message, null) }
         }
     }
     
@@ -391,11 +412,11 @@ class MainActivity : FlutterActivity() {
     private fun extractTextWithPositions(filePath: String?, pageNumber: Int, result: MethodChannel.Result) {
         try {
             if (filePath == null) {
-                return result.error("INVALID_ARGS", "Missing filePath", null)
+                return runOnUiThread { result.error("INVALID_ARGS", "Missing filePath", null) }
             }
             val file = File(filePath)
             if (!file.exists()) {
-                return result.error("FILE_NOT_FOUND", "File not found: $filePath", null)
+                return runOnUiThread { result.error("FILE_NOT_FOUND", "File not found: $filePath", null) }
             }
             
             val document = PDDocument.load(file)
@@ -424,14 +445,16 @@ class MainActivity : FlutterActivity() {
             val text = stripper.getText(document)
             document.close()
             
-            result.success(mapOf(
-                "pageNumber" to pageNumber,
-                "text" to text,
-                "characters" to stripper.characters
-            ))
+            runOnUiThread {
+                result.success(mapOf(
+                    "pageNumber" to pageNumber,
+                    "text" to text,
+                    "characters" to stripper.characters
+                ))
+            }
         } catch (e: Exception) {
             Log.e(TAG, "PDF text position extraction error", e)
-            result.error("PDF_ERROR", e.message, null)
+            runOnUiThread { result.error("PDF_ERROR", e.message, null) }
         }
     }
 
@@ -466,12 +489,12 @@ class MainActivity : FlutterActivity() {
 
             val duration = System.currentTimeMillis() - startTime
             Log.i(TAG, "Parse completed in ${duration}ms")
-            result.success(parsedData)
+            runOnUiThread { result.success(parsedData) }
         } catch (e: Exception) {
             Log.e(TAG, "Parse error", e)
             val sw = StringWriter()
             e.printStackTrace(PrintWriter(sw))
-            result.error("PARSE_ERROR", "${e.message}\n${sw.toString()}", null)
+            runOnUiThread { result.error("PARSE_ERROR", "${e.message}\n${sw.toString()}", null) }
         }
     }
 
