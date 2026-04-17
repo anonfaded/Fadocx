@@ -24,16 +24,17 @@ class FloatingDockScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final topPadding = mediaQuery.padding.top;
-    final bottomPadding = mediaQuery.padding.bottom;
-    final appBarHeight = appBarContent != null ? 56.0 : 0.0;
+    final topSafePadding = mediaQuery.padding.top;
+    final bottomSafePadding = mediaQuery.padding.bottom;
+    final appBarHeight =
+        appBarContent != null ? 56.0 : 0.0; // Content area height
     final dockHeight = showBottomDock ? 72.0 : 0.0;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Stack(
         children: [
-          // Main scrollable content - full screen, scrolls behind overlays
+          // Main scrollable content - FULL SCREEN, scrolls behind overlays
           Positioned.fill(
             child: body,
           ),
@@ -44,10 +45,10 @@ class FloatingDockScaffold extends StatelessWidget {
               top: 0,
               left: 0,
               right: 0,
-              height: appBarHeight + topPadding,
+              height: appBarHeight + topSafePadding,
               child: _FloatingAppBar(
                 content: appBarContent!,
-                topPadding: topPadding,
+                topPadding: topSafePadding,
               ),
             ),
 
@@ -58,7 +59,7 @@ class FloatingDockScaffold extends StatelessWidget {
               left: 0,
               right: 0,
               child: _FloatingDock(
-                bottomPadding: bottomPadding,
+                bottomPadding: bottomSafePadding,
                 currentRoute: currentRoute,
               ),
             ),
@@ -67,7 +68,7 @@ class FloatingDockScaffold extends StatelessWidget {
           if (floatingActionButton != null && showBottomDock)
             Positioned(
               right: 16,
-              bottom: dockHeight + bottomPadding + 8,
+              bottom: dockHeight + bottomSafePadding + 8,
               child: floatingActionButton!,
             ),
         ],
@@ -112,21 +113,59 @@ class _FloatingAppBar extends StatelessWidget {
             ),
           ),
         ),
-        // Main app bar
-        ClipRect(
+        // Main app bar with rounded bottom corners - FULL WIDTH
+        ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+          ),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
-              color:
-                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
-              child: Column(
-                children: [
-                  SizedBox(height: topPadding),
-                  SizedBox(
-                    height: 56,
-                    child: content,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.95)
+                    : Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.92),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+                border: Border(
+                  left: BorderSide(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                    width: 1,
                   ),
-                ],
+                  right: BorderSide(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                  bottom: BorderSide(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: SizedBox(
+                  height: 56, // Height for content area
+                  child: Center(child: content),
+                ),
               ),
             ),
           ),

@@ -36,17 +36,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildAppBarContent(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Center(
-          child: Text(
-            AppLocalizations.of(context)!.appName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
+      child: Center(
+        child: Image.asset(
+          'assets/app_icon.png',
+          height: 48,
+          width: 48,
+          fit: BoxFit.contain,
         ),
       ),
     );
@@ -66,7 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (!_dataLoaded) {
       // Show skeleton loader immediately
       return ListView(
-        padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
+        padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
         children: List.generate(
           6,
           (index) => Padding(
@@ -87,7 +82,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               : _buildRecentFilesScrollable(context, files),
           error: (error, st) => _buildErrorStateScrollable(context, error),
           loading: () => ListView(
-            padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
+            padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
             children: List.generate(
               6,
               (index) => Padding(
@@ -103,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildEmptyStateScrollable(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 80),
+      padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
       children: [
         Center(
           child: Column(
@@ -147,7 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     List<RecentFile> files,
   ) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
       children: [
         // BROWSE SECTION
         Container(

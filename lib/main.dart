@@ -10,10 +10,20 @@ import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
 import 'package:fadocx/services/file_intent_service.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
 import 'dart:async';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Make status bar transparent and overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+    ),
+  );
 
   // Initialize Hive in background - pre-opens boxes
   HiveDatasource.initialize();
