@@ -13,7 +13,7 @@ import 'package:fadocx/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Make status bar transparent and overlay style
@@ -26,7 +26,15 @@ void main() {
   );
 
   // Initialize Hive in background - pre-opens boxes
-  HiveDatasource.initialize();
+  await HiveDatasource.initialize();
+
+  // Clear old thumbnail cache to regenerate with new system
+  try {
+    await HiveDatasource().clearThumbnailCache();
+    log.i('✅ Thumbnail cache cleared on startup - will regenerate with new system');
+  } catch (e) {
+    log.e('Error clearing thumbnail cache on startup', e);
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }
