@@ -42,18 +42,10 @@ final appSettingsProvider = StreamProvider<AppSettings?>((ref) async* {
   final repository = ref.watch(appSettingsRepositoryProvider);
   log.d('Watching app settings stream...');
 
-  // Get initial settings
-  final result = await repository.getSettings();
-  yield await result.fold(
-    (failure) async => null,
-    (settings) async => settings,
-  );
-
-  // Watch for changes
   await for (final result in repository.watchSettings()) {
-    yield await result.fold(
-      (failure) async => null,
-      (settings) async => settings,
+    yield result.fold(
+      (failure) => null,
+      (settings) => settings,
     );
   }
 });
@@ -119,18 +111,13 @@ final recentFilesProvider = StreamProvider<List<RecentFile>>((ref) async* {
   final repository = ref.watch(recentFilesRepositoryProvider);
   log.d('Watching recent files stream...');
 
-  // Get initial list
-  final result = await repository.getRecentFiles();
-  yield await result.fold(
-    (failure) async => [],
-    (files) async => files,
-  );
-
-  // Watch for changes
+  // Start watching immediately - Hive watch() will trigger an initial event if configured,
+  // or we get it through the map logic in datasource.
+  // We remove the blocking initial getRecentFiles() to prevent main thread lag on startup.
   await for (final result in repository.watchRecentFiles()) {
-    yield await result.fold(
-      (failure) async => [],
-      (files) async => files,
+    yield result.fold(
+      (failure) => [],
+      (files) => files,
     );
   }
 });

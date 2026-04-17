@@ -64,8 +64,7 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final repository =
-          await ref.read(documentParsingRepositoryProvider.future);
+      final repository = ref.read(documentParsingRepositoryProvider);
       // Use filePath for extension detection (more reliable than display name)
       final extension =
           _extractExtension(_filePath) ?? _extractExtension(_fileName) ?? '';
