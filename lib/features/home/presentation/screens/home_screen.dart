@@ -37,11 +37,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return SafeArea(
       bottom: false,
       child: Center(
-        child: Image.asset(
-          'assets/app_icon.png',
-          height: 48,
-          width: 48,
-          fit: BoxFit.contain,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/fadocx_header_landscape_png.png',
+              height: 32,
+              width: 80,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Fadocx',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
         ),
       ),
     );
@@ -61,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (!_dataLoaded) {
       // Show skeleton loader immediately
       return ListView(
-        padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
+        padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
         children: List.generate(
           6,
           (index) => Padding(
@@ -82,7 +94,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               : _buildRecentFilesScrollable(context, files),
           error: (error, st) => _buildErrorStateScrollable(context, error),
           loading: () => ListView(
-            padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
+            padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
             children: List.generate(
               6,
               (index) => Padding(
@@ -98,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildEmptyStateScrollable(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
       children: [
         Center(
           child: Column(
@@ -142,7 +154,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     List<RecentFile> files,
   ) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 96, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
       children: [
         // BROWSE SECTION
         Container(

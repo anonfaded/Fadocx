@@ -27,7 +27,7 @@ class FloatingDockScaffold extends StatelessWidget {
     final topSafePadding = mediaQuery.padding.top;
     final bottomSafePadding = mediaQuery.padding.bottom;
     final appBarHeight =
-        appBarContent != null ? 56.0 : 0.0; // Content area height
+        appBarContent != null ? 40.0 : 0.0; // Reduced from 56 to 40 for compact
     final dockHeight = showBottomDock ? 72.0 : 0.0;
 
     return Scaffold(
@@ -137,20 +137,6 @@ class _FloatingAppBar extends StatelessWidget {
                   bottomRight: Radius.circular(16),
                 ),
                 border: Border(
-                  left: BorderSide(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                  right: BorderSide(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.2),
-                    width: 1,
-                  ),
                   bottom: BorderSide(
                     color: Theme.of(context)
                         .colorScheme
@@ -163,7 +149,7 @@ class _FloatingAppBar extends StatelessWidget {
               child: SafeArea(
                 bottom: false,
                 child: SizedBox(
-                  height: 56, // Height for content area
+                  height: 40, // Compact height for content area
                   child: Center(child: content),
                 ),
               ),
