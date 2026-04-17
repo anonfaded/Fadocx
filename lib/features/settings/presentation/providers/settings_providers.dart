@@ -241,3 +241,31 @@ class GridViewNotifier extends Notifier<bool> {
     log.i('Set view mode to: ${isGrid ? 'grid' : 'list'}');
   }
 }
+
+// ============================================================================
+// RECENT FILES VISIBILITY PROVIDER
+// ============================================================================
+
+/// Show/Hide recent files section on home screen (stored in memory)
+final showRecentFilesProvider = NotifierProvider<ShowRecentFilesNotifier, bool>(
+  ShowRecentFilesNotifier.new,
+);
+
+/// Notifier for managing show/hide recent files
+class ShowRecentFilesNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    log.d('Creating showRecentFilesProvider with default value: true');
+    return true; // Default to showing recent files
+  }
+
+  void toggle() {
+    state = !state;
+    log.i('Toggled recent files visibility to: ${state ? 'visible' : 'hidden'}');
+  }
+
+  void setShowRecentFiles(bool show) {
+    state = show;
+    log.i('Set recent files visibility to: ${show ? 'visible' : 'hidden'}');
+  }
+}

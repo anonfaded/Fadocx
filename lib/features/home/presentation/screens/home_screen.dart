@@ -7,6 +7,7 @@ import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
+import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
 
 /// Home screen - displays recent files and quick actions
 class HomeScreen extends ConsumerStatefulWidget {
@@ -18,6 +19,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _dataLoaded = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -36,7 +38,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            // Icon on left with natural width
+            // Hamburger menu
+            CustomHamburgerIcon(
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
+            const SizedBox(width: 8),
+            // Logo icon on left with natural width
             Image.asset(
               'assets/fadocx_header_landscape_png.png',
               height: 32,
@@ -66,10 +73,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FloatingDockScaffold(
-      appBarContent: _buildAppBarContent(context),
-      currentRoute: RouteNames.home,
-      body: _buildBody(),
+    return Scaffold(
+      key: _scaffoldKey,
+      drawer: const HomeDrawer(),
+      body: FloatingDockScaffold(
+        appBarContent: _buildAppBarContent(context),
+        currentRoute: RouteNames.home,
+        body: _buildBody(),
+      ),
     );
   }
 
@@ -91,8 +102,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Consumer(
       builder: (context, ref, _) {
         final recentFiles = ref.watch(recentFilesProvider);
+        final showRecentFiles = ref.watch(showRecentFilesProvider);
         return recentFiles.when(
-          data: (files) => _buildHomeContent(context, files),
+          data: (files) => _buildHomeContent(context, files, showRecentFiles),
           error: (error, st) => _buildErrorState(context, error),
           loading: () => ListView(
             padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
@@ -109,36 +121,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildHomeContent(BuildContext context, List<RecentFile> files) {
+  Widget _buildHomeContent(BuildContext context, List<RecentFile> files, bool showRecentFiles) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
       children: [
-        // Action Cards Section
-        _buildActionCard(
-          context,
-          title: 'Scan to Extract Text',
-          description: 'Extract text from documents using OCR',
-          icon: Icons.document_scanner,
-          onTap: () {
-            log.i('Navigating to scanner');
-            context.push(RouteNames.scanner);
-          },
-        ),
-        const SizedBox(height: 12),
-        _buildActionCard(
-          context,
-          title: 'Import a Document',
-          description: 'Browse and import files from your device',
-          icon: Icons.folder_open,
-          onTap: () {
-            log.i('Navigating to browse');
-            context.push(RouteNames.browse);
-          },
+        // Action Cards Section - 2 cards in one row
+        Row(
+          children: [
+            // Scan to Extract Text card
+            Expanded(
+              child: _buildActionCard(
+                context,
+                title: 'Scan to Extract Text',
+                description: 'Extract text from documents using OCR',
+                icon: Icons.document_scanner,
+                onTap: () {
+                  log.i('Navigating to scanner');
+                  context.push(RouteNames.scanner);
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Import a Document card
+            Expanded(
+              child: _buildActionCard(
+                context,
+                title: 'Import a Document',
+                description: 'Browse and import files from your device',
+                icon: Icons.folder_open,
+                onTap: () {
+                  log.i('Navigating to browse');
+                  context.push(RouteNames.browse);
+                },
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
 
-        // Recent Files Section
-        if (files.isNotEmpty) ...[
+        // Recent Files Section - only show if enabled
+        if (showRecentFiles && files.isNotEmpty) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -635,78 +657,71 @@ class _ModernActionCardState extends State<_ModernActionCard>
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                      child: Row(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Icon on the left
+                          // Icon on top
                           TweenAnimationBuilder<double>(
                             tween: Tween(begin: 0, end: _isHovered ? 8 : 0),
                             duration: const Duration(milliseconds: 300),
                             builder: (context, offset, _) {
                               return Transform.translate(
-                                offset: Offset(offset * 0.1, 0),
+                                offset: Offset(0, -offset * 0.1),
                                 child: Container(
-                                  padding: const EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(12),
+                                    color: Colors.white.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
                                   child: Icon(
                                     widget.icon,
-                                    size: 24,
+                                    size: 32,
                                     color: Colors.white,
                                   ),
                                 ),
                               );
                             },
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(height: 12),
 
-                          // Text content on the right
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Title
-                                Text(
-                                  widget.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                      ),
-                                ),
-                                const SizedBox(height: 4),
+                          // Text content below
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Title
+                              Text(
+                                widget.title,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                              ),
+                              const SizedBox(height: 6),
 
-                                // Description
-                                Text(
-                                  widget.description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        color:
-                                            Colors.white.withValues(alpha: 0.8),
-                                        fontSize: 11,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-
-                          // Arrow icon
-                          Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: Colors.white.withValues(alpha: 0.6),
+                              // Description
+                              Text(
+                                widget.description,
+                                textAlign: TextAlign.center,
+                                maxLines: 3,
+                                overflow: TextOverflow.clip,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.8),
+                                      fontSize: 12,
+                                      height: 1.3,
+                                    ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

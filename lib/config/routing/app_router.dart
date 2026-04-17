@@ -5,6 +5,7 @@ import 'package:fadocx/features/home/presentation/screens/home_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/documents_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/browse_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/trash_screen.dart';
+import 'package:fadocx/features/home/presentation/screens/whats_new_screen.dart';
 import 'package:fadocx/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fadocx/features/viewer/presentation/screens/viewer_screen.dart';
 import 'package:fadocx/features/scanner/presentation/screens/scanner_screen.dart';
@@ -18,6 +19,7 @@ class RouteNames {
   static const String viewer = '/viewer';
   static const String settings = '/settings';
   static const String scanner = '/scanner';
+  static const String whatsNew = '/whats-new';
 }
 
 /// Global router instance - singleton to prevent navigation reset on rebuild
@@ -151,15 +153,25 @@ GoRouter createGoRouter() {
         },
       ),
 
-      // Scanner screen
-      GoRoute(
-        path: RouteNames.scanner,
-        name: 'scanner',
-        builder: (context, state) {
-          log.d('Navigating to scanner');
-          return const ScannerScreen();
-        },
-      ),
+       // Scanner screen
+       GoRoute(
+         path: RouteNames.scanner,
+         name: 'scanner',
+         builder: (context, state) {
+           log.d('Navigating to scanner');
+           return const ScannerScreen();
+         },
+       ),
+
+       // What's New screen
+       GoRoute(
+         path: RouteNames.whatsNew,
+         name: 'whats_new',
+         builder: (context, state) {
+           log.d('Navigating to what\'s new');
+           return const WhatsNewScreen();
+         },
+       ),
     ],
 
     // Handle redirects including file intents from other apps
