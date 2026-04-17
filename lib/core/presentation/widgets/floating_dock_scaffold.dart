@@ -5,7 +5,7 @@ import 'package:fadocx/config/routing/app_router.dart';
 
 /// Floating overlay scaffold that places app bar and bottom dock as transparent
 /// overlays, allowing content to scroll behind them like iOS/macOS style.
-class FloatingDockScaffold extends StatelessWidget {
+class FloatingDockScaffold extends StatefulWidget {
   final Widget body; // Should be a scrollable widget (ListView, Column, etc)
   final String currentRoute;
   final bool showBottomDock;
@@ -22,13 +22,51 @@ class FloatingDockScaffold extends StatelessWidget {
   });
 
   @override
+  State<FloatingDockScaffold> createState() => _FloatingDockScaffoldState();
+}
+
+class _FloatingDockScaffoldState extends State<FloatingDockScaffold>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+  bool _hasInitializedAnimation = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOutCubic),
+    );
+
+    // Only animate on first build (app startup)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_hasInitializedAnimation && mounted) {
+        _hasInitializedAnimation = true;
+        _fadeController.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final topSafePadding = mediaQuery.padding.top;
     final bottomSafePadding = mediaQuery.padding.bottom;
-    final appBarHeight =
-        appBarContent != null ? 40.0 : 0.0; // Reduced from 56 to 40 for compact
-    final dockHeight = showBottomDock ? 72.0 : 0.0;
+    final appBarHeight = widget.appBarContent != null
+        ? 40.0
+        : 0.0; // Reduced from 56 to 40 for compact
+    final dockHeight = widget.showBottomDock ? 72.0 : 0.0;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -36,40 +74,46 @@ class FloatingDockScaffold extends StatelessWidget {
         children: [
           // Main scrollable content - FULL SCREEN, scrolls behind overlays
           Positioned.fill(
-            child: body,
+            child: widget.body,
           ),
 
-          // Floating top bar with blur (overlay on top)
-          if (appBarContent != null)
+          // Floating top bar with blur (overlay on top) - ONLY fade in on startup
+          if (widget.appBarContent != null)
             Positioned(
               top: 0,
               left: 0,
               right: 0,
               height: appBarHeight + topSafePadding,
-              child: _FloatingAppBar(
-                content: appBarContent!,
-                topPadding: topSafePadding,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: _FloatingAppBar(
+                  content: widget.appBarContent!,
+                  topPadding: topSafePadding,
+                ),
               ),
             ),
 
-          // Floating bottom dock with blur (overlay on bottom)
-          if (showBottomDock)
+          // Floating bottom dock with blur (overlay on bottom) - ONLY fade in on startup
+          if (widget.showBottomDock)
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
-              child: _FloatingDock(
-                bottomPadding: bottomSafePadding,
-                currentRoute: currentRoute,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: _FloatingDock(
+                  bottomPadding: bottomSafePadding,
+                  currentRoute: widget.currentRoute,
+                ),
               ),
             ),
 
           // Floating action button - above the dock
-          if (floatingActionButton != null && showBottomDock)
+          if (widget.floatingActionButton != null && widget.showBottomDock)
             Positioned(
               right: 16,
               bottom: dockHeight + bottomSafePadding + 8,
-              child: floatingActionButton!,
+              child: widget.floatingActionButton!,
             ),
         ],
       ),
@@ -235,12 +279,12 @@ class _FloatingDock extends StatelessWidget {
                         ),
                         _buildDockItem(
                           context,
-                          icon: Icons.history,
-                          label: 'Recents',
-                          isActive: false,
+                          icon: Icons.description,
+                          label: 'Documents',
+                          isActive: currentRoute == RouteNames.documents,
                           onTap: () {
-                            if (currentRoute != RouteNames.home) {
-                              context.go(RouteNames.home);
+                            if (currentRoute != RouteNames.documents) {
+                              context.go(RouteNames.documents);
                             }
                           },
                         ),
@@ -292,15 +336,31 @@ class _FloatingDock extends StatelessWidget {
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 2),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 10,
-                      color: isActive
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                    ),
+              // Label with smooth animated opacity transition
+              AnimatedOpacity(
+                opacity: isActive ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  alignment: Alignment.topCenter,
+                  child: isActive
+                      ? Text(
+                          label,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                fontSize: 10,
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        )
+                      : SizedBox(
+                          height:
+                              (Theme.of(context).textTheme.labelSmall?.height ??
+                                  1.2),
+                        ),
+                ),
               ),
             ],
           ),
