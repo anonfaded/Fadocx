@@ -156,37 +156,37 @@ class _FloatingDock extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
         child: Stack(
           children: [
-            // Shadows (above, left, right, bottom)
+            // Strong shadows (top, bottom, sides)
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     // Top shadow
                     BoxShadow(
                       color: isDark
-                          ? Colors.black.withValues(alpha: 0.3)
-                          : Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 12,
-                      offset: const Offset(0, -4),
-                      spreadRadius: 2,
+                          ? Colors.black.withValues(alpha: 0.6)
+                          : Colors.black.withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, -8),
+                      spreadRadius: 4,
                     ),
                     // Bottom shadow
                     BoxShadow(
                       color: isDark
-                          ? Colors.black.withValues(alpha: 0.25)
-                          : Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                      spreadRadius: 2,
+                          ? Colors.black.withValues(alpha: 0.7)
+                          : Colors.black.withValues(alpha: 0.5),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                      spreadRadius: 6,
                     ),
                   ],
                 ),
               ),
             ),
-            // Main dock with blur and buttons
+            // Main dock with blur and buttons (compact)
             ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(16),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
@@ -194,19 +194,19 @@ class _FloatingDock extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .surface
-                        .withValues(alpha: 0.8),
-                    borderRadius: BorderRadius.circular(24),
+                        .withValues(alpha: 0.85),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: Theme.of(context)
                           .colorScheme
                           .outline
-                          .withValues(alpha: 0.15),
+                          .withValues(alpha: 0.2),
                       width: 1,
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       mainAxisSize: MainAxisSize.max,
@@ -267,23 +267,24 @@ class _FloatingDock extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 24,
+                size: 20,
                 color: isActive
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontSize: 10,
                       color: isActive
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurfaceVariant,
