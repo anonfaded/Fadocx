@@ -17,13 +17,15 @@ class DocumentViewerFactory {
     bool textMode = false,
     VoidCallback? onInvertToggle,
     VoidCallback? onTextModeToggle,
+    VoidCallback? onTap,
+    Function(int currentPage, int totalPages)? onPageChanged,
   }) {
     return switch (document.format.toUpperCase()) {
       'JSON' || 'FADREC' => _buildJsonViewer(document),
       'XML' => _buildXmlViewer(document),
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
-          onInvertToggle, onTextModeToggle),
+          onInvertToggle, onTextModeToggle, onTap, onPageChanged),
       'DOCX' || 'DOC' => _buildDocxViewer(document),
       'PPT' || 'PPTX' || 'ODP' => _buildPptViewer(document),
       _ => _buildUnsupportedViewer(document.format),
@@ -109,6 +111,8 @@ class DocumentViewerFactory {
     bool textMode,
     VoidCallback? onInvertToggle,
     VoidCallback? onTextModeToggle,
+    VoidCallback? onTap,
+    Function(int currentPage, int totalPages)? onPageChanged,
   ) {
     return ModernPdfViewer(
       filePath: filePath,
@@ -117,6 +121,8 @@ class DocumentViewerFactory {
       textMode: textMode,
       onInvertToggle: onInvertToggle,
       onTextModeToggle: onTextModeToggle,
+      onTap: onTap,
+      onPageChanged: onPageChanged,
     );
   }
 
