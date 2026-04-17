@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/features/home/presentation/widgets/bottom_nav_dock.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
-import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
 
-/// Settings screen - comprehensive app configuration with card-based layout
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    log.d('Building SettingsScreen');
-
     final settings = ref.watch(appSettingsProvider);
     final themeMode = ref.watch(themeModeProvider);
 
@@ -32,46 +28,32 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surface
-                      .withValues(alpha: 0.9),
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.surface,
+                      Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withValues(alpha: 0.95),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: Theme.of(context)
                         .colorScheme
                         .outline
                         .withValues(alpha: 0.1),
-                    width: 1,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          AppLocalizations.of(context)!.settingsTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                child: Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.settingsTitle,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 48,
-                      child: Container(),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -81,434 +63,898 @@ class SettingsScreen extends ConsumerWidget {
       body: settings.when(
         data: (appSettings) {
           if (appSettings == null) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
-          return SingleChildScrollView(
+          return AnimatedListView(
             padding: const EdgeInsets.all(16),
+            children: [
+              _buildSectionHeader(context, 'Appearance'),
+              _buildSettingsGroup(context, [
+                _SettingsRow(
+                  icon: Icons.palette_outlined,
+                  title: 'Theme',
+                  value: _getThemeDisplayName(context, themeMode),
+                  onTap: () => _showThemePicker(context, ref, themeMode),
+                ),
+              ]),
+              const SizedBox(height: 24),
+              _buildSectionHeader(context, 'Language'),
+              _buildSettingsGroup(context, [
+                _SettingsRow(
+                  icon: Icons.language,
+                  title: 'Language',
+                  value: _getLanguageDisplayName(context, ref),
+                  onTap: () => _showLanguagePicker(context, ref),
+                ),
+              ]),
+              const SizedBox(height: 24),
+              _buildSectionHeader(context, 'Storage'),
+              _buildSettingsGroup(context, [
+                _SettingsRow(
+                  icon: Icons.folder_outlined,
+                  title: 'Documents Size',
+                  value: '~12.4 MB',
+                  showChevron: false,
+                  onTap: () {},
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.picture_as_pdf,
+                  title: 'PDFs',
+                  value: '3 files',
+                  showChevron: false,
+                  onTap: null,
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.table_chart,
+                  title: 'Spreadsheets',
+                  value: '2 files',
+                  showChevron: false,
+                  onTap: null,
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.settings_backup_restore,
+                  title: 'Custom Storage',
+                  value: 'Coming Soon',
+                  isComingSoon: true,
+                  onTap: null,
+                ),
+              ]),
+              const SizedBox(height: 24),
+              _buildSectionHeader(context, 'About'),
+              _buildSettingsGroup(context, [
+                _SettingsRow(
+                  icon: Icons.info_outline,
+                  title: 'Version',
+                  value: '1.0.0 (Build 1)',
+                  onTap: () => _showVersionInfo(context),
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.code,
+                  title: 'Source Code',
+                  onTap: () => _copyToClipboard(
+                      context, 'https://github.com/anonfaded/Fadocx'),
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.email_outlined,
+                  title: 'Contact',
+                  value: 'contact@fadseclab.com',
+                  onTap: () =>
+                      _copyToClipboard(context, 'contact@fadseclab.com'),
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.email_outlined,
+                  title: 'Contact',
+                  value: 'contact@fadseclab.com',
+                  onTap: () =>
+                      _copyToClipboard(context, 'contact@fadseclab.com'),
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.shield_outlined,
+                  title: 'Privacy Policy',
+                  onTap: () => _showPrivacyPolicy(context),
+                ),
+              ]),
+              const SizedBox(height: 24),
+              _buildSectionHeader(context, 'Danger Zone', color: Colors.red),
+              _buildDangerGroup(context, [
+                _DangerRow(
+                  icon: Icons.delete_outline,
+                  title: 'Clear Recent Files',
+                  subtitle: 'Remove all recent files',
+                  confirmText: 'DELETE',
+                  onConfirm: () {
+                    ref.read(recentFilesMutatorProvider).clearAllRecentFiles();
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Recent files cleared')),
+                    );
+                  },
+                ),
+                _divider(context),
+                _DangerRow(
+                  icon: Icons.restore,
+                  title: 'Reset Settings',
+                  subtitle: 'Restore all settings to defaults',
+                  confirmText: 'RESET',
+                  onConfirm: () {
+                    ref.read(settingsMutatorProvider).clearSettings();
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Settings reset to defaults')),
+                    );
+                  },
+                ),
+              ]),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error: $e'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(appSettingsProvider),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavDock(currentRoute: RouteNames.settings),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title,
+      {Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        title.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color ?? Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsGroup(BuildContext context, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildDangerGroup(BuildContext context, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.red.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _divider(BuildContext context) {
+    return Divider(
+      height: 1,
+      indent: 56,
+      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.08),
+    );
+  }
+
+  String _getThemeDisplayName(BuildContext context, ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.dark:
+        return AppLocalizations.of(context)!.themeDark;
+      case ThemeMode.light:
+        return AppLocalizations.of(context)!.themeLight;
+      case ThemeMode.system:
+        return AppLocalizations.of(context)!.themeSystem;
+    }
+  }
+
+  String _getLanguageDisplayName(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
+    return locale.languageCode == 'en'
+        ? AppLocalizations.of(context)!.languageEnglish
+        : AppLocalizations.of(context)!.languageUrdu;
+  }
+
+  void _copyToClipboard(BuildContext context, String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text('Copied: $text'), duration: const Duration(seconds: 2)),
+    );
+  }
+
+  void _showThemePicker(
+      BuildContext context, WidgetRef ref, ThemeMode current) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: _bottomSheetDecoration(context),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _handle(context),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Choose Theme',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              _ThemeOption(
+                icon: Icons.dark_mode,
+                title: AppLocalizations.of(context)!.themeDark,
+                isSelected: current == ThemeMode.dark,
+                onTap: () {
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.dark);
+                  ref.read(settingsMutatorProvider).updateTheme('dark');
+                  Navigator.pop(context);
+                },
+              ),
+              _ThemeOption(
+                icon: Icons.light_mode,
+                title: AppLocalizations.of(context)!.themeLight,
+                isSelected: current == ThemeMode.light,
+                onTap: () {
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.light);
+                  ref.read(settingsMutatorProvider).updateTheme('light');
+                  Navigator.pop(context);
+                },
+              ),
+              _ThemeOption(
+                icon: Icons.settings_brightness,
+                title: AppLocalizations.of(context)!.themeSystem,
+                isSelected: current == ThemeMode.system,
+                onTap: () {
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.system);
+                  ref.read(settingsMutatorProvider).updateTheme('system');
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: _bottomSheetDecoration(context),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _handle(context),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Select Language',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              _LanguageOption(
+                flag: '🇺🇸',
+                title: AppLocalizations.of(context)!.languageEnglish,
+                isSelected: ref.read(localeProvider).languageCode == 'en',
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale('en');
+                  ref.read(settingsMutatorProvider).updateLanguage('en');
+                  Navigator.pop(context);
+                },
+              ),
+              _LanguageOption(
+                flag: '🇵🇰',
+                title: AppLocalizations.of(context)!.languageUrdu,
+                isSelected: ref.read(localeProvider).languageCode == 'ur',
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale('ur');
+                  ref.read(settingsMutatorProvider).updateLanguage('ur');
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _bottomSheetDecoration(BuildContext context) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          Theme.of(context).colorScheme.surface,
+          Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+        ],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+    );
+  }
+
+  Widget _handle(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 4,
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  void _showVersionInfo(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: _bottomSheetDecoration(context),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _handle(context),
+              const SizedBox(height: 8),
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.tertiary,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(Icons.description,
+                    size: 40, color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Fadocx',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Version 1.0.0 (Build 1)',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'com.fadseclab.fadocx',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(const ClipboardData(
+                      text:
+                          'Fadocx v1.0.0 (Build 1)\nPackage: com.fadseclab.fadocx',
+                    ));
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Copied to clipboard')),
+                    );
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: const Text('Copy Info'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPrivacyPolicy(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => Container(
+          decoration: _bottomSheetDecoration(context),
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(24),
+            children: [
+              Center(child: _handle(context)),
+              const SizedBox(height: 16),
+              Center(
+                child: Icon(
+                  Icons.shield,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  'Privacy Policy',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _policyItem(
+                context,
+                Icons.wifi_off,
+                '100% Offline',
+                'All processing happens on your device. No internet required.',
+              ),
+              _policyItem(
+                context,
+                Icons.storage,
+                'Local Storage Only',
+                'Your documents stay on your device. Nothing is uploaded.',
+              ),
+              _policyItem(
+                context,
+                Icons.psychology,
+                'On-Device AI',
+                'Uses OpenCV + Tesseract for OCR. AI runs locally.',
+              ),
+              _policyItem(
+                context,
+                Icons.code,
+                'Open Source',
+                'Code is public. Audit it yourself on GitHub.',
+              ),
+              _policyItem(
+                context,
+                Icons.block,
+                'No Ads',
+                'No advertisements. No tracking. No analytics.',
+              ),
+              _policyItem(
+                context,
+                Icons.lock,
+                'Your Data, Your Rules',
+                'You own your documents. Delete anytime.',
+              ),
+              const SizedBox(height: 24),
+              Center(
+                child: Text(
+                  'We believe in privacy by design.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Fadocx is built with transparency. Your documents are your business - not ours.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _copyToClipboard(
+                      context, 'https://github.com/anonfaded/Fadocx'),
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('View Source Code'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _policyItem(
+      BuildContext context, IconData icon, String title, String desc) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon,
+                color: Theme.of(context).colorScheme.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // APPEARANCE SECTION
-                _buildSectionTitle(context, 'Appearance'),
-                _buildThemeCard(context, ref, themeMode),
-                const SizedBox(height: 24),
-
-                // LANGUAGE & REGION SECTION
-                _buildSectionTitle(context, 'Language & Region'),
-                _buildLanguageCard(context, ref, appSettings),
-                const SizedBox(height: 24),
-
-                // ABOUT SECTION
-                _buildSectionTitle(context, 'About'),
-                _buildAboutCard(context, appSettings),
-                const SizedBox(height: 24),
-
-                // DATA MANAGEMENT SECTION
-                _buildSectionTitle(context, 'Data Management'),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionCard(
-                        context,
-                        icon: Icons.history,
-                        title: 'Clear Recent',
-                        description: 'Remove all recent files',
-                        onTap: () => _showClearConfirmDialog(
-                          context,
-                          'Clear Recent Files',
-                          'This will remove all recent files from your list.',
-                          () {
-                            log.i('Clearing recent files');
-                            ref
-                                .read(recentFilesMutatorProvider)
-                                .clearAllRecentFiles();
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Recent files cleared'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildActionCard(
-                        context,
-                        icon: Icons.restore,
-                        title: 'Reset Settings',
-                        description: 'Restore defaults',
-                        onTap: () => _showClearConfirmDialog(
-                          context,
-                          'Reset All Settings',
-                          'This will reset all app settings to defaults.',
-                          () {
-                            log.i('Resetting all settings');
-                            ref.read(settingsMutatorProvider).clearSettings();
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Settings reset to defaults'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (error, st) {
-          log.e('Error loading settings', error, st);
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text('Error loading settings: $error'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    ref.invalidate(appSettingsProvider);
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: BottomNavDock(
-        currentRoute: RouteNames.settings,
-      ),
-    );
-  }
-
-  /// Build section title
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-      ),
-    );
-  }
-
-  /// Build theme card with button options
-  Widget _buildThemeCard(
-      BuildContext context, WidgetRef ref, ThemeMode currentTheme) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.theme,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildThemeButton(context, ref, ThemeMode.dark, currentTheme),
-              const SizedBox(width: 8),
-              _buildThemeButton(context, ref, ThemeMode.light, currentTheme),
-              const SizedBox(width: 8),
-              _buildThemeButton(context, ref, ThemeMode.system, currentTheme),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build individual theme button
-  Widget _buildThemeButton(
-    BuildContext context,
-    WidgetRef ref,
-    ThemeMode mode,
-    ThemeMode currentTheme,
-  ) {
-    final isSelected = currentTheme == mode;
-    return Expanded(
-      child: FilledButton.tonal(
-        onPressed: () async {
-          try {
-            log.i('Changing theme to: ${mode.displayName}');
-            ref.read(themeModeProvider.notifier).setThemeMode(mode);
-            await ref.read(settingsMutatorProvider).updateTheme(mode.value);
-            log.i('✅ Theme changed to ${mode.displayName}');
-          } catch (e, st) {
-            log.e('Error changing theme', e, st);
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Error: $e'), backgroundColor: Colors.red),
-              );
-            }
-          }
-        },
-        style: FilledButton.styleFrom(
-          backgroundColor: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.surface,
-          foregroundColor: isSelected
-              ? Theme.of(context).colorScheme.onPrimary
-              : Theme.of(context).colorScheme.onSurface,
-        ),
-        child: Text(mode.displayName),
-      ),
-    );
-  }
-
-  /// Build language selector card
-  Widget _buildLanguageCard(
-    BuildContext context,
-    WidgetRef ref,
-    AppSettings appSettings,
-  ) {
-    final currentLocale = ref.watch(localeProvider);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.language,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          DropdownButton<String>(
-            value: currentLocale.languageCode,
-            items: [
-              DropdownMenuItem(
-                value: 'en',
-                child: Text(AppLocalizations.of(context)!.languageEnglish),
-              ),
-              DropdownMenuItem(
-                value: 'ur',
-                child: Text(AppLocalizations.of(context)!.languageUrdu),
-              ),
-            ],
-            onChanged: (value) async {
-              if (value != null && value != currentLocale.languageCode) {
-                try {
-                  log.i('Changing language to: $value');
-                  ref.read(localeProvider.notifier).setLocale(value);
-                  await ref.read(settingsMutatorProvider).updateLanguage(value);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          value == 'en'
-                              ? 'Language changed to English'
-                              : 'زبان اردو میں تبدیل ہو گئی',
-                        ),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                } catch (e, st) {
-                  log.e('Error changing language', e, st);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Error: $e'),
-                          backgroundColor: Colors.red),
-                    );
-                  }
-                }
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  /// Build about section card
-  Widget _buildAboutCard(BuildContext context, AppSettings appSettings) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.appVersion,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Fadocx v1.0.0 (Build 1)',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'About Fadocx',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            AppLocalizations.of(context)!.aboutDescription,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Built with:',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '• Flutter + Dart\n'
-            '• Riverpod (State Management)\n'
-            '• Hive (Local Database)\n'
-            '• Go Router (Navigation)\n'
-            '• All Open Source',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context)!.privacyDescription,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build action card (for Clear Recent, Reset Settings)
-  Widget _buildActionCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String description,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 32,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 12),
                 Text(
                   title,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  description,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  desc,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class AnimatedListView extends StatelessWidget {
+  final List<Widget> children;
+  final EdgeInsets padding;
+
+  const AnimatedListView({
+    super.key,
+    required this.children,
+    this.padding = EdgeInsets.zero,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: padding,
+      children: children,
+    );
+  }
+}
+
+class _SettingsRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? value;
+  final VoidCallback? onTap;
+  final bool showChevron;
+  final bool isComingSoon;
+
+  const _SettingsRow({
+    required this.icon,
+    required this.title,
+    this.value,
+    this.onTap,
+    this.showChevron = true,
+    this.isComingSoon = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              if (isComingSoon)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    value ?? 'Coming Soon',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color:
+                              Theme.of(context).colorScheme.onTertiaryContainer,
+                        ),
+                  ),
+                )
+              else if (value != null)
+                Text(
+                  value!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              if (showChevron && onTap != null && !isComingSoon)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DangerRow extends StatefulWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String confirmText;
+  final VoidCallback onConfirm;
+
+  const _DangerRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.confirmText,
+    required this.onConfirm,
+  });
+
+  @override
+  State<_DangerRow> createState() => _DangerRowState();
+}
+
+class _DangerRowState extends State<_DangerRow> {
+  final _controller = TextEditingController();
+  bool _confirmed = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showDangerDialog(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(widget.icon, size: 20, color: Colors.red),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.red,
+                          ),
+                    ),
+                    Text(
+                      widget.subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Show confirmation dialog
-  void _showClearConfirmDialog(
-    BuildContext context,
-    String title,
-    String message,
-    VoidCallback onConfirm,
-  ) {
+  void _showDangerDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        title: Text(widget.title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Type "${widget.confirmText}" to confirm:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _controller,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: widget.confirmText,
+              ),
+              onChanged: (v) =>
+                  setState(() => _confirmed = v == widget.confirmText),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: onConfirm,
-            child: Text(AppLocalizations.of(context)!.ok),
+            onPressed: _confirmed ? widget.onConfirm : null,
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Confirm'),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ThemeOption extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ThemeOption({
+    required this.icon,
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: Theme.of(context).colorScheme.primary),
+      ),
+      title: Text(title),
+      trailing: isSelected
+          ? Icon(Icons.check_circle,
+              color: Theme.of(context).colorScheme.primary)
+          : Icon(Icons.circle_outlined,
+              color: Theme.of(context).colorScheme.outline),
+      onTap: onTap,
+    );
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  final String flag;
+  final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _LanguageOption({
+    required this.flag,
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Text(flag, style: const TextStyle(fontSize: 28)),
+      title: Text(title),
+      trailing: isSelected
+          ? Icon(Icons.check_circle,
+              color: Theme.of(context).colorScheme.primary)
+          : Icon(Icons.circle_outlined,
+              color: Theme.of(context).colorScheme.outline),
+      onTap: onTap,
     );
   }
 }
