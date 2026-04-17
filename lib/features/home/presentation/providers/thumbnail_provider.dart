@@ -52,6 +52,10 @@ final generateAndCacheThumbnailProvider = FutureProvider.family<Uint8List?,
         try {
           await hiveDatasource.saveThumbnail(params.fileId, thumbnailBytes.toList());
           log.d('🖼️  [Generate Thumbnail] ✓ Saved to cache');
+          
+          // CRITICAL: Invalidate the cache reader provider so UI refreshes
+          log.d('🖼️  [Generate Thumbnail] 🔄 Invalidating thumbnail provider to refresh UI...');
+          ref.invalidate(thumbnailProvider(params.fileId));
         } catch (e) {
           log.e('🖼️  [Generate Thumbnail] ERROR saving to cache: $e');
         }
