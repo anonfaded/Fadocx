@@ -4,45 +4,82 @@ import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 
-/// Custom hamburger icon with 2 lines (bottom line shorter)
-class CustomHamburgerIcon extends StatelessWidget {
+/// Custom animated hamburger icon with bottom line that grows when sidebar opens
+class AnimatedHamburgerIcon extends StatefulWidget {
   final VoidCallback onPressed;
   final Color? color;
-  final bool sidebarOpen;
+  final bool isOpen;
 
-  const CustomHamburgerIcon({
+  const AnimatedHamburgerIcon({
     super.key,
     required this.onPressed,
     this.color,
-    this.sidebarOpen = false,
+    this.isOpen = false,
   });
 
   @override
+  State<AnimatedHamburgerIcon> createState() => _AnimatedHamburgerIconState();
+}
+
+class _AnimatedHamburgerIconState extends State<AnimatedHamburgerIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+      value: widget.isOpen ? 1.0 : 0.0,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void didUpdateWidget(AnimatedHamburgerIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isOpen != widget.isOpen) {
+      if (widget.isOpen) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final iconColor = color ?? Theme.of(context).colorScheme.onSurface;
+    final iconColor = widget.color ?? Theme.of(context).colorScheme.onSurface;
     
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onPressed,
+        onTap: widget.onPressed,
         borderRadius: BorderRadius.circular(4),
         child: SizedBox(
           width: 24,
           height: 28,
           child: Center(
-            child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(
-                begin: sidebarOpen ? 0.35 : 0.7,
-                end: sidebarOpen ? 0.7 : 0.35,
-              ),
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              builder: (context, value, child) {
+            child: AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                final bottomLineFactor = 0.35 + (_animation.value * 0.35);
                 return CustomPaint(
                   size: const Size(14, 10),
                   painter: HamburgerPainter(
                     color: iconColor,
-                    bottomLineFactor: value,
+                    bottomLineFactor: bottomLineFactor,
                   ),
                 );
               },
@@ -74,14 +111,12 @@ class HamburgerPainter extends CustomPainter {
     const lineSpacing = 6.5;
     const yOffset = 2.0;
 
-    // Top line - 70% width
     canvas.drawLine(
       Offset(0, yOffset),
       Offset(size.width * 0.7, yOffset),
       paint,
     );
 
-    // Bottom line - animated width
     canvas.drawLine(
       Offset(0, lineSpacing + yOffset),
       Offset(size.width * bottomLineFactor, lineSpacing + yOffset),

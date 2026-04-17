@@ -39,8 +39,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Row(
           children: [
             // Hamburger menu
-            CustomHamburgerIcon(
+            AnimatedHamburgerIcon(
               onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              isOpen: false,
             ),
             const SizedBox(width: 8),
             // Logo icon on left with natural width
