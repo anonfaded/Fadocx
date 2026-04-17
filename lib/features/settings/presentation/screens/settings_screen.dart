@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
-import 'package:fadocx/features/home/presentation/widgets/bottom_nav_dock.dart';
+import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
@@ -17,57 +17,29 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(appSettingsProvider);
     final themeMode = ref.watch(themeModeProvider);
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: Material(
-          elevation: 0,
-          color: Colors.transparent,
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.surface,
-                      Theme.of(context)
-                          .colorScheme
-                          .surface
-                          .withValues(alpha: 0.95),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+    return FloatingDockScaffold(
+      appBarContent: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Center(
+            child: Text(
+              AppLocalizations.of(context)!.settingsTitle,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.1),
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    AppLocalizations.of(context)!.settingsTitle,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-              ),
             ),
           ),
         ),
       ),
+      currentRoute: RouteNames.settings,
       body: settings.when(
         data: (appSettings) {
           if (appSettings == null) {
             return const Center(child: CircularProgressIndicator());
           }
-          return AnimatedListView(
-            padding: const EdgeInsets.all(16),
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
             children: [
               _buildSectionHeader(context, 'Appearance'),
               _buildSettingsGroup(context, [
@@ -189,7 +161,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavDock(currentRoute: RouteNames.settings),
     );
   }
 

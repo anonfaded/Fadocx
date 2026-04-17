@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/config/routing/app_router.dart';
-import 'package:fadocx/features/home/presentation/widgets/bottom_nav_dock.dart';
+import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
@@ -33,296 +33,308 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return const PreferredSize(
-        preferredSize: Size.fromHeight(56),
-        child: _AppBarContent(),
-      );
-  }
-
-  Widget _buildErrorState(BuildContext context, Object error) {
-    log.e('Error loading recent files', error);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text('Error: $error'),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => ref.invalidate(recentFilesProvider),
-            child: const Text('Retry'),
+  Widget _buildAppBarContent(BuildContext context) {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Center(
+          child: Text(
+            AppLocalizations.of(context)!.appName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
-        ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(context),
+    return FloatingDockScaffold(
+      appBarContent: _buildAppBarContent(context),
+      currentRoute: RouteNames.home,
       body: _buildBody(),
       floatingActionButton: const _FloatingActionButtonContent(),
-      bottomNavigationBar: BottomNavDock(currentRoute: RouteNames.home),
     );
   }
 
   Widget _buildBody() {
     if (!_dataLoaded) {
-      // Show skeleton loader immediately (fast, non-blocking)
-      return _buildSkeletonList();
+      // Show skeleton loader immediately
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
+        children: List.generate(
+          6,
+          (index) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _SkeletonFileItem(),
+          ),
+        ),
+      );
     }
 
-    // Once first frame is rendered, show actual data with proper async handling
+    // Once first frame is rendered, show actual data
     return Consumer(
       builder: (context, ref, _) {
         final recentFiles = ref.watch(recentFilesProvider);
         return recentFiles.when(
-          data: (files) => files.isEmpty 
-              ? _buildEmptyState(context) 
-              : _buildRecentFilesList(context, files),
-          error: (error, st) => _buildErrorState(context, error),
-          loading: () => _buildSkeletonList(),
+          data: (files) => files.isEmpty
+              ? _buildEmptyStateScrollable(context)
+              : _buildRecentFilesScrollable(context, files),
+          error: (error, st) => _buildErrorStateScrollable(context, error),
+          loading: () => ListView(
+            padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
+            children: List.generate(
+              6,
+              (index) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _SkeletonFileItem(),
+              ),
+            ),
+          ),
         );
       },
     );
   }
 
-  Widget _buildSkeletonList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 6,
-      itemBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: _SkeletonFileItem(),
-      ),
-    );
-  }
-
-  /// Build empty state UI
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.description_outlined,
-            size: 80,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            AppLocalizations.of(context)!.emptyTitle,
-            style: Theme.of(context).textTheme.headlineMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            AppLocalizations.of(context)!.emptyMessage,
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          FilledButton.tonalIcon(
-            icon: const Icon(Icons.folder_open),
-            label: Text(AppLocalizations.of(context)!.startBrowsing),
-            onPressed: () {
-              log.i('Start browsing pressed from empty state');
-              _showOpenFileDialog(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build recent files list
-  Widget _buildRecentFilesList(
-      BuildContext context, List<RecentFile> files) {
-    return Column(
+  Widget _buildEmptyStateScrollable(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 80),
       children: [
-        // BROWSE SECTION
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .primaryContainer
-                  .withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.2),
-                width: 1,
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.description_outlined,
+                size: 80,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  log.i('Browse files button pressed');
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context)!.emptyTitle,
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                AppLocalizations.of(context)!.emptyMessage,
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              FilledButton.tonalIcon(
+                icon: const Icon(Icons.folder_open),
+                label: Text(AppLocalizations.of(context)!.startBrowsing),
+                onPressed: () {
+                  log.i('Start browsing pressed from empty state');
                   _showOpenFileDialog(context);
                 },
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.folder_open,
-                        size: 24,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Browse Files',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Open documents from your device',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
-                  ),
-                ),
               ),
-            ),
+            ],
           ),
         ),
-        // SCANNER SECTION
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .tertiaryContainer
-                  .withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .tertiary
-                    .withValues(alpha: 0.2),
-                width: 1,
-              ),
+      ],
+    );
+  }
+
+  Widget _buildRecentFilesScrollable(
+    BuildContext context,
+    List<RecentFile> files,
+  ) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
+      children: [
+        // BROWSE SECTION
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color:
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              width: 1,
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  log.i('Scan documents button pressed');
-                  context.go('/scanner');
-                },
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.camera_alt_outlined,
-                        size: 24,
-                        color: Theme.of(context).colorScheme.tertiary,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                log.i('Browse files button pressed');
+                _showOpenFileDialog(context);
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.folder_open,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Browse Files',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Open documents from your device',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Scan Documents',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Use camera to scan and extract text',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right,
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                    ],
-                  ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
         const SizedBox(height: 16),
-        // RECENT FILES SECTION
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.recentFiles,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Text(
-                '${files.length}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+        // SCANNER SECTION
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .tertiaryContainer
+                .withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color:
+                  Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                log.i('Scan documents button pressed');
+                context.go('/scanner');
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.tertiary,
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Scan Documents',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Use camera to scan and extract text',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            itemCount: files.length,
-            itemBuilder: (context, index) {
-              final file = files[index];
-              return _buildFileListTile(context, file, index);
-            },
+        const SizedBox(height: 24),
+        // RECENT FILES SECTION HEADER
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.recentFiles,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(
+              '${files.length}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // RECENT FILES LIST
+        ...files.asMap().entries.map(
+            (entry) => _buildFileListTile(context, entry.value, entry.key)),
+      ],
+    );
+  }
+
+  Widget _buildErrorStateScrollable(BuildContext context, Object error) {
+    log.e('Error loading recent files', error);
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 80),
+      children: [
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error: $error'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(recentFilesProvider),
+                child: const Text('Retry'),
+              ),
+            ],
           ),
         ),
       ],
@@ -688,10 +700,8 @@ class _AppBarContent extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surface
-                  .withValues(alpha: 0.9),
+              color:
+                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: Theme.of(context)
@@ -738,8 +748,7 @@ class _FloatingActionButtonContent extends ConsumerWidget {
       icon: const Icon(Icons.add_circle),
       label: Text(AppLocalizations.of(context)!.openFile),
       onPressed: () async {
-        final homeState =
-            context.findAncestorStateOfType<_HomeScreenState>();
+        final homeState = context.findAncestorStateOfType<_HomeScreenState>();
         if (homeState != null) {
           await homeState._showOpenFileDialog(context);
         }
