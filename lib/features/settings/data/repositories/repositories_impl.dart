@@ -100,11 +100,23 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
   @override
   Stream<Result<AppSettings>> watchSettings() async* {
     try {
+      // Try to load from Hive, but yield default first if slow
       final box = await _datasource.getSettingsBox();
       
-      // Yield initial values
       if (box.values.isNotEmpty) {
         yield ResultSuccess(SettingsMapper.fromHiveAppSettings(box.values.first));
+      } else {
+        // No settings yet - yield default
+        final now = DateTime.now();
+        yield ResultSuccess(AppSettings(
+          id: 'default',
+          theme: 'system',
+          language: 'en',
+          enableNotifications: true,
+          createdAt: now,
+          updatedAt: now,
+          syncStatus: 'local',
+        ));
       }
 
       final stream = await _datasource.watchSettings();
@@ -115,7 +127,17 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       }
     } catch (e, st) {
       log.e('Error watching settings', e, st);
-      yield ResultFailure(UnknownFailure(message: 'Error watching settings'));
+      // Yield defaults on error
+      final now = DateTime.now();
+      yield ResultSuccess(AppSettings(
+        id: 'default',
+        theme: 'system',
+        language: 'en',
+        enableNotifications: true,
+        createdAt: now,
+        updatedAt: now,
+        syncStatus: 'local',
+      ));
     }
   }
 

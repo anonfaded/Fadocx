@@ -33,3 +33,12 @@ dart run pdfrx:remove_wasm_modules --revert
 2. **ProGuard/R8:** Maintain `proguard-rules.pro` to prevent reflection-based classes (like `NativeDocumentParser`) from being stripped or renamed.
 3. **Manifest:** Ensure all `intent-filter` configurations are precise to avoid unnecessary app launches.
 4. **Permissions:** Check and request permissions (Camera, Storage) via Flutter's `permission_handler` before calling native code.
+
+**Agent Workflow Rules**
+
+- **Todo First**: Always create a detailed, long todo list before starting work on any bug or feature; include edge cases, assumptions, and explicit context-gathering steps.
+- **Never Assume**: Never assume—validate by gathering context (inputs, code paths, configs, etc.) before starting work.
+- **Broader Research**: Use Context7 MCP for research or to broaden your search and understanding before coding or debugging.
+- **Find Root Cause**: Diagnose and document the root cause before attempting fixes—avoid patching symptoms without understanding why they occur.
+- **Run Analysis**: Run `flutter analyze` (or the appropriate static analysis for the project) after making changes and address reported issues before finalizing.
+- **Document Decisions**: Record investigative steps, rationale, and the root-cause analysis back in the todo or the issue tracker so future reviewers see context.

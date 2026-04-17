@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
@@ -55,23 +54,6 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () {
-                        try {
-                          if (Navigator.canPop(context)) {
-                            Navigator.pop(context);
-                          } else {
-                            context.go('/');
-                          }
-                        } catch (e) {
-                          log.e('Error navigating back', e);
-                          context.go('/');
-                        }
-                      },
-                      tooltip: 'Back',
-                      iconSize: 20,
-                    ),
                     Expanded(
                       child: Center(
                         child: Text(
@@ -116,11 +98,6 @@ class SettingsScreen extends ConsumerWidget {
                 // LANGUAGE & REGION SECTION
                 _buildSectionTitle(context, 'Language & Region'),
                 _buildLanguageCard(context, ref, appSettings),
-                const SizedBox(height: 24),
-
-                // NOTIFICATIONS SECTION
-                _buildSectionTitle(context, 'Notifications'),
-                _buildNotificationCard(context, ref, appSettings),
                 const SizedBox(height: 24),
 
                 // ABOUT SECTION
@@ -385,42 +362,6 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// Build notification toggle card
-  Widget _buildNotificationCard(
-    BuildContext context,
-    WidgetRef ref,
-    AppSettings appSettings,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Enable Notifications (Phase 2)',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          Switch(
-            value: appSettings.enableNotifications,
-            onChanged: (value) {
-              log.i('Toggling notifications: $value');
-              ref.read(settingsMutatorProvider).updateNotifications(value);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   /// Build about section card
   Widget _buildAboutCard(BuildContext context, AppSettings appSettings) {
