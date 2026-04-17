@@ -70,13 +70,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBarContent: _buildAppBarContent(context),
       currentRoute: RouteNames.home,
       body: _buildBody(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push(RouteNames.browse);
-        },
-        tooltip: 'Add document',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
@@ -84,9 +77,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (!_dataLoaded) {
       // Show skeleton loader
       return ListView(
-        padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
+        padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
         children: List.generate(
-          3,
+          5,
           (index) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _buildSkeletonItem(),
@@ -99,14 +92,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (context, ref, _) {
         final recentFiles = ref.watch(recentFilesProvider);
         return recentFiles.when(
-          data: (files) => files.isEmpty
-              ? _buildEmptyState(context)
-              : _buildRecentFilesList(context, files),
+          data: (files) => _buildHomeContent(context, files),
           error: (error, st) => _buildErrorState(context, error),
           loading: () => ListView(
-            padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
+            padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
             children: List.generate(
-              3,
+              5,
               (index) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildSkeletonItem(),
@@ -118,48 +109,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildHomeContent(BuildContext context, List<RecentFile> files) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
       children: [
-        Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.inbox_outlined,
-                size: 64,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No documents yet',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Tap the + button to browse and import files',
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+        // Action Cards Section
+        _buildActionCard(
+          context,
+          title: 'Scan to Extract Text',
+          description: 'Extract text from documents using OCR',
+          icon: Icons.document_scanner,
+          onTap: () {
+            log.i('Navigating to scanner');
+            context.push(RouteNames.scanner);
+          },
         ),
-      ],
-    );
-  }
+        const SizedBox(height: 12),
+        _buildActionCard(
+          context,
+          title: 'Import a Document',
+          description: 'Browse and import files from your device',
+          icon: Icons.folder_open,
+          onTap: () {
+            log.i('Navigating to browse');
+            context.push(RouteNames.browse);
+          },
+        ),
+        const SizedBox(height: 24),
 
-  Widget _buildRecentFilesList(BuildContext context, List<RecentFile> files) {
-    // Show only recent 3-4 files
-    final recentList = files.take(4).toList();
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
-      children: [
-        // Section header
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
+        // Recent Files Section
+        if (files.isNotEmpty) ...[
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
@@ -170,25 +150,87 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onPressed: () {
                   context.push(RouteNames.documents);
                 },
-                child: const Text('See All →'),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('See All'),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
-        // Recent files grid
-        ...recentList.asMap().entries.map(
-          (entry) {
-            final index = entry.key;
-            final file = entry.value;
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: index < recentList.length - 1 ? 8 : 0,
-              ),
-              child: _buildRecentFileItem(context, file),
-            );
-          },
-        ),
+          const SizedBox(height: 8),
+          ...files.take(4).toList().asMap().entries.map(
+            (entry) {
+              final index = entry.key;
+              final file = entry.value;
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: index < (files.take(4).toList().length - 1) ? 8 : 0,
+                ),
+                child: _buildRecentFileItem(context, file),
+              );
+            },
+          ),
+        ] else
+          _buildEmptyRecentState(context),
       ],
+    );
+  }
+
+  Widget _buildActionCard(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return _ModernActionCard(
+      title: title,
+      description: description,
+      icon: icon,
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildEmptyRecentState(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+        ),
+        color: Theme.of(context).colorScheme.surface,
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 48,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No Recent Files',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Scan or import documents to get started',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -457,5 +499,208 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
   bool _isPresentationFormat(String fileType) {
     final type = fileType.toLowerCase();
     return type == 'ppt' || type == 'pptx' || type == 'odp';
+  }
+}
+
+/// Modern Compact Action Card with layered icon effect
+class _ModernActionCard extends StatefulWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ModernActionCard({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  State<_ModernActionCard> createState() => _ModernActionCardState();
+}
+
+class _ModernActionCardState extends State<_ModernActionCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.01).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onHover(bool hovering) {
+    setState(() => _isHovered = hovering);
+    if (hovering) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final isScanning = widget.icon == Icons.document_scanner;
+
+    final gradientStart = isScanning
+        ? Color.lerp(primaryColor, const Color(0xFF3B82F6), 0.4)!
+        : Color.lerp(primaryColor, const Color(0xFF10B981), 0.4)!;
+    final gradientEnd = isScanning
+        ? Color.lerp(primaryColor, const Color(0xFF8B5CF6), 0.3)!
+        : Color.lerp(primaryColor, const Color(0xFF0EA5E9), 0.3)!;
+
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: MouseRegion(
+            onEnter: (_) => _onHover(true),
+            onExit: (_) => _onHover(false),
+            child: GestureDetector(
+              onTapDown: (_) => _controller.forward(),
+              onTapUp: (_) {
+                _controller.reverse();
+                widget.onTap();
+              },
+              onTapCancel: () => _controller.reverse(),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withValues(alpha: 0.12),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: primaryColor.withValues(alpha: 0.06),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        gradientStart,
+                        gradientEnd,
+                      ],
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        width: 1,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Icon on the left
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: _isHovered ? 8 : 0),
+                            duration: const Duration(milliseconds: 300),
+                            builder: (context, offset, _) {
+                              return Transform.translate(
+                                offset: Offset(offset * 0.1, 0),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    widget.icon,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 12),
+
+                          // Text content on the right
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Title
+                                Text(
+                                  widget.title,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+
+                                // Description
+                                Text(
+                                  widget.description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color:
+                                            Colors.white.withValues(alpha: 0.8),
+                                        fontSize: 11,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          // Arrow icon
+                          Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: Colors.white.withValues(alpha: 0.6),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
