@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/features/home/presentation/widgets/bottom_nav_dock.dart';
@@ -94,8 +95,15 @@ class SettingsScreen extends ConsumerWidget {
                   icon: Icons.folder_outlined,
                   title: 'Documents Size',
                   value: '~12.4 MB',
-                  showChevron: false,
                   onTap: () => _showStorageInfo(context),
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.settings_backup_restore,
+                  title: 'Custom Storage',
+                  value: 'Coming Soon',
+                  isComingSoon: true,
+                  onTap: null,
                 ),
               ]),
               const SizedBox(height: 24),
@@ -264,24 +272,41 @@ class SettingsScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: _bottomSheetDecoration(context),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => Container(
+          padding: const EdgeInsets.all(24),
+          decoration: _bottomSheetDecoration(context),
+          child: ListView(
+            controller: scrollController,
             children: [
-              _handle(context),
+              Center(child: _handle(context)),
               const SizedBox(height: 8),
-              Text('Storage',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold)),
+              Center(
+                  child: Text('Storage',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold))),
               const SizedBox(height: 20),
-              _infoRow(context, Icons.folder, 'Documents', '~12.4 MB'),
-              _infoRow(context, Icons.picture_as_pdf, 'PDFs', '3 files'),
-              _infoRow(context, Icons.table_chart, 'Spreadsheets', '2 files'),
+              SizedBox(height: 140, child: _storageChart()),
+              const SizedBox(height: 12),
+              Row(children: [
+                Expanded(
+                    child: _storageChip(
+                        Icons.picture_as_pdf, 'PDFs', '4.8 MB', Colors.red)),
+                const SizedBox(width: 8),
+                Expanded(
+                    child: _storageChip(
+                        Icons.table_chart, 'Sheets', '4.2 MB', Colors.green)),
+                const SizedBox(width: 8),
+                Expanded(
+                    child: _storageChip(
+                        Icons.description, 'Docs', '3.4 MB', Colors.blue)),
+              ]),
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(16),
@@ -335,17 +360,63 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _infoRow(BuildContext context, IconData i, String t, String v) =>
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(children: [
-          Icon(i, size: 20, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 16),
-          Expanded(child: Text(t)),
-          Text(v,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600)),
+  Widget _storageChart() => TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) => Opacity(
+          opacity: value,
+          child: Transform.scale(
+              scale: 0.8 + (0.2 * value),
+              child: PieChart(PieChartData(
+                sectionsSpace: 2,
+                centerSpaceRadius: 35,
+                sections: [
+                  PieChartSectionData(
+                      color: Colors.red,
+                      value: 40,
+                      title: '40%',
+                      titleStyle: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                      radius: 45),
+                  PieChartSectionData(
+                      color: Colors.green,
+                      value: 35,
+                      title: '35%',
+                      titleStyle: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                      radius: 45),
+                  PieChartSectionData(
+                      color: Colors.blue,
+                      value: 25,
+                      title: '25%',
+                      titleStyle: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                      radius: 45),
+                ],
+              )))));
+
+  Widget _storageChip(IconData icon, String label, String size, Color color) =>
+      Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10)),
+        child: Column(children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(height: 6),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+          Text(size,
+              style:
+                  TextStyle(fontSize: 10, color: color.withValues(alpha: 0.7))),
         ]),
       );
 
