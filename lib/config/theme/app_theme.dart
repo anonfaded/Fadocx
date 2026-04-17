@@ -4,6 +4,7 @@ class AppTheme {
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
+    fontFamily: 'Ubuntu',
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF2D6A4F), // Forest green
       brightness: Brightness.dark,
@@ -15,6 +16,7 @@ class AppTheme {
       elevation: 0,
       centerTitle: true,
       titleTextStyle: const TextStyle(
+        fontFamily: 'Ubuntu',
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: Colors.white,
@@ -28,22 +30,46 @@ class AppTheme {
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(
-          fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+          fontFamily: 'Ubuntu',
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: Colors.white),
       displayMedium: TextStyle(
-          fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+          fontFamily: 'Ubuntu',
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.white),
       headlineMedium: TextStyle(
-          fontSize: 24, fontWeight: FontWeight.w600, color: Colors.white),
+          fontFamily: 'Ubuntu',
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          color: Colors.white),
       headlineSmall: TextStyle(
-          fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+          fontFamily: 'Ubuntu',
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white),
       titleLarge: TextStyle(
-          fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+          fontFamily: 'Ubuntu',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: Colors.white),
       titleMedium: TextStyle(
-          fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
-      bodyLarge: TextStyle(fontSize: 16, color: Color(0xFFE0E0E0)),
-      bodyMedium: TextStyle(fontSize: 14, color: Color(0xFFBDBDBD)),
-      bodySmall: TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
+          fontFamily: 'Ubuntu',
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.white),
+      bodyLarge: TextStyle(
+          fontFamily: 'Ubuntu', fontSize: 16, color: Color(0xFFE0E0E0)),
+      bodyMedium: TextStyle(
+          fontFamily: 'Ubuntu', fontSize: 14, color: Color(0xFFBDBDBD)),
+      bodySmall: TextStyle(
+          fontFamily: 'Ubuntu', fontSize: 12, color: Color(0xFF9E9E9E)),
       labelLarge: TextStyle(
-          fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
+          fontFamily: 'Ubuntu',
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white),
     ),
     iconTheme: const IconThemeData(color: Colors.white, size: 24),
     dividerColor: const Color(0xFF424242),
@@ -52,6 +78,7 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
+    fontFamily: 'Ubuntu',
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF2D6A4F), // Forest green
       brightness: Brightness.light,
@@ -63,7 +90,10 @@ class AppTheme {
       elevation: 0,
       centerTitle: true,
       titleTextStyle: const TextStyle(
-          fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black),
+          fontFamily: 'Ubuntu',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: Colors.black),
       iconTheme: const IconThemeData(color: Colors.black),
     ),
     cardTheme: CardThemeData(
@@ -73,8 +103,12 @@ class AppTheme {
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(
-          fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black87),
-      bodyMedium: TextStyle(fontSize: 14, color: Colors.black54),
+          fontFamily: 'Ubuntu',
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87),
+      bodyMedium:
+          TextStyle(fontFamily: 'Ubuntu', fontSize: 14, color: Colors.black54),
     ),
     dividerColor: const Color(0xFFE0E0E0),
   );
