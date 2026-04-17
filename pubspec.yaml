@@ -108,6 +108,8 @@ flutter_native_splash:
   image: "assets/fadocx_header_landscape_png.png"
   image_dark: "assets/fadocx_header_landscape_png.png"
   android_gravity: center
+  branding: "assets/fadocx_header_landscape_png.png"
+  branding_dark: "assets/fadocx_header_landscape_png.png"
   android_12:
     color: "#121212"
     image: "assets/fadocx_header_landscape_png.png"
