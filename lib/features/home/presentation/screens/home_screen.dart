@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fadocx/core/utils/logger.dart';
@@ -17,18 +18,48 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStateMixin {
   bool _dataLoaded = false;
+  bool _sidebarOpen = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late AnimationController _sidebarController;
+  
+  static const double _kSidebarTopOffset = 56;
+  static const double _kSidebarBottomOffset = 88;
+  static const double _kSidebarRadius = 24.0;
 
   @override
   void initState() {
     super.initState();
+    _sidebarController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
     // OPTIMIZATION: Defer recent files loading to after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => _dataLoaded = true);
       Future.microtask(() => ref.read(recentFilesProvider));
     });
+  }
+  
+  @override
+  void dispose() {
+    _sidebarController.dispose();
+    super.dispose();
+  }
+  
+  void _toggleSidebar() {
+    setState(() => _sidebarOpen = !_sidebarOpen);
+    if (_sidebarOpen) {
+      _sidebarController.forward();
+    } else {
+      _sidebarController.reverse();
+    }
+  }
+  
+  void _closeSidebar() {
+    setState(() => _sidebarOpen = false);
+    _sidebarController.reverse();
   }
 
   Widget _buildAppBarContent(BuildContext context) {
@@ -40,8 +71,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             // Hamburger menu
             AnimatedHamburgerIcon(
-              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-              isOpen: false,
+              onPressed: _toggleSidebar,
+              isOpen: _sidebarOpen,
             ),
             const SizedBox(width: 8),
             // Logo icon on left with natural width
@@ -74,13 +105,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       key: _scaffoldKey,
-      drawer: const HomeDrawer(),
-      body: FloatingDockScaffold(
-        appBarContent: _buildAppBarContent(context),
-        currentRoute: RouteNames.home,
-        body: _buildBody(),
+      body: Stack(
+        children: [
+          FloatingDockScaffold(
+            appBarContent: _buildAppBarContent(context),
+            currentRoute: RouteNames.home,
+            body: _buildBody(),
+          ),
+          // Sidebar with slide-in animation
+          AnimatedBuilder(
+            animation: _sidebarController,
+            builder: (context, child) {
+              return Positioned(
+                top: _kSidebarTopOffset - _kSidebarRadius,
+                bottom: _kSidebarBottomOffset - _kSidebarRadius,
+                left: 0,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(-1.0, 0.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _sidebarController,
+                    curve: Curves.easeOutCubic,
+                  )),
+                  child: _sidebarOpen ? _buildSidebarDrawer(context, isDark) : const SizedBox.shrink(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -416,6 +473,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+
+  Widget _buildSidebarDrawer(BuildContext context, bool isDark) {
+    final maxWidth = MediaQuery.of(context).size.width * 0.8;
+    final width = maxWidth < 280 ? maxWidth : 280.0;
+    final theme = Theme.of(context);
+    final bgColor = isDark
+        ? theme.colorScheme.surface.withValues(alpha: 0.95)
+        : theme.colorScheme.surface.withValues(alpha: 0.92);
+    final borderColor = theme.colorScheme.outline.withValues(alpha: 0.2);
+
+    return GestureDetector(
+      onTap: () {}, // Absorb taps to prevent propagation
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: width + 20,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // 1. Background and Flares
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _InvertedCornerSidebarPainter(
+                  color: bgColor,
+                  borderColor: borderColor,
+                  radius: _kSidebarRadius,
+                  sidebarWidth: width,
+                ),
+              ),
+            ),
+            // 2. Content (Sheet)
+            Positioned(
+              left: 0,
+              top: _kSidebarRadius,
+              bottom: _kSidebarRadius,
+              width: width,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: _HomeDrawerContent(
+                    onClose: _closeSidebar,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Helper widget to display and trigger thumbnail generation for recent files
@@ -736,4 +846,93 @@ class _ModernActionCardState extends State<_ModernActionCard>
       },
     );
   }
+}
+
+class _HomeDrawerContent extends ConsumerWidget {
+  final VoidCallback onClose;
+
+  const _HomeDrawerContent({required this.onClose});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return HomeDrawer(onClose: onClose);
+  }
+}
+
+class _InvertedCornerSidebarPainter extends CustomPainter {
+  final Color color;
+  final Color borderColor;
+  final double radius;
+  final double sidebarWidth;
+
+  _InvertedCornerSidebarPainter({
+    required this.color,
+    required this.borderColor,
+    required this.radius,
+    required this.sidebarWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final borderPaint = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    final path = Path();
+    
+    // Top flare flaring UP from sidebar top (0, radius) to screen edge (0, 0)
+    path.moveTo(0, 0);
+    // Smooth S-curve transition
+    path.cubicTo(
+      0, radius * 0.4, 
+      radius * 0.1, radius, 
+      radius, radius
+    );
+    
+    // Top edge
+    path.lineTo(sidebarWidth - 16, radius);
+    path.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
+    
+    // Right side
+    path.lineTo(sidebarWidth, size.height - radius - 16);
+    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
+    
+    // Bottom edge
+    path.lineTo(radius, size.height - radius);
+    
+    // Bottom flare flaring DOWN from sidebar bottom (0, h-radius) to screen edge (0, h)
+    path.cubicTo(
+      radius * 0.1, size.height - radius,
+      0, size.height - radius * 0.4,
+      0, size.height
+    );
+    
+    path.lineTo(0, 0);
+    path.close();
+    
+    canvas.drawShadow(path, Colors.black, 10, false);
+    canvas.drawPath(path, paint);
+    
+    // Border for the visible part
+    final borderPath = Path();
+    borderPath.moveTo(0, 0);
+    borderPath.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
+    borderPath.lineTo(sidebarWidth - 16, radius);
+    borderPath.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
+    borderPath.lineTo(sidebarWidth, size.height - radius - 16);
+    borderPath.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
+    borderPath.lineTo(radius, size.height - radius);
+    borderPath.cubicTo(radius * 0.1, size.height - radius, 0, size.height - radius * 0.4, 0, size.height);
+    
+    canvas.drawPath(borderPath, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _InvertedCornerSidebarPainter oldDelegate) => 
+    oldDelegate.color != color || oldDelegate.borderColor != borderColor;
 }

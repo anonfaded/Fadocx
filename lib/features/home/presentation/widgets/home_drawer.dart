@@ -134,7 +134,9 @@ class HamburgerPainter extends CustomPainter {
 
 /// Side drawer widget
 class HomeDrawer extends ConsumerStatefulWidget {
-  const HomeDrawer({super.key});
+  final VoidCallback? onClose;
+  
+  const HomeDrawer({super.key, this.onClose});
 
   @override
   ConsumerState<HomeDrawer> createState() => _HomeDrawerState();
@@ -143,86 +145,82 @@ class HomeDrawer extends ConsumerStatefulWidget {
 class _HomeDrawerState extends ConsumerState<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Drawer(
-        child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Image.asset(
-                        'assets/fadocx_header_landscape_png.png',
-                        height: 32,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Fadocx',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ],
+                  Image.asset(
+                    'assets/fadocx_header_landscape_png.png',
+                    height: 32,
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    'Document Management',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    'Fadocx',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
                   ),
                 ],
               ),
-            ),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-
-            // Menu items
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                children: [
-                  // What's New
-                  ListTile(
-                    leading: const Icon(Icons.auto_awesome),
-                    title: const Text("What's New"),
-                    trailing: Icon(
-                      Icons.arrow_forward,
-                      size: 18,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    onTap: () {
-                      Navigator.pop(context); // Close drawer
-                      context.push(RouteNames.whatsNew);
-                    },
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Recent Files visibility toggle
-                  _buildRecentFilesToggle(context),
-                ],
-              ),
-            ),
-
-            // Footer
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'v1.0.0',
+              const SizedBox(height: 8),
+              Text(
+                'Document Management',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        const Divider(height: 1),
+        const SizedBox(height: 8),
+
+        // Menu items
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            children: [
+              // What's New
+              ListTile(
+                leading: const Icon(Icons.auto_awesome),
+                title: const Text("What's New"),
+                trailing: Icon(
+                  Icons.arrow_forward,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                onTap: () {
+                  widget.onClose?.call();
+                  context.push(RouteNames.whatsNew);
+                },
+              ),
+              const SizedBox(height: 8),
+
+              // Recent Files visibility toggle
+              _buildRecentFilesToggle(context),
+            ],
+          ),
+        ),
+
+        // Footer
+        const Divider(height: 1),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'v1.0.0',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ),
+      ],
     );
   }
 
