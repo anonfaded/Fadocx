@@ -409,10 +409,12 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       widget.filePath,
       controller: _controller,
       params: PdfViewerParams(
-        textSelectionParams: const PdfTextSelectionParams(
-          enabled: true,
-          enableSelectionHandles: true,
-        ),
+        textSelectionParams: widget.invertColors
+            ? null
+            : const PdfTextSelectionParams(
+                enabled: true,
+                enableSelectionHandles: true,
+              ),
         matchTextColor: Colors.transparent,
         activeMatchTextColor: Colors.transparent,
         pageOverlaysBuilder: _buildPageOverlays,
@@ -464,7 +466,12 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
 
     if (widget.invertColors) {
       return ColorFiltered(
-        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.difference),
+        colorFilter: const ColorFilter.matrix([
+          -1, 0, 0, 0, 255,
+          0, -1, 0, 0, 255,
+          0, 0, -1, 0, 255,
+          0, 0, 0, 1, 0,
+        ]),
         child: viewer,
       );
     }
