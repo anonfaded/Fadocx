@@ -39,20 +39,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     return SafeArea(
       bottom: false,
       child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: 'Documents'.split('').map((letter) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                letter,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0,
-                    ),
+        child: Text(
+          'Documents',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
-            );
-          }).toList(),
         ),
       ),
     );
