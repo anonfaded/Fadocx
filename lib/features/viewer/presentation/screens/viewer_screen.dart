@@ -345,103 +345,106 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   Widget _buildFloatingTopBar(BuildContext context, bool isDark) {
-    return Stack(
-      children: [
-        // Shadow below the top bar
-        Positioned(
-          bottom: -8,
-          left: 0,
-          right: 0,
-          height: 8,
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withValues(alpha: 0.3)
-                      : Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Main top bar with rounded bottom corners
-        ClipRRect(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16),
-          ),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    return GestureDetector(
+      onTap: () {}, // Absorb taps to prevent triggering PDF tap
+      child: Stack(
+        children: [
+          // Shadow below the top bar
+          Positioned(
+            bottom: -8,
+            left: 0,
+            right: 0,
+            height: 8,
             child: Container(
               decoration: BoxDecoration(
-              color: isDark
-                  ? Theme.of(context)
-                      .colorScheme
-                      .surface
-                      .withValues(alpha: 0.95)
-                  : Theme.of(context)
-                      .colorScheme
-                      .surface
-                      .withValues(alpha: 0.92),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-              border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.2),
-                  width: 1,
-                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
             ),
-            child: SafeArea(
-                bottom: false,
-                child: SizedBox(
-                  height: 40,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.chevron_left),
-                          onPressed: () => context.pop(),
-                          tooltip: 'Back',
-                          iconSize: 20,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
+          ),
+          // Main top bar with rounded bottom corners
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                color: isDark
+                    ? Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.95)
+                    : Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.92),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                  bottom: false,
+                  child: SizedBox(
+                    height: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.chevron_left),
+                            onPressed: () => context.pop(),
+                            tooltip: 'Back',
+                            iconSize: 20,
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            padding: EdgeInsets.zero,
                           ),
-                          padding: EdgeInsets.zero,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            widget.fileName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              widget.fileName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -677,7 +680,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                   children: [
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: !_bottomMenuExpanded ? _toggleControls : null,
+                      onTap: null, // Removed tap-to-toggle from bottom panel
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
