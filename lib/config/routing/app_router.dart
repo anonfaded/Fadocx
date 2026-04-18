@@ -28,6 +28,22 @@ GoRouter? _routerInstance;
 /// Current route location preserved across rebuilds
 String _currentLocation = RouteNames.home;
 
+/// Helper to create a fade transition page
+Page<dynamic> _fadeTransitionPage(
+  BuildContext context,
+  GoRouterState state,
+  Widget child,
+) {
+  return CustomTransitionPage<dynamic>(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+  );
+}
+
 /// GoRouter configuration provider
 GoRouter createGoRouter() {
   // Return existing instance if available to prevent navigation reset
@@ -67,9 +83,9 @@ GoRouter createGoRouter() {
       GoRoute(
         path: RouteNames.home,
         name: 'home',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           log.d('Navigating to home');
-          return const HomeScreen();
+          return _fadeTransitionPage(context, state, const HomeScreen());
         },
       ),
 
@@ -77,9 +93,9 @@ GoRouter createGoRouter() {
       GoRoute(
         path: RouteNames.documents,
         name: 'documents',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           log.d('Navigating to documents');
-          return const DocumentsScreen();
+          return _fadeTransitionPage(context, state, const DocumentsScreen());
         },
       ),
 
@@ -87,9 +103,9 @@ GoRouter createGoRouter() {
       GoRoute(
         path: RouteNames.browse,
         name: 'browse',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           log.d('Navigating to browse');
-          return const BrowseScreen();
+          return _fadeTransitionPage(context, state, const BrowseScreen());
         },
       ),
 
@@ -97,9 +113,9 @@ GoRouter createGoRouter() {
       GoRoute(
         path: RouteNames.trash,
         name: 'trash',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           log.d('Navigating to trash');
-          return const TrashScreen();
+          return _fadeTransitionPage(context, state, const TrashScreen());
         },
       ),
 
@@ -107,13 +123,13 @@ GoRouter createGoRouter() {
       GoRoute(
         path: RouteNames.viewer,
         name: 'viewer',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final filePath = state.uri.queryParameters['path'];
           final fileName = state.uri.queryParameters['name'];
 
           if (filePath == null || filePath.isEmpty) {
             log.w('Document path is empty, redirecting to home');
-            return Scaffold(
+            final errorWidget = Scaffold(
               appBar: AppBar(title: const Text('Error')),
               body: Center(
                 child: Column(
@@ -131,14 +147,19 @@ GoRouter createGoRouter() {
                 ),
               ),
             );
+            return _fadeTransitionPage(context, state, errorWidget);
           }
 
           log.d('Navigating to viewer: $filePath');
           final displayName = fileName ?? (filePath.split('/').last);
 
-          return ViewerScreen(
-            filePath: filePath,
-            fileName: displayName,
+          return _fadeTransitionPage(
+            context,
+            state,
+            ViewerScreen(
+              filePath: filePath,
+              fileName: displayName,
+            ),
           );
         },
       ),
@@ -147,9 +168,9 @@ GoRouter createGoRouter() {
       GoRoute(
         path: RouteNames.settings,
         name: 'settings',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           log.d('Navigating to settings');
-          return const SettingsScreen();
+          return _fadeTransitionPage(context, state, const SettingsScreen());
         },
       ),
 
@@ -157,9 +178,9 @@ GoRouter createGoRouter() {
        GoRoute(
          path: RouteNames.scanner,
          name: 'scanner',
-         builder: (context, state) {
+         pageBuilder: (context, state) {
            log.d('Navigating to scanner');
-           return const ScannerScreen();
+           return _fadeTransitionPage(context, state, const ScannerScreen());
          },
        ),
 
@@ -167,9 +188,9 @@ GoRouter createGoRouter() {
        GoRoute(
          path: RouteNames.whatsNew,
          name: 'whats_new',
-         builder: (context, state) {
+         pageBuilder: (context, state) {
            log.d('Navigating to what\'s new');
-           return const WhatsNewScreen();
+           return _fadeTransitionPage(context, state, const WhatsNewScreen());
          },
        ),
     ],
