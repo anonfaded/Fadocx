@@ -29,7 +29,6 @@ class ViewerScreen extends ConsumerStatefulWidget {
 
 class _ViewerScreenState extends ConsumerState<ViewerScreen>
     with TickerProviderStateMixin {
-  static const double _kTapMovementThreshold = 5;
   static const double _kSidebarTopOffset = 56;
   static const double _kSidebarBottomOffset = 88;
 
@@ -45,8 +44,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   late AnimationController _topBarController;
   late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
-  Offset? _pointerDownPosition;
-  bool _pointerMoved = false;
 
   void _toggleControls() {
     final willBeVisible = !_controlsVisible;
@@ -67,53 +64,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       _sidebarController.reverse();
       _menuController.reverse();
     }
-  }
-
-  void _handleViewerPointerDown(PointerDownEvent event) {
-    _pointerDownPosition = event.position;
-    _pointerMoved = false;
-  }
-
-  void _handleViewerPointerMove(PointerMoveEvent event) {
-    final pointerDownPosition = _pointerDownPosition;
-    if (pointerDownPosition == null || _pointerMoved) {
-      return;
-    }
-
-    if ((event.position - pointerDownPosition).distance >=
-        _kTapMovementThreshold) {
-      _pointerMoved = true;
-    }
-  }
-
-  void _handleViewerPointerUp(PointerUpEvent event) {
-    final pointerDownPosition = _pointerDownPosition;
-    if (pointerDownPosition == null) {
-      return;
-    }
-
-    final isTap =
-        !_pointerMoved &&
-        (event.position - pointerDownPosition).distance <
-            _kTapMovementThreshold;
-
-    _pointerDownPosition = null;
-    _pointerMoved = false;
-
-    if (!isTap) {
-      return;
-    }
-
-    if (_bottomMenuExpanded) {
-      return;
-    }
-
-    _toggleControls();
-  }
-
-  void _handleViewerPointerCancel(PointerCancelEvent event) {
-    _pointerDownPosition = null;
-    _pointerMoved = false;
   }
 
   void _toggleBottomMenu() {
@@ -270,11 +220,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       body: Stack(
         children: [
           Positioned.fill(
-            child: Listener(
-              onPointerDown: _handleViewerPointerDown,
-              onPointerMove: _handleViewerPointerMove,
-              onPointerUp: _handleViewerPointerUp,
-              onPointerCancel: _handleViewerPointerCancel,
+            child: GestureDetector(
+              onTap: _toggleControls,
+              behavior: HitTestBehavior.translucent,
               child: docState.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : docState.hasError
