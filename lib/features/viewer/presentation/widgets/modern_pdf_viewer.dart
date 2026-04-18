@@ -1154,7 +1154,7 @@ class _PageFocusDimmer extends StatelessWidget {
     return ClipPath(
       clipper: _FocusClipper(rects),
       child: Container(
-        color: Colors.black.withOpacity(opacity),
+        color: Colors.black.withValues(alpha: opacity),
       ),
     );
   }
