@@ -218,88 +218,90 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: docState.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : docState.hasError
-                    ? _buildErrorState(context, ref, docState)
-                    : docState.document != null
-                        ? _buildContentViewer(
-                            document: docState.document!,
-                          )
-                        : const Center(child: Text('No content')),
-          ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: docState.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : docState.hasError
+                      ? _buildErrorState(context, ref, docState)
+                      : docState.document != null
+                          ? _buildContentViewer(
+                              document: docState.document!,
+                            )
+                          : const Center(child: Text('No content')),
+            ),
 
-          // Sidebar with slide-in animation
-          AnimatedBuilder(
-            animation: _sidebarController,
-            builder: (context, child) {
-              return Positioned(
-                top: _kSidebarTopOffset - _kSidebarRadius,
-                bottom: _kSidebarBottomOffset - _kSidebarRadius,
-                left: 0,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(-1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: _sidebarController,
-                    curve: Curves.easeOutCubic,
-                  )),
-                  child: _sidebarOpen && _controlsVisible
-                      ? _buildSidebarDrawer(context, isDark)
-                      : const SizedBox.shrink(),
-                ),
-              );
-            },
-          ),
+            // Sidebar with slide-in animation
+            AnimatedBuilder(
+              animation: _sidebarController,
+              builder: (context, child) {
+                return Positioned(
+                  top: _kSidebarTopOffset - _kSidebarRadius,
+                  bottom: _kSidebarBottomOffset - _kSidebarRadius,
+                  left: 0,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(-1.0, 0.0),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: _sidebarController,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: _sidebarOpen && _controlsVisible
+                        ? _buildSidebarDrawer(context, isDark)
+                        : const SizedBox.shrink(),
+                  ),
+                );
+              },
+            ),
 
-          // Always show top/bottom panels - let controller handle visibility
-          AnimatedBuilder(
-            animation: _topBarController,
-            builder: (context, child) {
-              return Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, -1.0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: _topBarController,
-                    curve: Curves.easeOutCubic,
-                  )),
-                  child: _buildFloatingTopBar(context, isDark),
-                ),
-              );
-            },
-          ),
+            // Always show top/bottom panels - let controller handle visibility
+            AnimatedBuilder(
+              animation: _topBarController,
+              builder: (context, child) {
+                return Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, -1.0),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: _topBarController,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: _buildFloatingTopBar(context, isDark),
+                  ),
+                );
+              },
+            ),
 
-          // Bottom panel with slide animation
-          AnimatedBuilder(
-            animation: _bottomPanelController,
-            builder: (context, child) {
-              return Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 1.0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: _bottomPanelController,
-                    curve: Curves.easeOutCubic,
-                  )),
-                  child: _buildFloatingBottomPanel(context, isDark),
-                ),
-              );
-            },
-          ),
-        ],
+            // Bottom panel with slide animation
+            AnimatedBuilder(
+              animation: _bottomPanelController,
+              builder: (context, child) {
+                return Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 1.0),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: _bottomPanelController,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: _buildFloatingBottomPanel(context, isDark),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -791,50 +793,48 @@ child: Row(
         : theme.colorScheme.surface.withValues(alpha: 0.92);
     final borderColor = theme.colorScheme.outline.withValues(alpha: 0.2);
 
-    return SafeArea(
-      child: GestureDetector(
-        onTap: () {},
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: width + 20,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // 1. Background and Flares
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: _InvertedCornerSidebarPainter(
-                    color: bgColor,
-                    borderColor: borderColor,
-                    radius: _kSidebarRadius,
-                    sidebarWidth: width,
-                  ),
+    return GestureDetector(
+      onTap: () {},
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: width + 20,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // 1. Background and Flares
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _InvertedCornerSidebarPainter(
+                  color: bgColor,
+                  borderColor: borderColor,
+                  radius: _kSidebarRadius,
+                  sidebarWidth: width,
                 ),
               ),
-              // 2. Content (Sheet) - Body starts at x=0
-              Positioned(
-                left: 0,
-                top: _kSidebarRadius,
-                bottom: _kSidebarRadius,
-                width: width,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.transparent,
-                      ),
-                      child: drawerContent,
+            ),
+            // 2. Content (Sheet) - Body starts at x=0
+            Positioned(
+              left: 0,
+              top: _kSidebarRadius,
+              bottom: _kSidebarRadius,
+              width: width,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.transparent,
                     ),
+                    child: drawerContent,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
