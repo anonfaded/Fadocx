@@ -62,7 +62,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   List<PdfOutlineNode>? _outlineNodes;
   bool _isLoadingOutline = false;
 
-  // Sidebar tabs: 0=Pages, 1=Search, 2=TOC
+  // Sidebar tabs: 0=Pages, 1=Search, 2=TOC, 3=Notes, 4=Bookmarks
   int _sidebarTab = 0;
 
    // Public getters for parent access
@@ -107,6 +107,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                           _buildSidebarTab(context, 'Pages', Icons.pages, 0),
                           _buildSidebarTab(context, 'Search', Icons.search, 1),
                           _buildSidebarTab(context, 'TOC', Icons.list, 2),
+                          _buildSidebarTab(context, 'Notes', Icons.note, 3, comingSoon: true),
+                          _buildSidebarTab(context, 'Bookmarks', Icons.bookmark, 4, comingSoon: true),
                         ],
                       ),
                     ),
@@ -120,7 +122,11 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                   ? _buildPagesTab()
                   : _sidebarTab == 1
                       ? _buildSearchTab()
-                      : _buildTocTab(),
+                      : _sidebarTab == 2
+                          ? _buildTocTab()
+                          : _sidebarTab == 3
+                              ? _buildComingSoonTab('Notes', 'Add notes and annotations to PDF pages')
+                              : _buildComingSoonTab('Bookmarks', 'Save and organize your favorite pages'),
             ),
           ],
         );
@@ -643,7 +649,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
         height: 65,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: const Center(
             child: SizedBox(
@@ -658,7 +664,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       height: 65,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
@@ -1009,6 +1015,56 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     );
   }
 
+  Widget _buildComingSoonTab(String title, String description) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.schedule,
+                size: 32,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '$title - Coming Soon',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'This feature is under development and will be available in a future update.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
    // ignore: unused_element
   Widget _buildBottomDock() {
     return SafeArea(
@@ -1094,7 +1150,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   Widget _buildSidebarTab(
-      BuildContext context, String label, IconData icon, int index) {
+      BuildContext context, String label, IconData icon, int index, {bool comingSoon = false}) {
     final isActive = _sidebarTab == index;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -1121,20 +1177,45 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    icon,
-                    size: 18,
-                    color: isActive
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.outline,
+                  Stack(
+                    children: [
+                      Icon(
+                        icon,
+                        size: 18,
+                        color: comingSoon
+                            ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.4)
+                            : isActive
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.outline,
+                      ),
+                      if (comingSoon)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(1),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.schedule,
+                              size: 6,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   Text(
                     label,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           fontSize: 10,
-                          color: isActive
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.outline,
+                          color: comingSoon
+                              ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.4)
+                              : isActive
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.outline,
                           fontWeight:
                               isActive ? FontWeight.w600 : FontWeight.w500,
                         ),
