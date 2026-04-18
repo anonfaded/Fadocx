@@ -25,36 +25,14 @@ class FloatingDockScaffold extends StatefulWidget {
   State<FloatingDockScaffold> createState() => _FloatingDockScaffoldState();
 }
 
-class _FloatingDockScaffoldState extends State<FloatingDockScaffold>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-  bool _hasInitializedAnimation = false;
-
+class _FloatingDockScaffoldState extends State<FloatingDockScaffold> {
   @override
   void initState() {
     super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 700),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOutCubic),
-    );
-
-    // Only animate on first build (app startup)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_hasInitializedAnimation && mounted) {
-        _hasInitializedAnimation = true;
-        _fadeController.forward();
-      }
-    });
   }
 
   @override
   void dispose() {
-    _fadeController.dispose();
     super.dispose();
   }
 
@@ -77,30 +55,26 @@ class _FloatingDockScaffoldState extends State<FloatingDockScaffold>
             child: widget.body,
           ),
 
-          // Floating top bar with blur (overlay on top) - ONLY fade in on startup
+          // Floating top bar with blur (overlay on top)
           if (widget.appBarContent != null)
             Positioned(
               top: 0,
               left: 0,
               right: 0,
               height: appBarHeight + topSafePadding,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: _FloatingAppBar(
-                  content: widget.appBarContent!,
-                  topPadding: topSafePadding,
-                ),
+              child: _FloatingAppBar(
+                content: widget.appBarContent!,
+                topPadding: topSafePadding,
               ),
             ),
 
-          // Floating bottom dock with blur (overlay on bottom) - ONLY fade in on startup
+          // Floating bottom dock with blur (overlay on bottom) - FIXED in place, no animation
           if (widget.showBottomDock)
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
+              child: RepaintBoundary(
                 child: _FloatingDock(
                   bottomPadding: bottomSafePadding,
                   currentRoute: widget.currentRoute,
