@@ -105,21 +105,23 @@ class HamburgerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 1.5
+      ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
 
     const lineSpacing = 6.5;
     const yOffset = 2.0;
 
+    // Top line - slightly increased width from 0.7 to 0.75
     canvas.drawLine(
       Offset(0, yOffset),
-      Offset(size.width * 0.7, yOffset),
+      Offset(size.width * 0.75, yOffset),
       paint,
     );
 
+    // Bottom line - maintains same ratio (0.375 is 50% of 0.75)
     canvas.drawLine(
       Offset(0, lineSpacing + yOffset),
-      Offset(size.width * bottomLineFactor, lineSpacing + yOffset),
+      Offset(size.width * (bottomLineFactor * 1.07), lineSpacing + yOffset),
       paint,
     );
   }
