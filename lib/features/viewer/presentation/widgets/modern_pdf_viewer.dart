@@ -449,9 +449,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
           }
         },
         onGeneralTap: (context, controller, details) {
-          // Handle tap to toggle controls, but don't consume the event
-          // so that long press and other gestures still work
-          widget.onTap?.call();
+          // Handle tap to toggle controls, but only for actual taps, not long press
+          if (details.type == PdfViewerGeneralTapType.tap) {
+            widget.onTap?.call();
+          }
           // Return false to let the event continue to PDF viewer for text selection etc.
           return false;
         },
