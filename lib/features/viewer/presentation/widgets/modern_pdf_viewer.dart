@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:logger/logger.dart';
 
 class _SearchResult {
   final int page;
@@ -40,6 +42,16 @@ class ModernPdfViewer extends StatefulWidget {
 }
 
 class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderStateMixin {
+  static final log = Logger(
+    printer: PrettyPrinter(
+      methodCount: 0,
+      errorMethodCount: 5,
+      lineLength: 50,
+      colors: true,
+      printEmojis: true,
+    ),
+  );
+
   final _controller = PdfViewerController();
   final _searchController = TextEditingController();
   final ValueNotifier<int> _drawerVersion = ValueNotifier<int>(0);
@@ -49,6 +61,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   int _currentPage = 1;
   int _totalPages = 0;
   PdfDocument? _document;
+  bool _isControllerReady = false;
 
   PdfDocument? get pdfDocument => _document;
 
@@ -61,6 +74,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   // TOC state
   List<PdfOutlineNode>? _outlineNodes;
   bool _isLoadingOutline = false;
+
+  // Text mode state - cache loaded page texts
+  final Map<int, String> _pageTexts = {};
+  bool _isLoadingAllPages = false;
 
   // Sidebar tabs: 0=Pages, 1=Search, 2=TOC, 3=Notes, 4=Bookmarks
   int _sidebarTab = 0;
@@ -80,12 +97,9 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   @override
-  void setState(VoidCallback fn) {
-    if (!mounted) {
-      return;
-    }
-    super.setState(fn);
-    _drawerVersion.value++;
+  void didUpdateWidget(ModernPdfViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // No need for page restoration anymore - ColorFilter no longer destroys PdfViewer widget
   }
 
   /// Build drawer content for display in ViewerScreen's sidebar.
@@ -161,10 +175,19 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   void _goToPage(int page) {
-    if (page < 1 || page > _totalPages) return;
-    _controller.goToPage(pageNumber: page);
-    // Notify parent about page change
-    widget.onPageChanged?.call(_currentPage, _totalPages);
+    log.d('_goToPage called: page=$page, totalPages=$_totalPages, isReady=$_isControllerReady');
+    if (page < 1 || page > _totalPages || !_isControllerReady) {
+      log.w('_goToPage rejected: invalid params');
+      return;
+    }
+    try {
+      log.d('Calling controller.goToPage($page)');
+      _controller.goToPage(pageNumber: page);
+      // Notify parent about page change
+      widget.onPageChanged?.call(_currentPage, _totalPages);
+    } catch (e) {
+      log.e('Failed to navigate to page $page', error: e);
+    }
   }
 
   // Public methods for parent to call
@@ -196,15 +219,16 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     setState(() => _showSidebar = !_showSidebar);
   }
 
-  Future<Map<String, dynamic>> extractAllText() async {
+  Future<Map<String, dynamic>> extractAllText([void Function(int current, int total)? onProgress]) async {
     if (_document == null) {
       return {'text': '', 'wordCount': 0, 'pageCount': 0};
     }
 
     final allText = StringBuffer();
     int totalWords = 0;
+    final totalPages = _document!.pages.length;
 
-    for (int i = 0; i < _document!.pages.length; i++) {
+    for (int i = 0; i < totalPages; i++) {
       try {
         final pageText = await _document!.pages[i].loadText();
         if (pageText != null) {
@@ -219,13 +243,172 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
           }
         }
       } catch (_) {}
+
+      // Report progress
+      onProgress?.call(i + 1, totalPages);
     }
 
     return {
       'text': allText.toString(),
       'wordCount': totalWords,
-      'pageCount': _document!.pages.length,
+      'pageCount': totalPages,
     };
+  }
+
+  Future<void> _showCopyDialog() async {
+    if (_document == null) return;
+
+    int currentPage = 0;
+    int totalPages = _document!.pages.length;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Copy PDF Text'),
+          content: FutureBuilder<Map<String, dynamic>>(
+            future: extractAllText((current, total) {
+              if (mounted) {
+                setState(() {
+                  currentPage = current;
+                  totalPages = total;
+                });
+              }
+            }),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SizedBox(
+                  height: 120,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          currentPage > 0
+                              ? 'Extracting text... ($currentPage/$totalPages pages)'
+                              : 'Extracting text...',
+                        ),
+                        if (currentPage > 0) ...[
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(
+                            value: currentPage / totalPages,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+            if (snapshot.hasError) {
+              return const SizedBox(
+                height: 100,
+                child: Center(
+                  child: Text('Error extracting text'),
+                ),
+              );
+            }
+
+            final data = snapshot.data;
+            final text = data?['text'] ?? '';
+            final wordCount = data?['wordCount'] ?? 0;
+
+            return SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Word count: $wordCount',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.4,
+                    ),
+                    child: SingleChildScrollView(
+                      child: SelectableText(
+                        text.isEmpty ? 'No text found in PDF' : text,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          FutureBuilder<Map<String, dynamic>>(
+            future: extractAllText(),
+            builder: (context, snapshot) {
+              final text = snapshot.data?['text'] ?? '';
+              return TextButton(
+                onPressed: text.isNotEmpty
+                    ? () async {
+                        await Clipboard.setData(ClipboardData(text: text));
+                        Navigator.of(dialogContext).pop();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Full PDF text copied to clipboard'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }
+                    : null,
+                child: const Text('Copy All'),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+  Future<void> _loadAllPageTexts() async {
+    if (_document == null || _isLoadingAllPages) return;
+
+    setState(() => _isLoadingAllPages = true);
+
+    try {
+      for (int i = 0; i < _document!.pages.length; i++) {
+        if (!mounted) break;
+
+        try {
+          final pageText = await _document!.pages[i].loadText();
+          if (pageText != null && mounted) {
+            final text = ((pageText as dynamic).fullText ?? '') as String;
+            setState(() {
+              _pageTexts[i] = text;
+            });
+          }
+        } catch (e) {
+          // Skip pages that fail to load
+          if (mounted) {
+            setState(() {
+              _pageTexts[i] = '';
+            });
+          }
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingAllPages = false);
+      }
+    }
   }
 
   Future<void> _performSearch(String query) async {
@@ -429,6 +612,17 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   Widget _buildPdfViewer() {
+    // ROOT CAUSE FIX: Always wrap in ColorFiltered with conditional colorFilter
+    // This keeps the PdfViewer widget stable and prevents _state from becoming null
+    // when invertColors changes. See: https://github.com/espresso3389/pdfrx/issues/277
+    
+    final invertColorFilter = const ColorFilter.matrix([
+      -1, 0, 0, 0, 255,
+      0, -1, 0, 0, 255,
+      0, 0, -1, 0, 255,
+      0, 0, 0, 1, 0,
+    ]);
+
     final viewer = PdfViewer.file(
       widget.filePath,
       controller: _controller,
@@ -446,16 +640,19 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
         scaleEnabled: true,
         interactionEndFrictionCoefficient: 0.1,
         onViewerReady: (document, controller) async {
+          log.d('PDF document loaded: ${document.pages.length} pages');
           setState(() {
             _document = document;
             _totalPages = document.pages.length;
             _isLoadingOutline = true;
+            _pageTexts.clear();
+            _isControllerReady = true;
           });
 
-          // Notify parent about initial page info
+          log.i('Document ready: $_totalPages pages');
           widget.onPageChanged?.call(_currentPage, _totalPages);
 
-          // Load outline/TOC in background
+          // Load outline in background
           try {
             final outline = await document.loadOutline();
             if (mounted) {
@@ -469,42 +666,39 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
               setState(() => _isLoadingOutline = false);
             }
           }
+
+          // Load all page texts in background for text mode
+          if (mounted) {
+            _loadAllPageTexts();
+          }
         },
         onPageChanged: (pageNumber) {
           if (pageNumber != null) {
+            log.d('Page changed to: $pageNumber');
             setState(() => _currentPage = pageNumber);
-            // Notify parent about page change
             widget.onPageChanged?.call(_currentPage, _totalPages);
           }
         },
         onGeneralTap: (context, controller, details) {
-          // Handle tap to toggle controls, but only for actual taps, not long press
           if (details.type == PdfViewerGeneralTapType.tap) {
             widget.onTap?.call();
           }
-          // Return false to let the event continue to PDF viewer for text selection etc.
           return false;
         },
       ),
     );
 
-    if (widget.invertColors) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: ColorFiltered(
-          colorFilter: const ColorFilter.matrix([
-            -1, 0, 0, 0, 255,
-            0, -1, 0, 0, 255,
-            0, 0, -1, 0, 255,
-            0, 0, 0, 1, 0,
-          ]),
-          child: viewer,
-        ),
-      );
-    }
+    // Always use ColorFiltered with RepaintBoundary to maintain widget stability
+    // and improve rendering performance. The colorFilter property changes dynamically
+    // instead of rebuilding the entire widget tree.
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: viewer,
+      child: RepaintBoundary(
+        child: ColorFiltered(
+          colorFilter: widget.invertColors ? invertColorFilter : const ColorFilter.mode(Colors.transparent, BlendMode.lighten),
+          child: viewer,
+        ),
+      ),
     );
   }
 
@@ -512,51 +706,130 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     if (_document == null) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    // Start loading texts if not already started
+    if (!_isLoadingAllPages && _pageTexts.isEmpty) {
+      _loadAllPageTexts();
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _totalPages,
-        itemBuilder: (context, index) {
-          final page = _document!.pages[index];
-          return FutureBuilder<dynamic>(
-            future: page.loadText(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: LinearProgressIndicator(),
-                );
-              }
-              final pageText = snapshot.data;
-              final text = ((pageText as dynamic).fullText ?? '') as String;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Page ${index + 1}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
+      child: Column(
+        children: [
+          // Header with loading indicator
+          if (_isLoadingAllPages)
+            Container(
+              padding: const EdgeInsets.all(12),
+              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Loading page texts...',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+
+          // Main content
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _totalPages,
+              itemBuilder: (context, index) {
+                final pageText = _pageTexts[index];
+                final isLoaded = pageText != null;
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Page header with copy button
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Page ${index + 1}',
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
                           ),
-                    ),
-                    const SizedBox(height: 8),
-                    SelectableText(
-                      text.isEmpty ? '(No text on this page)' : text,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Divider(height: 1),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+                          if (isLoaded && pageText.isNotEmpty)
+                            IconButton(
+                              icon: const Icon(Icons.copy),
+                              iconSize: 18,
+                              onPressed: () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                await Clipboard.setData(ClipboardData(text: pageText));
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text('Page ${index + 1} text copied to clipboard'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                              tooltip: 'Copy page text',
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Page content
+                      if (!isLoaded)
+                        // Loading state for individual page
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: LinearProgressIndicator(),
+                        )
+                      else if (pageText.isEmpty)
+                        // Empty page
+                        Text(
+                          '(No text on this page)',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                                fontStyle: FontStyle.italic,
+                              ),
+                        )
+                      else
+                        // Page text
+                        SelectableText(
+                          pageText,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                height: 1.6,
+                              ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1128,6 +1401,11 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                 icon: const Icon(Icons.menu),
                 onPressed: () => setState(() => _showSidebar = !_showSidebar),
                 tooltip: 'Sidebar',
+              ),
+              IconButton(
+                icon: const Icon(Icons.content_copy),
+                onPressed: _document != null ? _showCopyDialog : null,
+                tooltip: 'Copy PDF Text',
               ),
               IconButton(
                 icon: const Icon(Icons.first_page),

@@ -194,6 +194,8 @@ Widget _buildContentViewer() {
 
 **Agent Workflow Rules**
 
+- **Incremental Changes**: Make small, targeted edits rather than large rewrites to avoid breaking Dart syntax and minimize debugging time.
+- **Logging**: Always use `import 'package:logger/logger.dart';` and add logs when debugging or adding features to track and debug easily.
 - **Todo First**: Always create a detailed, long todo list before starting work on any bug or feature; include edge cases, assumptions, and explicit context-gathering steps.
 - **Never Assume**: Never assume—validate by gathering context (inputs, code paths, configs, etc.) before starting work.
 - **Broader Research**: Use Context7 MCP for research or to broaden your search and understanding before coding or debugging.
