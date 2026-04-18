@@ -56,6 +56,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   final _searchController = TextEditingController();
   final ValueNotifier<int> _drawerVersion = ValueNotifier<int>(0);
   late final AnimationController _highlightController;
+  late final PageController _textModePageController;
+  late final ScrollController _pagesScrollController;
 
   bool _showSidebar = false;
   int _currentPage = 1;
@@ -81,6 +83,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   final Map<int, String> _pageTexts = {};
   bool _isLoadingAllPages = false;
 
+  // Tap detection tracking - distinguish taps from scrolls
+  Offset? _pointerDownPosition;
+  DateTime? _pointerDownTime;
+
   // Sidebar tabs: 0=Pages, 1=Search, 2=TOC, 3=Notes, 4=Bookmarks
   int _sidebarTab = 0;
 
@@ -96,12 +102,95 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
+    _textModePageController = PageController(initialPage: 0);
+    _textModePageController.addListener(_onPageChanged);
+    _pagesScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _highlightController.dispose();
+    _textModePageController.dispose();
+    _pagesScrollController.dispose();
+    _drawerVersion.dispose();
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(ModernPdfViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
     // No need for page restoration anymore - ColorFilter no longer destroys PdfViewer widget
+  }
+
+  /// Scroll to a specific page in reader mode - INSTANT jump for better UX
+  void _scrollToTextModePage(int pageNumber) {
+    if (pageNumber < 1 || pageNumber > _totalPages) {
+      log.w('_scrollToTextModePage rejected: page=$pageNumber, totalPages=$_totalPages');
+      return;
+    }
+    try {
+      // Use jumpToPage for instant navigation instead of animateToPage
+      // This is much faster for large PDFs with many pages
+      final index = pageNumber - 1; // PageView index is 0-based
+      log.d('_scrollToTextModePage: jumping to page=$pageNumber (index=$index)');
+      _textModePageController.jumpToPage(index);
+      log.d('_scrollToTextModePage: jumped successfully to page=$pageNumber');
+    } catch (e) {
+      log.e('Failed to scroll to text mode page $pageNumber', error: e, stackTrace: StackTrace.current);
+    }
+  }
+
+  void _onPageChanged() {
+    if (!_textModePageController.hasClients) return;
+    
+    // Get current page from PageController
+    final currentPage = (_textModePageController.page ?? 0).round() + 1;
+    
+    if (currentPage != _currentPage && mounted) {
+      log.d('Page changed: $currentPage -> from ${_currentPage} total=$_totalPages');
+      setState(() => _currentPage = currentPage);
+      widget.onPageChanged?.call(_currentPage, _totalPages);
+      
+      // Auto-scroll sidebar to keep current page in view instantly (no delay)
+      // This ensures accurate positioning without race conditions
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToActivePageInSidebar();
+      });
+    }
+  }
+
+  /// Auto-scroll sidebar to keep current page in view using instant jump for better performance
+  void _scrollToActivePageInSidebar() {
+    if (!_pagesScrollController.hasClients || _totalPages == 0) return;
+    
+    try {
+      // Each page row is 18 (vertical padding: 12) + 12 (container height approximately)
+      // Actually measure: margin(6+6) + container(12+12) + padding = ~48 pixels base
+      // Add IconButton height when thumbnail visible: ~40 pixels
+      // Total per item: ~88-100 pixels depending on thumbnail
+      // For accurate positioning, use measured item height from first item or estimate
+      
+      // Use measured height of ~98 pixels per row as observed
+      const itemHeight = 98.0;
+      final targetOffset = (_currentPage - 1) * itemHeight;
+      final maxExtent = _pagesScrollController.position.maxScrollExtent;
+      
+      log.d('Sidebar auto-scroll: page=$_currentPage, targetOffset=$targetOffset, maxExtent=$maxExtent');
+      
+      // Instantly jump to the target offset (teleport, no animation)
+      // This is more performant than animate especially with many items
+      if (targetOffset >= 0 && targetOffset <= maxExtent) {
+        _pagesScrollController.jumpTo(targetOffset);
+        log.d('Sidebar jumped to offset: $targetOffset');
+      } else if (targetOffset > maxExtent) {
+        // If target is beyond max, jump to max
+        _pagesScrollController.jumpTo(maxExtent);
+        log.d('Sidebar jumped to max extent: $maxExtent');
+      }
+    } catch (e) {
+      log.w('Error scrolling sidebar to active page: $e');
+    }
   }
 
   /// Build drawer content for display in ViewerScreen's sidebar.
@@ -168,14 +257,6 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     );
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _drawerVersion.dispose();
-    _highlightController.dispose();
-    super.dispose();
-  }
-
   void _goToPage(int page) {
     log.d('_goToPage called: page=$page, totalPages=$_totalPages, isReady=$_isControllerReady');
     if (page < 1 || page > _totalPages || !_isControllerReady) {
@@ -193,28 +274,47 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   // Public methods for parent to call
+  void goToPage(int page) {
+    log.d('goToPage called: page=$page, textMode=${widget.textMode}');
+    if (widget.textMode) {
+      log.d('Using text mode navigation');
+      _scrollToTextModePage(page);
+    } else {
+      log.d('Using normal mode navigation (PdfViewer)');
+      _goToPage(page);
+    }
+  }
+
   void goToFirstPage() {
-    _goToPage(1);
+    if (widget.textMode) {
+      _scrollToTextModePage(1);
+    } else {
+      _goToPage(1);
+    }
   }
 
   void goToPreviousPage() {
-    if (_currentPage > 1) {
+    if (widget.textMode) {
+      _scrollToTextModePage((_currentPage - 1).clamp(1, _totalPages));
+    } else if (_currentPage > 1) {
       _goToPage(_currentPage - 1);
     }
   }
 
   void goToNextPage() {
-    if (_currentPage < _totalPages) {
+    if (widget.textMode) {
+      _scrollToTextModePage((_currentPage + 1).clamp(1, _totalPages));
+    } else if (_currentPage < _totalPages) {
       _goToPage(_currentPage + 1);
     }
   }
 
   void goToLastPage() {
-    _goToPage(_totalPages);
-  }
-
-  void goToPage(int page) {
-    _goToPage(page);
+    if (widget.textMode) {
+      _scrollToTextModePage(_totalPages);
+    } else {
+      _goToPage(_totalPages);
+    }
   }
 
   void toggleSidebar() {
@@ -382,33 +482,136 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
 
   Future<void> _loadAllPageTexts() async {
     if (_document == null || _isLoadingAllPages) return;
+    if (_pageTexts.length == _totalPages) return; // Already loaded all
 
     setState(() => _isLoadingAllPages = true);
 
     try {
-      for (int i = 0; i < _document!.pages.length; i++) {
+      for (int i = 0; i < _totalPages; i++) {
         if (!mounted) break;
+        if (_pageTexts.containsKey(i)) continue; // Skip already loaded
 
         try {
-          final pageText = await _document!.pages[i].loadText();
+          final page = _document!.pages[i];
+          final pageText = await page.loadText();
           if (pageText != null && mounted) {
             final text = ((pageText as dynamic).fullText ?? '') as String;
+            if (mounted) {
+              setState(() {
+                _pageTexts[i] = text;
+              });
+            }
+          } else if (mounted) {
             setState(() {
-              _pageTexts[i] = text;
+              _pageTexts[i] = ''; // Empty page
             });
           }
         } catch (e) {
-          // Skip pages that fail to load
+          log.d('Error loading text for page $i: $e');
           if (mounted) {
             setState(() {
-              _pageTexts[i] = '';
+              _pageTexts[i] = ''; // Mark as loaded but empty
             });
           }
         }
       }
+    } catch (e) {
+      log.e('Error in _loadAllPageTexts: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoadingAllPages = false);
+      }
+    }
+  }
+
+  /// Load page text on-demand with robust fallback strategy
+  Future<void> _extractAllPageTextsComprehensive() async {
+    if (_document == null) return;
+
+    try {
+      log.i('🔄 Starting comprehensive text extraction for all $_totalPages pages...');
+      
+      // Extract text from all pages systematically with PdfViewer rendering
+      for (int pageIndex = 0; pageIndex < _totalPages; pageIndex++) {
+        if (!mounted) break;
+        
+        try {
+          log.d('📄 Extracting page ${pageIndex + 1}/$_totalPages...');
+          final page = _document!.pages[pageIndex];
+          
+          // Render page at screen resolution using PdfViewer's logic
+          // This initializes the page engine properly
+          await page.render(
+            width: 600,
+            height: 847,
+          );
+          
+          // Small delay to allow page initialization
+          await Future.delayed(const Duration(milliseconds: 50));
+          
+          // Now extract text - page should be properly initialized
+          final pageText = await page.loadText();
+          
+          if (pageText != null) {
+            final fullText = ((pageText as dynamic).fullText ?? '') as String;
+            final trimmedText = fullText.trim();
+            if (mounted) {
+              setState(() => _pageTexts[pageIndex] = trimmedText);
+            }
+            log.d('✅ Page ${pageIndex + 1}: Extracted ${trimmedText.length} chars');
+          } else {
+            // Page has no text content - cache as empty
+            if (mounted) {
+              setState(() => _pageTexts[pageIndex] = '');
+            }
+            log.w('⚠️ Page ${pageIndex + 1}: No text content (scanned image?)');
+          }
+        } catch (e) {
+          log.e('❌ Page ${pageIndex + 1} extraction error: $e');
+          if (mounted) {
+            setState(() => _pageTexts[pageIndex] = '');
+          }
+        }
+      }
+      
+      log.i('✅ Text extraction complete: ${_pageTexts.length}/$_totalPages pages');
+    } catch (e) {
+      log.e('❌ Comprehensive extraction failed: $e');
+    } finally {
+      // Done loading - hide loader
+      if (mounted) {
+        setState(() => _isLoadingAllPages = false);
+      }
+    }
+  }
+
+  Future<void> _loadPageTextOnDemand(int pageIndex) async {
+    if (_document == null) return;
+    if (_pageTexts.containsKey(pageIndex)) return; // Already loaded
+
+    try {
+      log.d('📄 Extracting text for page ${pageIndex + 1}');
+      final page = _document!.pages[pageIndex];
+      
+      // Simple direct extraction - page should already be rendered by PdfViewer
+      final pageText = await page.loadText();
+      
+      if (pageText != null) {
+        final fullText = ((pageText as dynamic).fullText ?? '') as String;
+        if (mounted) {
+          setState(() => _pageTexts[pageIndex] = fullText.trim());
+        }
+        log.d('✅ Page ${pageIndex + 1}: Extracted (${fullText.length} chars)');
+      } else {
+        if (mounted) {
+          setState(() => _pageTexts[pageIndex] = '');
+        }
+        log.w('⚠️ Page ${pageIndex + 1}: No text found');
+      }
+    } catch (e) {
+      log.e('❌ Page ${pageIndex + 1} extraction error: $e');
+      if (mounted) {
+        setState(() => _pageTexts[pageIndex] = '');
       }
     }
   }
@@ -704,6 +907,20 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
         panEnabled: true,
         scaleEnabled: true,
         interactionEndFrictionCoefficient: 0.1,
+        onPageChanged: (pageNumber) {
+          // Extract text from pages the viewer is rendering
+          // Only extract from pages around the current page to avoid bottleneck
+          if (pageNumber != null && pageNumber > 0) {
+            log.d('🐛 PdfViewer rendered page: $pageNumber');
+            setState(() => _currentPage = pageNumber);
+            widget.onPageChanged?.call(_currentPage, _totalPages);
+            
+            // Extract text from pages around current page (only those PdfViewer rendered)
+            _loadPageTextOnDemand(pageNumber - 1).ignore(); // Current (convert 1-based to 0-based)
+            if (pageNumber > 1) _loadPageTextOnDemand(pageNumber - 2).ignore(); // Previous
+            if (pageNumber < _totalPages) _loadPageTextOnDemand(pageNumber).ignore(); // Next
+          }
+        },
         onViewerReady: (document, controller) async {
           log.d('PDF document loaded: ${document.pages.length} pages');
           setState(() {
@@ -712,10 +929,14 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             _isLoadingOutline = true;
             _pageTexts.clear();
             _isControllerReady = true;
+            _isLoadingAllPages = true; // Show loader while extracting text
           });
 
-          log.i('Document ready: $_totalPages pages');
+          log.i('Document ready: $_totalPages pages - starting comprehensive text extraction');
           widget.onPageChanged?.call(_currentPage, _totalPages);
+
+          // Extract all page texts systematically with proper rendering
+          _extractAllPageTextsComprehensive().ignore();
 
           // Load outline in background
           try {
@@ -726,22 +947,11 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                 _isLoadingOutline = false;
               });
             }
-          } catch (_) {
+          } catch (e) {
+            log.d('Error loading outline: $e');
             if (mounted) {
               setState(() => _isLoadingOutline = false);
             }
-          }
-
-          // Load all page texts in background for text mode
-          if (mounted) {
-            _loadAllPageTexts();
-          }
-        },
-        onPageChanged: (pageNumber) {
-          if (pageNumber != null) {
-            log.d('Page changed to: $pageNumber');
-            setState(() => _currentPage = pageNumber);
-            widget.onPageChanged?.call(_currentPage, _totalPages);
           }
         },
         onGeneralTap: (context, controller, details) {
@@ -772,18 +982,143 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Start loading texts if not already started
-    if (!_isLoadingAllPages && _pageTexts.isEmpty) {
-      _loadAllPageTexts();
+    // Build page card widget (text loads on-demand)
+    Widget buildPageCard(int index) {
+      // Load this page's text on-demand (will be instant if already loaded)
+      _loadPageTextOnDemand(index);
+      
+      final pageText = _pageTexts[index];
+      final isLoaded = pageText != null;
+
+      // Card container wrapped with tap handling
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => widget.onTap?.call(),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Page header with copy button
+              GestureDetector(
+                onTap: () {
+                  log.d('Header tap detected on page ${index + 1}');
+                  widget.onTap?.call();
+                },
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Page ${index + 1}',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                    if (isLoaded && pageText.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.copy),
+                        iconSize: 18,
+                        onPressed: () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          await Clipboard.setData(ClipboardData(text: pageText));
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text('Page ${index + 1} text copied to clipboard'),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        tooltip: 'Copy page text',
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Page content
+              if (!isLoaded)
+                // Loading state for individual page
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: LinearProgressIndicator(),
+                )
+              else if (pageText.isEmpty)
+                // Empty page - text couldn't be extracted
+                GestureDetector(
+                  onTap: () {
+                    log.d('Empty page tap detected on page ${index + 1}');
+                    widget.onTap?.call();
+                  },
+                  child: Text(
+                    'Text cannot be extracted from this page',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                )
+              else
+                // Page text - use Listener to detect taps without interfering with selection/scroll
+                Expanded(
+                  child: Listener(
+                    onPointerDown: (event) {
+                      _pointerDownPosition = event.position;
+                      _pointerDownTime = DateTime.now();
+                      log.d('📍 Pointer down at ${event.position}');
+                    },
+                    onPointerUp: (event) {
+                      // Check if this was a tap (short duration, minimal movement)
+                      if (_pointerDownPosition != null && _pointerDownTime != null) {
+                        final duration = DateTime.now().difference(_pointerDownTime!);
+                        final distance = (_pointerDownPosition! - event.position).distance;
+                        
+                        // Tap = press for < 200ms with < 10 pixel movement
+                        if (duration.inMilliseconds < 200 && distance < 10) {
+                          log.d('✓ TAP detected on page ${index + 1}');
+                          widget.onTap?.call();
+                        }
+                      }
+                      _pointerDownPosition = null;
+                      _pointerDownTime = null;
+                    },
+                    child: SingleChildScrollView(
+                      child: SelectableText(
+                        pageText,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              height: 1.6,
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Column(
-        children: [
-          // Header with loading indicator
-          if (_isLoadingAllPages)
-            Container(
+    return Stack(
+      children: [
+        // Loading indicator overlay
+        if (_isLoadingAllPages)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
               padding: const EdgeInsets.all(12),
               color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
               child: Row(
@@ -806,96 +1141,17 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                 ],
               ),
             ),
-
-          // Main content
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _totalPages,
-              itemBuilder: (context, index) {
-                final pageText = _pageTexts[index];
-                final isLoaded = pageText != null;
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 24),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Page header with copy button
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Page ${index + 1}',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ),
-                          if (isLoaded && pageText.isNotEmpty)
-                            IconButton(
-                              icon: const Icon(Icons.copy),
-                              iconSize: 18,
-                              onPressed: () async {
-                                final messenger = ScaffoldMessenger.of(context);
-                                await Clipboard.setData(ClipboardData(text: pageText));
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text('Page ${index + 1} text copied to clipboard'),
-                                    duration: const Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                              tooltip: 'Copy page text',
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Page content
-                      if (!isLoaded)
-                        // Loading state for individual page
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: LinearProgressIndicator(),
-                        )
-                      else if (pageText.isEmpty)
-                        // Empty page
-                        Text(
-                          '(No text on this page)',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.outline,
-                                fontStyle: FontStyle.italic,
-                              ),
-                        )
-                      else
-                        // Page text
-                        SelectableText(
-                          pageText,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                height: 1.6,
-                              ),
-                        ),
-                    ],
-                  ),
-                );
-              },
-            ),
           ),
-        ],
-      ),
+
+        // PageView for page-based navigation with SafeArea top padding
+        SafeArea(
+          child: PageView.builder(
+            controller: _textModePageController,
+            itemCount: _totalPages,
+            itemBuilder: (context, index) => buildPageCard(index),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1055,8 +1311,11 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            _goToPage(page);
+            log.d('Page row tapped: page=$page, textMode=${widget.textMode}');
+            // Use public goToPage() which handles both text mode and normal mode
+            goToPage(page);
             setState(() => _showSidebar = false);
+            log.d('Navigated to page $page, closing sidebar');
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -1088,7 +1347,14 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   Widget _buildPagesTab() {
+    // Schedule scroll after frame to ensure ListView is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      log.d('Pages tab built, current page=$_currentPage total=$_totalPages');
+      _scrollToActivePageInSidebar();
+    });
+    
     return ListView.builder(
+      controller: _pagesScrollController,
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: _totalPages,
       itemBuilder: (context, index) {
