@@ -448,6 +448,13 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             widget.onPageChanged?.call(_currentPage, _totalPages);
           }
         },
+        onGeneralTap: (context, controller, details) {
+          // Handle tap to toggle controls, but don't consume the event
+          // so that long press and other gestures still work
+          widget.onTap?.call();
+          // Return false to let the event continue to PDF viewer for text selection etc.
+          return false;
+        },
       ),
     );
 
@@ -1123,21 +1130,18 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(preferredSize: Size.zero, child: Container()),
-      body: Stack(
-        children: [
-           // Main content - PDF/Text viewer fills entire screen
-           // NOTE: Tap handling is now done by parent ViewerScreen via Listener
-           // We don't use GestureDetector here to avoid interference with scrolling
-            Container(
-              color: Colors.transparent,
-              child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
-            ),
-          // Sidebar overlay is rendered by ViewerScreen so taps do not
-          // interfere with the viewer-wide tap gesture.
-        ],
-      ),
+    return Stack(
+      children: [
+         // Main content - PDF/Text viewer fills entire screen
+         // NOTE: Tap handling is done by parent ViewerScreen via GestureDetector
+         // We don't use GestureDetector here to avoid interference with scrolling
+          Container(
+            color: Colors.transparent,
+            child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
+          ),
+        // Sidebar overlay is rendered by ViewerScreen so taps do not
+        // interfere with the viewer-wide tap gesture.
+      ],
     );
   }
 }

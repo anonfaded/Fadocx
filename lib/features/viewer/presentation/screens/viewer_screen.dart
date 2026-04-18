@@ -221,19 +221,15 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       body: Stack(
         children: [
           Positioned.fill(
-            child: GestureDetector(
-              onTap: _toggleControls,
-              behavior: HitTestBehavior.translucent,
-              child: docState.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : docState.hasError
-                      ? _buildErrorState(context, ref, docState)
-                      : docState.document != null
-                          ? _buildContentViewer(
-                              document: docState.document!,
-                            )
-                          : const Center(child: Text('No content')),
-            ),
+            child: docState.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : docState.hasError
+                    ? _buildErrorState(context, ref, docState)
+                    : docState.document != null
+                        ? _buildContentViewer(
+                            document: docState.document!,
+                          )
+                        : const Center(child: Text('No content')),
           ),
 
           // Sidebar with slide-in animation
@@ -317,6 +313,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         fileName: widget.fileName,
         invertColors: _invertColors,
         textMode: _textMode,
+        onTap: _toggleControls,
         onInvertToggle: () {
           setState(() => _invertColors = !_invertColors);
         },
