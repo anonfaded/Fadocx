@@ -203,6 +203,25 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update system UI overlay when theme changes
+    _updateSystemUIOverlay();
+  }
+
+  void _updateSystemUIOverlay() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: surfaceColor,
+        statusBarBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: surfaceColor,
+      ),
+    );
+  }
+
+  @override
   void dispose() {
     _menuController.dispose();
     _sidebarController.dispose();
