@@ -70,6 +70,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   List<_SearchResult> _searchResults = [];
   bool _isSearching = false;
   String _currentQuery = '';
+  int _searchCancellationToken = 0; // Incremented to cancel previous searches
+  int _searchPagesChecked = 0; // Track progress during search
 
   // TOC state
   List<PdfOutlineNode>? _outlineNodes;
@@ -186,7 +188,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       // Notify parent about page change
       widget.onPageChanged?.call(_currentPage, _totalPages);
     } catch (e) {
-      log.e('Failed to navigate to page $page', error: e);
+      log.e('Failed to navigate to page $page', error: e, stackTrace: StackTrace.current);
     }
   }
 
@@ -412,73 +414,136 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   Future<void> _performSearch(String query) async {
+    // If query is empty, immediately clear all results and stop any active search
     if (query.isEmpty || _document == null) {
-      setState(() {
-        _searchResults = [];
-        _currentSearchResult = -1;
-        _isSearching = false;
-        _currentQuery = '';
-      });
+      // Invalidate any running search by incrementing token
+      _searchCancellationToken++;
+      
+      if (mounted) {
+        setState(() {
+          _searchResults = [];
+          _currentSearchResult = -1;
+          _isSearching = false;
+          _currentQuery = '';
+          _searchPagesChecked = 0;
+        });
+      }
       _highlightController.reset();
       return;
     }
 
-    setState(() {
-      _isSearching = true;
-      _currentQuery = query;
-    });
+    // Increment token to cancel any previous searches
+    final searchToken = ++_searchCancellationToken;
+
+    // Immediately show loading state
+    if (mounted) {
+      setState(() {
+        _isSearching = true;
+        _currentQuery = query;
+        _searchResults = [];
+        _currentSearchResult = -1;
+        _searchPagesChecked = 0;
+      });
+    }
 
     final results = <_SearchResult>[];
     final lowerQuery = query.toLowerCase();
+    final totalPages = _document!.pages.length;
+    bool isSearchCancelled = false;
 
-    for (int i = 0; i < _document!.pages.length; i++) {
-      try {
-        final pageText = await _document!.pages[i].loadText();
-        if (pageText != null) {
-          final text = ((pageText as dynamic).fullText ?? '') as String;
-          if (text.toLowerCase().contains(lowerQuery)) {
-            final idx = text.toLowerCase().indexOf(lowerQuery);
-            final start = (idx - 40).clamp(0, text.length);
-            final end = (idx + query.length + 40).clamp(0, text.length);
-            var snippet = text.substring(start, end);
-            if (start > 0) snippet = '...$snippet';
-            if (end < text.length) snippet = '$snippet...';
-            final charIdx = idx;
-            final charLen = query.length;
-            final pageCharRects = ((pageText as dynamic).charRects as List?)?.cast<PdfRect>();
-            results.add(_SearchResult(page: i + 1, snippet: snippet, charIndex: charIdx, charLength: charLen, charRects: pageCharRects));
+    try {
+      for (int i = 0; i < totalPages; i++) {
+        // Check if this search was cancelled
+        if (searchToken != _searchCancellationToken) {
+          log.d('Search cancelled at page $i');
+          isSearchCancelled = true;
+          break;
+        }
+
+        try {
+          final pageText = await _document!.pages[i].loadText();
+          if (pageText != null) {
+            final text = ((pageText as dynamic).fullText ?? '') as String;
+            if (text.toLowerCase().contains(lowerQuery)) {
+              final idx = text.toLowerCase().indexOf(lowerQuery);
+              final start = (idx - 40).clamp(0, text.length);
+              final end = (idx + query.length + 40).clamp(0, text.length);
+              var snippet = text.substring(start, end);
+              if (start > 0) snippet = '...$snippet';
+              if (end < text.length) snippet = '$snippet...';
+              final charIdx = idx;
+              final charLen = query.length;
+              final pageCharRects = ((pageText as dynamic).charRects as List?)?.cast<PdfRect>();
+              results.add(_SearchResult(
+                page: i + 1,
+                snippet: snippet,
+                charIndex: charIdx,
+                charLength: charLen,
+                charRects: pageCharRects,
+              ));
+              // When first result found, immediately navigate and show it
+              if (results.length == 1 && _currentSearchResult == -1) {
+                if (mounted && searchToken == _searchCancellationToken) {
+                  setState(() {
+                    _searchResults = results;
+                    _currentSearchResult = 0;
+                    _searchPagesChecked = i + 1;
+                  });
+                  _goToPage(results[0].page);
+                }
+              }
+            }
+          }
+        } catch (_) {}
+
+        // Update progress every 3 pages for real-time feel
+        if ((i + 1) % 3 == 0 || i == totalPages - 1) {
+          if (searchToken == _searchCancellationToken && mounted) {
+            setState(() {
+              _searchPagesChecked = i + 1;
+              _searchResults = results;
+              _isSearching = i < totalPages - 1; // Still searching if not at last page
+            });
           }
         }
-      } catch (_) {}
+      }
+    } catch (e) {
+      log.e('Search error: $e', error: e);
+      isSearchCancelled = true;
     }
 
-    setState(() {
-      _searchResults = results;
-      if (_searchResults.isNotEmpty) {
-        _currentSearchResult = 0;
-        _goToPage(_searchResults[0].page);
-      } else {
-        _currentSearchResult = -1;
-      }
-      _isSearching = false;
-    });
+    // Final update - always mark search as complete if this is still the current search
+    // This fires regardless of whether it was cancelled, ensuring _isSearching is always set to false
+    if (searchToken == _searchCancellationToken && mounted) {
+      setState(() {
+        if (!isSearchCancelled) {
+          _searchResults = results;
+        }
+        _isSearching = false;
+        _searchPagesChecked = totalPages;
+      });
+      log.d('Search complete: found ${results.length} results in $totalPages pages');
+    }
   }
 
   void _nextSearchResult() async {
     if (_searchResults.isEmpty) return;
     final idx = (_currentSearchResult + 1) % _searchResults.length;
-    await _goToSearchResult(idx);
+    if (idx >= 0 && idx < _searchResults.length) {
+      await _goToSearchResult(idx);
+    }
   }
 
   void _previousSearchResult() async {
     if (_searchResults.isEmpty) return;
-    setState(() {
-      _currentSearchResult =
-          (_currentSearchResult - 1 + _searchResults.length) %
-              _searchResults.length;
-      _goToPage(_searchResults[_currentSearchResult].page);
-      _triggerHighlight();
-    });
+    final idx = (_currentSearchResult - 1 + _searchResults.length) % _searchResults.length;
+    if (idx >= 0 && idx < _searchResults.length) {
+      setState(() {
+        _currentSearchResult = idx;
+        _goToPage(_searchResults[_currentSearchResult].page);
+        _triggerHighlight();
+      });
+    }
   }
 
   void _triggerHighlight() {
@@ -835,7 +900,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   // iOS-style row for search results with snippet
-  Widget _buildSearchResultRow(BuildContext context, _SearchResult result, bool isActive) {
+  Widget _buildSearchResultRow(BuildContext context, _SearchResult result, int resultIndex, bool isActive) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -853,7 +918,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _goToSearchResult(_searchResults.indexOf(result)),
+          onTap: () => _goToSearchResult(resultIndex),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1035,163 +1100,199 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   Widget _buildSearchTab() {
+    // Wrap in SingleChildScrollView to handle overflow when keyboard appears
+    // The search input, progress indicator, and result counter are fixed-height widgets
+    // that can cause overflow when the sidebar height shrinks due to keyboard
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: Container(
-            decoration: BoxDecoration(
-              color:
-                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .outline
-                    .withValues(alpha: 0.2),
-                width: 1,
-              ),
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search PDF...',
-                border: InputBorder.none,
-                prefixIcon: Icon(Icons.search,
-                    color: Theme.of(context).colorScheme.primary),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _performSearch('');
-                        },
-                      )
-                    : null,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              onChanged: (value) {
-                setState(() {});
-                if (value.isNotEmpty) {
-                  _performSearch(value);
-                }
-              },
-            ),
-          ),
-        ),
-        if (_isSearching)
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: SizedBox(
-              height: 40,
-              child: Center(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Theme.of(context).colorScheme.primary,
+        SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search PDF...',
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.search,
+                          color: Theme.of(context).colorScheme.primary),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                _performSearch('');
+                              },
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onChanged: (value) {
+                      setState(() {});
+                      // Clear results immediately if search is empty, otherwise search
+                      if (value.isEmpty) {
+                        _performSearch('');
+                      } else {
+                        _performSearch(value);
+                      }
+                    },
                   ),
                 ),
               ),
-            ),
-          ),
-        if (_searchResults.isNotEmpty && !_isSearching)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface
-                    .withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.1),
-                  width: 1,
-                ),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  children: [
-                    Text(
-                      '${_currentSearchResult + 1}/${_searchResults.length}',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
+              if (_isSearching)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: _document != null ? _searchPagesChecked / _document!.pages.length : 0,
+                          minHeight: 4,
+                          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                          valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.primary),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Text(
+                            'Searching ${_searchPagesChecked}/${_document?.pages.length ?? 0}',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                           ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_upward),
-                      iconSize: 18,
-                      onPressed: _previousSearchResult,
-                      tooltip: 'Previous',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_downward),
-                      iconSize: 18,
-                      onPressed: _nextSearchResult,
-                      tooltip: 'Next',
-                    ),
-                  ],
+                          const Spacer(),
+                          if (_searchResults.isNotEmpty)
+                            Text(
+                              '${_searchResults.length} result${_searchResults.length == 1 ? '' : 's'}',
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              if (_searchResults.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: !_isSearching
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surface
+                                .withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outline
+                                  .withValues(alpha: 0.1),
+                              width: 1,
+                            ),
+                          ),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            child: Row(
+                              children: [
+                                Text(
+                                  '${_currentSearchResult + 1}/${_searchResults.length}',
+                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                const Spacer(),
+                                IconButton(
+                                  icon: const Icon(Icons.arrow_upward),
+                                  iconSize: 18,
+                                  onPressed: _previousSearchResult,
+                                  tooltip: 'Previous',
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.arrow_downward),
+                                  iconSize: 18,
+                                  onPressed: _nextSearchResult,
+                                  tooltip: 'Next',
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : SizedBox.shrink(),
+                ),
+            ],
           ),
+        ),
         Expanded(
-          child: _searchResults.isEmpty && _searchController.text.isNotEmpty && !_isSearching
+          child: _searchController.text.isEmpty
               ? Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.search_off, size: 48, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
+                      Icon(Icons.search, size: 48, color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
                       const SizedBox(height: 12),
                       Text(
-                        'No results found',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.outline,
+                        'Search in PDF',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
                             ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'Try a different search term',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
-                            ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          'Find text across all pages',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ],
                   ),
                 )
-              : _searchController.text.isEmpty
+              : _searchResults.isEmpty && !_isSearching
                   ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.search, size: 48, color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+                          Icon(Icons.search_off, size: 48, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
                           const SizedBox(height: 12),
                           Text(
-                            'Search in PDF',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
+                            'No results found',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.outline,
                                 ),
                           ),
                           const SizedBox(height: 4),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Text(
-                              'Find text across all pages',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.outline,
-                                  ),
-                              textAlign: TextAlign.center,
-                            ),
+                          Text(
+                            'Try a different search term',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
+                                ),
                           ),
                         ],
                       ),
@@ -1200,9 +1301,13 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: _searchResults.length,
                       itemBuilder: (context, index) {
+                        // Bounds check to prevent RangeError if list changed
+                        if (index < 0 || index >= _searchResults.length) {
+                          return const SizedBox.shrink();
+                        }
                         final result = _searchResults[index];
                         final isActive = index == _currentSearchResult;
-                        return _buildSearchResultRow(context, result, isActive);
+                        return _buildSearchResultRow(context, result, index, isActive);
                       },
                     ),
         ),
@@ -1233,7 +1338,9 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             child: InkWell(
               onTap: () {
                 if (node.dest != null) {
-                  _controller.goToDest(node.dest!);
+                  // Use goToPage() instead of goToDest() to avoid unwanted zoom
+                  // goToDest() applies zoom level from PDF destination, we only want page navigation
+                  _controller.goToPage(pageNumber: node.dest!.pageNumber);
                   setState(() => _showSidebar = false);
                 }
               },
