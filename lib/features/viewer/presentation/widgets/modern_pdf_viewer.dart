@@ -426,6 +426,9 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             _isLoadingOutline = true;
           });
 
+          // Notify parent about initial page info
+          widget.onPageChanged?.call(_currentPage, _totalPages);
+
           // Load outline/TOC in background
           try {
             final outline = await document.loadOutline();

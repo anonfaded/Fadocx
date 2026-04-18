@@ -342,10 +342,12 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           setState(() => _textMode = !_textMode);
         },
         onPageChanged: (current, total) {
-          setState(() {
-            _currentPage = current;
-            _totalPages = total;
-          });
+          if (total > 0) {
+            setState(() {
+              _currentPage = current;
+              _totalPages = total;
+            });
+          }
         },
         onSearchHighlight: _onSearchHighlight,
       );
