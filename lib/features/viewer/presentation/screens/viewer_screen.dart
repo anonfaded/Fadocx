@@ -211,12 +211,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   void _updateSystemUIOverlay() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = Theme.of(context).colorScheme.surface;
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: surfaceColor,
+        statusBarColor: Colors.transparent,
         statusBarBrightness: isDark ? Brightness.light : Brightness.dark,
-        systemNavigationBarColor: surfaceColor,
+        systemNavigationBarColor: Colors.transparent,
       ),
     );
   }
@@ -281,12 +280,12 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
               animation: _topBarController,
               builder: (context, child) {
                 return Positioned(
-                  top: 0,
+                  top: MediaQuery.of(context).padding.top,
                   left: 0,
                   right: 0,
                   child: SlideTransition(
                     position: Tween<Offset>(
-                      begin: const Offset(0, -1.0),
+                      begin: const Offset(0, -2.0),
                       end: Offset.zero,
                     ).animate(CurvedAnimation(
                       parent: _topBarController,
