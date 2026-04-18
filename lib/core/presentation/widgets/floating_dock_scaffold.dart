@@ -236,46 +236,52 @@ class _FloatingDock extends StatelessWidget {
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        _buildDockItem(
-                          context,
-                          icon: Icons.home,
-                          label: 'Home',
-                          isActive: currentRoute == RouteNames.home,
-                          onTap: () {
-                            if (currentRoute != RouteNames.home) {
-                              context.go(RouteNames.home);
-                            }
-                          },
+                    child: SizedBox(
+                      height: 48,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                        Expanded(
+                          child: _DockItem(
+                            icon: Icons.home,
+                            label: 'Home',
+                            isActive: currentRoute == RouteNames.home,
+                            onTap: () {
+                              if (currentRoute != RouteNames.home) {
+                                context.go(RouteNames.home);
+                              }
+                            },
+                          ),
                         ),
-                        _buildDockItem(
-                          context,
-                          icon: Icons.description,
-                          label: 'Documents',
-                          isActive: currentRoute == RouteNames.documents,
-                          onTap: () {
-                            if (currentRoute != RouteNames.documents) {
-                              context.go(RouteNames.documents);
-                            }
-                          },
+                        Expanded(
+                          child: _DockItem(
+                            icon: Icons.description,
+                            label: 'Documents',
+                            isActive: currentRoute == RouteNames.documents,
+                            onTap: () {
+                              if (currentRoute != RouteNames.documents) {
+                                context.go(RouteNames.documents);
+                              }
+                            },
+                          ),
                         ),
-                        _buildDockItem(
-                          context,
-                          icon: Icons.settings,
-                          label: 'Settings',
-                          isActive: currentRoute == RouteNames.settings,
-                          onTap: () {
-                            if (currentRoute != RouteNames.settings) {
-                              context.go(RouteNames.settings);
-                            }
-                          },
+                        Expanded(
+                          child: _DockItem(
+                            icon: Icons.settings,
+                            label: 'Settings',
+                            isActive: currentRoute == RouteNames.settings,
+                            onTap: () {
+                              if (currentRoute != RouteNames.settings) {
+                                context.go(RouteNames.settings);
+                              }
+                            },
+                          ),
                         ),
                       ],
                     ),
                   ),
+                ),
                 ),
               ),
             ),
@@ -284,59 +290,127 @@ class _FloatingDock extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildDockItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color: isActive
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: 2),
-              // Label with smooth animated opacity transition
-              AnimatedOpacity(
-                opacity: isActive ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  alignment: Alignment.topCenter,
-                  child: isActive
-                      ? Text(
-                          label,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(
-                                fontSize: 10,
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                        )
-                      : SizedBox(
-                          height:
-                              (Theme.of(context).textTheme.labelSmall?.height ??
-                                  1.2),
-                        ),
+/// Stateful dock item that manages its own animation state
+class _DockItem extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _DockItem({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  State<_DockItem> createState() => _DockItemState();
+}
+
+class _DockItemState extends State<_DockItem>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+      value: widget.isActive ? 1.0 : 0.0,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
+    );
+  }
+
+  @override
+  void didUpdateWidget(_DockItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isActive != widget.isActive) {
+      if (widget.isActive) {
+        _controller.forward(from: 0.0);
+      } else {
+        _controller.reverse(from: 1.0);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            alignment: Alignment.topCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Icon - always visible with opacity animation
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: Center(
+                    child: AnimatedOpacity(
+                      opacity: widget.isActive ? 1.0 : 0.55,
+                      duration: const Duration(milliseconds: 300),
+                      child: Icon(
+                        widget.icon,
+                        size: 18,
+                        color: widget.isActive
+                            ? Theme.of(context).colorScheme.secondary
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                // Label - only rendered when active, fades in/out
+                if (widget.isActive) ...[
+                  const SizedBox(height: 2),
+                  SizedBox(
+                    height: 16,
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: Text(
+                        widget.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(
+                              fontSize: 9,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+
           ),
         ),
       ),
