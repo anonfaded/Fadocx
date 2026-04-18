@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
@@ -530,6 +531,126 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     );
   }
 
+  Widget _buildTile({required IconData icon, required String label, required VoidCallback onTap}) {
+    return Material(color: Colors.transparent, child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(12), child: Container(padding: EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(12)), child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 20), SizedBox(height: 4), Text(label, style: Theme.of(context).textTheme.labelSmall)]))));
+  }
+
+  void _copyPdfText() async {
+    final viewerState = _pdfViewerKey.currentState as dynamic;
+    if (viewerState == null) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Extracting text from all pages...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final extractMethod = viewerState.extractAllText;
+      if (extractMethod == null) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Text extraction not available')),
+        );
+        return;
+      }
+
+      final result = await extractMethod() as Map<String, dynamic>;
+      Navigator.pop(context);
+
+      final text = result['text'] as String;
+      final wordCount = result['wordCount'] as int;
+      final pageCount = result['pageCount'] as int;
+
+      if (text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No text found in this PDF')),
+        );
+        return;
+      }
+
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.copy_all,
+                  size: 20, color: Theme.of(ctx).colorScheme.primary),
+              const SizedBox(width: 8),
+              const Text('Copy All Text'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                  'This will extract text from all $pageCount pages and copy to clipboard.'),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.text_fields,
+                        size: 16, color: Theme.of(ctx).colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$wordCount words found',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(ctx).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton.icon(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await Clipboard.setData(ClipboardData(text: text));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Copied $wordCount words from $pageCount pages'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.copy, size: 16),
+              label: const Text('Copy'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
   Widget _buildFloatingBottomPanel(BuildContext context, bool isDark) {
     return Stack(
       children: [
@@ -659,78 +780,23 @@ child: Row(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                      Divider(
-                        height: 1,
-                        indent: 16,
-                        endIndent: 16,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outline
-                            .withValues(alpha: 0.2),
-                      ),
-                      // Invert colors option
-                      _buildMenuOption(
-                        context,
-                        icon: _invertColors
-                            ? Icons.brightness_high
-                            : Icons.brightness_low,
-                        label: 'Invert Colors',
-                        isActive: _invertColors,
-                        onTap: () {
-                          setState(() => _invertColors = !_invertColors);
-                        },
-                      ),
-                      Divider(
-                        height: 1,
-                        indent: 16,
-                        endIndent: 16,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outline
-                            .withValues(alpha: 0.2),
-                      ),
-                      // Text/PDF mode option
-                      _buildMenuOption(
-                        context,
-                        icon: _textMode
-                            ? Icons.picture_as_pdf
-                            : Icons.text_snippet,
-                        label: _textMode ? 'PDF Mode' : 'Text Mode',
-                        isActive: _textMode,
-                        onTap: () {
-                          setState(() => _textMode = !_textMode);
-                        },
-                      ),
-                      Divider(
-                        height: 1,
-                        indent: 16,
-                        endIndent: 16,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outline
-                            .withValues(alpha: 0.2),
-                      ),
-                      // Theme toggle option
-                      _buildMenuOption(
-                        context,
-                        icon: Theme.of(context).brightness == Brightness.dark
-                            ? Icons.light_mode_outlined
-                            : Icons.dark_mode_outlined,
-                        label: 'Toggle Theme',
-                        isActive: false,
-                        onTap: () async {
-                          final notifier =
-                              ref.read(themeModeProvider.notifier);
-                          notifier.toggleThemeMode();
-                          final mode = ref.read(themeModeProvider);
-                          final box = Hive.box<HiveAppSettings>(
-                              HiveDatasource.settingsBoxName);
-                          final settings =
-                              box.values.firstOrNull ?? HiveAppSettings();
-                          await box.put(0,
-                              settings.copyWith(theme: mode.value));
-                        },
-                      ),
+                          Divider(height: 1, indent: 16, endIndent: 16, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+                          Padding(padding: EdgeInsets.all(12), child: Row(children: [
+                            Expanded(child: _buildTile(icon: Icons.copy_all, label: 'Copy', onTap: _copyPdfText)),
+                            SizedBox(width: 8),
+                            Expanded(child: _buildTile(icon: _invertColors ? Icons.brightness_high : Icons.brightness_low, label: 'Invert', onTap: () => setState(() => _invertColors = !_invertColors))),
+                            SizedBox(width: 8),
+                            Expanded(child: _buildTile(icon: _textMode ? Icons.picture_as_pdf : Icons.text_snippet, label: _textMode ? 'PDF' : 'Text', onTap: () => setState(() => _textMode = !_textMode))),
+                            SizedBox(width: 8),
+                            Expanded(child: _buildTile(icon: Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, label: 'Theme', onTap: () async {
+                              final notifier = ref.read(themeModeProvider.notifier);
+                              notifier.toggleThemeMode();
+                              final mode = ref.read(themeModeProvider);
+                              final box = Hive.box<HiveAppSettings>(HiveDatasource.settingsBoxName);
+                              final settings = box.values.firstOrNull ?? HiveAppSettings();
+                              await box.put(0, settings.copyWith(theme: mode.value));
+                            })),
+                          ])),
                         ],
                       ),
                     ),
