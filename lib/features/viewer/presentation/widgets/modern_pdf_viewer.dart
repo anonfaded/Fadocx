@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 
+class _SearchResult {
+  final int page;
+  final String snippet;
+  _SearchResult({required this.page, required this.snippet});
+}
+
 /// Premium PDF Viewer with macOS/iOS dock-style Material3 UI
 class ModernPdfViewer extends StatefulWidget {
   final String filePath;
@@ -11,6 +17,7 @@ class ModernPdfViewer extends StatefulWidget {
   final VoidCallback? onTextModeToggle;
   final VoidCallback? onTap;
   final Function(int currentPage, int totalPages)? onPageChanged;
+  final VoidCallback? onSearchHighlight;
 
   const ModernPdfViewer({
     required this.filePath,
@@ -21,6 +28,7 @@ class ModernPdfViewer extends StatefulWidget {
     this.onTextModeToggle,
     this.onTap,
     this.onPageChanged,
+    this.onSearchHighlight,
     super.key,
   });
 
@@ -42,8 +50,12 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
 
   // Search state
   int _currentSearchResult = -1;
-  List<int> _searchResultPages = [];
+  List<_SearchResult> _searchResults = [];
   bool _isSearching = false;
+  String _currentQuery = '';
+
+  // Highlight state
+  bool _showHighlight = false;
 
   // TOC state
   List<PdfOutlineNode>? _outlineNodes;
@@ -184,33 +196,46 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
   Future<void> _performSearch(String query) async {
     if (query.isEmpty || _document == null) {
       setState(() {
-        _searchResultPages = [];
+        _searchResults = [];
         _currentSearchResult = -1;
         _isSearching = false;
+        _currentQuery = '';
+        _showHighlight = false;
       });
       return;
     }
 
-    setState(() => _isSearching = true);
+    setState(() {
+      _isSearching = true;
+      _currentQuery = query;
+    });
 
-    final results = <int>{};
+    final results = <_SearchResult>[];
+    final lowerQuery = query.toLowerCase();
+
     for (int i = 0; i < _document!.pages.length; i++) {
       try {
         final pageText = await _document!.pages[i].loadText();
         if (pageText != null) {
           final text = ((pageText as dynamic).fullText ?? '') as String;
-          if (text.toLowerCase().contains(query.toLowerCase())) {
-            results.add(i + 1);
+          if (text.toLowerCase().contains(lowerQuery)) {
+            final idx = text.toLowerCase().indexOf(lowerQuery);
+            final start = (idx - 40).clamp(0, text.length);
+            final end = (idx + query.length + 40).clamp(0, text.length);
+            var snippet = text.substring(start, end);
+            if (start > 0) snippet = '...$snippet';
+            if (end < text.length) snippet = '$snippet...';
+            results.add(_SearchResult(page: i + 1, snippet: snippet));
           }
         }
       } catch (_) {}
     }
 
     setState(() {
-      _searchResultPages = results.toList()..sort();
-      if (_searchResultPages.isNotEmpty) {
+      _searchResults = results;
+      if (_searchResults.isNotEmpty) {
         _currentSearchResult = 0;
-        _goToPage(_searchResultPages[0]);
+        _goToPage(_searchResults[0].page);
       } else {
         _currentSearchResult = -1;
       }
@@ -219,21 +244,40 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
   }
 
   void _nextSearchResult() {
-    if (_searchResultPages.isEmpty) return;
+    if (_searchResults.isEmpty) return;
     setState(() {
       _currentSearchResult =
-          (_currentSearchResult + 1) % _searchResultPages.length;
-      _goToPage(_searchResultPages[_currentSearchResult]);
+          (_currentSearchResult + 1) % _searchResults.length;
+      _goToPage(_searchResults[_currentSearchResult].page);
+      _triggerHighlight();
     });
   }
 
   void _previousSearchResult() {
-    if (_searchResultPages.isEmpty) return;
+    if (_searchResults.isEmpty) return;
     setState(() {
       _currentSearchResult =
-          (_currentSearchResult - 1 + _searchResultPages.length) %
-              _searchResultPages.length;
-      _goToPage(_searchResultPages[_currentSearchResult]);
+          (_currentSearchResult - 1 + _searchResults.length) %
+              _searchResults.length;
+      _goToPage(_searchResults[_currentSearchResult].page);
+      _triggerHighlight();
+    });
+  }
+
+  void _triggerHighlight() {
+    setState(() => _showHighlight = true);
+    widget.onSearchHighlight?.call();
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) setState(() => _showHighlight = false);
+    });
+  }
+
+  void _goToSearchResult(int index) {
+    if (index < 0 || index >= _searchResults.length) return;
+    setState(() {
+      _currentSearchResult = index;
+      _goToPage(_searchResults[index].page);
+      _triggerHighlight();
     });
   }
 
@@ -336,8 +380,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
     );
   }
 
-  // iOS-style row for search results
-  Widget _buildSearchResultRow(BuildContext context, int page, bool isActive) {
+  // iOS-style row for search results with snippet
+  Widget _buildSearchResultRow(BuildContext context, _SearchResult result, bool isActive) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -355,37 +399,61 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            _goToPage(page);
-            setState(
-                () => _currentSearchResult = _searchResultPages.indexOf(page));
-          },
+          onTap: () => _goToSearchResult(_searchResults.indexOf(result)),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.description,
-                    size: 20, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Page $page',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight:
-                              isActive ? FontWeight.w600 : FontWeight.w500,
-                          color: isActive
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurface,
-                        ),
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.description,
+                        size: 18, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Page ${result.page}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    const Spacer(),
+                    Icon(Icons.chevron_right,
+                        size: 18, color: Theme.of(context).colorScheme.outline),
+                  ],
                 ),
-                Icon(Icons.chevron_right,
-                    size: 20, color: Theme.of(context).colorScheme.outline),
+                const SizedBox(height: 8),
+                _buildHighlightedSnippet(context, result.snippet),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHighlightedSnippet(BuildContext context, String snippet) {
+    if (_currentQuery.isEmpty) return const SizedBox.shrink();
+    final lowerText = snippet.toLowerCase();
+    final lowerQuery = _currentQuery.toLowerCase();
+    final idx = lowerText.indexOf(lowerQuery);
+    if (idx == -1) {
+      return Text(snippet, style: Theme.of(context).textTheme.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis);
+    }
+    final before = snippet.substring(0, idx);
+    final match = snippet.substring(idx, idx + _currentQuery.length);
+    final after = snippet.substring(idx + _currentQuery.length);
+    return RichText(
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        style: Theme.of(context).textTheme.bodySmall,
+        children: [
+          TextSpan(text: before),
+          TextSpan(text: match, style: TextStyle(backgroundColor: Colors.yellow.withValues(alpha: 0.5), fontWeight: FontWeight.w600)),
+          TextSpan(text: after),
+        ],
       ),
     );
   }
@@ -554,7 +622,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
               ),
             ),
           ),
-        if (_searchResultPages.isNotEmpty && !_isSearching)
+        if (_searchResults.isNotEmpty && !_isSearching)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Container(
@@ -578,7 +646,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
                 child: Row(
                   children: [
                     Text(
-                      '${_currentSearchResult + 1}/${_searchResultPages.length}',
+                      '${_currentSearchResult + 1}/${_searchResults.length}',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w600,
@@ -603,26 +671,66 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
             ),
           ),
         Expanded(
-          child: _searchResultPages.isEmpty &&
-                  _searchController.text.isNotEmpty &&
-                  !_isSearching
+          child: _searchResults.isEmpty && _searchController.text.isNotEmpty && !_isSearching
               ? Center(
-                  child: Text(
-                    'No results found',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.search_off, size: 48, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No results found',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Try a different search term',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
+                            ),
+                      ),
+                    ],
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: _searchResultPages.length,
-                  itemBuilder: (context, index) {
-                    final page = _searchResultPages[index];
-                    final isActive = index == _currentSearchResult;
-                    return _buildSearchResultRow(context, page, isActive);
-                  },
-                ),
+              : _searchController.text.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search, size: 48, color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Search in PDF',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Text(
+                              'Find text across all pages',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.outline,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: _searchResults.length,
+                      itemBuilder: (context, index) {
+                        final result = _searchResults[index];
+                        final isActive = index == _currentSearchResult;
+                        return _buildSearchResultRow(context, result, isActive);
+                      },
+                    ),
         ),
       ],
     );
@@ -863,7 +971,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
     );
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(preferredSize: Size.zero, child: Container()),
@@ -872,18 +980,18 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
            // Main content - PDF/Text viewer fills entire screen
            // NOTE: Tap handling is now done by parent ViewerScreen via Listener
            // We don't use GestureDetector here to avoid interference with scrolling
-           Container(
-             color: Colors.transparent,
-             child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
-           ),
-           // Bottom dock - navigation and menu (DISABLED - controlled by parent ViewerScreen)
-           // if (_showControls && !widget.textMode)
-           //   Positioned(
-           //     bottom: 16,
-           //     left: 16,
-           //     right: 16,
-           //     child: _buildBottomDock(),
-           //   ),
+            Container(
+              color: Colors.transparent,
+              child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
+            ),
+            // Search highlight overlay with animation
+            AnimatedOpacity(
+              opacity: _showHighlight ? 0.4 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: Container(
+                color: Colors.black,
+              ),
+            ),
           // Sidebar overlay is rendered by ViewerScreen so taps do not
           // interfere with the viewer-wide tap gesture.
         ],
