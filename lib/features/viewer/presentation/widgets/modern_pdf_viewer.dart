@@ -465,66 +465,75 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     );
 
     if (widget.invertColors) {
-      return ColorFiltered(
-        colorFilter: const ColorFilter.matrix([
-          -1, 0, 0, 0, 255,
-          0, -1, 0, 0, 255,
-          0, 0, -1, 0, 255,
-          0, 0, 0, 1, 0,
-        ]),
-        child: viewer,
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: ColorFiltered(
+          colorFilter: const ColorFilter.matrix([
+            -1, 0, 0, 0, 255,
+            0, -1, 0, 0, 255,
+            0, 0, -1, 0, 255,
+            0, 0, 0, 1, 0,
+          ]),
+          child: viewer,
+        ),
       );
     }
-    return viewer;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: viewer,
+    );
   }
 
   Widget _buildTextMode() {
     if (_document == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _totalPages,
-      itemBuilder: (context, index) {
-        final page = _document!.pages[index];
-        return FutureBuilder<dynamic>(
-          future: page.loadText(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Padding(
-                padding: EdgeInsets.all(8),
-                child: LinearProgressIndicator(),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _totalPages,
+        itemBuilder: (context, index) {
+          final page = _document!.pages[index];
+          return FutureBuilder<dynamic>(
+            future: page.loadText(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: LinearProgressIndicator(),
+                );
+              }
+              final pageText = snapshot.data;
+              final text = ((pageText as dynamic).fullText ?? '') as String;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Page ${index + 1}',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      text.isEmpty ? '(No text on this page)' : text,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Divider(height: 1),
+                    ),
+                  ],
+                ),
               );
-            }
-            final pageText = snapshot.data;
-            final text = ((pageText as dynamic).fullText ?? '') as String;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Page ${index + 1}',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  SelectableText(
-                    text.isEmpty ? '(No text on this page)' : text,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Divider(height: 1),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -634,7 +643,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
         height: 65,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: const Center(
             child: SizedBox(
@@ -649,7 +658,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       height: 65,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
