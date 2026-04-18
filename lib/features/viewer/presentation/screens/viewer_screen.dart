@@ -116,8 +116,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     _pointerMoved = false;
   }
 
-  bool get _showSidebarDrawer => _controlsVisible && _sidebarOpen;
-
   void _toggleBottomMenu() {
     setState(() {
       _bottomMenuExpanded = !_bottomMenuExpanded;
@@ -139,6 +137,20 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     } else {
       _sidebarController.reverse();
     }
+  }
+
+  void _onSearchHighlight() {
+    if (!_sidebarOpen) return;
+    (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+    setState(() => _sidebarOpen = false);
+    _sidebarController.reverse();
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      if (mounted) {
+        (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+        setState(() => _sidebarOpen = true);
+        _sidebarController.forward();
+      }
+    });
   }
 
   void _goToFirstPage() {
@@ -368,6 +380,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             _totalPages = total;
           });
         },
+        onSearchHighlight: _onSearchHighlight,
       );
     }
     // For other document types, use the factory
@@ -539,6 +552,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     final viewerState = _pdfViewerKey.currentState as dynamic;
     if (viewerState == null) return;
 
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -558,13 +573,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       final extractMethod = viewerState.extractAllText;
       if (extractMethod == null) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('Text extraction not available')),
         );
         return;
       }
 
       final result = await extractMethod() as Map<String, dynamic>;
+      if (!mounted) return;
       Navigator.pop(context);
 
       final text = result['text'] as String;
@@ -572,12 +588,13 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       final pageCount = result['pageCount'] as int;
 
       if (text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('No text found in this PDF')),
         );
         return;
       }
 
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -629,7 +646,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                 Navigator.pop(ctx);
                 await Clipboard.setData(ClipboardData(text: text));
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('Copied $wordCount words from $pageCount pages'),
                       duration: const Duration(seconds: 2),
@@ -645,7 +662,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       );
     } catch (e) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     }
@@ -859,45 +876,6 @@ child: Row(
                 child: drawerContent,
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuOption(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: isActive
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurface,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: isActive
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
           ),
         ),
       ),
