@@ -38,6 +38,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
   int _totalPages = 0;
   PdfDocument? _document;
 
+  PdfDocument? get pdfDocument => _document;
+
   // Search state
   int _currentSearchResult = -1;
   List<int> _searchResultPages = [];
@@ -145,6 +147,38 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
 
   void toggleSidebar() {
     setState(() => _showSidebar = !_showSidebar);
+  }
+
+  Future<Map<String, dynamic>> extractAllText() async {
+    if (_document == null) {
+      return {'text': '', 'wordCount': 0, 'pageCount': 0};
+    }
+
+    final allText = StringBuffer();
+    int totalWords = 0;
+
+    for (int i = 0; i < _document!.pages.length; i++) {
+      try {
+        final pageText = await _document!.pages[i].loadText();
+        if (pageText != null) {
+          final text = ((pageText as dynamic).fullText ?? '') as String;
+          if (text.isNotEmpty) {
+            if (allText.isNotEmpty) {
+              allText.writeln();
+              allText.writeln();
+            }
+            allText.write(text);
+            totalWords += text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+          }
+        }
+      } catch (_) {}
+    }
+
+    return {
+      'text': allText.toString(),
+      'wordCount': totalWords,
+      'pageCount': _document!.pages.length,
+    };
   }
 
   Future<void> _performSearch(String query) async {
