@@ -57,6 +57,19 @@ When updating app branding or icons, follow this workflow:
 - Both commands modify native platform files; regenerate after any asset changes
 - Test on both Android and iOS after regeneration to ensure correct scaling
 
+## Custom UI Design Patterns
+
+### Inverted Rounded Corners (Sidebar Flares)
+This pattern creates a "tab" or "sheet" that appears to grow out of a screen edge using concave (inward) curves instead of standard convex rounded corners.
+
+**Implementation Details:**
+1. **CustomPaint + Path.cubicTo**: Use `Path.cubicTo` to create smooth S-curves (flares) that transition from a screen edge into the main body of the element.
+2. **Layering (Stack)**: Use a `Stack` where the background (containing the flares) is in one layer and the content is in another.
+3. **ClipBehavior.none**: Ensure the parent `Stack` has `clipBehavior: Clip.none` if the flares need to extend into the "safe area" or beyond the content boundaries.
+4. **Coordinate Mapping**: The body should be offset (e.g., by `radius`) to allow the flares to occupy the space above/below or to the side of the main content area.
+
+**Visual Reference:** Similar to how Google Chrome tabs blend into the top toolbar. In Fadocx, this is used on the `ViewerScreen` sidebar to blend it into the screen's left boundary.
+
 ## Flutter Animation Best Practices
 
 ### The Golden Rule: Never Use TweenAnimationBuilder for Prop-Driven Animations
