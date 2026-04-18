@@ -1489,7 +1489,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => setState(() => _sidebarTab = index),
+                onTap: () => setState(() {
+                  _sidebarTab = index;
+                  _drawerVersion.value++; // Notify ValueListenableBuilder to rebuild drawer
+                }),
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
