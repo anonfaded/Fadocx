@@ -104,11 +104,29 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          _buildSidebarTab(context, 'Pages', Icons.pages, 0),
-                          _buildSidebarTab(context, 'Search', Icons.search, 1),
-                          _buildSidebarTab(context, 'TOC', Icons.list, 2),
-                          _buildSidebarTab(context, 'Notes', Icons.note, 3, comingSoon: true),
-                          _buildSidebarTab(context, 'Bookmarks', Icons.bookmark, 4, comingSoon: true),
+                          _buildSidebarTab(
+                            context, 'Pages', Icons.pages, 0,
+                            badgeText: '$_currentPage',
+                            showBadge: true,
+                          ),
+                          _buildSidebarTab(
+                            context, 'Search', Icons.search, 1,
+                            badgeText: _searchResults.isNotEmpty ? '${_searchResults.length}' : null,
+                            showBadge: _searchResults.isNotEmpty,
+                          ),
+                          _buildSidebarTab(
+                            context, 'TOC', Icons.list, 2,
+                            badgeText: _outlineNodes != null ? '${_outlineNodes!.length}' : null,
+                            showBadge: _outlineNodes != null && _outlineNodes!.isNotEmpty,
+                          ),
+                          _buildSidebarTab(
+                            context, 'Notes', Icons.note, 3,
+                            comingSoon: true,
+                          ),
+                          _buildSidebarTab(
+                            context, 'Bookmarks', Icons.bookmark, 4,
+                            comingSoon: true,
+                          ),
                         ],
                       ),
                     ),
@@ -997,11 +1015,26 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
 
     if (_outlineNodes == null || _outlineNodes!.isEmpty) {
       return Center(
-        child: Text(
-          'No table of contents available',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.list_alt, size: 48, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
+            const SizedBox(height: 12),
+            Text(
+              'No table of contents available',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'This PDF does not contain a table of contents',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       );
     }
@@ -1150,11 +1183,16 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   Widget _buildSidebarTab(
-      BuildContext context, String label, IconData icon, int index, {bool comingSoon = false}) {
+      BuildContext context, String label, IconData icon, int index, {
+        bool comingSoon = false,
+        String? badgeText,
+        bool showBadge = false,
+      }) {
     final isActive = _sidebarTab == index;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Container(
+        clipBehavior: Clip.none,
         decoration: BoxDecoration(
           color: isActive
               ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
@@ -1167,17 +1205,18 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             width: 1,
           ),
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => setState(() => _sidebarTab = index),
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Stack(
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => setState(() => _sidebarTab = index),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         icon,
@@ -1188,42 +1227,66 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                                 ? Theme.of(context).colorScheme.primary
                                 : Theme.of(context).colorScheme.outline,
                       ),
-                      if (comingSoon)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(1),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              shape: BoxShape.circle,
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontSize: 10,
+                              color: comingSoon
+                                  ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.4)
+                                  : isActive
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.outline,
+                              fontWeight:
+                                  isActive ? FontWeight.w600 : FontWeight.w500,
                             ),
-                            child: Icon(
-                              Icons.schedule,
-                              size: 6,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
+                      ),
                     ],
                   ),
-                  Text(
-                    label,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontSize: 10,
-                          color: comingSoon
-                              ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.4)
-                              : isActive
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.outline,
-                          fontWeight:
-                              isActive ? FontWeight.w600 : FontWeight.w500,
-                        ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            if (showBadge && badgeText != null)
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: comingSoon
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.secondary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    badgeText,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      color: comingSoon
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSecondary,
+                    ),
+                  ),
+                ),
+              ),
+            if (comingSoon && !showBadge)
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.schedule,
+                    size: 8,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
