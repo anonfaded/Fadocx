@@ -102,28 +102,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
               onPressed: _toggleSidebar,
               isOpen: _sidebarOpen,
             ),
-            const SizedBox(width: 8),
-            // Logo icon on left with natural width
+            const SizedBox(width: 12),
+            // Logo icon
             Image.asset(
               'assets/fadocx_header_landscape_png.png',
               height: 32,
               fit: BoxFit.contain,
             ),
-            // Text right next to icon
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: 'Fadocx'.split('').map((letter) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    letter,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0,
-                        ),
+            const SizedBox(width: 6),
+            // App title
+            Text(
+              'Fadocx',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                );
-              }).toList(),
             ),
           ],
         ),
@@ -344,6 +336,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         color: Theme.of(context).colorScheme.surface,
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
             Icons.inbox_outlined,
@@ -354,6 +348,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
           Text(
             'No Recent Files',
             style: Theme.of(context).textTheme.bodyLarge,
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(

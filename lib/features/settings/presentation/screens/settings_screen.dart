@@ -22,23 +22,11 @@ class SettingsScreen extends ConsumerWidget {
       appBarContent: SafeArea(
         bottom: false,
         child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: AppLocalizations.of(context)!
-                .settingsTitle
-                .split('')
-                .map((letter) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: Text(
-                  letter,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0,
-                      ),
+          child: Text(
+            AppLocalizations.of(context)!.settingsTitle,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-              );
-            }).toList(),
           ),
         ),
       ),
