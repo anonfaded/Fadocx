@@ -40,11 +40,13 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   bool _sidebarOpen = false;
   int _currentPage = 1;
   int _totalPages = 0;
+  double _sidebarDragOffset = 0.0;
   late AnimationController _menuController;
   late AnimationController _sidebarController;
   late AnimationController _topBarController;
   late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
+  static const double _kDragCloseThreshold = 100.0;
 
   void _toggleControls() {
     final willBeVisible = !_controlsVisible;
@@ -114,6 +116,34 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   void _goToNextPage() {
     (_pdfViewerKey.currentState as dynamic)?.goToNextPage();
+  }
+
+  void _closeSidebar() {
+    (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+    setState(() => _sidebarOpen = false);
+    _sidebarController.reverse();
+  }
+
+  void _handleSidebarDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      _sidebarDragOffset += details.delta.dx;
+      _sidebarDragOffset = _sidebarDragOffset.clamp(-500, 0.0);
+    });
+  }
+
+  void _handleSidebarDragEnd(DragEndDetails details) {
+    if (_sidebarDragOffset.abs() > _kDragCloseThreshold) {
+      setState(() => _sidebarOpen = false);
+      _sidebarController.reverse();
+      // Reset drag offset after animation completes so sidebar animates smoothly from current position
+      Future.delayed(const Duration(milliseconds: 260), () {
+        if (mounted && !_sidebarOpen) {
+          setState(() => _sidebarDragOffset = 0.0);
+        }
+      });
+    } else {
+      setState(() => _sidebarDragOffset = 0.0);
+    }
   }
 
   void _goToLastPage() {
@@ -251,7 +281,29 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                           : const Center(child: Text('No content')),
             ),
 
-            // Sidebar with slide-in animation
+            // Scrim overlay with dimming and tap-to-close - controlled by sidebar state
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: !_sidebarOpen || !_controlsVisible,
+                child: AnimatedBuilder(
+                  animation: _sidebarController,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _sidebarController.value,
+                      child: GestureDetector(
+                        onTap: _closeSidebar,
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          color: Colors.black.withValues(alpha: 0.45),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            // Sidebar with slide-in animation and drag support
             AnimatedBuilder(
               animation: _sidebarController,
               builder: (context, child) {
@@ -267,9 +319,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                       parent: _sidebarController,
                       curve: Curves.easeOutCubic,
                     )),
-                    child: _sidebarOpen && _controlsVisible
-                        ? _buildSidebarDrawer(context, isDark)
-                        : const SizedBox.shrink(),
+                    child: IgnorePointer(
+                      ignoring: !_sidebarOpen,
+                      child: _controlsVisible ? _buildSidebarDrawer(context, isDark) : const SizedBox.shrink(),
+                    ),
                   ),
                 );
               },
@@ -810,51 +863,65 @@ child: Row(
     final theme = Theme.of(context);
     final bgColor = isDark
         ? theme.colorScheme.surface.withValues(alpha: 0.95)
-        : theme.colorScheme.surface.withValues(alpha: 0.92);
+        : theme.colorScheme.surface.withValues(alpha: 0.93);
     final borderColor = theme.colorScheme.outline.withValues(alpha: 0.2);
 
     return GestureDetector(
       onTap: () {},
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: width + 20,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // 1. Background and Flares
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _InvertedCornerSidebarPainter(
-                  color: bgColor,
-                  borderColor: borderColor,
-                  radius: _kSidebarRadius,
-                  sidebarWidth: width,
-                ),
-              ),
+      onHorizontalDragUpdate: _handleSidebarDragUpdate,
+      onHorizontalDragEnd: _handleSidebarDragEnd,
+      child: Transform.translate(
+        offset: Offset(_sidebarDragOffset, 0),
+        child: SizedBox(
+          width: width + 20,
+          child: ClipPath(
+            clipper: _SidebarClipper(
+              sidebarWidth: width,
+              radius: _kSidebarRadius,
             ),
-            // 2. Content (Sheet) - Body starts at x=0
-            Positioned(
-              left: 0,
-              top: _kSidebarRadius,
-              bottom: _kSidebarRadius,
-              width: width,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(16),
-                  bottomRight: Radius.circular(16),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.transparent,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // 1. Background and Flares with blurred appearance
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _InvertedCornerSidebarPainter(
+                        color: bgColor,
+                        borderColor: borderColor,
+                        radius: _kSidebarRadius,
+                        sidebarWidth: width,
+                      ),
                     ),
-                    child: drawerContent,
                   ),
-                ),
+                  // 2. Content (Sheet) - Body starts at x=0
+                  Positioned(
+                    left: 0,
+                    top: _kSidebarRadius,
+                    bottom: _kSidebarRadius,
+                    width: width,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.transparent,
+                          ),
+                          child: drawerContent,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -973,4 +1040,56 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _InvertedCornerSidebarPainter oldDelegate) => 
     oldDelegate.color != color || oldDelegate.borderColor != borderColor;
+}
+
+/// Custom clipper that matches the exact shape of the sidebar with flares
+class _SidebarClipper extends CustomClipper<Path> {
+  final double sidebarWidth;
+  final double radius;
+
+  _SidebarClipper({
+    required this.sidebarWidth,
+    required this.radius,
+  });
+
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    
+    // Top flare flaring UP from sidebar top (0, radius) to screen edge (0, 0)
+    path.moveTo(0, 0);
+    // Smooth S-curve transition
+    path.cubicTo(
+      0, radius * 0.4, 
+      radius * 0.1, radius, 
+      radius, radius
+    );
+    
+    // Top edge
+    path.lineTo(sidebarWidth - 16, radius);
+    path.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
+    
+    // Right side
+    path.lineTo(sidebarWidth, size.height - radius - 16);
+    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
+    
+    // Bottom edge
+    path.lineTo(radius, size.height - radius);
+    
+    // Bottom flare flaring DOWN from sidebar bottom (0, h-radius) to screen edge (0, h)
+    path.cubicTo(
+      radius * 0.1, size.height - radius,
+      0, size.height - radius * 0.4,
+      0, size.height
+    );
+    
+    path.lineTo(0, 0);
+    path.close();
+    
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant _SidebarClipper oldClipper) =>
+    oldClipper.sidebarWidth != sidebarWidth || oldClipper.radius != radius;
 }
