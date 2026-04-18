@@ -83,9 +83,9 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   final Map<int, String> _pageTexts = {};
   bool _isLoadingAllPages = false;
 
-  // Tap detection tracking - distinguish taps from scrolls
-  Offset? _pointerDownPosition;
-  DateTime? _pointerDownTime;
+  // Tap detection - track pointer position and time to distinguish taps from scrolls
+  Offset? _tapStartPosition;
+  DateTime? _tapStartTime;
 
   // Sidebar tabs: 0=Pages, 1=Search, 2=TOC, 3=Notes, 4=Bookmarks
   int _sidebarTab = 0;
@@ -990,10 +990,27 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       final pageText = _pageTexts[index];
       final isLoaded = pageText != null;
 
-      // Card container wrapped with tap handling
-      return GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => widget.onTap?.call(),
+      // Wrap entire card in Listener to detect taps everywhere
+      return Listener(
+        onPointerDown: (event) {
+          _tapStartPosition = event.position;
+          _tapStartTime = DateTime.now();
+        },
+        onPointerUp: (event) {
+          // Detect if this was a tap (not a scroll)
+          if (_tapStartPosition != null && _tapStartTime != null) {
+            final duration = DateTime.now().difference(_tapStartTime!);
+            final distance = (_tapStartPosition! - event.position).distance;
+            
+            // Tap = press < 200ms with < 10px movement
+            if (duration.inMilliseconds < 200 && distance < 10) {
+              log.d('✓ TAP detected on page ${index + 1}');
+              widget.onTap?.call();
+            }
+          }
+          _tapStartPosition = null;
+          _tapStartTime = null;
+        },
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           padding: const EdgeInsets.all(16),
@@ -1071,36 +1088,14 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                   ),
                 )
               else
-                // Page text - use Listener to detect taps without interfering with selection/scroll
+                // Page text - SelectableText handles text selection, outer Listener handles taps
                 Expanded(
-                  child: Listener(
-                    onPointerDown: (event) {
-                      _pointerDownPosition = event.position;
-                      _pointerDownTime = DateTime.now();
-                      log.d('📍 Pointer down at ${event.position}');
-                    },
-                    onPointerUp: (event) {
-                      // Check if this was a tap (short duration, minimal movement)
-                      if (_pointerDownPosition != null && _pointerDownTime != null) {
-                        final duration = DateTime.now().difference(_pointerDownTime!);
-                        final distance = (_pointerDownPosition! - event.position).distance;
-                        
-                        // Tap = press for < 200ms with < 10 pixel movement
-                        if (duration.inMilliseconds < 200 && distance < 10) {
-                          log.d('✓ TAP detected on page ${index + 1}');
-                          widget.onTap?.call();
-                        }
-                      }
-                      _pointerDownPosition = null;
-                      _pointerDownTime = null;
-                    },
-                    child: SingleChildScrollView(
-                      child: SelectableText(
-                        pageText,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              height: 1.6,
-                            ),
-                      ),
+                  child: SingleChildScrollView(
+                    child: SelectableText(
+                      pageText,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            height: 1.6,
+                          ),
                     ),
                   ),
                 ),
