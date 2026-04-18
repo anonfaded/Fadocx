@@ -4,7 +4,10 @@ import 'package:pdfrx/pdfrx.dart';
 class _SearchResult {
   final int page;
   final String snippet;
-  _SearchResult({required this.page, required this.snippet});
+  final int charIndex;
+  final int charLength;
+  final List<PdfRect>? charRects;
+  _SearchResult({required this.page, required this.snippet, this.charIndex = 0, this.charLength = 0, this.charRects});
 }
 
 /// Premium PDF Viewer with macOS/iOS dock-style Material3 UI
@@ -36,10 +39,11 @@ class ModernPdfViewer extends StatefulWidget {
   State<ModernPdfViewer> createState() => _ModernPdfViewerState();
 }
 
-class _ModernPdfViewerState extends State<ModernPdfViewer> {
+class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderStateMixin {
   final _controller = PdfViewerController();
   final _searchController = TextEditingController();
   final ValueNotifier<int> _drawerVersion = ValueNotifier<int>(0);
+  late final AnimationController _highlightController;
 
   bool _showSidebar = false;
   int _currentPage = 1;
@@ -54,9 +58,6 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
   bool _isSearching = false;
   String _currentQuery = '';
 
-  // Highlight state
-  bool _showHighlight = false;
-
   // TOC state
   List<PdfOutlineNode>? _outlineNodes;
   bool _isLoadingOutline = false;
@@ -68,6 +69,15 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
    int get currentPage => _currentPage;
    int get totalPages => _totalPages;
    bool get showSidebar => _showSidebar;
+
+  @override
+  void initState() {
+    super.initState();
+    _highlightController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+  }
 
   @override
   void setState(VoidCallback fn) {
@@ -122,6 +132,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
   void dispose() {
     _searchController.dispose();
     _drawerVersion.dispose();
+    _highlightController.dispose();
     super.dispose();
   }
 
@@ -200,8 +211,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
         _currentSearchResult = -1;
         _isSearching = false;
         _currentQuery = '';
-        _showHighlight = false;
       });
+      _highlightController.reset();
       return;
     }
 
@@ -225,7 +236,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
             var snippet = text.substring(start, end);
             if (start > 0) snippet = '...$snippet';
             if (end < text.length) snippet = '$snippet...';
-            results.add(_SearchResult(page: i + 1, snippet: snippet));
+            final charIdx = idx;
+            final charLen = query.length;
+            final pageCharRects = ((pageText as dynamic).charRects as List?)?.cast<PdfRect>();
+            results.add(_SearchResult(page: i + 1, snippet: snippet, charIndex: charIdx, charLength: charLen, charRects: pageCharRects));
           }
         }
       } catch (_) {}
@@ -243,17 +257,13 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
     });
   }
 
-  void _nextSearchResult() {
+  void _nextSearchResult() async {
     if (_searchResults.isEmpty) return;
-    setState(() {
-      _currentSearchResult =
-          (_currentSearchResult + 1) % _searchResults.length;
-      _goToPage(_searchResults[_currentSearchResult].page);
-      _triggerHighlight();
-    });
+    final idx = (_currentSearchResult + 1) % _searchResults.length;
+    await _goToSearchResult(idx);
   }
 
-  void _previousSearchResult() {
+  void _previousSearchResult() async {
     if (_searchResults.isEmpty) return;
     setState(() {
       _currentSearchResult =
@@ -265,20 +275,133 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
   }
 
   void _triggerHighlight() {
-    setState(() => _showHighlight = true);
+    _highlightController.forward();
     widget.onSearchHighlight?.call();
     Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) setState(() => _showHighlight = false);
+      if (mounted) _highlightController.reverse();
     });
   }
 
-  void _goToSearchResult(int index) {
+  Future<void> _goToSearchResult(int index) async {
     if (index < 0 || index >= _searchResults.length) return;
-    setState(() {
-      _currentSearchResult = index;
-      _goToPage(_searchResults[index].page);
-      _triggerHighlight();
-    });
+    
+    // Auto-collapse sidebar if open
+    if (_showSidebar) {
+      setState(() => _showSidebar = false);
+    }
+
+    final result = _searchResults[index];
+    final pageNum = result.page;
+    setState(() => _currentSearchResult = index);
+
+    try {
+      final charRects = result.charRects;
+      final idx = result.charIndex;
+      final len = result.charLength;
+
+      if (charRects != null && idx >= 0 && idx < charRects.length && len > 0) {
+        final startIdx = idx.clamp(0, charRects.length - 1);
+        final endIdx = (idx + len - 1).clamp(0, charRects.length - 1);
+
+        // Calculate bounding box of the match
+        double left = charRects[startIdx].left;
+        double top = charRects[startIdx].top;
+        double right = charRects[startIdx].right;
+        double bottom = charRects[startIdx].bottom;
+
+        for (int i = startIdx + 1; i <= endIdx; i++) {
+          left = left.clamp(double.negativeInfinity, charRects[i].left);
+          top = top.clamp(charRects[i].top, double.infinity);
+          right = right.clamp(charRects[i].right, double.infinity);
+          bottom = bottom.clamp(double.negativeInfinity, charRects[i].bottom);
+        }
+
+        final pdfRect = PdfRect(left, bottom, right, top);
+        
+        await _controller.goToRectInsidePage(
+          pageNumber: pageNum,
+          rect: pdfRect,
+          anchor: PdfPageAnchor.center,
+        );
+        
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        _triggerHighlight();
+        return;
+      }
+    } catch (_) {}
+    
+    _goToPage(pageNum);
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+    _triggerHighlight();
+  }
+
+  List<Widget> _buildPageOverlays(BuildContext context, Rect pageRect, PdfPage page) {
+    final overlays = <Widget>[];
+    if (_currentSearchResult == -1) return overlays;
+    final result = _searchResults[_currentSearchResult];
+    if (result.page != page.pageNumber) return overlays;
+
+    final charRects = result.charRects;
+    final idx = result.charIndex;
+    final len = result.charLength;
+
+    if (charRects != null && idx >= 0 && idx < charRects.length && len > 0) {
+      final startIdx = idx.clamp(0, charRects.length - 1);
+      final endIdx = (idx + len - 1).clamp(0, charRects.length - 1);
+
+      final highlightRects = <Rect>[];
+      for (int i = startIdx; i <= endIdx; i++) {
+        final pdfRect = charRects[i];
+        highlightRects.add(pdfRect.toRect(page: page, scaledPageSize: pageRect.size));
+      }
+
+      // Add the global page dimmer with holes for highlights, wrapped in an animation
+      overlays.add(
+        Positioned.fill(
+          child: ListenableBuilder(
+            listenable: _highlightController,
+            builder: (context, child) {
+              if (_highlightController.value == 0) return const SizedBox.shrink();
+              return Opacity(
+                opacity: _highlightController.value,
+                child: child,
+              );
+            },
+            child: IgnorePointer(
+              child: Stack(
+                children: [
+                  // The focus dimmer with holes
+                  _PageFocusDimmer(
+                    rects: highlightRects,
+                    opacity: 0.55,
+                  ),
+                  // Subtle highlights above the dimmer
+                  ...highlightRects.map((rect) => Positioned(
+                        left: rect.left,
+                        top: rect.top,
+                        width: rect.width,
+                        height: rect.height,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            border: Border.all(
+                              color: Colors.yellow.withValues(alpha: 0.5),
+                              width: 1,
+                            ),
+                            color: Colors.yellow.withValues(alpha: 0.1),
+                          ),
+                        ),
+                      )),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return overlays;
   }
 
   Widget _buildPdfViewer() {
@@ -286,9 +409,16 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
       widget.filePath,
       controller: _controller,
       params: PdfViewerParams(
-        textSelectionParams: const PdfTextSelectionParams(enabled: true),
-        loadingBannerBuilder: (context, bytesDownloaded, totalBytes) =>
-            const Center(child: CircularProgressIndicator()),
+        textSelectionParams: const PdfTextSelectionParams(
+          enabled: true,
+          enableSelectionHandles: true,
+        ),
+        matchTextColor: Colors.transparent,
+        activeMatchTextColor: Colors.transparent,
+        pageOverlaysBuilder: _buildPageOverlays,
+        panEnabled: true,
+        scaleEnabled: true,
+        interactionEndFrictionCoefficient: 0.1,
         onViewerReady: (document, controller) async {
           setState(() {
             _document = document;
@@ -439,7 +569,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
     final lowerQuery = _currentQuery.toLowerCase();
     final idx = lowerText.indexOf(lowerQuery);
     if (idx == -1) {
-      return Text(snippet, style: Theme.of(context).textTheme.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis);
+      return Text(snippet,
+          style: Theme.of(context).textTheme.bodySmall,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis);
     }
     final before = snippet.substring(0, idx);
     final match = snippet.substring(idx, idx + _currentQuery.length);
@@ -451,7 +584,24 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
         style: Theme.of(context).textTheme.bodySmall,
         children: [
           TextSpan(text: before),
-          TextSpan(text: match, style: TextStyle(backgroundColor: Colors.yellow.withValues(alpha: 0.5), fontWeight: FontWeight.w600)),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.amber[700], // Strong yellow for better contrast
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                match,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+              ),
+            ),
+          ),
           TextSpan(text: after),
         ],
       ),
@@ -971,7 +1121,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
     );
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(preferredSize: Size.zero, child: Container()),
@@ -984,14 +1134,6 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
               color: Colors.transparent,
               child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
             ),
-            // Search highlight overlay with animation
-            AnimatedOpacity(
-              opacity: _showHighlight ? 0.4 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: Container(
-                color: Colors.black,
-              ),
-            ),
           // Sidebar overlay is rendered by ViewerScreen so taps do not
           // interfere with the viewer-wide tap gesture.
         ],
@@ -999,3 +1141,53 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> {
     );
   }
 }
+
+/// A painter that dims the whole page but keeps specific rects bright
+class _PageFocusDimmer extends StatelessWidget {
+  final List<Rect> rects;
+  final double opacity;
+
+  const _PageFocusDimmer({required this.rects, required this.opacity});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipPath(
+      clipper: _FocusClipper(rects),
+      child: Container(
+        color: Colors.black.withOpacity(opacity),
+      ),
+    );
+  }
+}
+
+/// Clips everything EXCEPT the provided rects
+class _FocusClipper extends CustomClipper<Path> {
+  final List<Rect> rects;
+
+  _FocusClipper(this.rects);
+
+  @override
+  Path getClip(Size size) {
+    // 1. Create a path for the full page
+    final fullPagePath = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    
+    // 2. Create a path for all the highlight holes combined
+    final holesPath = Path();
+    for (final rect in rects) {
+      holesPath.addRRect(RRect.fromRectAndRadius(
+        rect.inflate(2), // Inflate slightly for better breathing room
+        const Radius.circular(4),
+      ));
+    }
+
+    // 3. Subtract the holes from the full page to create the dimmer with transparent windows
+    // PathOperation.difference is much safer than evenOdd when rects might overlap
+    return Path.combine(PathOperation.difference, fullPagePath, holesPath);
+  }
+
+  @override
+  bool shouldReclip(_FocusClipper oldClipper) => rects != oldClipper.rects;
+}
+
+
