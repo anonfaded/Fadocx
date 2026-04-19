@@ -1,10 +1,14 @@
 package com.fadseclab.fadocx
 
 import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.os.ParcelFileDescriptor
+import android.provider.Settings
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -108,6 +112,18 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        // Method channel for app settings
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.fadseclab.fadocx/app_settings")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "openManageAllFilesSettings" -> {
+                        openManageAllFilesSettings()
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
     }
 
     override fun onDestroy() {
@@ -121,6 +137,58 @@ class MainActivity : FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleFileIntent(intent)
+    }
+
+    private fun openManageAllFilesSettings() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            openApplicationDetailsSettings()
+            Log.i(TAG, "Opened app settings (Android < 11)")
+            return
+        }
+
+        if (Environment.isExternalStorageManager()) {
+            Log.i(TAG, "MANAGE_EXTERNAL_STORAGE already granted for $packageName")
+            openApplicationDetailsSettings()
+            return
+        }
+
+        val uri = Uri.fromParts("package", packageName, null)
+        val appSpecificIntent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri)
+        val genericAllFilesIntent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+
+        try {
+            startActivity(appSpecificIntent)
+            Log.i(TAG, "Opened MANAGE_APP_ALL_FILES_ACCESS_PERMISSION for $packageName")
+        } catch (e: ActivityNotFoundException) {
+            Log.w(TAG, "App-specific all files settings unavailable, opening generic page", e)
+            try {
+                startActivity(genericAllFilesIntent)
+                Log.i(TAG, "Opened MANAGE_ALL_FILES_ACCESS_PERMISSION page")
+            } catch (e2: Exception) {
+                Log.e(TAG, "Failed to open all files access screens, using app details", e2)
+                openApplicationDetailsSettings()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open app-specific all files settings, using fallback", e)
+            try {
+                startActivity(genericAllFilesIntent)
+                Log.i(TAG, "Opened MANAGE_ALL_FILES_ACCESS_PERMISSION page")
+            } catch (e2: Exception) {
+                Log.e(TAG, "Failed to open all files access screens, using app details", e2)
+                openApplicationDetailsSettings()
+            }
+        }
+    }
+
+    private fun openApplicationDetailsSettings() {
+        try {
+            val appDetailsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:$packageName")
+            }
+            startActivity(appDetailsIntent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open app details settings", e)
+        }
     }
 
     private fun handleFileIntent(intent: Intent?) {
