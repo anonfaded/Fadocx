@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fadocx/core/services/thumbnail_generation_service.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
+
+final log = Logger();
 
 /// Thumbnail provider - fetches cached thumbnail
 final thumbnailProvider = FutureProvider.family<Uint8List?, String>(

@@ -1,10 +1,12 @@
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
 import 'package:fadocx/features/viewer/domain/repositories/document_parsing_repository.dart';
 import '../services/cache_service.dart';
 import '../services/document_parser_service.dart';
 import '../services/platform_channel_service.dart';
+
+final log = Logger();
 
 /// Production implementation of DocumentParsingRepository
 /// 
@@ -66,7 +68,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('JSON parsing failed: $e', e, st);
+      log.e('JSON parsing failed: $e', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -90,7 +92,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('FADREC parsing failed: $e', e, st);
+      log.e('FADREC parsing failed: $e', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -113,7 +115,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('XML parsing failed: $e', e, st);
+      log.e('XML parsing failed: $e', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -136,7 +138,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('ODS parsing failed: $e', e, st);
+      log.e('ODS parsing failed: $e', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -171,7 +173,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('NATIVE PARSING FAILED for $format: $e', e, st);
+      log.e('NATIVE PARSING FAILED for $format: $e', error: e, stackTrace: st);
       log.d('Failed file path: $filePath');
       log.d('Native channel may not be available or file may be corrupted');
       rethrow; // Let it fail - this is critical
@@ -195,7 +197,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('CSV parsing failed: $e', e, st);
+      log.e('CSV parsing failed: $e', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -249,7 +251,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('NATIVE PARSING FAILED for DOC: $e', e, st);
+      log.e('NATIVE PARSING FAILED for DOC: $e', error: e, stackTrace: st);
       log.d('Failed file path: $filePath');
       log.d('Native channel may not be available or file may be corrupted');
       rethrow; // Let it fail - this is critical
@@ -281,7 +283,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('NATIVE PARSING FAILED for $format: $e', e, st);
+      log.e('NATIVE PARSING FAILED for $format: $e', error: e, stackTrace: st);
       log.d('Failed file path: $filePath');
       log.d('Native channel may not be available or file may be corrupted');
       rethrow; // Let it fail - this is critical

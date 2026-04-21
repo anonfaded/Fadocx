@@ -1,6 +1,8 @@
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/features/settings/data/models/hive_models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+final log = Logger();
 
 /// Datasource for Hive database operations
 /// Handles all direct Hive box access
@@ -30,7 +32,7 @@ class HiveDatasource {
       log.i(
           'Hive initialization complete (settings + recent files boxes opened)');
     } catch (e, st) {
-      log.e('Error initializing Hive', e, st);
+      log.e('Error initializing Hive', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -43,7 +45,7 @@ class HiveDatasource {
       }
       return await Hive.openBox<HiveAppSettings>(settingsBoxName);
     } catch (e, st) {
-      log.e('Error opening settings box', e, st);
+      log.e('Error opening settings box', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -57,7 +59,7 @@ class HiveDatasource {
       log.d('Lazy opening recent files box...');
       return await Hive.openBox<HiveRecentFile>(recentFilesBoxName);
     } catch (e, st) {
-      log.e('Error opening recent files box', e, st);
+      log.e('Error opening recent files box', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -71,7 +73,7 @@ class HiveDatasource {
       log.d('Lazy opening device info box...');
       return await Hive.openBox<HiveDeviceInfo>(deviceInfoBoxName);
     } catch (e, st) {
-      log.e('Error opening device info box', e, st);
+      log.e('Error opening device info box', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -91,7 +93,7 @@ class HiveDatasource {
       log.d('Retrieved settings: ${settings.theme}');
       return settings;
     } catch (e, st) {
-      log.e('Error getting settings', e, st);
+      log.e('Error getting settings', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -105,7 +107,7 @@ class HiveDatasource {
       log.i(
           'Settings saved: theme=${settings.theme}, language=${settings.language}');
     } catch (e, st) {
-      log.e('Error saving settings', e, st);
+      log.e('Error saving settings', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -120,7 +122,7 @@ class HiveDatasource {
       log.d('Retrieved ${files.length} recent files');
       return files;
     } catch (e, st) {
-      log.e('Error getting recent files', e, st);
+      log.e('Error getting recent files', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -132,7 +134,7 @@ class HiveDatasource {
       await box.put(file.id, file);
       log.i('Added recent file: ${file.fileName}');
     } catch (e, st) {
-      log.e('Error adding recent file', e, st);
+      log.e('Error adding recent file', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -144,7 +146,7 @@ class HiveDatasource {
       await box.put(file.id, file);
       log.d('Updated recent file: ${file.fileName}');
     } catch (e, st) {
-      log.e('Error updating recent file', e, st);
+      log.e('Error updating recent file', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -156,7 +158,7 @@ class HiveDatasource {
       await box.delete(fileId);
       log.i('Deleted recent file: $fileId');
     } catch (e, st) {
-      log.e('Error deleting recent file', e, st);
+      log.e('Error deleting recent file', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -168,7 +170,7 @@ class HiveDatasource {
       await box.clear();
       log.i('Cleared all recent files');
     } catch (e, st) {
-      log.e('Error clearing recent files', e, st);
+      log.e('Error clearing recent files', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -182,7 +184,7 @@ class HiveDatasource {
           .watch()
           .map((_) => box.values.isNotEmpty ? box.values.first : null);
     } catch (e, st) {
-      log.e('Error watching settings', e, st);
+      log.e('Error watching settings', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -208,7 +210,7 @@ class HiveDatasource {
         },
       );
     } catch (e, st) {
-      log.e('Error watching recent files', e, st);
+      log.e('Error watching recent files', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -219,7 +221,7 @@ class HiveDatasource {
       final box = await getRecentFilesBox();
       return box.get(fileId);
     } catch (e, st) {
-      log.e('Error getting recent file', e, st);
+      log.e('Error getting recent file', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -232,7 +234,7 @@ class HiveDatasource {
       }
       return await Hive.openBox<HiveThumbnail>(thumbnailCacheBoxName);
     } catch (e, st) {
-      log.e('Error opening thumbnail cache box', e, st);
+      log.e('Error opening thumbnail cache box', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -249,7 +251,7 @@ class HiveDatasource {
       await box.put(fileId, thumbnail);
       log.d('Thumbnail saved for file: $fileId');
     } catch (e, st) {
-      log.e('Error saving thumbnail', e, st);
+      log.e('Error saving thumbnail', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -260,7 +262,7 @@ class HiveDatasource {
       final box = await getThumbnailCacheBox();
       return box.get(fileId);
     } catch (e, st) {
-      log.e('Error getting thumbnail', e, st);
+      log.e('Error getting thumbnail', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -272,7 +274,7 @@ class HiveDatasource {
       await box.delete(fileId);
       log.d('Thumbnail removed for file: $fileId');
     } catch (e, st) {
-      log.e('Error removing thumbnail', e, st);
+      log.e('Error removing thumbnail', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -284,7 +286,7 @@ class HiveDatasource {
       await box.clear();
       log.i('Thumbnail cache cleared');
     } catch (e, st) {
-      log.e('Error clearing thumbnail cache', e, st);
+      log.e('Error clearing thumbnail cache', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -295,7 +297,7 @@ class HiveDatasource {
       await Hive.close();
       log.i('Hive database closed');
     } catch (e, st) {
-      log.e('Error closing Hive', e, st);
+      log.e('Error closing Hive', error: e, stackTrace: st);
     }
   }
 }

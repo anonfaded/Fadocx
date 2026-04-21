@@ -5,13 +5,15 @@ import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/config/theme/app_theme.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
 import 'package:fadocx/services/file_intent_service.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+
+final log = Logger();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +35,7 @@ void main() async {
     await HiveDatasource().clearThumbnailCache();
     log.i('✅ Thumbnail cache cleared on startup - will regenerate with new system');
   } catch (e) {
-    log.e('Error clearing thumbnail cache on startup', e);
+    log.e('Error clearing thumbnail cache on startup', error: e);
   }
 
   runApp(const ProviderScope(child: MyApp()));

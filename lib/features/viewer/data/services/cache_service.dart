@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
+
+final log = Logger();
 
 /// Cache model stored in Hive
 class CachedParsedSheet {

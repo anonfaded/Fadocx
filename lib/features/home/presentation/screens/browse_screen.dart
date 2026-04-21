@@ -8,10 +8,13 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/config/theme/app_theme.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
+
+final log = Logger();
 
 /// Document model for organization
 class DeviceDocument {
@@ -1032,16 +1035,15 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         log.d('⚠️  Could not get downloads dir: $e');
       }
 
-      // Try to get app documents directory (for sample files)
+      // Try to get Fadocx samples directory
       try {
-        final appDocs = await getApplicationDocumentsDirectory();
-        final sampleDir = Directory('${appDocs.path}/Fadocx Samples');
+        final sampleDir = await StorageService.getCategoryDir('Samples');
         if (await sampleDir.exists()) {
           pathsToScan.add(sampleDir);
           log.i('✓ Added Fadocx Samples directory to scan: ${sampleDir.path}');
         }
       } catch (e) {
-        log.d('⚠️  Could not get app documents dir: $e');
+        log.d('⚠️  Could not get Fadocx samples dir: $e');
       }
 
       // Try to get common user documents paths
@@ -1299,18 +1301,20 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
           final fileName = filePath.split('/').last;
           final fileExtension = _getFileExtension(fileName);
 
+          // Copy file into app's internal storage
+          final cachedFile = await StorageService.cacheDocument(filePath, fileName);
+          
           int fileSizeBytes = 0;
           try {
-            final file = File(filePath);
-            fileSizeBytes = await file.length();
+            fileSizeBytes = await cachedFile.length();
           } catch (e) {
-            log.w('⚠️  Could not calculate file size for $filePath: $e');
+            log.w('⚠️  Could not calculate file size for $fileName: $e');
           }
 
           final recentFile = RecentFile(
             id: DateTime.now().millisecondsSinceEpoch.toString() +
                 _selectedFilePaths.toList().indexOf(filePath).toString(),
-            filePath: filePath,
+            filePath: cachedFile.path,
             fileName: fileName,
             fileType: fileExtension,
             fileSizeBytes: fileSizeBytes,
@@ -1322,9 +1326,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
 
           await mutator.addRecentFile(recentFile);
           imported++;
-          log.d('  ✓ Imported: $fileName');
+          log.d('  ✓ Imported and cached: $fileName to ${cachedFile.path}');
         } catch (e) {
-          log.e('  ❌ Failed to import file: $e');
+          log.e('  ❌ Failed to import file: $e', error: e);
         }
       }
 
@@ -1337,7 +1341,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         context.pop();
       }
     } catch (e) {
-      log.e('❌ Error importing files: $e');
+      log.e('❌ Error importing files: $e', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error importing files: $e')),

@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
+
+final log = Logger();
 
 /// Service to parse and extract data from various document formats
 class DocumentParserService {
@@ -33,7 +35,7 @@ class DocumentParserService {
 
       throw Exception('Invalid or unsupported XLS file format');
     } catch (e, st) {
-      log.e('Error parsing XLS', e, st);
+      log.e('Error parsing XLS', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -108,7 +110,7 @@ class DocumentParserService {
         'sheetCount': 1,
       };
     } catch (e, st) {
-      log.e('Error parsing CSV', e, st);
+      log.e('Error parsing CSV', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -120,7 +122,7 @@ class DocumentParserService {
       log.i('Parsing ODT file: $filePath');
       return await _parseOpenDocumentFormat(filePath, 'ODT');
     } catch (e, st) {
-      log.e('Error parsing ODT', e, st);
+      log.e('Error parsing ODT', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -132,7 +134,7 @@ class DocumentParserService {
       log.i('Parsing ODS file: $filePath');
       return await _parseOpenDocumentSpreadsheet(filePath);
     } catch (e, st) {
-      log.e('Error parsing ODS', e, st);
+      log.e('Error parsing ODS', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -176,7 +178,7 @@ class DocumentParserService {
       log.i('ODP parsed: ${slides.length} slides');
       return slides;
     } catch (e, st) {
-      log.e('Error parsing ODP', e, st);
+      log.e('Error parsing ODP', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -206,7 +208,7 @@ class DocumentParserService {
       log.i('RTF extracted: ${text.length} characters');
       return text;
     } catch (e, st) {
-      log.e('Error parsing RTF', e, st);
+      log.e('Error parsing RTF', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -350,7 +352,7 @@ class DocumentParserService {
         ];
       }
     } catch (e, st) {
-      log.e('Error parsing PPT', e, st);
+      log.e('Error parsing PPT', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -432,7 +434,7 @@ class DocumentParserService {
       log.i('DOCX extracted: ${texts.join().length} characters');
       return texts.join('\n');
     } catch (e, st) {
-      log.e('Error parsing DOCX', e, st);
+      log.e('Error parsing DOCX', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -520,7 +522,7 @@ class DocumentParserService {
         throw Exception('JSON must be an object or array');
       }
     } catch (e, st) {
-      log.e('Error parsing JSON', e, st);
+      log.e('Error parsing JSON', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -572,7 +574,7 @@ class DocumentParserService {
         };
       }
     } catch (e, st) {
-      log.e('Error reading XML file', e, st);
+      log.e('Error reading XML file', error: e, stackTrace: st);
       rethrow;
     }
   }

@@ -1,7 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
+
+final log = Logger();
 
 class CameraService extends ChangeNotifier {
   CameraController? _controller;

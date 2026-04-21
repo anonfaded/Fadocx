@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/data/providers/repository_providers.dart';
+
+final log = Logger();
 
 /// State class for parsed document with loading/error handling
 class ParsedDocumentState {
@@ -150,7 +152,7 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         log.w('Failed to cache document: $e');
       }
     } catch (e, st) {
-      log.e('Error loading document: $e', e, st);
+      log.e('Error loading document: $e', error: e, stackTrace: st);
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),

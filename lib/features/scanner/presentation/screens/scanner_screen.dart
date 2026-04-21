@@ -6,10 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:camera/camera.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/core/services/image_processing_service.dart';
 import 'package:fadocx/core/services/tesseract_service.dart';
 import 'package:fadocx/features/scanner/presentation/providers/scanner_provider.dart';
+
+final log = Logger();
 
 /// Document Scanner Screen
 class ScannerScreen extends ConsumerStatefulWidget {
@@ -211,7 +213,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                           context.go('/');
                         }
                       } catch (e) {
-                        log.e('Error navigating back', e);
+                        log.e('Error navigating back', error: e);
                         context.go('/');
                       }
                     },

@@ -1,7 +1,9 @@
 import 'package:image/image.dart' as img;
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'dart:io';
 import 'package:flutter/services.dart';
+
+final log = Logger();
 
 /// Service for generating file thumbnails with REAL document previews
 /// Calls native rendering from main thread (MethodChannels don't work in isolates!)
