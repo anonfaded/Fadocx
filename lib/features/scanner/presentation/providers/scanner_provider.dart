@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/core/services/camera_service.dart';
 import 'package:fadocx/core/services/scan_processor.dart';
 import 'package:fadocx/core/services/isolate_processor.dart';
 import 'package:fadocx/core/services/tesseract_service.dart';
+
+final log = Logger();
 
 /// Processing step enum — drives UI step-by-step animation.
 enum ProcessingStep {
@@ -235,7 +237,7 @@ class ScannerNotifier extends Notifier<ScannerState> {
         isProcessing: false,
       );
     } catch (e, st) {
-      log.e('captureAndProcess error', e, st);
+      log.e('captureAndProcess error', error: e, stackTrace: st);
       state = state.copyWith(
         isProcessing: false,
         processingStep: ProcessingStep.idle,
@@ -257,7 +259,7 @@ class ScannerNotifier extends Notifier<ScannerState> {
 
       await _processExistingImage(imagePath);
     } catch (e, st) {
-      log.e('pickAndProcessImage error', e, st);
+      log.e('pickAndProcessImage error', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -317,7 +319,7 @@ class ScannerNotifier extends Notifier<ScannerState> {
         isProcessing: false,
       );
     } catch (e, st) {
-      log.e('_processExistingImage error', e, st);
+      log.e('_processExistingImage error', error: e, stackTrace: st);
       state = state.copyWith(
         isProcessing: false,
         processingStep: ProcessingStep.idle,

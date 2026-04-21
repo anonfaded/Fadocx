@@ -457,8 +457,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
               final text = snapshot.data?['text'] ?? '';
               return TextButton(
                 onPressed: text.isNotEmpty
-                    ? () async {
-                        await Clipboard.setData(ClipboardData(text: text));
+                    ? () {
+                        Clipboard.setData(ClipboardData(text: text));
                         Navigator.of(dialogContext).pop();
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -479,50 +479,6 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     ),
   );
 }
-
-  Future<void> _loadAllPageTexts() async {
-    if (_document == null || _isLoadingAllPages) return;
-    if (_pageTexts.length == _totalPages) return; // Already loaded all
-
-    setState(() => _isLoadingAllPages = true);
-
-    try {
-      for (int i = 0; i < _totalPages; i++) {
-        if (!mounted) break;
-        if (_pageTexts.containsKey(i)) continue; // Skip already loaded
-
-        try {
-          final page = _document!.pages[i];
-          final pageText = await page.loadText();
-          if (pageText != null && mounted) {
-            final text = ((pageText as dynamic).fullText ?? '') as String;
-            if (mounted) {
-              setState(() {
-                _pageTexts[i] = text;
-              });
-            }
-          } else if (mounted) {
-            setState(() {
-              _pageTexts[i] = ''; // Empty page
-            });
-          }
-        } catch (e) {
-          log.d('Error loading text for page $i: $e');
-          if (mounted) {
-            setState(() {
-              _pageTexts[i] = ''; // Mark as loaded but empty
-            });
-          }
-        }
-      }
-    } catch (e) {
-      log.e('Error in _loadAllPageTexts: $e');
-    } finally {
-      if (mounted) {
-        setState(() => _isLoadingAllPages = false);
-      }
-    }
-  }
 
   /// Load page text on-demand with robust fallback strategy
   Future<void> _extractAllPageTextsComprehensive() async {

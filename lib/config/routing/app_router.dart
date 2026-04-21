@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/features/home/presentation/screens/home_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/documents_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/browse_screen.dart';
@@ -9,6 +9,8 @@ import 'package:fadocx/features/home/presentation/screens/whats_new_screen.dart'
 import 'package:fadocx/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fadocx/features/viewer/presentation/screens/viewer_screen.dart';
 import 'package:fadocx/features/scanner/presentation/screens/scanner_screen.dart';
+
+final log = Logger();
 
 /// Route names constant
 class RouteNames {

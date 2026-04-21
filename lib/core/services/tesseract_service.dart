@@ -3,8 +3,10 @@ import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart';
 import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:xml/xml.dart';
+
+final log = Logger();
 
 class TesseractService {
   static const String _language = 'eng';
@@ -94,7 +96,7 @@ class TesseractService {
 
       return bestOverall;
     } catch (e, st) {
-      log.e('Error during hOCR extraction', e, st);
+      log.e('Error during hOCR extraction', error: e, stackTrace: st);
       return null;
     }
   }
@@ -154,7 +156,7 @@ class TesseractService {
 
       return best;
     } catch (e, st) {
-      log.e('Error during OCR candidate extraction', e, st);
+      log.e('Error during OCR candidate extraction', error: e, stackTrace: st);
       return null;
     }
   }
@@ -230,7 +232,7 @@ class TesseractService {
         imageHeight: pageBox?.height,
       );
     } catch (e, st) {
-      log.e('Failed to parse hOCR', e, st);
+      log.e('Failed to parse hOCR', error: e, stackTrace: st);
       return const OcrResult(words: [], lines: [], plainText: '');
     }
   }

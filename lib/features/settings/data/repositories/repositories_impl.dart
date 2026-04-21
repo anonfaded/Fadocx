@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:fadocx/core/errors/failures.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
+import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
 import 'package:fadocx/features/settings/data/models/hive_models.dart';
 import 'package:fadocx/features/settings/data/repositories/settings_mapper.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/domain/repositories/repositories.dart';
+
+final log = Logger();
 
 /// Implementation of AppSettingsRepository using Hive
 class AppSettingsRepositoryImpl implements AppSettingsRepository {
@@ -29,7 +32,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       final domainSettings = SettingsMapper.fromHiveAppSettings(settings);
       return ResultSuccess(domainSettings);
     } catch (e, st) {
-      log.e('Failed to get settings', e, st);
+      log.e('Failed to get settings', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to get settings: $e'));
     }
@@ -51,7 +54,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       log.i('Updated theme to: $theme');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to update theme', e, st);
+      log.e('Failed to update theme', error: e, stackTrace: st);
       return ResultFailure(UnknownFailure(message: 'Failed to update theme'));
     }
   }
@@ -72,7 +75,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       log.i('Updated language to: $language');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to update language', e, st);
+      log.e('Failed to update language', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to update language'));
     }
@@ -94,7 +97,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       log.i('Updated notifications to: $enabled');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to update notifications', e, st);
+      log.e('Failed to update notifications', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to update notifications'));
     }
@@ -116,7 +119,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       log.i('Updated hasImportedSampleFiles to: $hasImported');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to update hasImportedSampleFiles', e, st);
+      log.e('Failed to update hasImportedSampleFiles', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to update hasImportedSampleFiles'));
     }
@@ -138,7 +141,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       log.i('Updated hasDismissedWelcome to: $hasDismissed');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to update hasDismissedWelcome', e, st);
+      log.e('Failed to update hasDismissedWelcome', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to update hasDismissedWelcome'));
     }
@@ -176,7 +179,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
         }
       }
     } catch (e, st) {
-      log.e('Error watching settings', e, st);
+      log.e('Error watching settings', error: e, stackTrace: st);
       // Yield defaults on error
       final now = DateTime.now();
       yield ResultSuccess(AppSettings(
@@ -201,7 +204,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       log.i('Settings cleared and reset to defaults');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to clear settings', e, st);
+      log.e('Failed to clear settings', error: e, stackTrace: st);
       return ResultFailure(UnknownFailure(message: 'Failed to clear settings'));
     }
   }
@@ -229,7 +232,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       log.d('Retrieved ${domainFiles.length} recent files');
       return ResultSuccess(domainFiles);
     } catch (e, st) {
-      log.e('Failed to get recent files', e, st);
+      log.e('Failed to get recent files', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to get recent files'));
     }
@@ -243,7 +246,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       log.i('Added recent file: ${file.fileName}');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to add recent file', e, st);
+      log.e('Failed to add recent file', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to add recent file'));
     }
@@ -261,7 +264,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       }
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to update page position', e, st);
+      log.e('Failed to update page position', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to update page position'));
     }
@@ -274,7 +277,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       log.i('Removed recent file: $fileId');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to remove recent file', e, st);
+      log.e('Failed to remove recent file', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to remove recent file'));
     }
@@ -287,7 +290,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       log.i('Cleared all recent files');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to clear recent files', e, st);
+      log.e('Failed to clear recent files', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to clear recent files'));
     }
@@ -304,7 +307,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       log.d('Retrieved ${domainFiles.length} trash files');
       return ResultSuccess(domainFiles);
     } catch (e, st) {
-      log.e('Failed to get trash files', e, st);
+      log.e('Failed to get trash files', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to get trash files'));
     }
@@ -315,6 +318,15 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
     try {
       final existing = await _datasource.getRecentFile(fileId);
       if (existing != null) {
+        // Move actual file to trash folder
+        try {
+          await StorageService.moveToTrash(existing.filePath);
+        } catch (e) {
+          // If file move fails, log but continue - still mark as deleted in DB
+          log.w('Could not move file to trash, may already be deleted: $e');
+        }
+        
+        // Update database to mark as deleted
         final deleted = existing.copyWith(
           isDeleted: true,
           deletedAt: DateTime.now(),
@@ -324,7 +336,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       }
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to soft delete file', e, st);
+      log.e('Failed to soft delete file', error: e, stackTrace: st);
       return ResultFailure(UnknownFailure(message: 'Failed to delete file'));
     }
   }
@@ -334,16 +346,21 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
     try {
       final existing = await _datasource.getRecentFile(fileId);
       if (existing != null && existing.isDeleted) {
+        // Move file back from trash to original category
+        final restoredFile = await StorageService.restoreFromTrash(existing.filePath);
+        
+        // Update database with new file path and restored status
         final restored = existing.copyWith(
+          filePath: restoredFile.path,
           isDeleted: false,
           deletedAt: null,
         );
         await _datasource.updateRecentFile(restored);
-        log.i('Restored file from trash: $fileId');
+        log.i('Restored file from trash: $fileId to ${restoredFile.path}');
       }
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to restore file from trash', e, st);
+      log.e('Failed to restore file from trash', error: e, stackTrace: st);
       return ResultFailure(UnknownFailure(message: 'Failed to restore file'));
     }
   }
@@ -351,11 +368,23 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   @override
   Future<Result<void>> permanentlyDeleteFile(String fileId) async {
     try {
+      final existing = await _datasource.getRecentFile(fileId);
+      if (existing != null) {
+        // Delete the actual file from disk
+        try {
+          await StorageService.permanentlyDeleteFile(existing.filePath);
+        } catch (e) {
+          // If file delete fails, log but continue - still remove from DB
+          log.w('Could not delete file from disk, may already be deleted: $e');
+        }
+      }
+      
+      // Remove from database
       await _datasource.deleteRecentFile(fileId);
       log.i('Permanently deleted file: $fileId');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to permanently delete file', e, st);
+      log.e('Failed to permanently delete file', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to permanently delete file'));
     }
@@ -385,7 +414,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
         yield ResultSuccess(domainFiles);
       }
     } catch (e, st) {
-      log.e('Error watching recent files', e, st);
+      log.e('Error watching recent files', error: e, stackTrace: st);
       yield ResultFailure(
           UnknownFailure(message: 'Error watching recent files'));
     }
@@ -407,7 +436,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       }
       return ResultFailure(FileNotFoundFailure(filePath: fileId));
     } catch (e, st) {
-      log.e('Failed to get sync status', e, st);
+      log.e('Failed to get sync status', error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to get sync status'));
     }

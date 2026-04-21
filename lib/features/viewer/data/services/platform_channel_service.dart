@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
+
+final log = Logger();
 
 /// Exception thrown when platform channel communication fails
 class PlatformChannelException implements Exception {

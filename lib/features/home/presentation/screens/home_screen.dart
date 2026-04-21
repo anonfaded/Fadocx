@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
+import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
+
+final log = Logger();
 
 /// Home screen - displays recent files and quick actions
 class HomeScreen extends ConsumerStatefulWidget {
@@ -531,9 +533,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         ),
       );
 
-      // Get the app documents directory
-      final appDir = await getApplicationDocumentsDirectory();
-      final sampleDir = Directory('${appDir.path}/Fadocx Samples');
+      // Get the Fadocx samples directory using storage service
+      final sampleDir = await StorageService.getCategoryDir('Samples');
 
       // Create samples directory if it doesn't exist
       if (!await sampleDir.exists()) {

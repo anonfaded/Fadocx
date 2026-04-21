@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
+
+final log = Logger();
 
 /// Service to handle file intents from other apps (Android)
 /// When user opens a file with our app from Files app or another app,

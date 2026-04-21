@@ -1,10 +1,11 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:opencv_dart/opencv_dart.dart' as cv;
-import 'package:path_provider/path_provider.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
+import 'package:fadocx/core/services/storage_service.dart';
+
+final log = Logger();
 
 /// Detected document corners (4 points in order: TL, TR, BR, BL)
 class DocumentCorners {
@@ -49,18 +50,15 @@ class ImageProcessingService {
       final bordered = _addWhiteBorder(working, 10);
       working.dispose();
 
-      final baseDir = await getApplicationDocumentsDirectory();
-      final scanPath = '${baseDir.path}/fadocx_docs/Scans';
-      await Directory(scanPath).create(recursive: true);
+      final scanDir = await StorageService.getCategoryDir(StorageService.scansFolder);
       final outPath =
-          '$scanPath/${DateTime.now().millisecondsSinceEpoch}_processed.png';
+          '${scanDir.path}/${DateTime.now().millisecondsSinceEpoch}_processed.png';
       cv.imwrite(outPath, bordered);
-      log.i(
-          'Processed image saved: $outPath (${bordered.cols}x${bordered.rows})');
+      log.i('Processed image saved: $outPath (${bordered.cols}x${bordered.rows})');
       bordered.dispose();
       return outPath;
     } catch (e, st) {
-      log.e('processImageFile error', e, st);
+      log.e('processImageFile error', error: e, stackTrace: st);
       return null;
     }
   }
@@ -102,7 +100,7 @@ class ImageProcessingService {
 
       return result;
     } catch (e, st) {
-      log.e('OpenCV pipeline error: $e', e, st);
+      log.e('OpenCV pipeline error: $e', error: e, stackTrace: st);
       return null;
     }
   }
@@ -131,7 +129,7 @@ class ImageProcessingService {
       mat.dispose();
       return result;
     } catch (e, st) {
-      log.e('Perspective correction error: $e', e, st);
+      log.e('Perspective correction error: $e', error: e, stackTrace: st);
       return null;
     }
   }

@@ -6,8 +6,10 @@ import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/config/theme/app_theme.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
+
+final log = Logger();
 
 /// Documents screen - displays all imported documents with category filtering
 class DocumentsScreen extends ConsumerStatefulWidget {

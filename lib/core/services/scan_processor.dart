@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/core/services/image_processing_service.dart';
 import 'package:fadocx/core/services/tesseract_service.dart';
-import 'package:fadocx/core/utils/logger.dart';
+import 'package:fadocx/core/services/storage_service.dart';
+
+final log = Logger();
 
 /// Scan result containing processed image and extracted text
 class ScanResult {
@@ -96,7 +98,7 @@ class ScanProcessor {
         ocrImageHeight: ocrResult?.imageHeight,
       );
     } catch (e, st) {
-      log.e('Error processing image', e, st);
+      log.e('Error processing image', error: e, stackTrace: st);
       return null;
     }
   }
@@ -104,13 +106,8 @@ class ScanProcessor {
   /// Get scan storage directory path
   static Future<String> _getScanStoragePath() async {
     try {
-      final baseDir = await getApplicationDocumentsDirectory();
-      final scanPath = '${baseDir.path}/fadocx_docs/Scans';
-      final scanDir = Directory(scanPath);
-      if (!await scanDir.exists()) {
-        await scanDir.create(recursive: true);
-      }
-      return scanPath;
+      final scanDir = await StorageService.getCategoryDir(StorageService.scansFolder);
+      return scanDir.path;
     } catch (e) {
       log.e('Error getting scan storage path: $e');
       rethrow;
