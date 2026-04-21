@@ -82,7 +82,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
     final suffix = (day % 10 == 1 && day != 11) ? 'st' :
                    (day % 10 == 2 && day != 12) ? 'nd' :
                    (day % 10 == 3 && day != 13) ? 'rd' : 'th';
-    return '${day}${suffix} ${DateFormat('MMMM yyyy').format(date)}';
+    return '$day$suffix ${DateFormat('MMMM yyyy').format(date)}';
   }
 
   String _getShortPath(String fullPath) {
@@ -1030,6 +1030,18 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         }
       } catch (e) {
         log.d('⚠️  Could not get downloads dir: $e');
+      }
+
+      // Try to get app documents directory (for sample files)
+      try {
+        final appDocs = await getApplicationDocumentsDirectory();
+        final sampleDir = Directory('${appDocs.path}/Fadocx Samples');
+        if (await sampleDir.exists()) {
+          pathsToScan.add(sampleDir);
+          log.i('✓ Added Fadocx Samples directory to scan: ${sampleDir.path}');
+        }
+      } catch (e) {
+        log.d('⚠️  Could not get app documents dir: $e');
       }
 
       // Try to get common user documents paths

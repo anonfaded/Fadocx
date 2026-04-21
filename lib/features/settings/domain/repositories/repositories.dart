@@ -16,6 +16,12 @@ abstract class AppSettingsRepository {
   /// Update notification setting
   Future<Result<void>> updateNotifications(bool enabled);
 
+  /// Update has imported sample files setting
+  Future<Result<void>> updateHasImportedSampleFiles(bool hasImported);
+
+  /// Update has dismissed welcome setting
+  Future<Result<void>> updateHasDismissedWelcome(bool hasDismissed);
+
   /// Get settings as stream for reactive updates
   Stream<Result<AppSettings>> watchSettings();
 

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 import 'package:fadocx/core/utils/logger.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
@@ -207,8 +211,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       builder: (context, ref, _) {
         final recentFiles = ref.watch(recentFilesProvider);
         final showRecentFiles = ref.watch(showRecentFilesProvider);
+        final appSettings = ref.watch(appSettingsProvider);
         return recentFiles.when(
-          data: (files) => _buildHomeContent(context, files, showRecentFiles),
+          data: (files) => _buildHomeContent(context, files, showRecentFiles, appSettings.value),
           error: (error, st) => _buildErrorState(context, error),
           loading: () => ListView(
             padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
@@ -225,7 +230,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildHomeContent(BuildContext context, List<RecentFile> files, bool showRecentFiles) {
+  Widget _buildHomeContent(BuildContext context, List<RecentFile> files, bool showRecentFiles, AppSettings? appSettings) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
       children: [
@@ -263,8 +268,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         ),
         const SizedBox(height: 24),
 
-        // Recent Files Section - only show if enabled
-        if (showRecentFiles && files.isNotEmpty) ...[
+        // Recent Files Section - show header only when not onboarding
+        if (showRecentFiles && (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles))) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -292,20 +297,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             ],
           ),
           const SizedBox(height: 8),
-          ...files.take(4).toList().asMap().entries.map(
-            (entry) {
-              final index = entry.key;
-              final file = entry.value;
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: index < (files.take(4).toList().length - 1) ? 8 : 0,
-                ),
-                child: _buildRecentFileItem(context, file),
-              );
-            },
-          ),
-        ] else
-          _buildEmptyRecentState(context),
+          if (files.isNotEmpty) ...[
+            ...files.take(4).toList().asMap().entries.map(
+              (entry) {
+                final index = entry.key;
+                final file = entry.value;
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom: index < (files.take(4).toList().length - 1) ? 8 : 0,
+                  ),
+                  child: _buildRecentFileItem(context, file),
+                );
+              },
+            ),
+          ] else
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.folder_open_outlined,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'No recent files',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ] else if (appSettings == null || !appSettings.hasImportedSampleFiles)
+          _buildEmptyRecentState(context)
+        // Don't show any onboarding after samples are imported
+        // Just show the action cards above
       ],
     );
   }
@@ -327,40 +360,282 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
   Widget _buildEmptyRecentState(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+          width: 1.5,
         ),
         color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            Icons.inbox_outlined,
-            size: 48,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                ],
+              ),
+            ),
+            child: Icon(
+              Icons.lightbulb_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Welcome to Fadocx',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            'No Recent Files',
-            style: Theme.of(context).textTheme.bodyLarge,
+            'Start by exploring our curated sample files or upload your own documents to get started',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Scan or import documents to get started',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+          const SizedBox(height: 28),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Color.lerp(Theme.of(context).colorScheme.primary, const Color(0xFF8B5CF6), 0.3)!,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
                 ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _importSampleFiles(context),
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.download_for_offline,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Import Sample Files',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              'or',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          RichText(
             textAlign: TextAlign.center,
+            text: TextSpan(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              children: [
+                TextSpan(
+                  text: 'scan',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Color.lerp(Theme.of(context).colorScheme.primary, const Color(0xFF3B82F6), 0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const TextSpan(text: ' or '),
+                TextSpan(
+                  text: 'import',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Color.lerp(Theme.of(context).colorScheme.primary, const Color(0xFF10B981), 0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const TextSpan(text: ' your own documents'),
+              ],
+            ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _importSampleFiles(BuildContext context) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final theme = Theme.of(context);
+
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Importing sample files...'),
+            ],
+          ),
+        ),
+      );
+
+      // Get the app documents directory
+      final appDir = await getApplicationDocumentsDirectory();
+      final sampleDir = Directory('${appDir.path}/Fadocx Samples');
+
+      // Create samples directory if it doesn't exist
+      if (!await sampleDir.exists()) {
+        await sampleDir.create(recursive: true);
+      }
+
+      // List of sample files to copy
+      final sampleFiles = [
+        'assets/samples/file-example_PDF_1MB.pdf',
+        'assets/samples/10rows_xlsx.xlsx',
+        'assets/samples/big_txt.txt',
+      ];
+
+      int importedCount = 0;
+
+      // Copy each sample file
+      for (final assetPath in sampleFiles) {
+        try {
+          final fileName = assetPath.split('/').last;
+          final targetPath = '${sampleDir.path}/$fileName';
+
+          // Load asset as bytes
+          final byteData = await rootBundle.load(assetPath);
+          final bytes = byteData.buffer.asUint8List();
+
+          // Write to file
+          final file = File(targetPath);
+          await file.writeAsBytes(bytes);
+
+          // Get file info
+          final fileStat = await file.stat();
+          final fileSizeBytes = fileStat.size;
+          final fileExtension = fileName.split('.').last.toLowerCase();
+          final now = DateTime.now();
+
+          // Create RecentFile entry
+          final recentFile = RecentFile(
+            id: const Uuid().v4(),
+            filePath: targetPath,
+            fileName: fileName,
+            fileType: fileExtension,
+            fileSizeBytes: fileSizeBytes,
+            dateOpened: now,
+            dateModified: now,
+            pagePosition: 0,
+            syncStatus: 'local',
+          );
+
+          // Add to recent files database
+          final mutator = ref.read(recentFilesMutatorProvider);
+          await mutator.addRecentFile(recentFile);
+
+          importedCount++;
+          log.i('Imported sample file: $fileName');
+        } catch (e) {
+          log.e('Failed to import sample file $assetPath: $e');
+        }
+      }
+
+      // Close loading dialog
+      if (!mounted) return;
+      navigator.pop();
+
+      // Show success message
+      if (!mounted) return;
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('$importedCount sample files imported successfully!'),
+          action: SnackBarAction(
+            label: 'View Files',
+            onPressed: () {
+              if (mounted) {
+                context.push(RouteNames.documents);
+              }
+            },
+          ),
+        ),
+      );
+
+      // Refresh the recent files provider to show the imported files
+      ref.invalidate(recentFilesProvider);
+
+      // Mark that user has imported sample files
+      final settingsMutator = ref.read(settingsMutatorProvider);
+      await settingsMutator.updateHasImportedSampleFiles(true);
+
+    } catch (e) {
+      // Close loading dialog if open
+      if (!mounted) return;
+      navigator.pop();
+
+      // Show error message
+      if (!mounted) return;
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Failed to import sample files: $e'),
+          backgroundColor: theme.colorScheme.error,
+        ),
+      );
+
+      log.e('Error importing sample files: $e');
+    }
   }
 
   Widget _buildRecentFileItem(BuildContext context, RecentFile file) {
@@ -715,7 +990,7 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
   }
 }
 
-/// Modern Compact Action Card with layered icon effect
+/// Modern Android-style Action Card with vertical layout and chevron
 class _ModernActionCard extends StatefulWidget {
   final String title;
   final String description;
@@ -737,17 +1012,16 @@ class _ModernActionCardState extends State<_ModernActionCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 150),
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.01).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -758,147 +1032,146 @@ class _ModernActionCardState extends State<_ModernActionCard>
     super.dispose();
   }
 
-  void _onHover(bool hovering) {
-    setState(() => _isHovered = hovering);
-    if (hovering) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).colorScheme.primary;
     final isScanning = widget.icon == Icons.document_scanner;
 
-    final gradientStart = isScanning
-        ? Color.lerp(primaryColor, const Color(0xFF3B82F6), 0.4)!
-        : Color.lerp(primaryColor, const Color(0xFF10B981), 0.4)!;
-    final gradientEnd = isScanning
-        ? Color.lerp(primaryColor, const Color(0xFF8B5CF6), 0.3)!
-        : Color.lerp(primaryColor, const Color(0xFF0EA5E9), 0.3)!;
+    // Different gradient colors for each card with better contrast
+    final gradientColors = isScanning
+        ? [
+            Color.lerp(primaryColor, const Color(0xFF3B82F6), 0.3)!,
+            Color.lerp(primaryColor, const Color(0xFF6366F1), 0.2)!,
+          ]
+        : [
+            Color.lerp(primaryColor, const Color(0xFF10B981), 0.3)!,
+            Color.lerp(primaryColor, const Color(0xFF059669), 0.2)!,
+          ];
 
     return AnimatedBuilder(
       animation: _scaleAnimation,
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
-          child: MouseRegion(
-            onEnter: (_) => _onHover(true),
-            onExit: (_) => _onHover(false),
-            child: GestureDetector(
-              onTapDown: (_) => _controller.forward(),
-              onTapUp: (_) {
-                _controller.reverse();
-                widget.onTap();
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                _controller.forward().then((_) {
+                  _controller.reverse();
+                  widget.onTap();
+                });
               },
-              onTapCancel: () => _controller.reverse(),
+              borderRadius: BorderRadius.circular(20),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: gradientColors,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.12),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      color: primaryColor.withValues(alpha: 0.2),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
                     BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.06),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
+                      color: primaryColor.withValues(alpha: 0.1),
+                      blurRadius: 32,
+                      offset: const Offset(0, 12),
                     ),
                   ],
                 ),
                 child: Container(
+                  height: 140, // Reduced height now that content is more compact
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        gradientStart,
-                        gradientEnd,
-                      ],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      width: 1,
                     ),
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        width: 1,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Icon on top
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0, end: _isHovered ? 8 : 0),
-                            duration: const Duration(milliseconds: 300),
-                            builder: (context, offset, _) {
-                              return Transform.translate(
-                                offset: Offset(0, -offset * 0.1),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(14),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Stack(
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Icon container with better contrast
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withValues(alpha: 0.1),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
                                   ),
-                                  child: Icon(
-                                    widget.icon,
-                                    size: 32,
-                                    color: Colors.white,
-                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                widget.icon,
+                                size: 24,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+
+                            // Text content - left aligned
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Title with better contrast
+                                Text(
+                                  widget.title,
+                                  textAlign: TextAlign.left,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        height: 1.1,
+                                        letterSpacing: 0.2,
+                                      ),
                                 ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 12),
+                                const SizedBox(height: 4),
 
-                          // Text content below
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Title
-                              Text(
-                                widget.title,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                    ),
-                              ),
-                              const SizedBox(height: 6),
+                                // Description with better contrast - no ellipsis
+                                Text(
+                                  widget.description,
+                                  textAlign: TextAlign.left,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.white.withValues(alpha: 0.9),
+                                        height: 1.3,
+                                        fontSize: 12,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
 
-                              // Description
-                              Text(
-                                widget.description,
-                                textAlign: TextAlign.center,
-                                maxLines: 3,
-                                overflow: TextOverflow.clip,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.8),
-                                      fontSize: 12,
-                                      height: 1.3,
-                                    ),
-                              ),
-                            ],
+                        // Chevron icon closer to top right corner
+                        Positioned(
+                          top: 2,
+                          right: 2,
+                          child: Icon(
+                            Icons.chevron_right,
+                            size: 18,
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

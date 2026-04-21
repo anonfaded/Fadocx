@@ -92,6 +92,24 @@ class SettingsMutator {
     );
   }
 
+  Future<void> updateHasImportedSampleFiles(bool hasImported) async {
+    log.i('Updating hasImportedSampleFiles to: $hasImported');
+    final result = await _repository.updateHasImportedSampleFiles(hasImported);
+    result.fold(
+      (failure) => log.e('Failed to update hasImportedSampleFiles: ${failure.message}'),
+      (success) => log.i('hasImportedSampleFiles updated successfully'),
+    );
+  }
+
+  Future<void> updateHasDismissedWelcome(bool hasDismissed) async {
+    log.i('Updating hasDismissedWelcome to: $hasDismissed');
+    final result = await _repository.updateHasDismissedWelcome(hasDismissed);
+    result.fold(
+      (failure) => log.e('Failed to update hasDismissedWelcome: ${failure.message}'),
+      (success) => log.i('hasDismissedWelcome updated successfully'),
+    );
+  }
+
   Future<void> clearSettings() async {
     log.i('Clearing settings');
     final result = await _repository.clearSettings();

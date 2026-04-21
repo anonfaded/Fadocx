@@ -101,6 +101,50 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
   }
 
   @override
+  Future<Result<void>> updateHasImportedSampleFiles(bool hasImported) async {
+    try {
+      var settings = await _datasource.getSettings();
+      settings ??= HiveAppSettings();
+
+      final updated = settings.copyWith(
+        hasImportedSampleFiles: hasImported,
+        syncStatus: 'pending',
+        updatedAt: DateTime.now(),
+      );
+
+      await _datasource.saveSettings(updated);
+      log.i('Updated hasImportedSampleFiles to: $hasImported');
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to update hasImportedSampleFiles', e, st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update hasImportedSampleFiles'));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateHasDismissedWelcome(bool hasDismissed) async {
+    try {
+      var settings = await _datasource.getSettings();
+      settings ??= HiveAppSettings();
+
+      final updated = settings.copyWith(
+        hasDismissedWelcome: hasDismissed,
+        syncStatus: 'pending',
+        updatedAt: DateTime.now(),
+      );
+
+      await _datasource.saveSettings(updated);
+      log.i('Updated hasDismissedWelcome to: $hasDismissed');
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to update hasDismissedWelcome', e, st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update hasDismissedWelcome'));
+    }
+  }
+
+  @override
   Stream<Result<AppSettings>> watchSettings() async* {
     try {
       // Try to load from Hive, but yield default first if slow
@@ -117,6 +161,8 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
           theme: 'system',
           language: 'en',
           enableNotifications: true,
+          hasImportedSampleFiles: false,
+          hasDismissedWelcome: false,
           createdAt: now,
           updatedAt: now,
           syncStatus: 'local',
@@ -138,6 +184,8 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
         theme: 'system',
         language: 'en',
         enableNotifications: true,
+        hasImportedSampleFiles: false,
+        hasDismissedWelcome: false,
         createdAt: now,
         updatedAt: now,
         syncStatus: 'local',

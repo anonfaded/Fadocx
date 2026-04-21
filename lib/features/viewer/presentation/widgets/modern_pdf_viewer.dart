@@ -148,7 +148,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     final currentPage = (_textModePageController.page ?? 0).round() + 1;
     
     if (currentPage != _currentPage && mounted) {
-      log.d('Page changed: $currentPage -> from ${_currentPage} total=$_totalPages');
+      log.d('Page changed: $currentPage -> from $_currentPage total=$_totalPages');
       setState(() => _currentPage = currentPage);
       widget.onPageChanged?.call(_currentPage, _totalPages);
       
@@ -1434,7 +1434,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                       Row(
                         children: [
                           Text(
-                            'Searching ${_searchPagesChecked}/${_document?.pages.length ?? 0}',
+                            'Searching $_searchPagesChecked/${_document?.pages.length ?? 0}',
                             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
