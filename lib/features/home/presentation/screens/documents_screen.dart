@@ -7,6 +7,10 @@ import 'package:fadocx/features/settings/presentation/providers/settings_provide
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/config/theme/app_theme.dart';
 import 'package:logger/logger.dart';
+import 'dart:io';
+import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
 
 final log = Logger();
@@ -637,6 +641,34 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               ),
             ),
             const SizedBox(height: 8),
+            // Duplicate action
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: ListTile(
+                leading: const Icon(Icons.copy, size: 20),
+                title: const Text('Duplicate'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _duplicateFile(file);
+                },
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
+            ),
+            // File info action
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: ListTile(
+                leading: const Icon(Icons.info_outline, size: 20),
+                title: const Text('File info'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showFileInfoDialog(context, file);
+                },
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
+            ),
           ],
         ),
       ),
@@ -651,6 +683,145 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  void _showFileInfoDialog(BuildContext context, RecentFile file) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('File info'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Name: ${file.fileName}'),
+              const SizedBox(height: 8),
+              Text('Type: ${file.fileType.toUpperCase()}'),
+              const SizedBox(height: 8),
+              Text('Size: ${file.formattedSize}'),
+              const SizedBox(height: 8),
+              SelectableText('Location: ${file.filePath}'),
+              const SizedBox(height: 8),
+              Text('Date opened: ${_formatDateTime(file.dateOpened)}'),
+              const SizedBox(height: 8),
+              Text('Last modified: ${_formatDateTime(file.dateModified)}'),
+              if (file.isDeleted) ...[
+                const SizedBox(height: 8),
+                Text('In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})'),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final text = _buildFileInfoText(file);
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+              await Clipboard.setData(ClipboardData(text: text));
+              navigator.pop();
+              messenger.showSnackBar(
+                const SnackBar(content: Text('File info copied')),
+              );
+            },
+            child: const Text('Copy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime dt) {
+    final day = dt.day;
+    final suffix = (day % 100 >= 11 && day % 100 <= 13)
+        ? 'th'
+        : (day % 10 == 1)
+            ? 'st'
+            : (day % 10 == 2)
+                ? 'nd'
+                : (day % 10 == 3)
+                    ? 'rd'
+                    : 'th';
+    final datePart = DateFormat('MMMM yyyy').format(dt);
+    final timePart = DateFormat('h:mm a').format(dt);
+    return '$day$suffix $datePart, $timePart';
+  }
+
+  String _buildFileInfoText(RecentFile file) {
+    final buffer = StringBuffer();
+    buffer.writeln('Name: ${file.fileName}');
+    buffer.writeln('Type: ${file.fileType.toUpperCase()}');
+    buffer.writeln('Size: ${file.formattedSize}');
+    buffer.writeln('Location: ${file.filePath}');
+    buffer.writeln('Date opened: ${_formatDateTime(file.dateOpened)}');
+    buffer.writeln('Last modified: ${_formatDateTime(file.dateModified)}');
+    if (file.isDeleted) {
+      buffer.writeln('In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})');
+    }
+    return buffer.toString();
+  }
+
+  Future<void> _duplicateFile(RecentFile file) async {
+    try {
+      final src = File(file.filePath);
+      if (!await src.exists()) {
+        throw Exception('Source file does not exist');
+      }
+
+      final dir = src.parent.path;
+      final originalName = src.path.split('/').last;
+      final dot = originalName.lastIndexOf('.');
+      final base = dot > 0 ? originalName.substring(0, dot) : originalName;
+      final ext = dot > 0 ? originalName.substring(dot) : '';
+
+      String candidateName(String suffixIndex) => '$base$suffixIndex$ext';
+
+      String suffix = ' (copy)';
+      String newName = candidateName(suffix);
+      int counter = 2;
+      while (await File('$dir/$newName').exists()) {
+        newName = candidateName(' (copy $counter)');
+        counter++;
+      }
+
+      final destPath = '$dir/$newName';
+      final copied = await src.copy(destPath);
+
+      // Create recent file entry for the duplicated file
+      final mutator = ref.read(recentFilesMutatorProvider);
+      final newRecent = RecentFile(
+        id: const Uuid().v4(),
+        filePath: copied.path,
+        fileName: newName,
+        fileType: file.fileType,
+        fileSizeBytes: await copied.length(),
+        dateOpened: DateTime.now(),
+        dateModified: await copied.lastModified(),
+        pagePosition: 0,
+        syncStatus: 'local',
+        isDeleted: false,
+      );
+
+      await mutator.addRecentFile(newRecent);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Duplicated as $newName')),
+        );
+      }
+    } catch (e) {
+      log.e('Failed to duplicate file', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to duplicate file: $e')),
+        );
+      }
+    }
   }
 
   Widget _buildSkeletonLoader() {
