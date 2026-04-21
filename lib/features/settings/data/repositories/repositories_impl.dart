@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:fadocx/core/errors/failures.dart';
 import 'package:logger/logger.dart';
@@ -319,20 +320,23 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       final existing = await _datasource.getRecentFile(fileId);
       if (existing != null) {
         // Move actual file to trash folder
+        late File movedFile;
         try {
-          await StorageService.moveToTrash(existing.filePath);
+          movedFile = await StorageService.moveToTrash(existing.filePath);
         } catch (e) {
           // If file move fails, log but continue - still mark as deleted in DB
           log.w('Could not move file to trash, may already be deleted: $e');
+          rethrow;
         }
         
-        // Update database to mark as deleted
+        // Update database with NEW trash path and mark as deleted
         final deleted = existing.copyWith(
+          filePath: movedFile.path,  // Update to trash path so restore works
           isDeleted: true,
           deletedAt: DateTime.now(),
         );
         await _datasource.updateRecentFile(deleted);
-        log.i('Soft deleted file: $fileId');
+        log.i('Soft deleted file: $fileId to ${movedFile.path}');
       }
       return const ResultSuccess(null);
     } catch (e, st) {

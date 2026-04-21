@@ -164,20 +164,24 @@ final trashFilesProvider = FutureProvider<List<RecentFile>>((ref) async {
 /// Recent files mutator for modifying recent files
 final recentFilesMutatorProvider = Provider((ref) {
   final repository = ref.watch(recentFilesRepositoryProvider);
-  return RecentFilesMutator(repository);
+  return RecentFilesMutator(repository, ref);
 });
 
 class RecentFilesMutator {
   final RecentFilesRepository _repository;
+  final Ref _ref;
 
-  RecentFilesMutator(this._repository);
+  RecentFilesMutator(this._repository, this._ref);
 
   Future<void> addRecentFile(RecentFile file) async {
     log.i('Adding recent file: ${file.fileName}');
     final result = await _repository.addRecentFile(file);
     result.fold(
       (failure) => log.e('Failed to add recent file: ${failure.message}'),
-      (success) => log.i('Recent file added successfully'),
+      (success) {
+        log.i('Recent file added successfully');
+        _ref.invalidate(recentFilesProvider);
+      },
     );
   }
 
@@ -195,7 +199,10 @@ class RecentFilesMutator {
     final result = await _repository.removeRecentFile(fileId);
     result.fold(
       (failure) => log.e('Failed to remove file: ${failure.message}'),
-      (success) => log.i('File removed successfully'),
+      (success) {
+        log.i('File removed successfully');
+        _ref.invalidate(recentFilesProvider);
+      },
     );
   }
 
@@ -204,7 +211,10 @@ class RecentFilesMutator {
     final result = await _repository.clearRecentFiles();
     result.fold(
       (failure) => log.e('Failed to clear recent files: ${failure.message}'),
-      (success) => log.i('All recent files cleared'),
+      (success) {
+        log.i('All recent files cleared');
+        _ref.invalidate(recentFilesProvider);
+      },
     );
   }
 
@@ -213,7 +223,11 @@ class RecentFilesMutator {
     final result = await _repository.softDeleteFile(fileId);
     result.fold(
       (failure) => log.e('Failed to delete file: ${failure.message}'),
-      (success) => log.i('File moved to trash'),
+      (success) {
+        log.i('File moved to trash');
+        _ref.invalidate(trashFilesProvider);
+        _ref.invalidate(recentFilesProvider);
+      },
     );
   }
 
@@ -222,7 +236,11 @@ class RecentFilesMutator {
     final result = await _repository.restoreFromTrash(fileId);
     result.fold(
       (failure) => log.e('Failed to restore file: ${failure.message}'),
-      (success) => log.i('File restored from trash'),
+      (success) {
+        log.i('File restored from trash');
+        _ref.invalidate(trashFilesProvider);
+        _ref.invalidate(recentFilesProvider);
+      },
     );
   }
 
@@ -232,7 +250,11 @@ class RecentFilesMutator {
     result.fold(
       (failure) =>
           log.e('Failed to permanently delete file: ${failure.message}'),
-      (success) => log.i('File permanently deleted'),
+      (success) {
+        log.i('File permanently deleted');
+        _ref.invalidate(trashFilesProvider);
+        _ref.invalidate(recentFilesProvider);
+      },
     );
   }
 }

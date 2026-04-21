@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/theme/app_theme.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
+import 'package:logger/logger.dart';
+
+final log = Logger();
 
 /// Trash screen - displays deleted/soft-deleted files
 class TrashScreen extends ConsumerStatefulWidget {
@@ -36,10 +39,24 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
     final trashFiles = ref.watch(trashFilesProvider);
 
     return trashFiles.when(
-      data: (files) => files.isEmpty
-          ? _buildEmptyState(context)
-          : _buildTrashList(context, files),
-      error: (error, st) => _buildErrorState(context, error),
+      data: (files) => RefreshIndicator(
+        onRefresh: () async {
+          log.d('Manual refresh of trash');
+          ref.invalidate(trashFilesProvider);
+          // Wait for the provider to be refreshed
+          await ref.read(trashFilesProvider.future);
+        },
+        child: files.isEmpty
+            ? _buildEmptyState(context)
+            : _buildTrashList(context, files),
+      ),
+      error: (error, st) => RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(trashFilesProvider);
+          await ref.read(trashFilesProvider.future);
+        },
+        child: _buildErrorState(context, error),
+      ),
       loading: () => _buildSkeletonLoader(),
     );
   }
@@ -389,59 +406,65 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
   void _showPermanentDeleteConfirmation(BuildContext context,
       [RecentFile? singleFile]) {
     final filesCount = singleFile != null ? 1 : _selectedFiles.length;
-    final controller = TextEditingController();
+    String confirmText = '';
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Permanently?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'You are about to permanently delete $filesCount file${filesCount > 1 ? 's' : ''}. This action cannot be undone.',
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Type DELETE in capital letters to confirm:',
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: 'DELETE',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Delete Permanently?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'You are about to permanently delete $filesCount file${filesCount > 1 ? 's' : ''}. This action cannot be undone.',
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                const SizedBox(height: 16),
+                Text(
+                  'Type DELETE in capital letters to confirm:',
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
+                const SizedBox(height: 8),
+                TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      confirmText = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'DELETE',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              controller.dispose();
-              Navigator.pop(context);
-            },
-            child: const Text('Cancel'),
-          ),
-          FilledButton.tonalIcon(
-            icon: const Icon(Icons.delete_forever),
-            label: const Text('Delete Permanently'),
-            onPressed: controller.text == 'DELETE'
-                ? () async {
-                    Navigator.pop(context);
-                    await _permanentlyDeleteFiles(singleFile);
-                  }
-                : null,
-          ),
-        ],
+              FilledButton.tonalIcon(
+                icon: const Icon(Icons.delete_forever),
+                label: const Text('Delete Permanently'),
+                onPressed: confirmText == 'DELETE'
+                    ? () async {
+                        Navigator.pop(context);
+                        await _permanentlyDeleteFiles(singleFile);
+                      }
+                    : null,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
