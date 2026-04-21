@@ -111,6 +111,12 @@ class HiveAppSettings {
   @HiveField(3)
   final bool enableNotifications;
 
+  @HiveField(8)
+  final bool hasImportedSampleFiles;
+
+  @HiveField(9)
+  final bool? hasDismissedWelcome;
+
   @HiveField(4)
   final DateTime createdAt;
 
@@ -128,11 +134,14 @@ class HiveAppSettings {
     this.theme = 'dark',
     this.language = 'en',
     this.enableNotifications = true,
+    this.hasImportedSampleFiles = false,
+    bool? hasDismissedWelcome,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.syncStatus = 'pending',
     this.syncedAt,
-  })  : id = id ?? const Uuid().v4(),
+  })  : hasDismissedWelcome = hasDismissedWelcome ?? false,
+        id = id ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -141,6 +150,8 @@ class HiveAppSettings {
     String? theme,
     String? language,
     bool? enableNotifications,
+    bool? hasImportedSampleFiles,
+    bool? hasDismissedWelcome,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? syncStatus,
@@ -151,6 +162,8 @@ class HiveAppSettings {
       theme: theme ?? this.theme,
       language: language ?? this.language,
       enableNotifications: enableNotifications ?? this.enableNotifications,
+      hasImportedSampleFiles: hasImportedSampleFiles ?? this.hasImportedSampleFiles,
+      hasDismissedWelcome: hasDismissedWelcome ?? this.hasDismissedWelcome,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       syncStatus: syncStatus ?? this.syncStatus,

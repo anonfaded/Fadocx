@@ -77,6 +77,8 @@ class AppSettings {
   final String theme; // dark, light, system
   final String language; // en, es, fr, etc.
   final bool enableNotifications;
+  final bool hasImportedSampleFiles; // Track if user has imported sample files
+  final bool hasDismissedWelcome; // Track if user has dismissed the welcome message
   final DateTime createdAt;
   final DateTime updatedAt;
   final String syncStatus;
@@ -87,6 +89,8 @@ class AppSettings {
     required this.theme,
     required this.language,
     required this.enableNotifications,
+    required this.hasImportedSampleFiles,
+    required this.hasDismissedWelcome,
     required this.createdAt,
     required this.updatedAt,
     required this.syncStatus,
