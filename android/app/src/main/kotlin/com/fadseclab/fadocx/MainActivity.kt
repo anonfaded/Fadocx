@@ -52,12 +52,21 @@ class MainActivity : FlutterActivity() {
                             "parseDocument" -> {
                                 val filePath = call.argument<String>("filePath")
                                 val format = call.argument<String>("format")
+                                val maxRows = call.argument<Int>("maxRows")
+                                val maxCols = call.argument<Int>("maxCols")
+                                val maxSheets = call.argument<Int>("maxSheets")
                                 
                                 val parserClass = Class.forName("com.fadseclab.fadocx.NativeDocumentParser")
                                 val parserInstance = parserClass.getConstructor(String::class.java).newInstance(TAG)
                                 val method = parserClass.getDeclaredMethod("handleParseDocument", 
-                                    String::class.java, String::class.java, MethodChannel.Result::class.java, android.app.Activity::class.java)
-                                method.invoke(parserInstance, filePath, format, result, this@MainActivity)
+                                    String::class.java,
+                                    String::class.java,
+                                    Int::class.javaObjectType,
+                                    Int::class.javaObjectType,
+                                    Int::class.javaObjectType,
+                                    MethodChannel.Result::class.java,
+                                    android.app.Activity::class.java)
+                                method.invoke(parserInstance, filePath, format, maxRows, maxCols, maxSheets, result, this@MainActivity)
                             }
                             "isAvailable" -> runOnUiThread { result.success(true) }
                             else -> runOnUiThread { result.notImplemented() }
@@ -82,7 +91,13 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PDF_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "renderPage" -> renderPdfPage(call.argument("filePath"), call.argument("pageNumber") ?: 0, call.argument("width") ?: 800, result)
+                    "renderPage" -> renderPdfPage(
+                        call.argument("filePath"),
+                        call.argument("pageNumber") ?: 0,
+                        call.argument("width") ?: 800,
+                        call.argument("height"),
+                        result,
+                    )
                     "openPdf" -> openPdf(call.argument("filePath"), result)
                     "closePdf" -> closePdf(call.argument("filePath"), result)
                     "getPageCount" -> getPdfPageCount(call.argument("filePath"), result)
@@ -279,7 +294,7 @@ class MainActivity : FlutterActivity() {
         }
     }
     
-    private fun renderPdfPage(filePath: String?, pageNumber: Int, width: Int, result: MethodChannel.Result) {
+    private fun renderPdfPage(filePath: String?, pageNumber: Int, width: Int, height: Int?, result: MethodChannel.Result) {
         try {
             if (filePath == null) return result.error("INVALID_ARGS", "Missing filePath", null)
             var renderer = pdfRenderers[filePath]
@@ -295,8 +310,10 @@ class MainActivity : FlutterActivity() {
             val page = renderer.openPage(pageNumber)
             val dpiScale = 2.0f
             val renderWidth = (width * dpiScale).toInt()
+            val requestedHeight = height?.let { (it * dpiScale).toInt() }
             val scale = renderWidth.toFloat() / page.width
-            val renderHeight = (page.height * scale).toInt()
+            val scaledHeight = (page.height * scale).toInt()
+            val renderHeight = requestedHeight ?: scaledHeight
             val bitmap = Bitmap.createBitmap(renderWidth, renderHeight, Bitmap.Config.ARGB_8888)
             page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
             page.close()

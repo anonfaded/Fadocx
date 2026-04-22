@@ -1049,19 +1049,10 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
   @override
   void initState() {
     super.initState();
-    log.d(
-        '🖼️  [Thumbnail Widget] Initializing for file: ${widget.file.fileName}');
-
-    // Skip thumbnail generation for presentation formats (not yet supported)
     final type = widget.file.fileType.toLowerCase();
     if (type == 'ppt' || type == 'pptx' || type == 'odp') {
-      log.d(
-          '🖼️  [Thumbnail Widget] Skipping generation for presentation format: $type');
       return;
     }
-
-    // Watching the generation provider in build() will auto-trigger generation
-    log.d('🖼️  [Thumbnail Widget] Generation will be triggered via provider watch');
   }
 
   @override
@@ -1084,8 +1075,6 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
     return thumbnail.when(
       data: (bytes) {
         if (bytes != null && !isPresentation) {
-          log.d(
-              '🖼️  [Thumbnail Widget] ✓ Displaying thumbnail for ${widget.file.fileName} (${bytes.length} bytes)');
           return ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: Image.memory(
@@ -1093,18 +1082,14 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
               width: 40,
               height: 56,
               fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+              filterQuality: FilterQuality.high,
             ),
           );
         }
-        // No thumbnail available or presentation format
-        log.d(
-            '🖼️  [Thumbnail Widget] ⚠️  No thumbnail available or presentation format, showing placeholder');
         return _buildThumbPlaceholder(isPresentation);
       },
-      loading: () {
-        log.d('🖼️  [Thumbnail Widget] Loading thumbnail...');
-        return _buildThumbPlaceholder(isPresentation);
-      },
+      loading: () => _buildThumbPlaceholder(isPresentation),
       error: (error, stack) {
         log.e('🖼️  [Thumbnail Widget] Error loading thumbnail: $error');
         return _buildThumbPlaceholder(isPresentation);

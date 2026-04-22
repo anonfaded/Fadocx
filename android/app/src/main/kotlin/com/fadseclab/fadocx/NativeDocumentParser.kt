@@ -3,6 +3,7 @@ package com.fadseclab.fadocx
 import android.app.Activity
 import android.util.Log
 import io.flutter.plugin.common.MethodChannel
+import org.apache.poi.ss.usermodel.DataFormatter
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
@@ -15,7 +16,15 @@ import java.io.StringWriter
 
 class NativeDocumentParser(private val TAG: String) {
 
-    fun handleParseDocument(filePath: String?, format: String?, result: MethodChannel.Result, activity: Activity) {
+    fun handleParseDocument(
+        filePath: String?,
+        format: String?,
+        maxRows: Int?,
+        maxCols: Int?,
+        maxSheets: Int?,
+        result: MethodChannel.Result,
+        activity: Activity,
+    ) {
         try {
             if (filePath == null || format == null) {
                 activity.runOnUiThread { result.error("INVALID_ARGS", "Missing filePath or format", null) }
@@ -26,9 +35,9 @@ class NativeDocumentParser(private val TAG: String) {
             val startTime = System.currentTimeMillis()
 
             val parsedData = when (format.uppercase()) {
-                "XLSX" -> parseXLSX(filePath)
-                "XLS" -> parseXLS(filePath)
-                "CSV" -> parseCSV(filePath)
+                "XLSX" -> parseXLSX(filePath, maxRows, maxCols, maxSheets)
+                "XLS" -> parseXLS(filePath, maxRows, maxCols, maxSheets)
+                "CSV" -> parseCSV(filePath, maxRows, maxCols)
                 "DOC" -> parseDOC(filePath)
                 "PDF" -> mapOf("format" to "PDF", "filePath" to filePath) // PDF page count handled in MainActivity for now
                 "PPT", "PPTX", "ODP" -> {
@@ -53,28 +62,31 @@ class NativeDocumentParser(private val TAG: String) {
         }
     }
 
-    private fun parseXLSX(filePath: String): Map<String, Any> {
+    private fun parseXLSX(filePath: String, maxRows: Int?, maxCols: Int?, maxSheets: Int?): Map<String, Any> {
         val file = File(filePath)
         val workbook = WorkbookFactory.create(file)
         val sheets = mutableListOf<Map<String, Any>>()
+        val formatter = DataFormatter()
+        val evaluator = workbook.creationHelper.createFormulaEvaluator()
+        val rowLimit = maxRows ?: Int.MAX_VALUE
+        val colLimit = maxCols ?: Int.MAX_VALUE
+        val sheetLimit = minOf(workbook.numberOfSheets, maxSheets ?: workbook.numberOfSheets)
 
         try {
-            for (sheetIndex in 0 until workbook.numberOfSheets) {
+            for (sheetIndex in 0 until sheetLimit) {
                 val sheet = workbook.getSheetAt(sheetIndex)
                 val rows = mutableListOf<List<String>>()
 
                 for (rowIndex in 0 until sheet.physicalNumberOfRows) {
+                    if (rows.size >= rowLimit) break
+
                     val row = sheet.getRow(rowIndex) ?: continue
                     val cells = mutableListOf<String>()
+                    val cellCount = minOf(row.lastCellNum.toInt().coerceAtLeast(0), colLimit)
 
-                    for (cellIndex in 0 until row.physicalNumberOfCells) {
+                    for (cellIndex in 0 until cellCount) {
                         val cell = row.getCell(cellIndex)
-                        val cellValue = when (cell?.cellType) {
-                            CellType.STRING -> cell.stringCellValue ?: ""
-                            CellType.NUMERIC -> cell.numericCellValue.toString()
-                            CellType.BOOLEAN -> cell.booleanCellValue.toString()
-                            else -> ""
-                        }
+                        val cellValue = if (cell == null) "" else formatter.formatCellValue(cell, evaluator)
                         cells.add(cellValue)
                     }
                     if (cells.isNotEmpty()) rows.add(cells)
@@ -99,29 +111,32 @@ class NativeDocumentParser(private val TAG: String) {
         )
     }
 
-    private fun parseXLS(filePath: String): Map<String, Any> {
+    private fun parseXLS(filePath: String, maxRows: Int?, maxCols: Int?, maxSheets: Int?): Map<String, Any> {
         val file = File(filePath)
         val fileInputStream = FileInputStream(file)
         val workbook = HSSFWorkbook(fileInputStream)
         val sheets = mutableListOf<Map<String, Any>>()
+        val formatter = DataFormatter()
+        val evaluator = workbook.creationHelper.createFormulaEvaluator()
+        val rowLimit = maxRows ?: Int.MAX_VALUE
+        val colLimit = maxCols ?: Int.MAX_VALUE
+        val sheetLimit = minOf(workbook.numberOfSheets, maxSheets ?: workbook.numberOfSheets)
 
         try {
-            for (sheetIndex in 0 until workbook.numberOfSheets) {
+            for (sheetIndex in 0 until sheetLimit) {
                 val sheet = workbook.getSheetAt(sheetIndex)
                 val rows = mutableListOf<List<String>>()
 
                 for (rowIndex in 0 until sheet.physicalNumberOfRows) {
+                    if (rows.size >= rowLimit) break
+
                     val row = sheet.getRow(rowIndex) ?: continue
                     val cells = mutableListOf<String>()
+                    val cellCount = minOf(row.lastCellNum.toInt().coerceAtLeast(0), colLimit)
 
-                    for (cellIndex in 0 until row.physicalNumberOfCells) {
+                    for (cellIndex in 0 until cellCount) {
                         val cell = row.getCell(cellIndex)
-                        val cellValue = when (cell?.cellType) {
-                            CellType.STRING -> cell.stringCellValue ?: ""
-                            CellType.NUMERIC -> cell.numericCellValue.toString()
-                            CellType.BOOLEAN -> cell.booleanCellValue.toString()
-                            else -> ""
-                        }
+                        val cellValue = if (cell == null) "" else formatter.formatCellValue(cell, evaluator)
                         cells.add(cellValue)
                     }
                     if (cells.isNotEmpty()) rows.add(cells)
@@ -147,13 +162,16 @@ class NativeDocumentParser(private val TAG: String) {
         )
     }
 
-    private fun parseCSV(filePath: String): Map<String, Any> {
+    private fun parseCSV(filePath: String, maxRows: Int?, maxCols: Int?): Map<String, Any> {
         val file = File(filePath)
         val content = file.readText()
         val lines = content.split("\n")
         val rows = mutableListOf<List<String>>()
+        val rowLimit = maxRows ?: Int.MAX_VALUE
+        val colLimit = maxCols ?: Int.MAX_VALUE
 
         for (line in lines) {
+            if (rows.size >= rowLimit) break
             if (line.trim().isEmpty()) continue
 
             val cells = mutableListOf<String>()
@@ -176,7 +194,7 @@ class NativeDocumentParser(private val TAG: String) {
             }
 
             if (cells.isNotEmpty()) {
-                rows.add(cells)
+                rows.add(cells.take(colLimit))
             }
         }
 

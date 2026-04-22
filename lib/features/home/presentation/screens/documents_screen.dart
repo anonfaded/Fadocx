@@ -222,9 +222,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                childAspectRatio: 0.75,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.714, // Matches 200x280 thumbnail aspect ratio
               ),
               itemCount: filteredFiles.length,
               itemBuilder: (context, index) =>
@@ -309,8 +309,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                                 child: Image.memory(
                                   bytes,
                                   fit: BoxFit.cover,
+                                  alignment: Alignment.topCenter,
                                   width: double.infinity,
                                   height: double.infinity,
+                                  filterQuality: FilterQuality.high,
                                 ),
                               );
                             }
@@ -450,6 +452,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                                 width: 50,
                                 height: 70,
                                 fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                                filterQuality: FilterQuality.high,
                               ),
                             );
                           }
