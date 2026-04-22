@@ -29,6 +29,8 @@ class ModernPdfViewer extends StatefulWidget {
   final Function(int currentPage, int totalPages)? onPageChanged;
   final VoidCallback? onSearchHighlight;
   final Function(int wordCount, int lineCount)? onTextStatsChanged;
+  final int? initialWordCount;
+  final int? initialLineCount;
 
   const ModernPdfViewer({
     required this.filePath,
@@ -41,6 +43,8 @@ class ModernPdfViewer extends StatefulWidget {
     this.onPageChanged,
     this.onSearchHighlight,
     this.onTextStatsChanged,
+    this.initialWordCount,
+    this.initialLineCount,
     super.key,
   });
 
@@ -102,6 +106,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
   int get currentPage => _currentPage;
   int get totalPages => _totalPages;
   bool get showSidebar => _showSidebar;
+  bool get _hasCachedTextStats =>
+      (widget.initialWordCount ?? 0) > 0 && (widget.initialLineCount ?? 0) > 0;
 
   @override
   void initState() {
@@ -893,6 +899,73 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
     return overlays;
   }
 
+  String _pdfLoadErrorMessage(Object error) {
+    final message = error.toString().toLowerCase();
+    if (message.contains('fpdf_err_format') ||
+        message.contains('file not in pdf format') ||
+        message.contains('corrupted')) {
+      return 'This file could not be opened as a valid PDF. It may be damaged or renamed with a .pdf extension.';
+    }
+    return 'This PDF could not be loaded right now.';
+  }
+
+  Widget _buildPdfErrorBanner(BuildContext context, Object error) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: colorScheme.error.withValues(alpha: 0.18),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.picture_as_pdf_outlined,
+                    size: 34,
+                    color: colorScheme.error,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Unable to open PDF',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _pdfLoadErrorMessage(error),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPdfViewer() {
     // ROOT CAUSE FIX: Always wrap in ColorFiltered with conditional colorFilter
     // This keeps the PdfViewer widget stable and prevents _state from becoming null
@@ -937,6 +1010,11 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
         panEnabled: true,
         scaleEnabled: true,
         interactionEndFrictionCoefficient: 0.1,
+        errorBannerBuilder: (context, error, stackTrace, documentRef) {
+          log.e('PdfViewer failed to load document',
+              error: error, stackTrace: stackTrace);
+          return _buildPdfErrorBanner(context, error);
+        },
         onPageChanged: (pageNumber) {
           // Extract text from pages the viewer is rendering
           // Only extract from pages around the current page to avoid bottleneck
@@ -964,15 +1042,19 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
             _isLoadingOutline = true;
             _pageTexts.clear();
             _isControllerReady = true;
-            _isLoadingAllPages = true; // Show loader while extracting text
+            _isLoadingAllPages = !_hasCachedTextStats;
           });
 
           log.i(
-              'Document ready: $_totalPages pages - starting comprehensive text extraction');
+              'Document ready: $_totalPages pages - ${_hasCachedTextStats ? 'using cached text stats' : 'starting comprehensive text extraction'}');
           widget.onPageChanged?.call(_currentPage, _totalPages);
 
-          // Extract all page texts systematically with proper rendering
-          _extractAllPageTextsComprehensive().ignore();
+          if (!_hasCachedTextStats) {
+            // Extract all page texts systematically with proper rendering.
+            // Search and text mode already support page-level on-demand loading,
+            // so we only do the expensive full pass when exact stats are missing.
+            _extractAllPageTextsComprehensive().ignore();
+          }
 
           // Load outline in background
           try {

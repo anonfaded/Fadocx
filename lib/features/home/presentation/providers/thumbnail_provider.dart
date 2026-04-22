@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fadocx/core/services/thumbnail_generation_service.dart';
 import 'package:logger/logger.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
+import 'package:fadocx/features/viewer/data/providers/repository_providers.dart';
 
 final log = Logger();
 
@@ -19,7 +20,8 @@ final thumbnailProvider = FutureProvider.family<Uint8List?, String>(
 
       return null;
     } catch (e, st) {
-      log.e('Thumbnail cache read failed for $fileId', error: e, stackTrace: st);
+      log.e('Thumbnail cache read failed for $fileId',
+          error: e, stackTrace: st);
       return null;
     }
   },
@@ -31,25 +33,33 @@ final generateAndCacheThumbnailProvider = FutureProvider.family<Uint8List?,
   (ref, params) async {
     try {
       final hiveDatasource = ref.watch(hiveDatasourceProvider);
+      final documentRepository = ref.watch(documentParsingRepositoryProvider);
+      final cachedDocument = params.fileType.toLowerCase() == 'pdf'
+          ? await documentRepository.getCachedParsing(params.filePath)
+          : null;
 
       final thumbnailBytes = await ThumbnailGenerationService.generateThumbnail(
         params.filePath,
         params.fileName,
         params.fileType,
+        cachedDocument: cachedDocument,
       );
 
       if (thumbnailBytes != null) {
         try {
-          await hiveDatasource.saveThumbnail(params.fileId, thumbnailBytes.toList());
+          await hiveDatasource.saveThumbnail(
+              params.fileId, thumbnailBytes.toList());
           ref.invalidate(thumbnailProvider(params.fileId));
         } catch (e, st) {
-          log.e('Thumbnail cache save failed for ${params.fileName}', error: e, stackTrace: st);
+          log.e('Thumbnail cache save failed for ${params.fileName}',
+              error: e, stackTrace: st);
         }
       }
 
       return thumbnailBytes;
     } catch (e, st) {
-      log.e('Thumbnail generation failed for ${params.fileName}', error: e, stackTrace: st);
+      log.e('Thumbnail generation failed for ${params.fileName}',
+          error: e, stackTrace: st);
       return null;
     }
   },

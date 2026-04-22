@@ -228,7 +228,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
   void _jumpToLine(int lineNumber, {bool animate = true}) {
     if (!_scrollController.hasClients) return;
-    final lineOffset = _kTopPadding + ((lineNumber - 1) * _lineHeight);
+    final lineOffset = _kTopPadding + ((lineNumber - 1) * _lineExtent);
     final target = lineOffset.clamp(
       0.0,
       _scrollController.position.maxScrollExtent,
@@ -256,6 +256,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   }
 
   double get _lineHeight => widget.fontSize * 1.5;
+  double get _lineExtent => _lineHeight + 2;
 
   double _lineNumberWidth(BuildContext context) {
     final lineNumberStyle = TextStyle(
@@ -353,37 +354,41 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
                         : SingleChildScrollView(
                             controller: _horizontalScrollController,
                             scrollDirection: Axis.horizontal,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                  minWidth: constraints.maxWidth),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: List.generate(
-                                  _lines.length,
-                                  (index) => _buildUnwrappedLineRow(
-                                    context: context,
-                                    index: index,
-                                    lineNumberWidth: lineNumberWidth,
-                                    textStyle: textStyle,
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minWidth: constraints.maxWidth,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: List.generate(
+                                    _lines.length,
+                                    (index) => _buildUnwrappedLineRow(
+                                      context: context,
+                                      index: index,
+                                      lineNumberWidth: lineNumberWidth,
+                                      textStyle: textStyle,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                     if (_highlightedLine != null)
-                      Positioned(
-                        left: lineNumberWidth + 12,
-                        right: 0,
-                        top: (_highlightedLine! - 1) * _lineHeight,
+                      Positioned.fill(
                         child: IgnorePointer(
                           child: AnimatedBuilder(
                             animation: _highlightController,
                             builder: (context, child) {
                               final t = 1 - _highlightController.value;
+                              final focusLeft = lineNumberWidth + 12;
+                              final focusTop =
+                                  (_highlightedLine! - 1) * _lineExtent;
                               final focusRect = Rect.fromLTWH(
-                                lineNumberWidth + 12,
-                                (_highlightedLine! - 1) * _lineHeight,
-                                (constraints.maxWidth - (lineNumberWidth + 12))
+                                focusLeft,
+                                focusTop,
+                                (constraints.maxWidth - focusLeft)
                                     .clamp(40.0, double.infinity),
                                 _lineHeight,
                               );
@@ -395,14 +400,25 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
                                       opacity: 0.45 * t,
                                     ),
                                   ),
-                                  Container(
-                                    height: _lineHeight,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withValues(alpha: 0.25 * t),
-                                      borderRadius: BorderRadius.circular(6),
+                                  Positioned(
+                                    left: focusRect.left,
+                                    top: focusRect.top,
+                                    width: focusRect.width,
+                                    height: focusRect.height,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.25 * t),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withValues(alpha: 0.65 * t),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -502,6 +518,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
                 : SelectableText(
                     _lines[index],
                     style: textStyle,
+                    textAlign: TextAlign.left,
                   ),
           ),
         ],
@@ -542,6 +559,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
               : SelectableText(
                   _lines[index],
                   style: textStyle,
+                  textAlign: TextAlign.left,
                 ),
         ],
       ),

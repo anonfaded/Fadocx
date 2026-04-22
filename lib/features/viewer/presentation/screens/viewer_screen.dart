@@ -5,12 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
+import 'package:fadocx/features/viewer/data/providers/repository_providers.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/text_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/modern_pdf_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
+import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
+import 'package:fadocx/core/services/thumbnail_generation_service.dart';
+import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 
 class ViewerScreen extends ConsumerStatefulWidget {
   final String filePath;
@@ -468,12 +472,15 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           }
         },
         onSearchHighlight: _onSearchHighlight,
+        initialWordCount: document.wordCount,
+        initialLineCount: document.lineCount,
         onTextStatsChanged: (wordCount, lineCount) {
           if (!mounted) return;
           setState(() {
             _documentWordCount = wordCount;
             _documentLineCount = lineCount;
           });
+          _cachePdfTextStats(document, wordCount, lineCount);
         },
       );
     }
@@ -636,14 +643,15 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       return const SizedBox.shrink();
     }
 
-    final textContent = docState.document!.textContent ?? '';
+    final document = docState.document!;
+    final textContent = document.textContent ?? '';
     final hasEmbeddedText = textContent.isNotEmpty;
     final wordCount = hasEmbeddedText
         ? textContent.split(RegExp(r'\s+')).length
-        : _documentWordCount;
+        : (document.wordCount ?? _documentWordCount);
     final lineCount = hasEmbeddedText
         ? textContent.split(RegExp(r'\r\n|\r|\n')).length
-        : _documentLineCount;
+        : (document.lineCount ?? _documentLineCount);
 
     if (wordCount == null || lineCount == null || wordCount == 0) {
       return const SizedBox.shrink();
@@ -656,7 +664,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Text(
-        '~$readingMinutes $minuteLabel read • $wordCount words • $lineCount lines',
+        '$readingMinutes $minuteLabel read • $wordCount words • $lineCount lines',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.center,
@@ -665,6 +673,48 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             ),
       ),
     );
+  }
+
+  Future<void> _cachePdfTextStats(
+    ParsedDocumentEntity document,
+    int wordCount,
+    int lineCount,
+  ) async {
+    if (document.format.toUpperCase() != 'PDF') return;
+    if (document.wordCount == wordCount && document.lineCount == lineCount) {
+      return;
+    }
+
+    final cachedDocument = document.copyWith(
+      wordCount: wordCount,
+      lineCount: lineCount,
+      parsedAt: DateTime.now(),
+    );
+
+    try {
+      final repository = ref.read(documentParsingRepositoryProvider);
+      await repository.cacheParsing(widget.filePath, cachedDocument);
+
+      final thumbnailBytes = await ThumbnailGenerationService.generateThumbnail(
+        widget.filePath,
+        widget.fileName,
+        'pdf',
+        cachedDocument: cachedDocument,
+      );
+      if (thumbnailBytes != null) {
+        final hiveDatasource = ref.read(hiveDatasourceProvider);
+        final recentFiles = await hiveDatasource.getRecentFiles();
+        for (final file in recentFiles) {
+          if (file.filePath == widget.filePath) {
+            await hiveDatasource.saveThumbnail(file.id, thumbnailBytes);
+            ref.invalidate(thumbnailProvider(file.id));
+            break;
+          }
+        }
+      }
+    } catch (e, st) {
+      _log.w('Failed to cache PDF text stats', error: e, stackTrace: st);
+    }
   }
 
   Widget _buildIconButton(

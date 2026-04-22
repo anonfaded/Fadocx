@@ -124,13 +124,18 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
 
         case 'pdf':
           log.d('Routing to PDF viewer');
-          document = ParsedDocumentEntity(
-            format: 'PDF',
-            sheets: const [],
-            sheetCount: 0,
-            parsedAt: DateTime.now(),
-            sourceFilePath: _filePath,
-          );
+          final cached = await repository.getCachedParsing(_filePath);
+          if (cached != null && cached.format == 'PDF') {
+            document = cached;
+          } else {
+            document = ParsedDocumentEntity(
+              format: 'PDF',
+              sheets: const [],
+              sheetCount: 0,
+              parsedAt: DateTime.now(),
+              sourceFilePath: _filePath,
+            );
+          }
 
         default:
           log.e(

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:fadocx/features/viewer/data/services/document_parser_service.dart';
+import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
@@ -21,21 +22,19 @@ class ThumbnailGenerationService {
   static const int _sheetPreviewSheets = 1;
   static const int _maxPreviewTextLength = 1800;
   static const int _readingWordsPerMinute = 200;
-  static const double _compactHeaderHeight = 68.0;
+  static const double _compactHeaderHeight = 56.0;
 
   static final Logger _log = Logger();
   static const TextStyle _previewHeaderMetaStyle = TextStyle(
     color: ui.Color(0xFFFDFDFD),
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: FontWeight.w600,
     fontFamily: 'Ubuntu',
   );
 
   static Future<Uint8List?> generateThumbnail(
-    String filePath,
-    String fileName,
-    String fileType,
-  ) async {
+      String filePath, String fileName, String fileType,
+      {ParsedDocumentEntity? cachedDocument}) async {
     try {
       final file = File(filePath);
       if (!file.existsSync()) {
@@ -46,7 +45,10 @@ class ThumbnailGenerationService {
       final normalizedType = fileType.toLowerCase();
 
       return switch (normalizedType) {
-        'pdf' => _generatePdfThumbnail(filePath),
+        'pdf' => _generatePdfThumbnail(
+            filePath,
+            cachedDocument: cachedDocument,
+          ),
         'doc' ||
         'docx' ||
         'txt' ||
@@ -76,7 +78,10 @@ class ThumbnailGenerationService {
     }
   }
 
-  static Future<Uint8List?> _generatePdfThumbnail(String filePath) async {
+  static Future<Uint8List?> _generatePdfThumbnail(
+    String filePath, {
+    ParsedDocumentEntity? cachedDocument,
+  }) async {
     try {
       final result = await pdfChannel.invokeMethod<Map<dynamic, dynamic>>(
         'renderPage',
@@ -106,7 +111,12 @@ class ThumbnailGenerationService {
             0;
       } catch (_) {}
 
-      return _createPdfPreview(pageBytes: bytes, pageCount: pageCount);
+      return _createPdfPreview(
+        pageBytes: bytes,
+        pageCount: pageCount,
+        wordCount: cachedDocument?.wordCount,
+        lineCount: cachedDocument?.lineCount,
+      );
     } on PlatformException catch (e, st) {
       _log.e('PDF thumbnail render failed: ${e.code}',
           error: e, stackTrace: st);
@@ -124,6 +134,8 @@ class ThumbnailGenerationService {
   static Future<Uint8List> _createPdfPreview({
     required Uint8List pageBytes,
     required int pageCount,
+    int? wordCount,
+    int? lineCount,
   }) async {
     final codec = await ui.instantiateImageCodec(pageBytes);
     final frame = await codec.getNextFrame();
@@ -146,16 +158,15 @@ class ThumbnailGenerationService {
           topLeft: const ui.Radius.circular(22),
           topRight: const ui.Radius.circular(22),
         );
-        canvas.drawRRect(
-            headerRect, ui.Paint()..color = _uiColor(ThumbnailColors.pdfRed));
-
-        final pageLabel = pageCount == 1 ? 'page' : 'pages';
-        _paintPreviewHeaderMeta(
+        _paintPreviewHeader(
           canvas,
-          text: 'PDF • $pageCount $pageLabel',
-          top: 37,
-          left: 18,
-          maxWidth: size.width - 36,
+          rect: headerRect.outerRect,
+          color: _uiColor(ThumbnailColors.pdfRed),
+          text: _buildPdfPreviewStats(
+            pageCount,
+            wordCount: wordCount,
+            lineCount: lineCount,
+          ),
         );
 
         final imageTop = 18.0 + headerHeight;
@@ -364,22 +375,18 @@ class ThumbnailGenerationService {
         topLeft: const ui.Radius.circular(22),
         topRight: const ui.Radius.circular(22),
       );
-      canvas.drawRRect(headerRect, ui.Paint()..color = _uiColor(accent));
-
-      final stats = _buildReadingStats(fullText);
-      _paintPreviewHeaderMeta(
+      _paintPreviewHeader(
         canvas,
-        text: stats,
-        top: 37,
-        left: 20,
-        maxWidth: size.width - 40,
+        rect: headerRect.outerRect,
+        color: _uiColor(accent),
+        text: _buildReadingStats(fullText),
       );
 
       _paintText(
         canvas,
         text: label,
         left: 44,
-        top: 112,
+        top: 100,
         maxWidth: size.width - 88,
         style: TextStyle(
           color: _uiColor(accent),
@@ -394,7 +401,7 @@ class ThumbnailGenerationService {
         canvas,
         text: text,
         left: 44,
-        top: 146,
+        top: 134,
         maxWidth: size.width - 88,
         maxLines: 16,
         style: const TextStyle(
@@ -424,11 +431,10 @@ class ThumbnailGenerationService {
           cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
 
       final topBandRect = ui.RRect.fromRectAndCorners(
-        ui.Rect.fromLTWH(18, 18, size.width - 36, 68),
+        ui.Rect.fromLTWH(18, 18, size.width - 36, _compactHeaderHeight),
         topLeft: const ui.Radius.circular(22),
         topRight: const ui.Radius.circular(22),
       );
-      canvas.drawRRect(topBandRect, ui.Paint()..color = _uiColor(accent));
 
       final firstSheet = sheets.first;
       final sheetName =
@@ -444,18 +450,17 @@ class ThumbnailGenerationService {
           .clamp(1, _sheetPreviewCols);
       final dataRowCount = visibleRows.isEmpty ? 6 : visibleRows.length;
 
-      _paintPreviewHeaderMeta(
+      _paintPreviewHeader(
         canvas,
+        rect: topBandRect.outerRect,
+        color: _uiColor(accent),
         text: '$label • $sheetName • $dataRowCount rows',
-        top: 37,
-        left: 18,
-        maxWidth: size.width - 36,
       );
 
       final gridLeft = 18.0;
-      final gridTop = 92.0;
+      final gridTop = 80.0;
       final gridWidth = size.width - 36;
-      final gridHeight = size.height - 116;
+      final gridHeight = size.height - 104;
       final serialColWidth = 30.0;
       final dataGridWidth = gridWidth - serialColWidth;
       final dataColWidth = dataGridWidth / visibleColCount;
@@ -731,15 +736,76 @@ class ThumbnailGenerationService {
     return '${minutes == 0 ? '<1' : minutes} $minuteLabel read • $words words • $lines lines';
   }
 
+  static String _buildPdfPreviewStats(
+    int pageCount, {
+    int? wordCount,
+    int? lineCount,
+  }) {
+    final parts = <String>['PDF'];
+
+    if (pageCount > 0) {
+      parts.add('${_formatCompactCount(pageCount)}p');
+    }
+
+    if ((wordCount ?? 0) > 0) {
+      final minutes =
+          (wordCount! / _readingWordsPerMinute).ceil().clamp(1, 999);
+      parts.add('${_formatCompactCount(minutes)}m');
+      parts.add('${_formatCompactCount(wordCount)}W');
+    }
+
+    if ((lineCount ?? 0) > 0) {
+      parts.add('${_formatCompactCount(lineCount!)}L');
+    }
+
+    return parts.join(' • ');
+  }
+
+  static String _formatCompactCount(int value) {
+    if (value < 1000) return value.toString();
+    if (value < 1000000) {
+      final compact = value / 1000;
+      final formatted = compact >= 10
+          ? compact.round().toString()
+          : compact.toStringAsFixed(1);
+      return '${formatted.replaceAll('.0', '')}k';
+    }
+
+    final compact = value / 1000000;
+    final formatted =
+        compact >= 10 ? compact.round().toString() : compact.toStringAsFixed(1);
+    return '${formatted.replaceAll('.0', '')}m';
+  }
+
+  static void _paintPreviewHeader(
+    ui.Canvas canvas, {
+    required ui.Rect rect,
+    required ui.Color color,
+    required String text,
+  }) {
+    canvas.drawRRect(
+      ui.RRect.fromRectAndCorners(
+        rect,
+        topLeft: const ui.Radius.circular(22),
+        topRight: const ui.Radius.circular(22),
+      ),
+      ui.Paint()..color = color,
+    );
+
+    _paintPreviewHeaderMeta(
+      canvas,
+      text: text,
+      rect: rect,
+    );
+  }
+
   static void _paintAutoFitCenteredText(
     ui.Canvas canvas, {
     required String text,
-    required double top,
-    required double maxWidth,
+    required ui.Rect rect,
     required TextStyle baseStyle,
     required double minFontSize,
     int maxLines = 1,
-    double left = 0,
   }) {
     var fontSize = baseStyle.fontSize ?? minFontSize;
     TextPainter painter;
@@ -752,35 +818,33 @@ class ThumbnailGenerationService {
         textAlign: TextAlign.center,
         maxLines: maxLines,
         ellipsis: maxLines == 1 ? '' : null,
-      )..layout(maxWidth: maxWidth);
+      )..layout(maxWidth: rect.width);
 
       final maxHeight = fontSize * (maxLines == 1 ? 1.3 : 2.4);
-      if ((painter.width <= maxWidth && painter.height <= maxHeight) ||
+      if ((painter.width <= rect.width && painter.height <= maxHeight) ||
           fontSize <= minFontSize) {
         break;
       }
       fontSize -= 1;
     }
 
-    final x = left + ((maxWidth - painter.width) / 2).clamp(0, maxWidth);
-    painter.paint(canvas, ui.Offset(x, top));
+    final x =
+        rect.left + ((rect.width - painter.width) / 2).clamp(0, rect.width);
+    final y = rect.top + ((rect.height - painter.height) / 2);
+    painter.paint(canvas, ui.Offset(x, y));
   }
 
   static void _paintPreviewHeaderMeta(
     ui.Canvas canvas, {
     required String text,
-    required double top,
-    required double maxWidth,
-    double left = 0,
+    required ui.Rect rect,
   }) {
     _paintAutoFitCenteredText(
       canvas,
       text: text,
-      top: top,
-      maxWidth: maxWidth,
-      left: left,
+      rect: rect,
       baseStyle: _previewHeaderMetaStyle,
-      minFontSize: 11,
+      minFontSize: 12,
       maxLines: 1,
     );
   }
