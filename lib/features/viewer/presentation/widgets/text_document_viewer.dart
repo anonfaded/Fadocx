@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:fadocx/features/viewer/presentation/widgets/text_document_search_drawer.dart';
 
 final log = Logger();
 
@@ -17,7 +18,7 @@ class TextDocumentViewer extends StatefulWidget {
     this.onTap,
     this.fontSize = 14,
     this.wordWrap = true,
-    this.useMonoFont = true,
+    this.useMonoFont = false,
     super.key,
   });
 
@@ -25,22 +26,41 @@ class TextDocumentViewer extends StatefulWidget {
   State<TextDocumentViewer> createState() => _TextDocumentViewerState();
 }
 
-class _TextDocumentViewerState extends State<TextDocumentViewer> {
+class _TextDocumentViewerState extends State<TextDocumentViewer>
+    with SingleTickerProviderStateMixin {
+  static const double _kTopPadding = 40;
+  static const double _kBottomPadding = 16;
+  static const double _kLineNumberColumnPadding = 8;
+
   late String _fullContent;
+  List<String> _lines = const [];
   DateTime? _tapStartTime;
   Offset? _tapStartPosition;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  late final AnimationController _highlightController;
+
+  List<TextSearchResult> _searchResults = const [];
+  int _activeSearchResultIndex = -1;
+  int? _highlightedLine;
 
   @override
   void initState() {
     super.initState();
+    _highlightController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
     _initializeContent();
   }
 
   void _initializeContent() {
     _fullContent = widget.textContent ?? '';
+    _lines = _fullContent.split('\n');
+    _performSearch(_searchController.text);
+
     if (_fullContent.isNotEmpty) {
-      log.d('Text document initialized with ${_fullContent.split("\n").length} lines');
+      log.d('Text document initialized with ${_lines.length} lines');
     }
   }
 
@@ -80,9 +100,143 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
     );
   }
 
+  Widget buildDrawerContent(BuildContext context) {
+    return TextDocumentSearchDrawer(
+      searchController: _searchController,
+      results: _searchResults,
+      activeResultIndex: _activeSearchResultIndex,
+      onQueryChanged: _performSearch,
+      onResultTap: _goToSearchResult,
+      onNextResult: _goToNextResult,
+      onPreviousResult: _goToPreviousResult,
+    );
+  }
+
+  void _performSearch(String query) {
+    final normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _searchResults = const [];
+          _activeSearchResultIndex = -1;
+        });
+      }
+      return;
+    }
+
+    final results = <TextSearchResult>[];
+    for (int i = 0; i < _lines.length; i++) {
+      final lineText = _lines[i];
+      final lowerLine = lineText.toLowerCase();
+      var start = 0;
+      while (start < lowerLine.length) {
+        final foundAt = lowerLine.indexOf(normalizedQuery, start);
+        if (foundAt == -1) break;
+
+        results.add(
+          TextSearchResult(
+            lineNumber: i + 1,
+            lineText: lineText,
+            matchStart: foundAt,
+            matchLength: normalizedQuery.length,
+          ),
+        );
+        start = foundAt + normalizedQuery.length;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _searchResults = results;
+      _activeSearchResultIndex = results.isNotEmpty ? 0 : -1;
+    });
+
+    if (results.isNotEmpty) {
+      _jumpToLine(results.first.lineNumber, animate: false);
+      _flashLineHighlight(results.first.lineNumber);
+    }
+  }
+
+  void _goToSearchResult(int index) {
+    if (index < 0 || index >= _searchResults.length) return;
+    final result = _searchResults[index];
+
+    setState(() => _activeSearchResultIndex = index);
+    _jumpToLine(result.lineNumber);
+    _flashLineHighlight(result.lineNumber);
+  }
+
+  void _goToNextResult() {
+    if (_searchResults.isEmpty) return;
+    final nextIndex = (_activeSearchResultIndex + 1) % _searchResults.length;
+    _goToSearchResult(nextIndex);
+  }
+
+  void _goToPreviousResult() {
+    if (_searchResults.isEmpty) return;
+    final prevIndex = (_activeSearchResultIndex - 1 + _searchResults.length) %
+        _searchResults.length;
+    _goToSearchResult(prevIndex);
+  }
+
+  void _jumpToLine(int lineNumber, {bool animate = true}) {
+    if (!_scrollController.hasClients) return;
+    final lineOffset = _kTopPadding + ((lineNumber - 1) * _lineHeight);
+    final target = lineOffset.clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
+
+    if (animate) {
+      _scrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _scrollController.jumpTo(target);
+    }
+  }
+
+  void _flashLineHighlight(int lineNumber) {
+    _highlightController.stop();
+    setState(() => _highlightedLine = lineNumber);
+    _highlightController.forward(from: 0);
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (!mounted) return;
+      setState(() => _highlightedLine = null);
+    });
+  }
+
+  double get _lineHeight => widget.fontSize * 1.5;
+
+  double _lineNumberWidth(BuildContext context) {
+    final lineNumberStyle = TextStyle(
+      fontSize: widget.fontSize * 0.9,
+      fontFamily: widget.useMonoFont ? 'Courier' : 'Ubuntu',
+      height: 1.5,
+      letterSpacing: -0.1,
+    );
+    final maxLineNumber = _lines.isEmpty ? '1' : _lines.length.toString();
+    final painter = TextPainter(
+      text: TextSpan(text: maxLineNumber, style: lineNumberStyle),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+
+    return painter.width + _kLineNumberColumnPadding;
+  }
+
+  String _buildLineNumbersText() {
+    if (_lines.isEmpty) return '1';
+    return List.generate(_lines.length, (index) => '${index + 1}').join('\n');
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
+    _highlightController.dispose();
     super.dispose();
   }
 
@@ -95,13 +249,14 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
     final textColor = Theme.of(context).colorScheme.onSurface;
     final fontFamily = widget.useMonoFont ? 'Courier' : 'Ubuntu';
     final fontSize = widget.fontSize;
-    final lines = _fullContent.split('\n');
-    final totalLineDigits = lines.length.toString().length;
-    final lineNumberWidth = switch (totalLineDigits) {
-      1 => 30.0,
-      2 => 40.0,
-      _ => 50.0,
-    };
+    final lineNumberWidth = _lineNumberWidth(context);
+    final textStyle = TextStyle(
+      fontSize: fontSize,
+      color: textColor,
+      fontFamily: fontFamily,
+      height: 1.5,
+      letterSpacing: -0.3,
+    );
 
     // Wrap entire content in Listener to detect taps (like PDF viewer)
     return Listener(
@@ -114,7 +269,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
         if (_tapStartPosition != null && _tapStartTime != null) {
           final duration = DateTime.now().difference(_tapStartTime!);
           final distance = (_tapStartPosition! - event.position).distance;
-          
+
           // Tap = press < 200ms with < 10px movement
           if (duration.inMilliseconds < 200 && distance < 10) {
             log.d('✓ TAP detected on text viewer');
@@ -126,45 +281,87 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
       },
       child: Container(
         color: Theme.of(context).colorScheme.surface,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Line numbers (scrollable with content)
-            _buildLineNumbers(context, lines, lineNumberWidth, fontSize),
-            // Content area with selection enabled (allows multi-line selection)
-            Expanded(
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16, top: 40),
-                  child: widget.wordWrap
-                      ? SelectableText(
-                          _fullContent.isEmpty ? ' ' : _fullContent,
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            color: textColor,
-                            fontFamily: fontFamily,
-                            height: 1.5,
-                            letterSpacing: -0.3,
-                          ),
-                        )
-                      : SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: SelectableText(
-                            _fullContent.isEmpty ? ' ' : _fullContent,
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              color: textColor,
-                              fontFamily: fontFamily,
-                              height: 1.5,
-                              letterSpacing: -0.3,
-                            ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final minTextWidth = (constraints.maxWidth - lineNumberWidth - 24)
+                .clamp(80.0, double.infinity);
+
+            return SingleChildScrollView(
+              controller: _scrollController,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 4,
+                  right: 8,
+                  top: _kTopPadding,
+                  bottom: _kBottomPadding,
+                ),
+                child: Stack(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLineNumbers(
+                          context: context,
+                          lineNumberWidth: lineNumberWidth,
+                          lineNumberStyle: textStyle.copyWith(
+                            fontSize: fontSize * 0.9,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant
+                                .withValues(alpha: 0.55),
+                            letterSpacing: -0.1,
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: widget.wordWrap
+                              ? ConstrainedBox(
+                                  constraints:
+                                      BoxConstraints(minWidth: minTextWidth),
+                                  child: SelectableText(
+                                    _fullContent.isEmpty ? ' ' : _fullContent,
+                                    style: textStyle,
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: SelectableText(
+                                    _fullContent.isEmpty ? ' ' : _fullContent,
+                                    style: textStyle,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                    if (_highlightedLine != null)
+                      Positioned(
+                        left: lineNumberWidth + 12,
+                        right: 0,
+                        top: (_highlightedLine! - 1) * _lineHeight,
+                        child: IgnorePointer(
+                          child: AnimatedBuilder(
+                            animation: _highlightController,
+                            builder: (context, child) {
+                              final t = 1 - _highlightController.value;
+                              return Container(
+                                height: _lineHeight,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withValues(alpha: 0.25 * t),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -195,42 +392,17 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
     );
   }
 
-  Widget _buildLineNumbers(
-    BuildContext context,
-    List<String> lines,
-    double lineNumberWidth,
-    double fontSize,
-  ) {
-    final lineNumberColor = Theme.of(context).colorScheme.onSurfaceVariant;
-    final fontFamily = widget.useMonoFont ? 'Courier' : 'Ubuntu';
-
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 4, right: 12, top: 40, bottom: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            for (int i = 0; i < lines.length; i++)
-              SizedBox(
-                height: (fontSize * 1.5),
-                child: SizedBox(
-                  width: lineNumberWidth,
-                  child: Text(
-                    (i + 1).toString().padLeft(5),
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: fontSize * 0.9,
-                      color: lineNumberColor.withValues(alpha: 0.4),
-                      fontFamily: fontFamily,
-                      height: 1.5,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+  Widget _buildLineNumbers({
+    required BuildContext context,
+    required double lineNumberWidth,
+    required TextStyle lineNumberStyle,
+  }) {
+    return SizedBox(
+      width: lineNumberWidth,
+      child: Text(
+        _buildLineNumbersText(),
+        textAlign: TextAlign.right,
+        style: lineNumberStyle,
       ),
     );
   }

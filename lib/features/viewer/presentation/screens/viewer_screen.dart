@@ -43,13 +43,13 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   double _sidebarDragOffset = 0.0;
   double _textFontSize = 14;
   bool _textWordWrap = true;
-  bool _textFontIsMonoFont = true;
+  bool _textFontIsMonoFont = false;
   late AnimationController _menuController;
   late AnimationController _sidebarController;
   late AnimationController _topBarController;
   late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
-  GlobalKey<State<TextDocumentViewer>>? _textViewerKey;
+  late GlobalKey<State<TextDocumentViewer>> _textViewerKey;
   static const double _kDragCloseThreshold = 100.0;
 
   bool _isPdfDocument() {
@@ -57,12 +57,21 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     return doc?.format.toUpperCase() == 'PDF';
   }
 
+  bool _isTextDocument() {
+    final format =
+        ref.read(documentViewerProvider).document?.format.toUpperCase();
+    return format == 'TXT' || format == 'DOCX' || format == 'DOC';
+  }
+
   bool _canOpenSidebar() {
     if (!_controlsVisible) return false;
     if (_isPdfDocument()) {
       return _pdfViewerKey.currentState != null;
     }
-    return true;
+    if (_isTextDocument()) {
+      return _textViewerKey.currentState != null;
+    }
+    return false;
   }
 
   Widget? _resolveSidebarContent(BuildContext context) {
@@ -70,7 +79,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       final viewerState = _pdfViewerKey.currentState as dynamic;
       return viewerState?.buildDrawerContent(context) as Widget?;
     }
-    return HomeDrawer(onClose: _closeSidebar);
+    if (_isTextDocument()) {
+      final viewerState = _textViewerKey.currentState as dynamic;
+      return viewerState?.buildDrawerContent(context) as Widget?;
+    }
+    return null;
   }
 
   void _toggleControls() {
@@ -229,6 +242,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   void initState() {
     super.initState();
     _pdfViewerKey = GlobalKey<State<ModernPdfViewer>>();
+    _textViewerKey = GlobalKey<State<TextDocumentViewer>>();
     _menuController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
