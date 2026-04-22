@@ -9,7 +9,12 @@ class _SearchResult {
   final int charIndex;
   final int charLength;
   final List<PdfRect>? charRects;
-  _SearchResult({required this.page, required this.snippet, this.charIndex = 0, this.charLength = 0, this.charRects});
+  _SearchResult(
+      {required this.page,
+      required this.snippet,
+      this.charIndex = 0,
+      this.charLength = 0,
+      this.charRects});
 }
 
 /// Premium PDF Viewer with macOS/iOS dock-style Material3 UI
@@ -23,6 +28,7 @@ class ModernPdfViewer extends StatefulWidget {
   final VoidCallback? onTap;
   final Function(int currentPage, int totalPages)? onPageChanged;
   final VoidCallback? onSearchHighlight;
+  final Function(int wordCount, int lineCount)? onTextStatsChanged;
 
   const ModernPdfViewer({
     required this.filePath,
@@ -34,6 +40,7 @@ class ModernPdfViewer extends StatefulWidget {
     this.onTap,
     this.onPageChanged,
     this.onSearchHighlight,
+    this.onTextStatsChanged,
     super.key,
   });
 
@@ -41,7 +48,8 @@ class ModernPdfViewer extends StatefulWidget {
   State<ModernPdfViewer> createState() => _ModernPdfViewerState();
 }
 
-class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderStateMixin {
+class _ModernPdfViewerState extends State<ModernPdfViewer>
+    with TickerProviderStateMixin {
   static final log = Logger(
     printer: PrettyPrinter(
       methodCount: 0,
@@ -90,10 +98,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   // Sidebar tabs: 0=Pages, 1=Search, 2=TOC, 3=Notes, 4=Bookmarks
   int _sidebarTab = 0;
 
-   // Public getters for parent access
-   int get currentPage => _currentPage;
-   int get totalPages => _totalPages;
-   bool get showSidebar => _showSidebar;
+  // Public getters for parent access
+  int get currentPage => _currentPage;
+  int get totalPages => _totalPages;
+  bool get showSidebar => _showSidebar;
 
   @override
   void initState() {
@@ -126,32 +134,36 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   /// Scroll to a specific page in reader mode - INSTANT jump for better UX
   void _scrollToTextModePage(int pageNumber) {
     if (pageNumber < 1 || pageNumber > _totalPages) {
-      log.w('_scrollToTextModePage rejected: page=$pageNumber, totalPages=$_totalPages');
+      log.w(
+          '_scrollToTextModePage rejected: page=$pageNumber, totalPages=$_totalPages');
       return;
     }
     try {
       // Use jumpToPage for instant navigation instead of animateToPage
       // This is much faster for large PDFs with many pages
       final index = pageNumber - 1; // PageView index is 0-based
-      log.d('_scrollToTextModePage: jumping to page=$pageNumber (index=$index)');
+      log.d(
+          '_scrollToTextModePage: jumping to page=$pageNumber (index=$index)');
       _textModePageController.jumpToPage(index);
       log.d('_scrollToTextModePage: jumped successfully to page=$pageNumber');
     } catch (e) {
-      log.e('Failed to scroll to text mode page $pageNumber', error: e, stackTrace: StackTrace.current);
+      log.e('Failed to scroll to text mode page $pageNumber',
+          error: e, stackTrace: StackTrace.current);
     }
   }
 
   void _onPageChanged() {
     if (!_textModePageController.hasClients) return;
-    
+
     // Get current page from PageController
     final currentPage = (_textModePageController.page ?? 0).round() + 1;
-    
+
     if (currentPage != _currentPage && mounted) {
-      log.d('Page changed: $currentPage -> from $_currentPage total=$_totalPages');
+      log.d(
+          'Page changed: $currentPage -> from $_currentPage total=$_totalPages');
       setState(() => _currentPage = currentPage);
       widget.onPageChanged?.call(_currentPage, _totalPages);
-      
+
       // Auto-scroll sidebar to keep current page in view instantly (no delay)
       // This ensures accurate positioning without race conditions
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -163,21 +175,22 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   /// Auto-scroll sidebar to keep current page in view using instant jump for better performance
   void _scrollToActivePageInSidebar() {
     if (!_pagesScrollController.hasClients || _totalPages == 0) return;
-    
+
     try {
       // Each page row is 18 (vertical padding: 12) + 12 (container height approximately)
       // Actually measure: margin(6+6) + container(12+12) + padding = ~48 pixels base
       // Add IconButton height when thumbnail visible: ~40 pixels
       // Total per item: ~88-100 pixels depending on thumbnail
       // For accurate positioning, use measured item height from first item or estimate
-      
+
       // Use measured height of ~98 pixels per row as observed
       const itemHeight = 98.0;
       final targetOffset = (_currentPage - 1) * itemHeight;
       final maxExtent = _pagesScrollController.position.maxScrollExtent;
-      
-      log.d('Sidebar auto-scroll: page=$_currentPage, targetOffset=$targetOffset, maxExtent=$maxExtent');
-      
+
+      log.d(
+          'Sidebar auto-scroll: page=$_currentPage, targetOffset=$targetOffset, maxExtent=$maxExtent');
+
       // Instantly jump to the target offset (teleport, no animation)
       // This is more performant than animate especially with many items
       if (targetOffset >= 0 && targetOffset <= maxExtent) {
@@ -210,26 +223,46 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                       child: Row(
                         children: [
                           _buildSidebarTab(
-                            context, 'Pages', Icons.pages, 0,
+                            context,
+                            'Pages',
+                            Icons.pages,
+                            0,
                             badgeText: '$_currentPage',
                             showBadge: true,
                           ),
                           _buildSidebarTab(
-                            context, 'Search', Icons.search, 1,
-                            badgeText: _searchResults.isNotEmpty ? '${_searchResults.length}' : null,
+                            context,
+                            'Search',
+                            Icons.search,
+                            1,
+                            badgeText: _searchResults.isNotEmpty
+                                ? '${_searchResults.length}'
+                                : null,
                             showBadge: _searchResults.isNotEmpty,
                           ),
                           _buildSidebarTab(
-                            context, 'TOC', Icons.list, 2,
-                            badgeText: _outlineNodes != null ? '${_outlineNodes!.length}' : null,
-                            showBadge: _outlineNodes != null && _outlineNodes!.isNotEmpty,
+                            context,
+                            'TOC',
+                            Icons.list,
+                            2,
+                            badgeText: _outlineNodes != null
+                                ? '${_outlineNodes!.length}'
+                                : null,
+                            showBadge: _outlineNodes != null &&
+                                _outlineNodes!.isNotEmpty,
                           ),
                           _buildSidebarTab(
-                            context, 'Notes', Icons.note, 3,
+                            context,
+                            'Notes',
+                            Icons.note,
+                            3,
                             comingSoon: true,
                           ),
                           _buildSidebarTab(
-                            context, 'Bookmarks', Icons.bookmark, 4,
+                            context,
+                            'Bookmarks',
+                            Icons.bookmark,
+                            4,
                             comingSoon: true,
                           ),
                         ],
@@ -248,8 +281,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                       : _sidebarTab == 2
                           ? _buildTocTab()
                           : _sidebarTab == 3
-                              ? _buildComingSoonTab('Notes', 'Add notes and annotations to PDF pages')
-                              : _buildComingSoonTab('Bookmarks', 'Save and organize your favorite pages'),
+                              ? _buildComingSoonTab('Notes',
+                                  'Add notes and annotations to PDF pages')
+                              : _buildComingSoonTab('Bookmarks',
+                                  'Save and organize your favorite pages'),
             ),
           ],
         );
@@ -258,7 +293,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   void _goToPage(int page) {
-    log.d('_goToPage called: page=$page, totalPages=$_totalPages, isReady=$_isControllerReady');
+    log.d(
+        '_goToPage called: page=$page, totalPages=$_totalPages, isReady=$_isControllerReady');
     if (page < 1 || page > _totalPages || !_isControllerReady) {
       log.w('_goToPage rejected: invalid params');
       return;
@@ -269,7 +305,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       // Notify parent about page change
       widget.onPageChanged?.call(_currentPage, _totalPages);
     } catch (e) {
-      log.e('Failed to navigate to page $page', error: e, stackTrace: StackTrace.current);
+      log.e('Failed to navigate to page $page',
+          error: e, stackTrace: StackTrace.current);
     }
   }
 
@@ -321,7 +358,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     setState(() => _showSidebar = !_showSidebar);
   }
 
-  Future<Map<String, dynamic>> extractAllText([void Function(int current, int total)? onProgress]) async {
+  Future<Map<String, dynamic>> extractAllText(
+      [void Function(int current, int total)? onProgress]) async {
     if (_document == null) {
       return {'text': '', 'wordCount': 0, 'pageCount': 0};
     }
@@ -341,7 +379,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
               allText.writeln();
             }
             allText.write(text);
-            totalWords += text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+            totalWords +=
+                text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
           }
         }
       } catch (_) {}
@@ -404,117 +443,120 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                 );
               }
 
-            if (snapshot.hasError) {
-              return const SizedBox(
-                height: 100,
-                child: Center(
-                  child: Text('Error extracting text'),
-                ),
-              );
-            }
-
-            final data = snapshot.data;
-            final text = data?['text'] ?? '';
-            final wordCount = data?['wordCount'] ?? 0;
-
-            return SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Word count: $wordCount',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
+              if (snapshot.hasError) {
+                return const SizedBox(
+                  height: 100,
+                  child: Center(
+                    child: Text('Error extracting text'),
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.4,
+                );
+              }
+
+              final data = snapshot.data;
+              final text = data?['text'] ?? '';
+              final wordCount = data?['wordCount'] ?? 0;
+
+              return SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Word count: $wordCount',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
                     ),
-                    child: SingleChildScrollView(
-                      child: SelectableText(
-                        text.isEmpty ? 'No text found in PDF' : text,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                    const SizedBox(height: 16),
+                    Container(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.4,
+                      ),
+                      child: SingleChildScrollView(
+                        child: SelectableText(
+                          text.isEmpty ? 'No text found in PDF' : text,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          FutureBuilder<Map<String, dynamic>>(
-            future: extractAllText(),
-            builder: (context, snapshot) {
-              final text = snapshot.data?['text'] ?? '';
-              return TextButton(
-                onPressed: text.isNotEmpty
-                    ? () {
-                        Clipboard.setData(ClipboardData(text: text));
-                        Navigator.of(dialogContext).pop();
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Full PDF text copied to clipboard'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      }
-                    : null,
-                child: const Text('Copy All'),
+                  ],
+                ),
               );
             },
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            FutureBuilder<Map<String, dynamic>>(
+              future: extractAllText(),
+              builder: (context, snapshot) {
+                final text = snapshot.data?['text'] ?? '';
+                return TextButton(
+                  onPressed: text.isNotEmpty
+                      ? () {
+                          Clipboard.setData(ClipboardData(text: text));
+                          Navigator.of(dialogContext).pop();
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Full PDF text copied to clipboard'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        }
+                      : null,
+                  child: const Text('Copy All'),
+                );
+              },
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   /// Load page text on-demand with robust fallback strategy
   Future<void> _extractAllPageTextsComprehensive() async {
     if (_document == null) return;
 
     try {
-      log.i('🔄 Starting comprehensive text extraction for all $_totalPages pages...');
-      
+      log.i(
+          '🔄 Starting comprehensive text extraction for all $_totalPages pages...');
+
       // Extract text from all pages systematically with PdfViewer rendering
       for (int pageIndex = 0; pageIndex < _totalPages; pageIndex++) {
         if (!mounted) break;
-        
+
         try {
           log.d('📄 Extracting page ${pageIndex + 1}/$_totalPages...');
           final page = _document!.pages[pageIndex];
-          
+
           // Render page at screen resolution using PdfViewer's logic
           // This initializes the page engine properly
           await page.render(
             width: 600,
             height: 847,
           );
-          
+
           // Small delay to allow page initialization
           await Future.delayed(const Duration(milliseconds: 50));
-          
+
           // Now extract text - page should be properly initialized
           final pageText = await page.loadText();
-          
+
           if (pageText != null) {
             final fullText = ((pageText as dynamic).fullText ?? '') as String;
             final trimmedText = fullText.trim();
             if (mounted) {
               setState(() => _pageTexts[pageIndex] = trimmedText);
             }
-            log.d('✅ Page ${pageIndex + 1}: Extracted ${trimmedText.length} chars');
+            log.d(
+                '✅ Page ${pageIndex + 1}: Extracted ${trimmedText.length} chars');
           } else {
             // Page has no text content - cache as empty
             if (mounted) {
@@ -529,8 +571,16 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
           }
         }
       }
-      
-      log.i('✅ Text extraction complete: ${_pageTexts.length}/$_totalPages pages');
+
+      log.i(
+          '✅ Text extraction complete: ${_pageTexts.length}/$_totalPages pages');
+      final extractedPages = _pageTexts.values.where((text) => text.isNotEmpty);
+      final combinedText = extractedPages.join('\n');
+      final wordCount = RegExp(r'\S+').allMatches(combinedText).length;
+      final lineCount = combinedText.isEmpty
+          ? 0
+          : combinedText.split(RegExp(r'\r\n|\r|\n')).length;
+      widget.onTextStatsChanged?.call(wordCount, lineCount);
     } catch (e) {
       log.e('❌ Comprehensive extraction failed: $e');
     } finally {
@@ -548,10 +598,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     try {
       log.d('📄 Extracting text for page ${pageIndex + 1}');
       final page = _document!.pages[pageIndex];
-      
+
       // Simple direct extraction - page should already be rendered by PdfViewer
       final pageText = await page.loadText();
-      
+
       if (pageText != null) {
         final fullText = ((pageText as dynamic).fullText ?? '') as String;
         if (mounted) {
@@ -577,7 +627,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     if (query.isEmpty || _document == null) {
       // Invalidate any running search by incrementing token
       _searchCancellationToken++;
-      
+
       if (mounted) {
         setState(() {
           _searchResults = [];
@@ -632,7 +682,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
               if (end < text.length) snippet = '$snippet...';
               final charIdx = idx;
               final charLen = query.length;
-              final pageCharRects = ((pageText as dynamic).charRects as List?)?.cast<PdfRect>();
+              final pageCharRects =
+                  ((pageText as dynamic).charRects as List?)?.cast<PdfRect>();
               results.add(_SearchResult(
                 page: i + 1,
                 snippet: snippet,
@@ -661,7 +712,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             setState(() {
               _searchPagesChecked = i + 1;
               _searchResults = results;
-              _isSearching = i < totalPages - 1; // Still searching if not at last page
+              _isSearching =
+                  i < totalPages - 1; // Still searching if not at last page
             });
           }
         }
@@ -681,7 +733,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
         _isSearching = false;
         _searchPagesChecked = totalPages;
       });
-      log.d('Search complete: found ${results.length} results in $totalPages pages');
+      log.d(
+          'Search complete: found ${results.length} results in $totalPages pages');
     }
   }
 
@@ -695,7 +748,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
 
   void _previousSearchResult() async {
     if (_searchResults.isEmpty) return;
-    final idx = (_currentSearchResult - 1 + _searchResults.length) % _searchResults.length;
+    final idx = (_currentSearchResult - 1 + _searchResults.length) %
+        _searchResults.length;
     if (idx >= 0 && idx < _searchResults.length) {
       setState(() {
         _currentSearchResult = idx;
@@ -715,7 +769,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
 
   Future<void> _goToSearchResult(int index) async {
     if (index < 0 || index >= _searchResults.length) return;
-    
+
     // Auto-collapse sidebar if open
     if (_showSidebar) {
       setState(() => _showSidebar = false);
@@ -748,27 +802,28 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
         }
 
         final pdfRect = PdfRect(left, bottom, right, top);
-        
+
         await _controller.goToRectInsidePage(
           pageNumber: pageNum,
           rect: pdfRect,
           anchor: PdfPageAnchor.center,
         );
-        
+
         await Future.delayed(const Duration(milliseconds: 300));
         if (!mounted) return;
         _triggerHighlight();
         return;
       }
     } catch (_) {}
-    
+
     _goToPage(pageNum);
     await Future.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
     _triggerHighlight();
   }
 
-  List<Widget> _buildPageOverlays(BuildContext context, Rect pageRect, PdfPage page) {
+  List<Widget> _buildPageOverlays(
+      BuildContext context, Rect pageRect, PdfPage page) {
     final overlays = <Widget>[];
     if (_currentSearchResult == -1) return overlays;
     final result = _searchResults[_currentSearchResult];
@@ -785,7 +840,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       final highlightRects = <Rect>[];
       for (int i = startIdx; i <= endIdx; i++) {
         final pdfRect = charRects[i];
-        highlightRects.add(pdfRect.toRect(page: page, scaledPageSize: pageRect.size));
+        highlightRects
+            .add(pdfRect.toRect(page: page, scaledPageSize: pageRect.size));
       }
 
       // Add the global page dimmer with holes for highlights, wrapped in an animation
@@ -794,7 +850,9 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
           child: ListenableBuilder(
             listenable: _highlightController,
             builder: (context, child) {
-              if (_highlightController.value == 0) return const SizedBox.shrink();
+              if (_highlightController.value == 0) {
+                return const SizedBox.shrink();
+              }
               return Opacity(
                 opacity: _highlightController.value,
                 child: child,
@@ -839,12 +897,28 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     // ROOT CAUSE FIX: Always wrap in ColorFiltered with conditional colorFilter
     // This keeps the PdfViewer widget stable and prevents _state from becoming null
     // when invertColors changes. See: https://github.com/espresso3389/pdfrx/issues/277
-    
+
     final invertColorFilter = const ColorFilter.matrix([
-      -1, 0, 0, 0, 255,
-      0, -1, 0, 0, 255,
-      0, 0, -1, 0, 255,
-      0, 0, 0, 1, 0,
+      -1,
+      0,
+      0,
+      0,
+      255,
+      0,
+      -1,
+      0,
+      0,
+      255,
+      0,
+      0,
+      -1,
+      0,
+      255,
+      0,
+      0,
+      0,
+      1,
+      0,
     ]);
 
     final viewer = PdfViewer.file(
@@ -870,11 +944,16 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             log.d('🐛 PdfViewer rendered page: $pageNumber');
             setState(() => _currentPage = pageNumber);
             widget.onPageChanged?.call(_currentPage, _totalPages);
-            
+
             // Extract text from pages around current page (only those PdfViewer rendered)
-            _loadPageTextOnDemand(pageNumber - 1).ignore(); // Current (convert 1-based to 0-based)
-            if (pageNumber > 1) _loadPageTextOnDemand(pageNumber - 2).ignore(); // Previous
-            if (pageNumber < _totalPages) _loadPageTextOnDemand(pageNumber).ignore(); // Next
+            _loadPageTextOnDemand(pageNumber - 1)
+                .ignore(); // Current (convert 1-based to 0-based)
+            if (pageNumber > 1) {
+              _loadPageTextOnDemand(pageNumber - 2).ignore(); // Previous
+            }
+            if (pageNumber < _totalPages) {
+              _loadPageTextOnDemand(pageNumber).ignore(); // Next
+            }
           }
         },
         onViewerReady: (document, controller) async {
@@ -888,7 +967,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             _isLoadingAllPages = true; // Show loader while extracting text
           });
 
-          log.i('Document ready: $_totalPages pages - starting comprehensive text extraction');
+          log.i(
+              'Document ready: $_totalPages pages - starting comprehensive text extraction');
           widget.onPageChanged?.call(_currentPage, _totalPages);
 
           // Extract all page texts systematically with proper rendering
@@ -941,7 +1021,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     Widget buildPageCard(int index) {
       // Load this page's text on-demand (will be instant if already loaded)
       _loadPageTextOnDemand(index);
-      
+
       final pageText = _pageTexts[index];
       final isLoaded = pageText != null;
 
@@ -956,7 +1036,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
           if (_tapStartPosition != null && _tapStartTime != null) {
             final duration = DateTime.now().difference(_tapStartTime!);
             final distance = (_tapStartPosition! - event.position).distance;
-            
+
             // Tap = press < 200ms with < 10px movement
             if (duration.inMilliseconds < 200 && distance < 10) {
               log.d('✓ TAP detected on page ${index + 1}');
@@ -973,7 +1053,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+              color:
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
               width: 1,
             ),
           ),
@@ -1003,10 +1084,12 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                         iconSize: 18,
                         onPressed: () async {
                           final messenger = ScaffoldMessenger.of(context);
-                          await Clipboard.setData(ClipboardData(text: pageText));
+                          await Clipboard.setData(
+                              ClipboardData(text: pageText));
                           messenger.showSnackBar(
                             SnackBar(
-                              content: Text('Page ${index + 1} text copied to clipboard'),
+                              content: Text(
+                                  'Page ${index + 1} text copied to clipboard'),
                               duration: const Duration(seconds: 2),
                             ),
                           );
@@ -1070,7 +1153,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             right: 0,
             child: Container(
               padding: const EdgeInsets.all(12),
-              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+              color:
+                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
               child: Row(
                 children: [
                   SizedBox(
@@ -1106,7 +1190,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   // iOS-style row for search results with snippet
-  Widget _buildSearchResultRow(BuildContext context, _SearchResult result, int resultIndex, bool isActive) {
+  Widget _buildSearchResultRow(BuildContext context, _SearchResult result,
+      int resultIndex, bool isActive) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -1302,7 +1387,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
       log.d('Pages tab built, current page=$_currentPage total=$_totalPages');
       _scrollToActivePageInSidebar();
     });
-    
+
     return ListView.builder(
       controller: _pagesScrollController,
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1329,8 +1414,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                 padding: const EdgeInsets.all(12),
                 child: Container(
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Theme.of(context)
@@ -1372,17 +1459,24 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
               ),
               if (_isSearching)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
-                          value: _document != null ? _searchPagesChecked / _document!.pages.length : 0,
+                          value: _document != null
+                              ? _searchPagesChecked / _document!.pages.length
+                              : 0,
                           minHeight: 4,
-                          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                          valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.primary),
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.1),
+                          valueColor: AlwaysStoppedAnimation(
+                              Theme.of(context).colorScheme.primary),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -1390,7 +1484,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                         children: [
                           Text(
                             'Searching $_searchPagesChecked/${_document?.pages.length ?? 0}',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
                           ),
@@ -1398,8 +1495,12 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                           if (_searchResults.isNotEmpty)
                             Text(
                               '${_searchResults.length} result${_searchResults.length == 1 ? '' : 's'}',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
@@ -1410,7 +1511,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                 ),
               if (_searchResults.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: !_isSearching
                       ? Container(
                           decoration: BoxDecoration(
@@ -1428,14 +1530,19 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                             ),
                           ),
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             child: Row(
                               children: [
                                 Text(
                                   '${_currentSearchResult + 1}/${_searchResults.length}',
-                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                        color: Theme.of(context).colorScheme.primary,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                 ),
@@ -1467,21 +1574,30 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.search, size: 48, color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+                      Icon(Icons.search,
+                          size: 48,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.3)),
                       const SizedBox(height: 12),
                       Text(
                         'Search in PDF',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                       const SizedBox(height: 4),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Text(
                           'Find text across all pages',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                           textAlign: TextAlign.center,
@@ -1495,20 +1611,32 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.search_off, size: 48, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
+                          Icon(Icons.search_off,
+                              size: 48,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outline
+                                  .withValues(alpha: 0.5)),
                           const SizedBox(height: 12),
                           Text(
                             'No results found',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   color: Theme.of(context).colorScheme.outline,
                                 ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Try a different search term',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline
+                                          .withValues(alpha: 0.7),
+                                    ),
                           ),
                         ],
                       ),
@@ -1523,7 +1651,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                         }
                         final result = _searchResults[index];
                         final isActive = index == _currentSearchResult;
-                        return _buildSearchResultRow(context, result, index, isActive);
+                        return _buildSearchResultRow(
+                            context, result, index, isActive);
                       },
                     ),
         ),
@@ -1614,7 +1743,12 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.list_alt, size: 48, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
+            Icon(Icons.list_alt,
+                size: 48,
+                color: Theme.of(context)
+                    .colorScheme
+                    .outline
+                    .withValues(alpha: 0.5)),
             const SizedBox(height: 12),
             Text(
               'No table of contents available',
@@ -1626,7 +1760,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             Text(
               'This PDF does not contain a table of contents',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.7),
                   ),
               textAlign: TextAlign.center,
             ),
@@ -1654,7 +1791,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -1684,7 +1824,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
             Text(
               'This feature is under development and will be available in a future update.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.7),
                   ),
               textAlign: TextAlign.center,
             ),
@@ -1694,7 +1837,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     );
   }
 
-   // ignore: unused_element
+  // ignore: unused_element
   Widget _buildBottomDock() {
     return SafeArea(
       top: false,
@@ -1784,11 +1927,14 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   }
 
   Widget _buildSidebarTab(
-      BuildContext context, String label, IconData icon, int index, {
-        bool comingSoon = false,
-        String? badgeText,
-        bool showBadge = false,
-      }) {
+    BuildContext context,
+    String label,
+    IconData icon,
+    int index, {
+    bool comingSoon = false,
+    String? badgeText,
+    bool showBadge = false,
+  }) {
     final isActive = _sidebarTab == index;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -1814,11 +1960,13 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
               child: InkWell(
                 onTap: () => setState(() {
                   _sidebarTab = index;
-                  _drawerVersion.value++; // Notify ValueListenableBuilder to rebuild drawer
+                  _drawerVersion
+                      .value++; // Notify ValueListenableBuilder to rebuild drawer
                 }),
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1826,7 +1974,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                         icon,
                         size: 18,
                         color: comingSoon
-                            ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.4)
+                            ? Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.4)
                             : isActive
                                 ? Theme.of(context).colorScheme.primary
                                 : Theme.of(context).colorScheme.outline,
@@ -1836,7 +1987,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontSize: 10,
                               color: comingSoon
-                                  ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.4)
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .outline
+                                      .withValues(alpha: 0.4)
                                   : isActive
                                       ? Theme.of(context).colorScheme.primary
                                       : Theme.of(context).colorScheme.outline,
@@ -1854,7 +2008,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                 right: 2,
                 top: 2,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                   decoration: BoxDecoration(
                     color: comingSoon
                         ? Theme.of(context).colorScheme.primary
@@ -1864,12 +2019,12 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
                   child: Text(
                     badgeText,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
-                      color: comingSoon
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onSecondary,
-                    ),
+                          fontSize: 8,
+                          fontWeight: FontWeight.w700,
+                          color: comingSoon
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSecondary,
+                        ),
                   ),
                 ),
               ),
@@ -1900,13 +2055,13 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
   Widget build(BuildContext context) {
     return Stack(
       children: [
-         // Main content - PDF/Text viewer fills entire screen
-         // NOTE: Tap handling is done by parent ViewerScreen via GestureDetector
-         // We don't use GestureDetector here to avoid interference with scrolling
-          Container(
-            color: Colors.transparent,
-            child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
-          ),
+        // Main content - PDF/Text viewer fills entire screen
+        // NOTE: Tap handling is done by parent ViewerScreen via GestureDetector
+        // We don't use GestureDetector here to avoid interference with scrolling
+        Container(
+          color: Colors.transparent,
+          child: widget.textMode ? _buildTextMode() : _buildPdfViewer(),
+        ),
         // Sidebar overlay is rendered by ViewerScreen so taps do not
         // interfere with the viewer-wide tap gesture.
       ],
@@ -1943,7 +2098,7 @@ class _FocusClipper extends CustomClipper<Path> {
     // 1. Create a path for the full page
     final fullPagePath = Path()
       ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
-    
+
     // 2. Create a path for all the highlight holes combined
     final holesPath = Path();
     for (final rect in rects) {
@@ -1961,4 +2116,3 @@ class _FocusClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(_FocusClipper oldClipper) => rects != oldClipper.rects;
 }
-

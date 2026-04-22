@@ -357,6 +357,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
                               constraints: BoxConstraints(
                                   minWidth: constraints.maxWidth),
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: List.generate(
                                   _lines.length,
                                   (index) => _buildUnwrappedLineRow(
@@ -485,6 +486,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Row(
+        mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildLineNumbers(
@@ -525,6 +527,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildLineNumbers(
