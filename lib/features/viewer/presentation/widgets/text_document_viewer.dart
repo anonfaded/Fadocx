@@ -9,6 +9,7 @@ final log = Logger();
 class TextDocumentViewer extends StatefulWidget {
   final String? textContent;
   final VoidCallback? onTap;
+  final VoidCallback? onSearchHighlight;
   final double fontSize;
   final bool wordWrap;
   final bool useMonoFont;
@@ -16,6 +17,7 @@ class TextDocumentViewer extends StatefulWidget {
   const TextDocumentViewer({
     required this.textContent,
     this.onTap,
+    this.onSearchHighlight,
     this.fontSize = 14,
     this.wordWrap = true,
     this.useMonoFont = false,
@@ -37,11 +39,16 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   DateTime? _tapStartTime;
   Offset? _tapStartPosition;
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _horizontalScrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  final ValueNotifier<int> _drawerVersion = ValueNotifier<int>(0);
   late final AnimationController _highlightController;
 
   List<TextSearchResult> _searchResults = const [];
   int _activeSearchResultIndex = -1;
+  bool _isSearching = false;
+  int _searchLinesChecked = 0;
+  int _searchCancellationToken = 0;
   int? _highlightedLine;
 
   @override
@@ -56,7 +63,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
   void _initializeContent() {
     _fullContent = widget.textContent ?? '';
-    _lines = _fullContent.split('\n');
+    _lines = _fullContent.split(RegExp(r'\r\n|\r|\n'));
     _performSearch(_searchController.text);
 
     if (_fullContent.isNotEmpty) {
@@ -101,60 +108,98 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   }
 
   Widget buildDrawerContent(BuildContext context) {
-    return TextDocumentSearchDrawer(
-      searchController: _searchController,
-      results: _searchResults,
-      activeResultIndex: _activeSearchResultIndex,
-      onQueryChanged: _performSearch,
-      onResultTap: _goToSearchResult,
-      onNextResult: _goToNextResult,
-      onPreviousResult: _goToPreviousResult,
+    return ValueListenableBuilder<int>(
+      valueListenable: _drawerVersion,
+      builder: (context, _, __) {
+        return TextDocumentSearchDrawer(
+          searchController: _searchController,
+          results: _searchResults,
+          activeResultIndex: _activeSearchResultIndex,
+          isSearching: _isSearching,
+          linesChecked: _searchLinesChecked,
+          totalLines: _lines.length,
+          onQueryChanged: _performSearch,
+          onResultTap: _goToSearchResult,
+          onNextResult: _goToNextResult,
+          onPreviousResult: _goToPreviousResult,
+        );
+      },
     );
   }
 
   void _performSearch(String query) {
     final normalizedQuery = query.trim().toLowerCase();
+    final searchToken = ++_searchCancellationToken;
+
     if (normalizedQuery.isEmpty) {
       if (mounted) {
         setState(() {
           _searchResults = const [];
           _activeSearchResultIndex = -1;
+          _isSearching = false;
+          _searchLinesChecked = 0;
         });
+        _drawerVersion.value++;
       }
       return;
     }
 
-    final results = <TextSearchResult>[];
-    for (int i = 0; i < _lines.length; i++) {
-      final lineText = _lines[i];
-      final lowerLine = lineText.toLowerCase();
-      var start = 0;
-      while (start < lowerLine.length) {
-        final foundAt = lowerLine.indexOf(normalizedQuery, start);
-        if (foundAt == -1) break;
-
-        results.add(
-          TextSearchResult(
-            lineNumber: i + 1,
-            lineText: lineText,
-            matchStart: foundAt,
-            matchLength: normalizedQuery.length,
-          ),
-        );
-        start = foundAt + normalizedQuery.length;
-      }
-    }
-
-    if (!mounted) return;
     setState(() {
-      _searchResults = results;
-      _activeSearchResultIndex = results.isNotEmpty ? 0 : -1;
+      _isSearching = true;
+      _searchLinesChecked = 0;
+      _searchResults = const [];
+      _activeSearchResultIndex = -1;
     });
+    _drawerVersion.value++;
 
-    if (results.isNotEmpty) {
-      _jumpToLine(results.first.lineNumber, animate: false);
-      _flashLineHighlight(results.first.lineNumber);
-    }
+    Future<void>(() async {
+      final results = <TextSearchResult>[];
+      final totalLines = _lines.length;
+
+      for (int i = 0; i < totalLines; i++) {
+        if (!mounted || searchToken != _searchCancellationToken) return;
+
+        final lineText = _lines[i];
+        final lowerLine = lineText.toLowerCase();
+        var start = 0;
+        while (start < lowerLine.length) {
+          final foundAt = lowerLine.indexOf(normalizedQuery, start);
+          if (foundAt == -1) break;
+          results.add(
+            TextSearchResult(
+              lineNumber: i + 1,
+              lineText: lineText,
+              matchStart: foundAt,
+              matchLength: normalizedQuery.length,
+            ),
+          );
+          start = foundAt + normalizedQuery.length;
+        }
+
+        if ((i + 1) % 120 == 0 || i == totalLines - 1) {
+          if (!mounted || searchToken != _searchCancellationToken) return;
+          setState(() {
+            _searchLinesChecked = i + 1;
+            _searchResults = results;
+          });
+          _drawerVersion.value++;
+          await Future<void>.delayed(Duration.zero);
+        }
+      }
+
+      if (!mounted || searchToken != _searchCancellationToken) return;
+      setState(() {
+        _isSearching = false;
+        _searchLinesChecked = totalLines;
+        _searchResults = results;
+        _activeSearchResultIndex = results.isNotEmpty ? 0 : -1;
+      });
+      _drawerVersion.value++;
+
+      if (results.isNotEmpty) {
+        _jumpToLine(results.first.lineNumber, animate: false);
+      }
+    });
   }
 
   void _goToSearchResult(int index) {
@@ -162,6 +207,8 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     final result = _searchResults[index];
 
     setState(() => _activeSearchResultIndex = index);
+    _drawerVersion.value++;
+    widget.onSearchHighlight?.call();
     _jumpToLine(result.lineNumber);
     _flashLineHighlight(result.lineNumber);
   }
@@ -202,7 +249,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     _highlightController.stop();
     setState(() => _highlightedLine = lineNumber);
     _highlightController.forward(from: 0);
-    Future.delayed(const Duration(milliseconds: 700), () {
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
       setState(() => _highlightedLine = null);
     });
@@ -227,16 +274,13 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     return painter.width + _kLineNumberColumnPadding;
   }
 
-  String _buildLineNumbersText() {
-    if (_lines.isEmpty) return '1';
-    return List.generate(_lines.length, (index) => '${index + 1}').join('\n');
-  }
-
   @override
   void dispose() {
     _scrollController.dispose();
+    _horizontalScrollController.dispose();
     _searchController.dispose();
     _highlightController.dispose();
+    _drawerVersion.dispose();
     super.dispose();
   }
 
@@ -283,9 +327,6 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
         color: Theme.of(context).colorScheme.surface,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final minTextWidth = (constraints.maxWidth - lineNumberWidth - 24)
-                .clamp(80.0, double.infinity);
-
             return SingleChildScrollView(
               controller: _scrollController,
               child: Padding(
@@ -297,42 +338,37 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
                 ),
                 child: Stack(
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLineNumbers(
-                          context: context,
-                          lineNumberWidth: lineNumberWidth,
-                          lineNumberStyle: textStyle.copyWith(
-                            fontSize: fontSize * 0.9,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant
-                                .withValues(alpha: 0.55),
-                            letterSpacing: -0.1,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: widget.wordWrap
-                              ? ConstrainedBox(
-                                  constraints:
-                                      BoxConstraints(minWidth: minTextWidth),
-                                  child: SelectableText(
-                                    _fullContent.isEmpty ? ' ' : _fullContent,
-                                    style: textStyle,
-                                  ),
-                                )
-                              : SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: SelectableText(
-                                    _fullContent.isEmpty ? ' ' : _fullContent,
-                                    style: textStyle,
+                    widget.wordWrap
+                        ? Column(
+                            children: List.generate(
+                              _lines.length,
+                              (index) => _buildWrappedLineRow(
+                                context: context,
+                                index: index,
+                                lineNumberWidth: lineNumberWidth,
+                                textStyle: textStyle,
+                              ),
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            controller: _horizontalScrollController,
+                            scrollDirection: Axis.horizontal,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  minWidth: constraints.maxWidth),
+                              child: Column(
+                                children: List.generate(
+                                  _lines.length,
+                                  (index) => _buildUnwrappedLineRow(
+                                    context: context,
+                                    index: index,
+                                    lineNumberWidth: lineNumberWidth,
+                                    textStyle: textStyle,
                                   ),
                                 ),
-                        ),
-                      ],
-                    ),
+                              ),
+                            ),
+                          ),
                     if (_highlightedLine != null)
                       Positioned(
                         left: lineNumberWidth + 12,
@@ -343,15 +379,32 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
                             animation: _highlightController,
                             builder: (context, child) {
                               final t = 1 - _highlightController.value;
-                              return Container(
-                                height: _lineHeight,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withValues(alpha: 0.25 * t),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
+                              final focusRect = Rect.fromLTWH(
+                                lineNumberWidth + 12,
+                                (_highlightedLine! - 1) * _lineHeight,
+                                (constraints.maxWidth - (lineNumberWidth + 12))
+                                    .clamp(40.0, double.infinity),
+                                _lineHeight,
+                              );
+                              return Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: _TextFocusDimmer(
+                                      rects: [focusRect],
+                                      opacity: 0.45 * t,
+                                    ),
+                                  ),
+                                  Container(
+                                    height: _lineHeight,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withValues(alpha: 0.25 * t),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  ),
+                                ],
                               );
                             },
                           ),
@@ -394,16 +447,143 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
   Widget _buildLineNumbers({
     required BuildContext context,
+    required int index,
     required double lineNumberWidth,
     required TextStyle lineNumberStyle,
   }) {
     return SizedBox(
       width: lineNumberWidth,
-      child: Text(
-        _buildLineNumbersText(),
-        textAlign: TextAlign.right,
-        style: lineNumberStyle,
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: Text(
+            '${index + 1}',
+            textAlign: TextAlign.right,
+            style: lineNumberStyle,
+          ),
+        ),
       ),
     );
   }
+
+  Widget _buildWrappedLineRow({
+    required BuildContext context,
+    required int index,
+    required double lineNumberWidth,
+    required TextStyle textStyle,
+  }) {
+    final lineNumberStyle = textStyle.copyWith(
+      fontSize: widget.fontSize * 0.9,
+      color: Theme.of(context)
+          .colorScheme
+          .onSurfaceVariant
+          .withValues(alpha: 0.55),
+      letterSpacing: -0.1,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLineNumbers(
+            context: context,
+            index: index,
+            lineNumberWidth: lineNumberWidth,
+            lineNumberStyle: lineNumberStyle,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _lines[index].isEmpty
+                ? SizedBox(height: _lineHeight)
+                : SelectableText(
+                    _lines[index],
+                    style: textStyle,
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUnwrappedLineRow({
+    required BuildContext context,
+    required int index,
+    required double lineNumberWidth,
+    required TextStyle textStyle,
+  }) {
+    final lineNumberStyle = textStyle.copyWith(
+      fontSize: widget.fontSize * 0.9,
+      color: Theme.of(context)
+          .colorScheme
+          .onSurfaceVariant
+          .withValues(alpha: 0.55),
+      letterSpacing: -0.1,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLineNumbers(
+            context: context,
+            index: index,
+            lineNumberWidth: lineNumberWidth,
+            lineNumberStyle: lineNumberStyle,
+          ),
+          const SizedBox(width: 12),
+          _lines[index].isEmpty
+              ? SizedBox(height: _lineHeight)
+              : SelectableText(
+                  _lines[index],
+                  style: textStyle,
+                ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TextFocusDimmer extends StatelessWidget {
+  final List<Rect> rects;
+  final double opacity;
+
+  const _TextFocusDimmer({required this.rects, required this.opacity});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipPath(
+      clipper: _TextFocusClipper(rects),
+      child: Container(
+        color: Colors.black.withValues(alpha: opacity),
+      ),
+    );
+  }
+}
+
+class _TextFocusClipper extends CustomClipper<Path> {
+  final List<Rect> rects;
+
+  _TextFocusClipper(this.rects);
+
+  @override
+  Path getClip(Size size) {
+    final fullPagePath = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final holesPath = Path();
+    for (final rect in rects) {
+      holesPath.addRRect(
+        RRect.fromRectAndRadius(
+          rect.inflate(2),
+          const Radius.circular(6),
+        ),
+      );
+    }
+    return Path.combine(PathOperation.difference, fullPagePath, holesPath);
+  }
+
+  @override
+  bool shouldReclip(_TextFocusClipper oldClipper) => rects != oldClipper.rects;
 }

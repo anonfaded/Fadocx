@@ -18,6 +18,9 @@ class TextDocumentSearchDrawer extends StatelessWidget {
   final TextEditingController searchController;
   final List<TextSearchResult> results;
   final int activeResultIndex;
+  final bool isSearching;
+  final int linesChecked;
+  final int totalLines;
   final ValueChanged<String> onQueryChanged;
   final ValueChanged<int> onResultTap;
   final VoidCallback onNextResult;
@@ -28,6 +31,9 @@ class TextDocumentSearchDrawer extends StatelessWidget {
     required this.searchController,
     required this.results,
     required this.activeResultIndex,
+    required this.isSearching,
+    required this.linesChecked,
+    required this.totalLines,
     required this.onQueryChanged,
     required this.onResultTap,
     required this.onNextResult,
@@ -76,7 +82,9 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                 children: [
                   if (searchController.text.isNotEmpty)
                     Text(
-                      '${results.length} result${results.length == 1 ? '' : 's'}',
+                      isSearching
+                          ? 'Searching $linesChecked/$totalLines'
+                          : '${results.length} result${results.length == 1 ? '' : 's'}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.primary,
@@ -112,6 +120,16 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                   ],
                 ],
               ),
+              if (isSearching) ...[
+                const SizedBox(height: 8),
+                LinearProgressIndicator(
+                  value: totalLines == 0 ? 0 : linesChecked / totalLines,
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.15),
+                ),
+              ],
             ],
           ),
         ),
