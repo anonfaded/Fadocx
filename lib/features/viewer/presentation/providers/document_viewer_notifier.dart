@@ -114,6 +114,9 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         case 'txt':
           log.d('Routing to parseTXT');
           document = await repository.parseTXT(_filePath);
+        case 'rtf':
+          log.d('Routing to parseRTF');
+          document = await repository.parseRTF(_filePath);
 
         // Presentation formats (PPT, PPTX, ODP - all require LibreOffice, Coming Soon)
         case 'ppt':

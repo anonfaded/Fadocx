@@ -4,7 +4,7 @@ import '../entities/parsed_document_entity.dart';
 /// This allows swapping implementations (Dart, Native, Mock, etc.)
 abstract class DocumentParsingRepository {
   /// Parse a spreadsheet file (XLSX, CSV, XLS)
-  /// 
+  ///
   /// Throws exceptions on parsing errors
   /// Returns ParsedDocumentEntity with all sheets and metadata
   Future<ParsedDocumentEntity> parseSpreadsheet(String filePath);
@@ -44,6 +44,9 @@ abstract class DocumentParsingRepository {
 
   /// Parse TXT file (plain text)
   Future<ParsedDocumentEntity> parseTXT(String filePath);
+
+  /// Parse RTF file (Rich Text Format)
+  Future<ParsedDocumentEntity> parseRTF(String filePath);
 
   /// Get cached parsing result if available and file unchanged
   ///

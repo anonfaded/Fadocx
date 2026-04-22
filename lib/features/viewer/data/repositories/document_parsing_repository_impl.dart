@@ -325,6 +325,29 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
   }
 
   @override
+  Future<ParsedDocumentEntity> parseRTF(String filePath) async {
+    final cached = await getCachedParsing(filePath);
+    if (cached != null && cached.format != 'UNKNOWN') {
+      log.i('Using cached RTF: $filePath');
+      return cached;
+    }
+
+    log.i('Parsing RTF (Dart): $filePath');
+
+    final textContent = await DocumentParserService.parseRTF(filePath);
+    final result = ParsedDocumentEntity(
+      format: 'RTF',
+      sheets: [],
+      sheetCount: 0,
+      parsedAt: DateTime.now(),
+      sourceFilePath: filePath,
+      textContent: textContent,
+    );
+    await cacheParsing(filePath, result);
+    return result;
+  }
+
+  @override
   Future<ParsedDocumentEntity?> getCachedParsing(String filePath) async {
     try {
       final cachedResult = await _cache.getCachedParsing(filePath);

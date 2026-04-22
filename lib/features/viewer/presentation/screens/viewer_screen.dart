@@ -67,7 +67,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   bool _isTextDocument() {
     final format =
         ref.read(documentViewerProvider).document?.format.toUpperCase();
-    return format == 'TXT' || format == 'DOCX' || format == 'DOC';
+    return format == 'TXT' ||
+        format == 'DOCX' ||
+        format == 'DOC' ||
+        format == 'RTF';
   }
 
   bool _canOpenSidebar() {
@@ -486,7 +489,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
 
     // For TXT/DOCX/DOC, use TextDocumentViewer with tap controls
-    if (format == 'TXT' || format == 'DOCX' || format == 'DOC') {
+    if (format == 'TXT' ||
+        format == 'DOCX' ||
+        format == 'DOC' ||
+        format == 'RTF') {
       return TextDocumentViewer(
         key: _textViewerKey,
         textContent: document.textContent,
@@ -1207,7 +1213,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    } else if (format == 'TXT' || format == 'DOCX' || format == 'DOC') {
+    } else if (format == 'TXT' ||
+        format == 'DOCX' ||
+        format == 'DOC' ||
+        format == 'RTF') {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1301,7 +1310,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    } else if (format == 'TXT' || format == 'DOCX' || format == 'DOC') {
+    } else if (format == 'TXT' ||
+        format == 'DOCX' ||
+        format == 'DOC' ||
+        format == 'RTF') {
       return Row(
         children: [
           Expanded(
