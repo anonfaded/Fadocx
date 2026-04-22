@@ -110,6 +110,31 @@ When updating app branding or icons, follow this workflow:
 - Both commands modify native platform files; regenerate after any asset changes
 - Test on both Android and iOS after regeneration to ensure correct scaling
 
+## Build Flavors
+
+Fadocx supports two build flavors: **beta** and **prod**.
+
+### Beta Flavor
+- **Package Name:** `com.fadseclab.fadocx.beta`
+- **App Name:** Fadocx Beta
+- **Icon:** `assets/fadocx_beta.png`
+- **Run Command:** `flutter run --flavor beta`
+- **Build APK:** `flutter build apk --flavor beta --debug`
+
+### Prod Flavor
+- **Package Name:** `com.fadseclab.fadocx`
+- **App Name:** Fadocx
+- **Icon:** `assets/fadocx.png`
+- **Run Command:** `flutter run --flavor prod`
+- **Build APK:** `flutter build apk --flavor prod --release`
+
+### Setup
+- Flavors are configured in `android/app/build.gradle.kts` using `flavorDimensions` and `productFlavors`
+- App name per flavor uses `manifestPlaceholders["appName"]` in build.gradle.kts
+- AndroidManifest.xml references `${appName}` for `android:label`
+- For iOS, create schemes in Xcode with matching bundle identifiers
+- Regenerate icons after changes: `flutter pub run flutter_launcher_icons`
+
 ## Custom UI Design Patterns
 
 ### Inverted Rounded Corners (Sidebar Flares)

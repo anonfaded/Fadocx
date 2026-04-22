@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:logger/logger.dart';
 import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
 import 'package:fadocx/features/settings/data/repositories/repositories_impl.dart';
@@ -7,6 +8,11 @@ import 'package:fadocx/features/settings/domain/repositories/repositories.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 
 final log = Logger();
+
+
+final packageInfoProvider = FutureProvider<PackageInfo>((ref) async {
+  return await PackageInfo.fromPlatform();
+});
 
 // ============================================================================
 // DATASOURCE PROVIDER

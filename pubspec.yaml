@@ -92,6 +92,7 @@ dependencies:
   intl: ^0.20.2
   pdfrx: ^2.2.24
   flutter_launcher_icons: ^0.14.4
+  package_info_plus: ^9.0.1
 
 dev_dependencies:
   flutter_test:
@@ -116,8 +117,11 @@ flutter_native_splash:
 
 flutter_launcher_icons:
   android: "ic_launcher"
-  ios: true
+  ios: false
   image_path: "assets/fadocx.png"
+  # Flavor-specific icons are generated via separate config files:
+  # dart run flutter_launcher_icons -f flutter_launcher_icons-beta.yaml
+  # dart run flutter_launcher_icons -f flutter_launcher_icons-prod.yaml
 
 dependency_overrides:
   matcher: ^0.12.16
@@ -131,6 +135,7 @@ flutter:
     - assets/tessdata/
     - assets/tessdata_config.json
     - assets/fadocx.png
+    - assets/fadocx_beta.png
     - assets/fadocx_header_landscape_png.png
     - assets/samples/
   

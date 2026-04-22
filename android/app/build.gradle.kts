@@ -50,6 +50,20 @@ android {
         }
     }
 
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("beta") {
+            dimension = "environment"
+            applicationIdSuffix = ".beta"
+            manifestPlaceholders["appName"] = "Fadocx Beta"
+        }
+        create("prod") {
+            dimension = "environment"
+            manifestPlaceholders["appName"] = "Fadocx"
+        }
+    }
+
     // Exclude duplicate META-INF files from transitive dependencies
     packaging {
         resources {
