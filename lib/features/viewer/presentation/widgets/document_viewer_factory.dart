@@ -26,7 +26,7 @@ class DocumentViewerFactory {
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
-      'DOCX' || 'DOC' => _buildDocxViewer(document),
+      'DOCX' || 'DOC' || 'TXT' => _buildTextViewer(document),
       'PPT' || 'PPTX' || 'ODP' => _buildPptViewer(document),
       _ => _buildUnsupportedViewer(document.format),
     };
@@ -126,11 +126,41 @@ class DocumentViewerFactory {
     );
   }
 
-  static Widget _buildDocxViewer(ParsedDocumentEntity document) {
+  static Widget _buildTextViewer(ParsedDocumentEntity document) {
+    final textContent = document.textContent ?? 'No content';
+    final isEmpty = textContent.trim().isEmpty;
+    
+    if (isEmpty) {
+      return Builder(
+        builder: (context) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.description_outlined,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Empty file',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: SelectableText(
-        document.textContent ?? 'No content',
+        textContent,
         style: const TextStyle(fontSize: 14, height: 1.6),
       ),
     );

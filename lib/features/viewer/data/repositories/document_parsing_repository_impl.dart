@@ -291,6 +291,31 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
   }
 
   @override
+  Future<ParsedDocumentEntity> parseTXT(String filePath) async {
+    // Check cache first (skip if format is UNKNOWN or invalid)
+    final cached = await getCachedParsing(filePath);
+    if (cached != null && cached.format != 'UNKNOWN') {
+      log.i('Using cached TXT: $filePath');
+      return cached;
+    }
+
+    log.i('Parsing TXT (Dart): $filePath');
+
+    // TXT: Pure Dart, no native needed - lightweight format
+    final textContent = await DocumentParserService.parseTXT(filePath);
+    final result = ParsedDocumentEntity(
+      format: 'TXT',
+      sheets: [],
+      sheetCount: 0,
+      parsedAt: DateTime.now(),
+      sourceFilePath: filePath,
+      textContent: textContent,
+    );
+    await cacheParsing(filePath, result);
+    return result;
+  }
+
+  @override
   Future<ParsedDocumentEntity?> getCachedParsing(String filePath) async {
     try {
       final cachedResult = await _cache.getCachedParsing(filePath);

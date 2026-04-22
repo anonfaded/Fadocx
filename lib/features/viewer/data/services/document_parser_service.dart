@@ -578,4 +578,74 @@ class DocumentParserService {
       rethrow;
     }
   }
+
+  /// Parse TXT format - Plain text file
+  /// Returns text content with proper encoding handling and large file support
+  static Future<String> parseTXT(String filePath) async {
+    try {
+      log.i('Parsing TXT file: $filePath');
+      final file = File(filePath);
+
+      if (!await file.exists()) {
+        throw Exception('TXT file does not exist: $filePath');
+      }
+
+      final fileSizeBytes = await file.length();
+      final fileSizeMB = fileSizeBytes / (1024 * 1024);
+
+      // For very large files (>50MB), read a preview to prevent memory issues
+      const maxPreviewSizeMB = 50;
+      if (fileSizeMB > maxPreviewSizeMB) {
+        log.w('Large TXT file detected: $fileSizeMB MB. Reading preview only.');
+        final bytes = await file.openRead(0, maxPreviewSizeMB * 1024 * 1024).toList();
+        final combinedBytes = <int>[];
+        for (var chunk in bytes) {
+          combinedBytes.addAll(chunk);
+        }
+        
+        try {
+          // Try UTF-8 first
+          var content = utf8.decode(combinedBytes, allowMalformed: true);
+          content += '\n\n[Preview truncated - file is ${fileSizeMB.toStringAsFixed(1)} MB]';
+          log.i('TXT preview extracted: ${content.length} characters');
+          return content;
+        } catch (e) {
+          log.e('Error decoding TXT preview: $e');
+          rethrow;
+        }
+      }
+
+      // For normal-sized files, read entire content
+      String content;
+      try {
+        // Try UTF-8 first (most common)
+        content = await file.readAsString(encoding: utf8);
+      } catch (utf8Error) {
+        log.w('UTF-8 decoding failed, trying latin-1: $utf8Error');
+        try {
+          // Fallback to latin-1 (ISO-8859-1)
+          final bytes = await file.readAsBytes();
+          content = latin1.decode(bytes);
+        } catch (latin1Error) {
+          log.w('Latin-1 decoding failed, using UTF-8 with malformed tolerance');
+          final bytes = await file.readAsBytes();
+          content = utf8.decode(bytes, allowMalformed: true);
+        }
+      }
+
+      if (content.trim().isEmpty) {
+        log.w('TXT file is empty or contains only whitespace');
+        return '';
+      }
+
+      // Normalize line endings to \n for consistency
+      content = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+
+      log.i('TXT extracted: ${content.length} characters, ${content.split('\n').length} lines');
+      return content;
+    } catch (e, st) {
+      log.e('Error parsing TXT', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
 }
