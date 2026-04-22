@@ -5,6 +5,7 @@ import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.da
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
 import 'professional_sheet_viewer.dart';
 import 'modern_pdf_viewer.dart';
+import 'text_document_viewer.dart';
 
 /// Returns embedded viewer content only.
 /// The owning screen provides the outer Scaffold/AppBar.
@@ -26,7 +27,7 @@ class DocumentViewerFactory {
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
-      'DOCX' || 'DOC' || 'TXT' => _buildTextViewer(document),
+      'DOCX' || 'DOC' || 'TXT' => _buildTextViewer(document, onTap: onTap),
       'PPT' || 'PPTX' || 'ODP' => _buildPptViewer(document),
       _ => _buildUnsupportedViewer(document.format),
     };
@@ -126,42 +127,17 @@ class DocumentViewerFactory {
     );
   }
 
-  static Widget _buildTextViewer(ParsedDocumentEntity document) {
-    final textContent = document.textContent ?? 'No content';
-    final isEmpty = textContent.trim().isEmpty;
+  static Widget _buildTextViewer(
+    ParsedDocumentEntity document, {
+    VoidCallback? onTap,
+  }) {
+    final textContent = document.textContent ?? '';
     
-    if (isEmpty) {
-      return Builder(
-        builder: (context) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.description_outlined,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Empty file',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: SelectableText(
-        textContent,
-        style: const TextStyle(fontSize: 14, height: 1.6),
+    return GestureDetector(
+      onTap: onTap,
+      child: TextDocumentViewer(
+        textContent: textContent,
+        onTap: onTap,
       ),
     );
   }
