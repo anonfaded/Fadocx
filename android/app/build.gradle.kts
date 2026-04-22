@@ -77,7 +77,8 @@ android {
                 "META-INF/INDEX.LIST",
                 "META-INF/*.md",
                 "META-INF/services/*",
-                "META-INF/LICENSE-notice.md"
+                "META-INF/LICENSE-notice.md",
+                "org/bouncycastle/pqc/**"
             )
         }
     }
