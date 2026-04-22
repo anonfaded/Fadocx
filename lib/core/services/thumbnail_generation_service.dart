@@ -20,8 +20,16 @@ class ThumbnailGenerationService {
   static const int _sheetPreviewCols = 5;
   static const int _sheetPreviewSheets = 1;
   static const int _maxPreviewTextLength = 1800;
+  static const int _readingWordsPerMinute = 200;
+  static const double _compactHeaderHeight = 68.0;
 
   static final Logger _log = Logger();
+  static const TextStyle _previewHeaderMetaStyle = TextStyle(
+    color: ui.Color(0xFFFDFDFD),
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Ubuntu',
+  );
 
   static Future<Uint8List?> generateThumbnail(
     String filePath,
@@ -39,23 +47,31 @@ class ThumbnailGenerationService {
 
       return switch (normalizedType) {
         'pdf' => _generatePdfThumbnail(filePath),
-        'doc' || 'docx' || 'txt' || 'rtf' || 'odt' =>
+        'doc' ||
+        'docx' ||
+        'txt' ||
+        'rtf' ||
+        'odt' =>
           _generateTextThumbnail(filePath, normalizedType),
-        'xls' || 'xlsx' || 'csv' || 'ods' =>
+        'xls' ||
+        'xlsx' ||
+        'csv' ||
+        'ods' =>
           _generateSpreadsheetThumbnail(filePath, normalizedType),
         'ppt' || 'pptx' || 'odp' => _createPlaceholderThumbnail(
-          label: 'SLIDES',
-          accent: ThumbnailColors.pptOrange,
-          caption: 'Preview coming soon',
-        ),
+            label: 'SLIDES',
+            accent: ThumbnailColors.pptOrange,
+            caption: 'Preview coming soon',
+          ),
         _ => _createPlaceholderThumbnail(
-          label: normalizedType.toUpperCase(),
-          accent: ThumbnailColors.gray,
-          caption: fileName,
-        ),
+            label: normalizedType.toUpperCase(),
+            accent: ThumbnailColors.gray,
+            caption: fileName,
+          ),
       };
     } catch (e, st) {
-      _log.e('Thumbnail generation failed for $fileName', error: e, stackTrace: st);
+      _log.e('Thumbnail generation failed for $fileName',
+          error: e, stackTrace: st);
       return null;
     }
   }
@@ -92,7 +108,8 @@ class ThumbnailGenerationService {
 
       return _createPdfPreview(pageBytes: bytes, pageCount: pageCount);
     } on PlatformException catch (e, st) {
-      _log.e('PDF thumbnail render failed: ${e.code}', error: e, stackTrace: st);
+      _log.e('PDF thumbnail render failed: ${e.code}',
+          error: e, stackTrace: st);
     } catch (e, st) {
       _log.e('PDF thumbnail render failed', error: e, stackTrace: st);
     }
@@ -120,46 +137,48 @@ class ThumbnailGenerationService {
           ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
           const ui.Radius.circular(22),
         );
-        canvas.drawRRect(cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
+        canvas.drawRRect(
+            cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
 
-        final headerHeight = 68.0;
+        final headerHeight = _compactHeaderHeight;
         final headerRect = ui.RRect.fromRectAndCorners(
           ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight),
           topLeft: const ui.Radius.circular(22),
           topRight: const ui.Radius.circular(22),
         );
-        canvas.drawRRect(headerRect, ui.Paint()..color = _uiColor(ThumbnailColors.pdfRed));
+        canvas.drawRRect(
+            headerRect, ui.Paint()..color = _uiColor(ThumbnailColors.pdfRed));
 
         final pageLabel = pageCount == 1 ? 'page' : 'pages';
-        _paintCenteredText(
+        _paintPreviewHeaderMeta(
           canvas,
-          text: 'PDF \u2022 $pageCount $pageLabel',
+          text: 'PDF • $pageCount $pageLabel',
           top: 37,
+          left: 18,
           maxWidth: size.width - 72,
-          style: const TextStyle(
-            color: ui.Color(0xFFFDFDFD),
-            fontSize: 21,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Ubuntu',
-          ),
         );
 
         final imageTop = 18.0 + headerHeight;
         final imageAreaHeight = size.height - 36 - headerHeight;
         final imageAreaWidth = size.width - 36;
 
-        final scaleX = imageAreaWidth / pageImage.width;
-        final scaleY = imageAreaHeight / pageImage.height;
-        final scale = scaleX < scaleY ? scaleX : scaleY;
-
-        final drawWidth = pageImage.width * scale;
-        final drawHeight = pageImage.height * scale;
-        final drawLeft = 18 + (imageAreaWidth - drawWidth) / 2;
-        final drawTop = imageTop + (imageAreaHeight - drawHeight) / 2;
+        final scale = imageAreaWidth / pageImage.width;
+        final visibleSourceHeight =
+            (imageAreaHeight / scale).clamp(1.0, pageImage.height.toDouble());
+        final sourceRect = ui.Rect.fromLTWH(
+          0,
+          0,
+          pageImage.width.toDouble(),
+          visibleSourceHeight,
+        );
+        final drawWidth = imageAreaWidth;
+        final drawHeight = imageAreaHeight;
+        final drawLeft = 18.0;
+        final drawTop = imageTop;
 
         canvas.drawImageRect(
           pageImage,
-          ui.Rect.fromLTWH(0, 0, pageImage.width.toDouble(), pageImage.height.toDouble()),
+          sourceRect,
           ui.Rect.fromLTWH(drawLeft, drawTop, drawWidth, drawHeight),
           ui.Paint()..filterQuality = FilterQuality.high,
         );
@@ -174,8 +193,8 @@ class ThumbnailGenerationService {
     String normalizedType,
   ) async {
     try {
-      final text = await _extractTextPreview(filePath, normalizedType);
-      if (text == null || text.trim().isEmpty) {
+      final fullText = await _extractTextContent(filePath, normalizedType);
+      if (fullText == null || fullText.trim().isEmpty) {
         _log.w('Text thumbnail fallback for $filePath');
         return _createPlaceholderThumbnail(
           label: normalizedType.toUpperCase(),
@@ -184,13 +203,25 @@ class ThumbnailGenerationService {
         );
       }
 
+      final previewText = _trimPreviewText(fullText);
+      if (previewText == null || previewText.isEmpty) {
+        _log.w('Text thumbnail preview text empty for $filePath');
+        return _createPlaceholderThumbnail(
+          label: normalizedType.toUpperCase(),
+          accent: _accentForType(normalizedType),
+          caption: 'No readable text found',
+        );
+      }
+
       return _createTextDocumentPreview(
-        text: text,
+        text: previewText,
+        fullText: fullText,
         accent: _accentForType(normalizedType),
         label: normalizedType.toUpperCase(),
       );
     } catch (e, st) {
-      _log.e('Text thumbnail parse failed for $filePath', error: e, stackTrace: st);
+      _log.e('Text thumbnail parse failed for $filePath',
+          error: e, stackTrace: st);
       return _createPlaceholderThumbnail(
         label: normalizedType.toUpperCase(),
         accent: _accentForType(normalizedType),
@@ -220,7 +251,8 @@ class ThumbnailGenerationService {
         label: normalizedType.toUpperCase(),
       );
     } catch (e, st) {
-      _log.e('Spreadsheet thumbnail parse failed for $filePath', error: e, stackTrace: st);
+      _log.e('Spreadsheet thumbnail parse failed for $filePath',
+          error: e, stackTrace: st);
       return _createPlaceholderThumbnail(
         label: normalizedType.toUpperCase(),
         accent: _accentForType(normalizedType),
@@ -229,7 +261,7 @@ class ThumbnailGenerationService {
     }
   }
 
-  static Future<String?> _extractTextPreview(
+  static Future<String?> _extractTextContent(
     String filePath,
     String normalizedType,
   ) async {
@@ -239,15 +271,15 @@ class ThumbnailGenerationService {
           'parseDocument',
           <String, dynamic>{'filePath': filePath, 'format': 'DOC'},
         );
-        return _trimPreviewText(result?['textContent'] as String?);
+        return result?['textContent'] as String?;
       case 'docx':
-        return _trimPreviewText(await DocumentParserService.parseDOCX(filePath));
+        return await DocumentParserService.parseDOCX(filePath);
       case 'txt':
-        return _trimPreviewText(await DocumentParserService.parseTXT(filePath));
+        return await DocumentParserService.parseTXT(filePath);
       case 'rtf':
-        return _trimPreviewText(await DocumentParserService.parseRTF(filePath));
+        return await DocumentParserService.parseRTF(filePath);
       case 'odt':
-        return _trimPreviewText(await DocumentParserService.parseODT(filePath));
+        return await DocumentParserService.parseODT(filePath);
       default:
         return null;
     }
@@ -292,7 +324,13 @@ class ThumbnailGenerationService {
       return null;
     }
 
-    final normalized = value.replaceAll(RegExp(r'\s+'), ' ').trim();
+    final normalized = value
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .split('\n')
+        .map((line) => line.replaceAll(RegExp(r'[ \t]+'), ' ').trimRight())
+        .join('\n')
+        .trim();
     if (normalized.isEmpty) {
       return null;
     }
@@ -306,6 +344,7 @@ class ThumbnailGenerationService {
 
   static Future<Uint8List> _createTextDocumentPreview({
     required String text,
+    required String fullText,
     required ColorRgb accent,
     required String label,
   }) {
@@ -316,9 +355,10 @@ class ThumbnailGenerationService {
         ui.Rect.fromLTWH(20, 20, size.width - 40, size.height - 40),
         const ui.Radius.circular(22),
       );
-      canvas.drawRRect(pageRect, ui.Paint()..color = const ui.Color(0xFFF8F6F1));
+      canvas.drawRRect(
+          pageRect, ui.Paint()..color = const ui.Color(0xFFF8F6F1));
 
-      final headerHeight = 78.0;
+      final headerHeight = _compactHeaderHeight;
       final headerRect = ui.RRect.fromRectAndCorners(
         ui.Rect.fromLTWH(20, 20, size.width - 40, headerHeight),
         topLeft: const ui.Radius.circular(22),
@@ -326,18 +366,13 @@ class ThumbnailGenerationService {
       );
       canvas.drawRRect(headerRect, ui.Paint()..color = _uiColor(accent));
 
-      final stats = _buildReadingStats(text);
-      _paintCenteredText(
+      final stats = _buildReadingStats(fullText);
+      _paintPreviewHeaderMeta(
         canvas,
         text: stats,
-        top: 42,
+        top: 37,
+        left: 20,
         maxWidth: size.width - 80,
-        style: const TextStyle(
-          color: ui.Color(0xFFFDFDFD),
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Ubuntu',
-        ),
       );
 
       _paintText(
@@ -385,7 +420,8 @@ class ThumbnailGenerationService {
         ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
         const ui.Radius.circular(22),
       );
-      canvas.drawRRect(cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
+      canvas.drawRRect(
+          cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
 
       final topBandRect = ui.RRect.fromRectAndCorners(
         ui.Rect.fromLTWH(18, 18, size.width - 36, 68),
@@ -396,26 +432,24 @@ class ThumbnailGenerationService {
 
       final firstSheet = sheets.first;
       final sheetName =
-          (firstSheet is Map ? firstSheet['name'] : null)?.toString() ?? 'Sheet1';
+          (firstSheet is Map ? firstSheet['name'] : null)?.toString() ??
+              'Sheet1';
       final rows = _extractSheetRows(firstSheet);
       final visibleRows = rows.take(_sheetPreviewRows).toList();
-      final visibleColCount = visibleRows.fold<int>(
-        0,
-        (current, row) => row.length > current ? row.length : current,
-      ).clamp(1, _sheetPreviewCols);
+      final visibleColCount = visibleRows
+          .fold<int>(
+            0,
+            (current, row) => row.length > current ? row.length : current,
+          )
+          .clamp(1, _sheetPreviewCols);
       final dataRowCount = visibleRows.isEmpty ? 6 : visibleRows.length;
 
-      _paintCenteredText(
+      _paintPreviewHeaderMeta(
         canvas,
-        text: '$label \u2022 $sheetName \u2022 $dataRowCount rows',
+        text: '$label • $sheetName • $dataRowCount rows',
         top: 37,
+        left: 18,
         maxWidth: size.width - 72,
-        style: const TextStyle(
-          color: ui.Color(0xFFFDFDFD),
-          fontSize: 19,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Ubuntu',
-        ),
       );
 
       final gridLeft = 18.0;
@@ -536,7 +570,8 @@ class ThumbnailGenerationService {
         ui.Rect.fromLTWH(26, 32, size.width - 52, size.height - 64),
         const ui.Radius.circular(26),
       );
-      canvas.drawRRect(cardRect, ui.Paint()..color = const ui.Color(0xFFF9FAF8));
+      canvas.drawRRect(
+          cardRect, ui.Paint()..color = const ui.Color(0xFFF9FAF8));
 
       final accentPaint = ui.Paint()..color = _uiColor(accent);
       canvas.drawCircle(ui.Offset(size.width / 2, 178), 52, accentPaint);
@@ -690,9 +725,64 @@ class ThumbnailGenerationService {
 
   static String _buildReadingStats(String text) {
     final words = RegExp(r'\S+').allMatches(text).length;
-    final minutes = words == 0 ? 0 : (words / 220).ceil();
-    final minuteLabel = minutes == 1 ? 'min' : 'mins';
-    return '$words words \u2022 ${minutes == 0 ? '<1' : minutes} $minuteLabel read';
+    final lines = text.split(RegExp(r'\r\n|\r|\n')).length;
+    final minutes = words == 0 ? 0 : (words / _readingWordsPerMinute).ceil();
+    final minuteLabel = minutes == 1 ? 'minute' : 'minutes';
+    return '${minutes == 0 ? '<1' : minutes} $minuteLabel read • $words words • $lines lines';
+  }
+
+  static void _paintAutoFitCenteredText(
+    ui.Canvas canvas, {
+    required String text,
+    required double top,
+    required double maxWidth,
+    required TextStyle baseStyle,
+    required double minFontSize,
+    int maxLines = 1,
+    double left = 0,
+  }) {
+    var fontSize = baseStyle.fontSize ?? minFontSize;
+    TextPainter painter;
+
+    while (true) {
+      final style = baseStyle.copyWith(fontSize: fontSize);
+      painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.center,
+        maxLines: maxLines,
+        ellipsis: maxLines == 1 ? '' : null,
+      )..layout(maxWidth: maxWidth);
+
+      final maxHeight = fontSize * (maxLines == 1 ? 1.3 : 2.4);
+      if ((painter.width <= maxWidth && painter.height <= maxHeight) ||
+          fontSize <= minFontSize) {
+        break;
+      }
+      fontSize -= 1;
+    }
+
+    final x = left + ((maxWidth - painter.width) / 2).clamp(0, maxWidth);
+    painter.paint(canvas, ui.Offset(x, top));
+  }
+
+  static void _paintPreviewHeaderMeta(
+    ui.Canvas canvas, {
+    required String text,
+    required double top,
+    required double maxWidth,
+    double left = 0,
+  }) {
+    _paintAutoFitCenteredText(
+      canvas,
+      text: text,
+      top: top,
+      maxWidth: maxWidth,
+      left: left,
+      baseStyle: _previewHeaderMetaStyle,
+      minFontSize: 11,
+      maxLines: 1,
+    );
   }
 
   static String _columnName(int index) {

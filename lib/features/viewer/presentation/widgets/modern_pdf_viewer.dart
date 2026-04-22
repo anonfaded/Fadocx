@@ -922,13 +922,12 @@ class _ModernPdfViewerState extends State<ModernPdfViewer> with TickerProviderSt
     // Always use ColorFiltered with RepaintBoundary to maintain widget stability
     // and improve rendering performance. The colorFilter property changes dynamically
     // instead of rebuilding the entire widget tree.
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: RepaintBoundary(
-        child: ColorFiltered(
-          colorFilter: widget.invertColors ? invertColorFilter : const ColorFilter.mode(Colors.transparent, BlendMode.lighten),
-          child: viewer,
-        ),
+    return RepaintBoundary(
+      child: ColorFiltered(
+        colorFilter: widget.invertColors
+            ? invertColorFilter
+            : const ColorFilter.mode(Colors.transparent, BlendMode.lighten),
+        child: viewer,
       ),
     );
   }
@@ -1962,5 +1961,4 @@ class _FocusClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(_FocusClipper oldClipper) => rects != oldClipper.rects;
 }
-
 

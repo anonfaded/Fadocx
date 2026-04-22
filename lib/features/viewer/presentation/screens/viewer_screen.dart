@@ -29,6 +29,7 @@ class ViewerScreen extends ConsumerStatefulWidget {
 class _ViewerScreenState extends ConsumerState<ViewerScreen>
     with TickerProviderStateMixin {
   static final _log = Logger();
+  static const int _readingWordsPerMinute = 200;
   static const double _kSidebarTopOffset = 56;
   static const double _kSidebarBottomOffset = 88;
   static const double _kSidebarRadius = 24.0;
@@ -138,12 +139,24 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   void _onSearchHighlight() {
     if (!_sidebarOpen) return;
-    (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+    if (_isPdfDocument()) {
+      final viewerState = _pdfViewerKey.currentState as dynamic;
+      final isSidebarOpen = viewerState?.showSidebar as bool? ?? false;
+      if (isSidebarOpen) {
+        viewerState?.toggleSidebar();
+      }
+    }
     setState(() => _sidebarOpen = false);
     _sidebarController.reverse();
     Future.delayed(const Duration(milliseconds: 1800), () {
       if (mounted) {
-        (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+        if (_isPdfDocument()) {
+          final viewerState = _pdfViewerKey.currentState as dynamic;
+          final isSidebarOpen = viewerState?.showSidebar as bool? ?? false;
+          if (!isSidebarOpen) {
+            viewerState?.toggleSidebar();
+          }
+        }
         setState(() => _sidebarOpen = true);
         _sidebarController.forward();
       }
@@ -462,6 +475,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         key: _textViewerKey,
         textContent: document.textContent,
         onTap: _toggleControls,
+        onSearchHighlight: _onSearchHighlight,
         fontSize: _textFontSize,
         wordWrap: _textWordWrap,
         useMonoFont: _textFontIsMonoFont,
@@ -546,39 +560,52 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                   child: SizedBox(
                     height: 40,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Stack(
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.chevron_left),
-                            onPressed: () => context.pop(),
-                            tooltip: 'Back',
-                            iconSize: 20,
-                            constraints: const BoxConstraints(
-                              minWidth: 32,
-                              minHeight: 32,
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              icon: const Icon(Icons.chevron_left),
+                              onPressed: () => context.pop(),
+                              tooltip: 'Back',
+                              iconSize: 20,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              padding: EdgeInsets.zero,
                             ),
-                            padding: EdgeInsets.zero,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.fileName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                                _buildTimeToRead(context),
-                              ],
+                          const Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              width: 32,
+                              height: 32,
+                            ),
+                          ),
+                          Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 420),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    widget.fileName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                  _buildTimeToRead(context),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -605,16 +632,20 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       return const SizedBox.shrink();
     }
 
-    // Calculate word count and reading time (200 words per minute average)
+    // Calculate word count and reading time
     final wordCount = textContent.split(RegExp(r'\s+')).length;
-    final readingMinutes = (wordCount / 200).ceil().clamp(1, 999);
+    final lineCount = textContent.split(RegExp(r'\r\n|\r|\n')).length;
+    final readingMinutes =
+        (wordCount / _readingWordsPerMinute).ceil().clamp(1, 999);
+    final minuteLabel = readingMinutes == 1 ? 'minute' : 'minutes';
 
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Text(
-        '~$readingMinutes min read • $wordCount words',
+        '~$readingMinutes $minuteLabel read • $wordCount words • $lineCount lines',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

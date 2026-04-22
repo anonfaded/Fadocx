@@ -42,15 +42,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Widget _buildAppBarContent(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Center(
-        child: Text(
-          'Documents',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-        ),
+    return Center(
+      child: Text(
+        'Documents',
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
       ),
     );
   }
@@ -153,7 +150,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         } catch (e) {
           log.e('Error clearing thumbnail cache: $e');
         }
-        
+
         // Invalidate the provider to force a refresh
         ref.invalidate(recentFilesProvider);
         // Wait for the new data to be fetched
@@ -224,7 +221,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.714, // Matches 200x280 thumbnail aspect ratio
+                childAspectRatio:
+                    0.714, // Matches 200x280 thumbnail aspect ratio
               ),
               itemCount: filteredFiles.length,
               itemBuilder: (context, index) =>
@@ -425,23 +423,24 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                   // Thumbnail preview
-                   Consumer(
-                     builder: (context, ref, _) {
-                       final thumbnail = ref.watch(thumbnailProvider(file.id));
-                       
-                       // Watch generation to trigger and refresh when complete
-                       // (result is unused intentionally - just triggers watching)
-                       // ignore: unused_local_variable
-                       final generation = ref.watch(generateAndCacheThumbnailProvider(
-                         (
-                           fileId: file.id,
-                           filePath: file.filePath,
-                           fileName: file.fileName,
-                           fileType: file.fileType,
-                         ),
-                       ));
-                      
+                  // Thumbnail preview
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final thumbnail = ref.watch(thumbnailProvider(file.id));
+
+                      // Watch generation to trigger and refresh when complete
+                      // (result is unused intentionally - just triggers watching)
+                      // ignore: unused_local_variable
+                      final generation =
+                          ref.watch(generateAndCacheThumbnailProvider(
+                        (
+                          fileId: file.id,
+                          filePath: file.filePath,
+                          fileName: file.fileName,
+                          fileType: file.fileType,
+                        ),
+                      ));
+
                       return thumbnail.when(
                         data: (bytes) {
                           if (bytes != null) {
@@ -523,7 +522,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       height: 70,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+        color: Theme.of(context)
+            .colorScheme
+            .primaryContainer
+            .withValues(alpha: 0.3),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
@@ -712,7 +714,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               Text('Last modified: ${_formatDateTime(file.dateModified)}'),
               if (file.isDeleted) ...[
                 const SizedBox(height: 8),
-                Text('In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})'),
+                Text(
+                    'In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})'),
               ],
             ],
           ),
@@ -765,7 +768,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     buffer.writeln('Date opened: ${_formatDateTime(file.dateOpened)}');
     buffer.writeln('Last modified: ${_formatDateTime(file.dateModified)}');
     if (file.isDeleted) {
-      buffer.writeln('In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})');
+      buffer.writeln(
+          'In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})');
     }
     return buffer.toString();
   }
