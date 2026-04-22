@@ -10,6 +10,7 @@ import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -18,6 +19,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final packageInfoAsync = ref.watch(packageInfoProvider);
 
     return FloatingDockScaffold(
       appBarContent: SafeArea(
@@ -128,8 +130,14 @@ class SettingsScreen extends ConsumerWidget {
                 _SettingsRow(
                   icon: Icons.info_outline,
                   title: 'Version',
-                  value: '1.0.0 (Build 1)',
-                  onTap: () => _showVersionInfo(context),
+                  value: packageInfoAsync.when(
+                    data: (info) => '${info.version} (${info.buildNumber})',
+                    loading: () => '...',
+                    error: (_, __) => 'Unknown',
+                  ),
+                  onTap: () => packageInfoAsync.whenData(
+                    (info) => _showVersionInfo(context, info),
+                  ),
                 ),
                 _divider(context),
                 _SettingsRow(
@@ -665,93 +673,107 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showVersionInfo(BuildContext context) {
+  void _showVersionInfo(BuildContext context, PackageInfo packageInfo) {
+    final appName = packageInfo.appName;
+    final version = packageInfo.version;
+    final buildNumber = packageInfo.buildNumber;
+    final packageName = packageInfo.packageName;
+    final versionString = 'Version $version (Build $buildNumber)';
+    final isBeta = packageName.endsWith('.beta');
+    final iconAsset = isBeta ? 'assets/fadocx_beta.png' : 'assets/fadocx.png';
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         padding: const EdgeInsets.all(24),
-        decoration: _bottomSheetDecoration(context),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _handle(context),
-              const SizedBox(height: 8),
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.tertiary,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    'assets/fadocx.png',
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  iconAsset,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Fadocx',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              appName,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                versionString,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
               ),
-              const SizedBox(height: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Version 1.0.0 (Build 1)',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              packageName,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(
+                    text: '$appName v$version (Build $buildNumber)\nPackage: $packageName',
+                  ));
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Copied to clipboard')),
+                  );
+                },
+                icon: const Icon(Icons.copy),
+                label: const Text('Copy Info'),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'com.fadseclab.fadocx',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () {
-                    Clipboard.setData(const ClipboardData(
-                      text:
-                          'Fadocx v1.0.0 (Build 1)\nPackage: com.fadseclab.fadocx',
-                    ));
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Copied to clipboard')),
-                    );
-                  },
-                  icon: const Icon(Icons.copy),
-                  label: const Text('Copy Info'),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

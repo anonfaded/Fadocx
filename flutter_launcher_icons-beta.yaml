@@ -1,0 +1,4 @@
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: false
+  image_path: "assets/fadocx_beta.png"
