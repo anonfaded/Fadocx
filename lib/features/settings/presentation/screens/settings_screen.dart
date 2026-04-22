@@ -156,11 +156,12 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               _buildSectionHeader(context, 'Danger Zone', color: Colors.red),
               _buildDangerGroup(context, [
-                _SettingsArrowRow(
+                _DangerRow(
                   icon: Icons.delete_outline,
                   title: 'Trash',
-                  subtitle: 'View and manage deleted files',
-                  onTap: () {
+                  subtitle: 'View deleted files',
+                  confirmText: '',
+                  onConfirm: () {
                     context.push(RouteNames.trash);
                   },
                 ),
@@ -383,7 +384,7 @@ class SettingsScreen extends ConsumerWidget {
                               Expanded(child: _storageChip(Icons.camera, 'Scans', '${StorageService.formatBytes(data[StorageService.scansFolder]?['bytes'] ?? 0)} • ${data[StorageService.scansFolder]?['count'] ?? 0} files', Colors.teal)),
                             ]),
                             const SizedBox(height: 12),
-                            _storageChip(Icons.delete_outline, 'Trash', '${StorageService.formatBytes(data[StorageService.trashFolder]?['bytes'] ?? 0)} • ${data[StorageService.trashFolder]?['count'] ?? 0} files', Colors.grey),
+                            _storageChip(Icons.delete_outline, 'Trash', '${StorageService.formatBytes(data[StorageService.trashFolder]?['bytes'] ?? 0)} • ${data[StorageService.trashFolder]?['count'] ?? 0} files', Colors.red),
                           ],
                         );
                       },
@@ -903,65 +904,6 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 }
-
-/// Settings arrow row - navigates to another screen
-class _SettingsArrowRow extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _SettingsArrowRow({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, size: 24),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Icon(Icons.arrow_forward_ios, size: 16),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 
 class AnimatedListView extends StatelessWidget {
   final List<Widget> children;
