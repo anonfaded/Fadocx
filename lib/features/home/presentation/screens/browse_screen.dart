@@ -516,7 +516,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.0,
+          childAspectRatio: 0.714, // Matches 200x280 thumbnail aspect ratio
         ),
         itemCount: filteredDocuments.length,
         itemBuilder: (context, index) {

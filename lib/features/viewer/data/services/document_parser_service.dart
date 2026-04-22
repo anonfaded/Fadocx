@@ -129,10 +129,20 @@ class DocumentParserService {
 
   /// Parse ODS format (OpenDocument Spreadsheet)
   /// Returns table structure
-  static Future<Map<String, dynamic>> parseODS(String filePath) async {
+  static Future<Map<String, dynamic>> parseODS(
+    String filePath, {
+    int? maxRowsPerSheet,
+    int? maxCols,
+    int? maxSheets,
+  }) async {
     try {
       log.i('Parsing ODS file: $filePath');
-      return await _parseOpenDocumentSpreadsheet(filePath);
+      return await _parseOpenDocumentSpreadsheet(
+        filePath,
+        maxRowsPerSheet: maxRowsPerSheet,
+        maxCols: maxCols,
+        maxSheets: maxSheets,
+      );
     } catch (e, st) {
       log.e('Error parsing ODS', error: e, stackTrace: st);
       rethrow;
@@ -248,8 +258,11 @@ class DocumentParserService {
 
   // Helper: Parse ODS (spreadsheet)
   static Future<Map<String, dynamic>> _parseOpenDocumentSpreadsheet(
-    String filePath,
-  ) async {
+    String filePath, {
+    int? maxRowsPerSheet,
+    int? maxCols,
+    int? maxSheets,
+  }) async {
     try {
       final file = File(filePath);
       final bytes = await file.readAsBytes();
@@ -264,21 +277,58 @@ class DocumentParserService {
       final document = XmlDocument.parse(xmlContent);
 
       final sheets = <Map<String, dynamic>>[];
+      final rowLimit = maxRowsPerSheet ?? 1 << 30;
+      final colLimit = maxCols ?? 1 << 30;
+      final sheetLimit = maxSheets ?? 1 << 30;
 
       // Parse each table (sheet)
       for (var table in document.findAllElements('table:table')) {
+        if (sheets.length >= sheetLimit) {
+          break;
+        }
+
         final sheetName =
             table.getAttribute('table:name') ?? 'Sheet${sheets.length + 1}';
         final rows = <List<String>>[];
 
         // Parse rows
         for (var row in table.findAllElements('table:table-row')) {
-          final cells = <String>[];
-          for (var cell in row.findAllElements('table:table-cell')) {
-            final cellText = cell.innerText;
-            cells.add(cellText);
+          if (rows.length >= rowLimit) {
+            break;
           }
-          if (cells.isNotEmpty) {
+
+          final rowRepeat =
+              int.tryParse(row.getAttribute('table:number-rows-repeated') ?? '') ??
+              1;
+          final cells = <String>[];
+
+          for (var cell in row.findElements('table:table-cell')) {
+            final cellText = cell.innerText.trim();
+            final cellRepeat =
+                int.tryParse(
+                      cell.getAttribute('table:number-columns-repeated') ?? '',
+                    ) ??
+                    1;
+
+            for (var repeatIndex = 0;
+                repeatIndex < cellRepeat && cells.length < colLimit;
+                repeatIndex++) {
+              cells.add(cellText);
+            }
+
+            if (cells.length >= colLimit) {
+              break;
+            }
+          }
+
+          if (cells.any((cell) => cell.isNotEmpty)) {
+            for (var repeatIndex = 0;
+                repeatIndex < rowRepeat && rows.length < rowLimit;
+                repeatIndex++) {
+              rows.add(List<String>.from(cells));
+            }
+          } else if (rows.isEmpty) {
+            // Preserve an initial empty row for empty-sheet previews.
             rows.add(cells);
           }
         }
@@ -286,6 +336,8 @@ class DocumentParserService {
         sheets.add({
           'name': sheetName,
           'rows': rows,
+          'rowCount': rows.length,
+          'colCount': rows.isNotEmpty ? rows.first.length : 0,
         });
       }
 

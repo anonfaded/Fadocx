@@ -26,7 +26,7 @@ class TextDocumentViewer extends StatefulWidget {
 }
 
 class _TextDocumentViewerState extends State<TextDocumentViewer> {
-  late List<String> _lines;
+  late String _fullContent;
   DateTime? _tapStartTime;
   Offset? _tapStartPosition;
   final ScrollController _scrollController = ScrollController();
@@ -38,13 +38,9 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
   }
 
   void _initializeContent() {
-    final content = widget.textContent ?? '';
-    if (content.isEmpty) {
-      _lines = [];
-    } else {
-      // Split into lines for virtualization - more efficient than loading entire text
-      _lines = content.split('\n');
-      log.d('Text document initialized with ${_lines.length} lines');
+    _fullContent = widget.textContent ?? '';
+    if (_fullContent.isNotEmpty) {
+      log.d('Text document initialized with ${_fullContent.split("\n").length} lines');
     }
   }
 
@@ -92,9 +88,20 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
 
   @override
   Widget build(BuildContext context) {
-    if (_lines.isEmpty) {
+    if (_fullContent.isEmpty) {
       return _buildEmptyView(context);
     }
+
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    final fontFamily = widget.useMonoFont ? 'Courier' : 'Ubuntu';
+    final fontSize = widget.fontSize;
+    final lines = _fullContent.split('\n');
+    final totalLineDigits = lines.length.toString().length;
+    final lineNumberWidth = switch (totalLineDigits) {
+      1 => 30.0,
+      2 => 40.0,
+      _ => 50.0,
+    };
 
     // Wrap entire content in Listener to detect taps (like PDF viewer)
     return Listener(
@@ -119,19 +126,45 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
       },
       child: Container(
         color: Theme.of(context).colorScheme.surface,
-        child: ListView.builder(
-          controller: _scrollController,
-          // Padding at top allows content to scroll past but shows space initially
-          padding: const EdgeInsets.only(bottom: 16),
-          itemCount: _lines.length + 1, // +1 for top spacer
-          itemBuilder: (context, index) {
-            // First item is padding spacer that can scroll up
-            if (index == 0) {
-              return SizedBox(height: 64); // Match appbar height + buffer
-            }
-            final line = _lines[index - 1];
-            return _buildTextLine(context, line, index - 1);
-          },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Line numbers (scrollable with content)
+            _buildLineNumbers(context, lines, lineNumberWidth, fontSize),
+            // Content area with selection enabled (allows multi-line selection)
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 16, top: 40),
+                  child: widget.wordWrap
+                      ? SelectableText(
+                          _fullContent.isEmpty ? ' ' : _fullContent,
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            color: textColor,
+                            fontFamily: fontFamily,
+                            height: 1.5,
+                            letterSpacing: -0.3,
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: SelectableText(
+                            _fullContent.isEmpty ? ' ' : _fullContent,
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              color: textColor,
+                              fontFamily: fontFamily,
+                              height: 1.5,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -162,63 +195,42 @@ class _TextDocumentViewerState extends State<TextDocumentViewer> {
     );
   }
 
-  Widget _buildTextLine(BuildContext context, String line, int index) {
-    final textColor = Theme.of(context).colorScheme.onSurface;
+  Widget _buildLineNumbers(
+    BuildContext context,
+    List<String> lines,
+    double lineNumberWidth,
+    double fontSize,
+  ) {
     final lineNumberColor = Theme.of(context).colorScheme.onSurfaceVariant;
-    final fontFamily = widget.useMonoFont ? 'Courier' : 'Ubuntu'; // Mono or Ubuntu font
-    final fontSize = widget.fontSize;
+    final fontFamily = widget.useMonoFont ? 'Courier' : 'Ubuntu';
 
-    // Calculate line number width dynamically (max line number width)
-    final lineNumberWidth = (_lines.length.toString().length * 8 + 12).clamp(40, 60).toDouble();
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, right: 12, top: 1, bottom: 1),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Line number (compact, right-aligned)
-          SizedBox(
-            width: lineNumberWidth,
-            child: Text(
-              (index + 1).toString().padLeft(5),
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: fontSize * 0.9,
-                color: lineNumberColor.withValues(alpha: 0.4),
-                fontFamily: fontFamily,
-                height: 1.5,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12), // Small gap between line number and content
-          // Line content - non-selectable when wrap is off to prevent individual scrolling
-          Expanded(
-            child: widget.wordWrap
-                ? SelectableText(
-                    line.isEmpty ? ' ' : line,
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 4, right: 12, top: 40, bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            for (int i = 0; i < lines.length; i++)
+              SizedBox(
+                height: (fontSize * 1.5),
+                child: SizedBox(
+                  width: lineNumberWidth,
+                  child: Text(
+                    (i + 1).toString().padLeft(5),
+                    textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: fontSize,
-                      color: textColor,
+                      fontSize: fontSize * 0.9,
+                      color: lineNumberColor.withValues(alpha: 0.4),
                       fontFamily: fontFamily,
                       height: 1.5,
-                      letterSpacing: -0.3,
+                      letterSpacing: -0.5,
                     ),
-                  )
-                : Text(
-                    line.isEmpty ? ' ' : line,
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      color: textColor,
-                      fontFamily: fontFamily,
-                      height: 1.5,
-                      letterSpacing: -0.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-          ),
-        ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

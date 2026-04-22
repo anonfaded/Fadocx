@@ -246,7 +246,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarColor: Colors.transparent,
       ),
     );
@@ -515,16 +515,23 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              widget.fileName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.fileName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                _buildTimeToRead(context),
+                              ],
                             ),
                           ),
                         ],
@@ -536,6 +543,34 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTimeToRead(BuildContext context) {
+    final docState = ref.watch(documentViewerProvider);
+    if (docState.document == null) {
+      return const SizedBox.shrink();
+    }
+
+    final textContent = docState.document!.textContent ?? '';
+    if (textContent.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Calculate word count and reading time (200 words per minute average)
+    final wordCount = textContent.split(RegExp(r'\s+')).length;
+    final readingMinutes = (wordCount / 200).ceil().clamp(1, 999);
+    
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Text(
+        '~$readingMinutes min read • $wordCount words',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
       ),
     );
   }
@@ -632,27 +667,129 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     try {
       final extractMethod = viewerState.extractAllText;
       if (extractMethod == null) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Text extraction not available')),
-        );
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Text extraction not available')),
+          );
+        }
         return;
       }
 
       final result = await extractMethod() as Map<String, dynamic>;
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
 
       final text = result['text'] as String;
       final wordCount = result['wordCount'] as int;
       final pageCount = result['pageCount'] as int;
 
       if (text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No text found in this PDF')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No text found in this PDF')),
+          );
+        }
         return;
       }
 
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.copy_all,
+                    size: 20, color: Theme.of(ctx).colorScheme.primary),
+                const SizedBox(width: 8),
+                const Text('Copy All Text'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                    'This will extract text from all $pageCount pages and copy to clipboard.'),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.text_fields,
+                          size: 16, color: Theme.of(ctx).colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$wordCount words found',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(ctx).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              FilledButton.icon(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await Clipboard.setData(ClipboardData(text: text));
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Copied $wordCount words from $pageCount pages'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.copy, size: 16),
+                label: const Text('Copy'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
+  void _copyDocumentText() async {
+    // For TXT/DOCX/DOC, copy all content
+    final doc = ref.watch(documentViewerProvider);
+    if (doc.document == null) return;
+
+    final text = doc.document!.textContent ?? '';
+    if (text.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No text content available')),
+        );
+      }
+      return;
+    }
+
+    final wordCount = text.split(RegExp(r'\s+')).length;
+    final lineCount = text.split('\n').length;
+
+    if (mounted) {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -668,8 +805,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                  'This will extract text from all $pageCount pages and copy to clipboard.'),
+              Text('This will copy the entire document content to clipboard.'),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -677,17 +813,37 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                   color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.text_fields,
-                        size: 16, color: Theme.of(ctx).colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Text(
-                      '$wordCount words found',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(ctx).colorScheme.primary,
-                      ),
+                    Row(
+                      children: [
+                        Icon(Icons.text_fields,
+                            size: 16, color: Theme.of(ctx).colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Text(
+                          '$wordCount words',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(ctx).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.format_list_numbered,
+                            size: 16, color: Theme.of(ctx).colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Text(
+                          '$lineCount lines',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(ctx).colorScheme.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -706,7 +862,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Copied $wordCount words from $pageCount pages'),
+                      content: Text('Copied $wordCount words from $lineCount lines'),
                       duration: const Duration(seconds: 2),
                     ),
                   );
@@ -718,114 +874,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ],
         ),
       );
-    } catch (e) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
     }
-  }
-
-  void _copyDocumentText() async {
-    // For TXT/DOCX/DOC, copy all content
-    final doc = ref.watch(documentViewerProvider);
-    if (doc.document == null) return;
-
-    final text = doc.document!.textContent ?? '';
-    if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No text content available')),
-      );
-      return;
-    }
-
-    final wordCount = text.split(RegExp(r'\s+')).length;
-    final lineCount = text.split('\n').length;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.copy_all,
-                size: 20, color: Theme.of(ctx).colorScheme.primary),
-            const SizedBox(width: 8),
-            const Text('Copy All Text'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('This will copy the entire document content to clipboard.'),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.text_fields,
-                          size: 16, color: Theme.of(ctx).colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        '$wordCount words',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(ctx).colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.format_list_numbered,
-                          size: 16, color: Theme.of(ctx).colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        '$lineCount lines',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(ctx).colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton.icon(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await Clipboard.setData(ClipboardData(text: text));
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Copied $wordCount words from $lineCount lines'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.copy, size: 16),
-            label: const Text('Copy'),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildFloatingBottomPanel(BuildContext context, bool isDark) {
@@ -892,7 +941,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     // Main control row
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: !_bottomMenuExpanded ? _toggleControls : null,
+                      onTap: () {}, // Absorb taps but don't hide controls
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,

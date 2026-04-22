@@ -18,17 +18,32 @@ final log = Logger();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Make status bar transparent and overlay style
+  // Initialize Hive FIRST - pre-opens boxes
+  await HiveDatasource.initialize();
+
+  // Load theme from Hive to set correct system UI overlay style
+  String savedTheme = 'dark'; // Default fallback
+  try {
+    final settings = await HiveDatasource().getSettings();
+    if (settings?.theme != null) {
+      savedTheme = settings!.theme;
+      log.i('📱 Theme loaded from Hive: $savedTheme');
+    }
+  } catch (e) {
+    log.w('⚠️ Could not load theme from Hive, using default: $e');
+  }
+
+  // Set system UI overlay style to match saved theme
+  // IMPORTANT: Use statusBarIconBrightness (not deprecated statusBarBrightness)
+  final isDarkTheme = savedTheme.toLowerCase() == 'dark';
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
+    SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarBrightness: Brightness.light,
+      statusBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
       systemNavigationBarColor: Colors.transparent,
     ),
   );
-
-  // Initialize Hive in background - pre-opens boxes
-  await HiveDatasource.initialize();
+  log.d('✅ System UI overlay style set for $savedTheme theme');
 
   // Clear old thumbnail cache to regenerate with new system
   try {
@@ -38,7 +53,14 @@ void main() async {
     log.e('Error clearing thumbnail cache on startup', error: e);
   }
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        initialThemeProvider.overrideWithValue(savedTheme),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends ConsumerStatefulWidget {
