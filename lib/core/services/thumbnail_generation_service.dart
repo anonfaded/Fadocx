@@ -155,7 +155,7 @@ class ThumbnailGenerationService {
           text: 'PDF • $pageCount $pageLabel',
           top: 37,
           left: 18,
-          maxWidth: size.width - 72,
+          maxWidth: size.width - 36,
         );
 
         final imageTop = 18.0 + headerHeight;
@@ -372,7 +372,7 @@ class ThumbnailGenerationService {
         text: stats,
         top: 37,
         left: 20,
-        maxWidth: size.width - 80,
+        maxWidth: size.width - 40,
       );
 
       _paintText(
@@ -449,7 +449,7 @@ class ThumbnailGenerationService {
         text: '$label • $sheetName • $dataRowCount rows',
         top: 37,
         left: 18,
-        maxWidth: size.width - 72,
+        maxWidth: size.width - 36,
       );
 
       final gridLeft = 18.0;

@@ -41,6 +41,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   bool _sidebarOpen = false;
   int _currentPage = 1;
   int _totalPages = 0;
+  int? _documentWordCount;
+  int? _documentLineCount;
   double _sidebarDragOffset = 0.0;
   double _textFontSize = 14;
   bool _textWordWrap = true;
@@ -466,6 +468,13 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           }
         },
         onSearchHighlight: _onSearchHighlight,
+        onTextStatsChanged: (wordCount, lineCount) {
+          if (!mounted) return;
+          setState(() {
+            _documentWordCount = wordCount;
+            _documentLineCount = lineCount;
+          });
+        },
       );
     }
 
@@ -628,13 +637,18 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
 
     final textContent = docState.document!.textContent ?? '';
-    if (textContent.isEmpty) {
+    final hasEmbeddedText = textContent.isNotEmpty;
+    final wordCount = hasEmbeddedText
+        ? textContent.split(RegExp(r'\s+')).length
+        : _documentWordCount;
+    final lineCount = hasEmbeddedText
+        ? textContent.split(RegExp(r'\r\n|\r|\n')).length
+        : _documentLineCount;
+
+    if (wordCount == null || lineCount == null || wordCount == 0) {
       return const SizedBox.shrink();
     }
 
-    // Calculate word count and reading time
-    final wordCount = textContent.split(RegExp(r'\s+')).length;
-    final lineCount = textContent.split(RegExp(r'\r\n|\r|\n')).length;
     final readingMinutes =
         (wordCount / _readingWordsPerMinute).ceil().clamp(1, 999);
     final minuteLabel = readingMinutes == 1 ? 'minute' : 'minutes';
