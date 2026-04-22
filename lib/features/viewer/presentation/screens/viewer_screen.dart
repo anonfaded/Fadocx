@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/text_document_viewer.dart';
@@ -27,6 +28,7 @@ class ViewerScreen extends ConsumerStatefulWidget {
 
 class _ViewerScreenState extends ConsumerState<ViewerScreen>
     with TickerProviderStateMixin {
+  static final _log = Logger();
   static const double _kSidebarTopOffset = 56;
   static const double _kSidebarBottomOffset = 88;
   static const double _kSidebarRadius = 24.0;
@@ -49,6 +51,27 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
   GlobalKey<State<TextDocumentViewer>>? _textViewerKey;
   static const double _kDragCloseThreshold = 100.0;
+
+  bool _isPdfDocument() {
+    final doc = ref.read(documentViewerProvider).document;
+    return doc?.format.toUpperCase() == 'PDF';
+  }
+
+  bool _canOpenSidebar() {
+    if (!_controlsVisible) return false;
+    if (_isPdfDocument()) {
+      return _pdfViewerKey.currentState != null;
+    }
+    return true;
+  }
+
+  Widget? _resolveSidebarContent(BuildContext context) {
+    if (_isPdfDocument()) {
+      final viewerState = _pdfViewerKey.currentState as dynamic;
+      return viewerState?.buildDrawerContent(context) as Widget?;
+    }
+    return HomeDrawer(onClose: _closeSidebar);
+  }
 
   void _toggleControls() {
     final willBeVisible = !_controlsVisible;
@@ -83,7 +106,13 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   void _toggleSidebar() {
-    (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+    if (!_canOpenSidebar()) {
+      _log.d('Sidebar toggle ignored: no sidebar content available yet.');
+      return;
+    }
+    if (_isPdfDocument()) {
+      (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+    }
     setState(() {
       _sidebarOpen = !_sidebarOpen;
     });
@@ -121,7 +150,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   void _closeSidebar() {
-    (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+    if (_isPdfDocument()) {
+      (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+    }
     setState(() => _sidebarOpen = false);
     _sidebarController.reverse();
   }
@@ -323,7 +354,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     )),
                     child: IgnorePointer(
                       ignoring: !_sidebarOpen,
-                      child: _controlsVisible ? _buildSidebarDrawer(context, isDark) : const SizedBox.shrink(),
+                      child: _controlsVisible
+                          ? _buildSidebarDrawer(context, isDark)
+                          : const SizedBox.shrink(),
                     ),
                   ),
                 );
@@ -381,7 +414,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   Widget _buildContentViewer({required ParsedDocumentEntity document}) {
     final format = document.format.toUpperCase();
-    
+
     // For PDFs, use ModernPdfViewer with GlobalKey to access navigation
     if (format == 'PDF') {
       return ModernPdfViewer(
@@ -408,7 +441,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         onSearchHighlight: _onSearchHighlight,
       );
     }
-    
+
     // For TXT/DOCX/DOC, use TextDocumentViewer with tap controls
     if (format == 'TXT' || format == 'DOCX' || format == 'DOC') {
       return TextDocumentViewer(
@@ -420,7 +453,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         useMonoFont: _textFontIsMonoFont,
       );
     }
-    
+
     // For other document types, use the factory
     return DocumentViewerFactory.createViewer(
       document: document,
@@ -471,30 +504,30 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
               filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
               child: Container(
                 decoration: BoxDecoration(
-                color: isDark
-                    ? Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withValues(alpha: 0.95)
-                    : Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withValues(alpha: 0.92),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(16),
-                  bottomRight: Radius.circular(16),
-                ),
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.2),
-                    width: 1,
+                  color: isDark
+                      ? Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withValues(alpha: 0.95)
+                      : Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withValues(alpha: 0.92),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
+                      width: 1,
+                    ),
                   ),
                 ),
-              ),
-              child: SafeArea(
+                child: SafeArea(
                   bottom: false,
                   child: SizedBox(
                     height: 40,
@@ -561,7 +594,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     // Calculate word count and reading time (200 words per minute average)
     final wordCount = textContent.split(RegExp(r'\s+')).length;
     final readingMinutes = (wordCount / 200).ceil().clamp(1, 999);
-    
+
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Text(
@@ -593,7 +626,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             size: 16,
             color: onTap != null
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                : Theme.of(context)
+                    .colorScheme
+                    .onSurfaceVariant
+                    .withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -606,7 +642,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+          color: Theme.of(context)
+              .colorScheme
+              .primaryContainer
+              .withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
@@ -620,7 +659,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     );
   }
 
-  Widget _buildTile({required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildTile(
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -629,7 +671,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -748,7 +793,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Copied $wordCount words from $pageCount pages'),
+                        content: Text(
+                            'Copied $wordCount words from $pageCount pages'),
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -862,7 +908,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Copied $wordCount words from $lineCount lines'),
+                      content:
+                          Text('Copied $wordCount words from $lineCount lines'),
                       duration: const Duration(seconds: 2),
                     ),
                   );
@@ -878,6 +925,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   Widget _buildFloatingBottomPanel(BuildContext context, bool isDark) {
+    final canOpenSidebar = _canOpenSidebar();
+
     return Stack(
       children: [
         // Shadow above the bottom panel
@@ -950,10 +999,16 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                         child: Row(
                           children: [
                             // Left: hamburger
-                            AnimatedHamburgerIcon(
-                              onPressed: _toggleSidebar,
-                              isOpen: _sidebarOpen,
-                              color: Theme.of(context).colorScheme.primary,
+                            Opacity(
+                              opacity: canOpenSidebar ? 1.0 : 0.5,
+                              child: IgnorePointer(
+                                ignoring: !canOpenSidebar,
+                                child: AnimatedHamburgerIcon(
+                                  onPressed: _toggleSidebar,
+                                  isOpen: _sidebarOpen,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
                             ),
                             // Center: format-specific nav controls
                             Expanded(
@@ -1013,7 +1068,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   Widget _buildFormatSpecificControls(BuildContext context) {
     final docState = ref.watch(documentViewerProvider);
     if (docState.document == null) return const SizedBox.shrink();
-    
+
     final format = docState.document!.format.toUpperCase();
 
     if (format == 'PDF') {
@@ -1051,7 +1106,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             context,
             Icons.remove,
             _textFontSize > 10
-                ? () => setState(() => _textFontSize = (_textFontSize - 1).clamp(10, 24))
+                ? () => setState(
+                    () => _textFontSize = (_textFontSize - 1).clamp(10, 24))
                 : null,
           ),
           SizedBox(
@@ -1067,7 +1123,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             context,
             Icons.add,
             _textFontSize < 24
-                ? () => setState(() => _textFontSize = (_textFontSize + 1).clamp(10, 24))
+                ? () => setState(
+                    () => _textFontSize = (_textFontSize + 1).clamp(10, 24))
                 : null,
           ),
           const SizedBox(width: 8),
@@ -1087,7 +1144,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   Widget _buildExpandedMenuContent(BuildContext context) {
     final docState = ref.watch(documentViewerProvider);
     if (docState.document == null) return const SizedBox.shrink();
-    
+
     final format = docState.document!.format.toUpperCase();
 
     if (format == 'PDF') {
@@ -1103,9 +1160,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           const SizedBox(width: 8),
           Expanded(
             child: _buildTile(
-              icon: _invertColors
-                  ? Icons.brightness_high
-                  : Icons.brightness_low,
+              icon:
+                  _invertColors ? Icons.brightness_high : Icons.brightness_low,
               label: 'Invert',
               onTap: () => setState(
                 () => _invertColors = !_invertColors,
@@ -1115,9 +1171,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           const SizedBox(width: 8),
           Expanded(
             child: _buildTile(
-              icon: _textMode
-                  ? Icons.picture_as_pdf
-                  : Icons.text_snippet,
+              icon: _textMode ? Icons.picture_as_pdf : Icons.text_snippet,
               label: _textMode ? 'PDF' : 'Text',
               onTap: () => setState(
                 () => _textMode = !_textMode,
@@ -1164,9 +1218,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                       children: [
                         ListTile(
                           title: const Text('Monospace (Courier)'),
-                          trailing: _textFontIsMonoFont 
-                            ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
-                            : null,
+                          trailing: _textFontIsMonoFont
+                              ? Icon(Icons.check,
+                                  color: Theme.of(ctx).colorScheme.primary)
+                              : null,
                           onTap: () {
                             setState(() => _textFontIsMonoFont = true);
                             Navigator.pop(ctx);
@@ -1174,9 +1229,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                         ),
                         ListTile(
                           title: const Text('System (Ubuntu)'),
-                          trailing: !_textFontIsMonoFont 
-                            ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
-                            : null,
+                          trailing: !_textFontIsMonoFont
+                              ? Icon(Icons.check,
+                                  color: Theme.of(ctx).colorScheme.primary)
+                              : null,
                           onTap: () {
                             setState(() => _textFontIsMonoFont = false);
                             Navigator.pop(ctx);
@@ -1209,8 +1265,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   Widget _buildSidebarDrawer(BuildContext context, bool isDark) {
-    final viewerState = _pdfViewerKey.currentState as dynamic;
-    final drawerContent = viewerState?.buildDrawerContent(context) as Widget?;
+    final drawerContent = _resolveSidebarContent(context);
     if (drawerContent == null) {
       return const SizedBox.shrink();
     }
@@ -1346,57 +1401,55 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
       ..strokeWidth = 1.2;
 
     final path = Path();
-    
+
     // Top flare flaring UP from sidebar top (0, radius) to screen edge (0, 0)
     path.moveTo(0, 0);
     // Smooth S-curve transition
-    path.cubicTo(
-      0, radius * 0.4, 
-      radius * 0.1, radius, 
-      radius, radius
-    );
-    
+    path.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
+
     // Top edge
     path.lineTo(sidebarWidth - 16, radius);
-    path.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
-    
+    path.arcToPoint(Offset(sidebarWidth, radius + 16),
+        radius: const Radius.circular(16), clockwise: true);
+
     // Right side
     path.lineTo(sidebarWidth, size.height - radius - 16);
-    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
-    
+    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
+        radius: const Radius.circular(16), clockwise: true);
+
     // Bottom edge
     path.lineTo(radius, size.height - radius);
-    
+
     // Bottom flare flaring DOWN from sidebar bottom (0, h-radius) to screen edge (0, h)
-    path.cubicTo(
-      radius * 0.1, size.height - radius,
-      0, size.height - radius * 0.4,
-      0, size.height
-    );
-    
+    path.cubicTo(radius * 0.1, size.height - radius, 0,
+        size.height - radius * 0.4, 0, size.height);
+
     path.lineTo(0, 0);
     path.close();
-    
+
     canvas.drawShadow(path, Colors.black, 10, false);
     canvas.drawPath(path, paint);
-    
+
     // Border for the visible part
     final borderPath = Path();
     borderPath.moveTo(0, 0);
     borderPath.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
     borderPath.lineTo(sidebarWidth - 16, radius);
-    borderPath.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
+    borderPath.arcToPoint(Offset(sidebarWidth, radius + 16),
+        radius: const Radius.circular(16), clockwise: true);
     borderPath.lineTo(sidebarWidth, size.height - radius - 16);
-    borderPath.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
+    borderPath.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
+        radius: const Radius.circular(16), clockwise: true);
     borderPath.lineTo(radius, size.height - radius);
-    borderPath.cubicTo(radius * 0.1, size.height - radius, 0, size.height - radius * 0.4, 0, size.height);
-    
+    borderPath.cubicTo(radius * 0.1, size.height - radius, 0,
+        size.height - radius * 0.4, 0, size.height);
+
     canvas.drawPath(borderPath, borderPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _InvertedCornerSidebarPainter oldDelegate) => 
-    oldDelegate.color != color || oldDelegate.borderColor != borderColor;
+  bool shouldRepaint(covariant _InvertedCornerSidebarPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.borderColor != borderColor;
 }
 
 /// Custom clipper that matches the exact shape of the sidebar with flares
@@ -1412,41 +1465,36 @@ class _SidebarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    
+
     // Top flare flaring UP from sidebar top (0, radius) to screen edge (0, 0)
     path.moveTo(0, 0);
     // Smooth S-curve transition
-    path.cubicTo(
-      0, radius * 0.4, 
-      radius * 0.1, radius, 
-      radius, radius
-    );
-    
+    path.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
+
     // Top edge
     path.lineTo(sidebarWidth - 16, radius);
-    path.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
-    
+    path.arcToPoint(Offset(sidebarWidth, radius + 16),
+        radius: const Radius.circular(16), clockwise: true);
+
     // Right side
     path.lineTo(sidebarWidth, size.height - radius - 16);
-    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
-    
+    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
+        radius: const Radius.circular(16), clockwise: true);
+
     // Bottom edge
     path.lineTo(radius, size.height - radius);
-    
+
     // Bottom flare flaring DOWN from sidebar bottom (0, h-radius) to screen edge (0, h)
-    path.cubicTo(
-      radius * 0.1, size.height - radius,
-      0, size.height - radius * 0.4,
-      0, size.height
-    );
-    
+    path.cubicTo(radius * 0.1, size.height - radius, 0,
+        size.height - radius * 0.4, 0, size.height);
+
     path.lineTo(0, 0);
     path.close();
-    
+
     return path;
   }
 
   @override
   bool shouldReclip(covariant _SidebarClipper oldClipper) =>
-    oldClipper.sidebarWidth != sidebarWidth || oldClipper.radius != radius;
+      oldClipper.sidebarWidth != sidebarWidth || oldClipper.radius != radius;
 }

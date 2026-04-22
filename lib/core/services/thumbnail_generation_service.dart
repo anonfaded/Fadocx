@@ -17,7 +17,7 @@ class ThumbnailGenerationService {
   static const int _thumbnailWidth = 400;
   static const int _thumbnailHeight = 560;
   static const int _sheetPreviewRows = 12;
-  static const int _sheetPreviewCols = 6;
+  static const int _sheetPreviewCols = 5;
   static const int _sheetPreviewSheets = 1;
   static const int _maxPreviewTextLength = 1800;
 
@@ -68,16 +68,29 @@ class ThumbnailGenerationService {
           'filePath': filePath,
           'pageNumber': 0,
           'width': _thumbnailWidth,
-          'height': _thumbnailHeight,
+          'height': _thumbnailHeight - 100,
         },
       );
 
       final bytes = result?['bytes'];
-      if (bytes is Uint8List && bytes.isNotEmpty) {
-        return bytes;
+      if (bytes is! Uint8List || bytes.isEmpty) {
+        _log.w('PDF thumbnail fell back to placeholder for $filePath');
+        return _createPlaceholderThumbnail(
+          label: 'PDF',
+          accent: ThumbnailColors.pdfRed,
+          caption: 'Unable to render preview',
+        );
       }
 
-      _log.w('PDF thumbnail fell back to placeholder for $filePath');
+      int pageCount = 0;
+      try {
+        pageCount = await pdfChannel.invokeMethod<int>('getPageCount', {
+              'filePath': filePath,
+            }) ??
+            0;
+      } catch (_) {}
+
+      return _createPdfPreview(pageBytes: bytes, pageCount: pageCount);
     } on PlatformException catch (e, st) {
       _log.e('PDF thumbnail render failed: ${e.code}', error: e, stackTrace: st);
     } catch (e, st) {
@@ -89,6 +102,71 @@ class ThumbnailGenerationService {
       accent: ThumbnailColors.pdfRed,
       caption: 'Unable to render preview',
     );
+  }
+
+  static Future<Uint8List> _createPdfPreview({
+    required Uint8List pageBytes,
+    required int pageCount,
+  }) async {
+    final codec = await ui.instantiateImageCodec(pageBytes);
+    final frame = await codec.getNextFrame();
+    final pageImage = frame.image;
+
+    try {
+      return _renderCanvas((canvas, size) {
+        _paintShadowBackground(canvas, size, ThumbnailColors.pdfRed);
+
+        final cardRect = ui.RRect.fromRectAndRadius(
+          ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
+          const ui.Radius.circular(22),
+        );
+        canvas.drawRRect(cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
+
+        final headerHeight = 68.0;
+        final headerRect = ui.RRect.fromRectAndCorners(
+          ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight),
+          topLeft: const ui.Radius.circular(22),
+          topRight: const ui.Radius.circular(22),
+        );
+        canvas.drawRRect(headerRect, ui.Paint()..color = _uiColor(ThumbnailColors.pdfRed));
+
+        final pageLabel = pageCount == 1 ? 'page' : 'pages';
+        _paintCenteredText(
+          canvas,
+          text: 'PDF \u2022 $pageCount $pageLabel',
+          top: 37,
+          maxWidth: size.width - 72,
+          style: const TextStyle(
+            color: ui.Color(0xFFFDFDFD),
+            fontSize: 21,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Ubuntu',
+          ),
+        );
+
+        final imageTop = 18.0 + headerHeight;
+        final imageAreaHeight = size.height - 36 - headerHeight;
+        final imageAreaWidth = size.width - 36;
+
+        final scaleX = imageAreaWidth / pageImage.width;
+        final scaleY = imageAreaHeight / pageImage.height;
+        final scale = scaleX < scaleY ? scaleX : scaleY;
+
+        final drawWidth = pageImage.width * scale;
+        final drawHeight = pageImage.height * scale;
+        final drawLeft = 18 + (imageAreaWidth - drawWidth) / 2;
+        final drawTop = imageTop + (imageAreaHeight - drawHeight) / 2;
+
+        canvas.drawImageRect(
+          pageImage,
+          ui.Rect.fromLTWH(0, 0, pageImage.width.toDouble(), pageImage.height.toDouble()),
+          ui.Rect.fromLTWH(drawLeft, drawTop, drawWidth, drawHeight),
+          ui.Paint()..filterQuality = FilterQuality.high,
+        );
+      });
+    } finally {
+      pageImage.dispose();
+    }
   }
 
   static Future<Uint8List?> _generateTextThumbnail(
@@ -317,35 +395,39 @@ class ThumbnailGenerationService {
       canvas.drawRRect(topBandRect, ui.Paint()..color = _uiColor(accent));
 
       final firstSheet = sheets.first;
-      final sheetName = (firstSheet is Map ? firstSheet['name'] : null)?.toString() ?? 'Sheet1';
+      final sheetName =
+          (firstSheet is Map ? firstSheet['name'] : null)?.toString() ?? 'Sheet1';
       final rows = _extractSheetRows(firstSheet);
       final visibleRows = rows.take(_sheetPreviewRows).toList();
       final visibleColCount = visibleRows.fold<int>(
         0,
         (current, row) => row.length > current ? row.length : current,
       ).clamp(1, _sheetPreviewCols);
+      final dataRowCount = visibleRows.isEmpty ? 6 : visibleRows.length;
 
       _paintCenteredText(
         canvas,
-        text: '$label • $sheetName',
+        text: '$label \u2022 $sheetName \u2022 $dataRowCount rows',
         top: 37,
         maxWidth: size.width - 72,
         style: const TextStyle(
           color: ui.Color(0xFFFDFDFD),
-          fontSize: 21,
+          fontSize: 19,
           fontWeight: FontWeight.w600,
           fontFamily: 'Ubuntu',
         ),
       );
 
-      final gridLeft = 30.0;
-      final gridTop = 104.0;
-      final gridWidth = size.width - 60;
-      final gridHeight = size.height - 142;
-      final rowCount = visibleRows.isEmpty ? 6 : visibleRows.length + 1;
-      final colCount = visibleColCount + 1;
-      final cellWidth = gridWidth / colCount;
-      final cellHeight = gridHeight / rowCount;
+      final gridLeft = 18.0;
+      final gridTop = 92.0;
+      final gridWidth = size.width - 36;
+      final gridHeight = size.height - 116;
+      final serialColWidth = 30.0;
+      final dataGridWidth = gridWidth - serialColWidth;
+      final dataColWidth = dataGridWidth / visibleColCount;
+      final totalRows = visibleRows.isEmpty ? 6 : visibleRows.length + 1;
+      final rowHeight = gridHeight / totalRows;
+
       final borderPaint = ui.Paint()
         ..color = const ui.Color(0xFFD6DDD2)
         ..style = ui.PaintingStyle.stroke
@@ -353,16 +435,16 @@ class ThumbnailGenerationService {
 
       final headerFill = ui.Paint()..color = _uiColor(accent, alpha: 36);
       canvas.drawRect(
-        ui.Rect.fromLTWH(gridLeft, gridTop, gridWidth, cellHeight),
+        ui.Rect.fromLTWH(gridLeft, gridTop, gridWidth, rowHeight),
         headerFill,
       );
       canvas.drawRect(
-        ui.Rect.fromLTWH(gridLeft, gridTop, cellWidth, gridHeight),
+        ui.Rect.fromLTWH(gridLeft, gridTop, serialColWidth, gridHeight),
         headerFill,
       );
 
-      for (int rowIndex = 0; rowIndex <= rowCount; rowIndex++) {
-        final y = gridTop + (rowIndex * cellHeight);
+      for (int rowIndex = 0; rowIndex <= totalRows; rowIndex++) {
+        final y = gridTop + (rowIndex * rowHeight);
         canvas.drawLine(
           ui.Offset(gridLeft, y),
           ui.Offset(gridLeft + gridWidth, y),
@@ -370,8 +452,14 @@ class ThumbnailGenerationService {
         );
       }
 
-      for (int colIndex = 0; colIndex <= colCount; colIndex++) {
-        final x = gridLeft + (colIndex * cellWidth);
+      canvas.drawLine(
+        ui.Offset(gridLeft + serialColWidth, gridTop),
+        ui.Offset(gridLeft + serialColWidth, gridTop + gridHeight),
+        borderPaint,
+      );
+
+      for (int colIndex = 0; colIndex <= visibleColCount; colIndex++) {
+        final x = gridLeft + serialColWidth + (colIndex * dataColWidth);
         canvas.drawLine(
           ui.Offset(x, gridTop),
           ui.Offset(x, gridTop + gridHeight),
@@ -383,12 +471,12 @@ class ThumbnailGenerationService {
         _paintCenteredText(
           canvas,
           text: _columnName(colIndex),
-          top: gridTop + 11,
-          left: gridLeft + ((colIndex + 1) * cellWidth),
-          maxWidth: cellWidth,
+          top: gridTop + 10,
+          left: gridLeft + serialColWidth + (colIndex * dataColWidth),
+          maxWidth: dataColWidth,
           style: TextStyle(
             color: _uiColor(accent),
-            fontSize: 16,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             fontFamily: 'Ubuntu',
           ),
@@ -396,30 +484,33 @@ class ThumbnailGenerationService {
       }
 
       for (int rowIndex = 0; rowIndex < visibleRows.length; rowIndex++) {
-        final top = gridTop + ((rowIndex + 1) * cellHeight) + 8;
+        final top = gridTop + ((rowIndex + 1) * rowHeight) + 7;
+
         _paintCenteredText(
           canvas,
           text: '${rowIndex + 1}',
           top: top,
           left: gridLeft,
-          maxWidth: cellWidth,
+          maxWidth: serialColWidth,
           style: TextStyle(
             color: _uiColor(accent),
-            fontSize: 15,
+            fontSize: 11,
             fontWeight: FontWeight.w700,
             fontFamily: 'Ubuntu',
           ),
         );
 
         final row = visibleRows[rowIndex];
-        for (int colIndex = 0; colIndex < row.length && colIndex < visibleColCount; colIndex++) {
+        for (int colIndex = 0;
+            colIndex < row.length && colIndex < visibleColCount;
+            colIndex++) {
           _paintText(
             canvas,
             text: row[colIndex],
-            left: gridLeft + ((colIndex + 1) * cellWidth) + 8,
+            left: gridLeft + serialColWidth + (colIndex * dataColWidth) + 6,
             top: top,
-            maxWidth: cellWidth - 12,
-            maxLines: 2,
+            maxWidth: dataColWidth - 10,
+            maxLines: 1,
             style: const TextStyle(
               color: ui.Color(0xFF2C332F),
               fontSize: 14,
@@ -534,7 +625,7 @@ class ThumbnailGenerationService {
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.left,
       maxLines: maxLines,
-      ellipsis: maxLines == null ? null : '…',
+      ellipsis: maxLines == null ? null : '\u2026',
     )..layout(maxWidth: maxWidth);
 
     painter.paint(canvas, ui.Offset(left, top));
@@ -553,7 +644,7 @@ class ThumbnailGenerationService {
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.center,
       maxLines: 1,
-      ellipsis: '…',
+      ellipsis: '\u2026',
     )..layout(maxWidth: maxWidth);
 
     final x = left + ((maxWidth - painter.width) / 2).clamp(0, maxWidth);
@@ -601,7 +692,7 @@ class ThumbnailGenerationService {
     final words = RegExp(r'\S+').allMatches(text).length;
     final minutes = words == 0 ? 0 : (words / 220).ceil();
     final minuteLabel = minutes == 1 ? 'min' : 'mins';
-    return '$words words • ${minutes == 0 ? '<1' : minutes} $minuteLabel read';
+    return '$words words \u2022 ${minutes == 0 ? '<1' : minutes} $minuteLabel read';
   }
 
   static String _columnName(int index) {
