@@ -1205,15 +1205,15 @@ class _ModernActionCardState extends State<_ModernActionCard>
     final primaryColor = Theme.of(context).colorScheme.primary;
     final isScanning = widget.icon == Icons.document_scanner;
 
-    // Different gradient colors for each card with better contrast
+    // Different gradient colors based on card type - using theme-appropriate gray gradients
     final gradientColors = isScanning
         ? [
-            Color.lerp(primaryColor, const Color(0xFF3B82F6), 0.3)!,
-            Color.lerp(primaryColor, const Color(0xFF6366F1), 0.2)!,
+            const Color(0xFF4A90E2),
+            const Color(0xFF357ABD),
           ]
         : [
-            Color.lerp(primaryColor, const Color(0xFF10B981), 0.3)!,
-            Color.lerp(primaryColor, const Color(0xFF059669), 0.2)!,
+            const Color(0xFF5A7A8A),
+            const Color(0xFF466A7A),
           ];
 
     return AnimatedBuilder(

@@ -9,11 +9,11 @@ class AppTheme {
       seedColor: const Color(0xFF2D6A4F), // Forest green
       brightness: Brightness.dark,
       dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
-      surface: const Color(0xFF0D0D0D), // Pitch black for OLED
+      surface: const Color(0xFF242424), // Lighter surface for better contrast with background
     ),
-    scaffoldBackgroundColor: const Color(0xFF0D0D0D), // True black
+    scaffoldBackgroundColor: const Color(0xFF141414), // Dark gray background
     appBarTheme: AppBarTheme(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color(0xFF242424), // Nice medium gray
       elevation: 0,
       centerTitle: true,
       titleTextStyle: const TextStyle(
@@ -25,7 +25,7 @@ class AppTheme {
       iconTheme: const IconThemeData(color: Colors.white),
     ),
     cardTheme: CardThemeData(
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFF2D2D2D), // Medium-light gray for excellent contrast
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
@@ -88,7 +88,7 @@ class AppTheme {
           color: Color(0xFFA0A0A0)),
     ),
     iconTheme: const IconThemeData(color: Colors.white, size: 24),
-    dividerColor: const Color(0xFF303030),
+    dividerColor: const Color(0xFF383838), // Lighter gray divider for better contrast
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFF2D6A4F),

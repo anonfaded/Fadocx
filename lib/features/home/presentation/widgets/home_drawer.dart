@@ -188,20 +188,16 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             children: [
               // What's New
-              ListTile(
-                leading: const Icon(Icons.auto_awesome),
-                title: const Text("What's New"),
-                trailing: Icon(
-                  Icons.arrow_forward,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              _buildDrawerCard(
+                context,
+                icon: Icons.auto_awesome,
+                title: "What's New",
                 onTap: () {
                   widget.onClose?.call();
                   context.push(RouteNames.whatsNew);
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
               // Recent Files visibility toggle
               _buildRecentFilesToggle(context),
@@ -224,41 +220,121 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
     );
   }
 
-  Widget _buildRecentFilesToggle(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
+  Widget _buildDrawerCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
       ),
-      child: Consumer(
-        builder: (context, ref, _) {
-          final showRecentFiles = ref.watch(showRecentFilesProvider);
+    );
+  }
 
-          return ListTile(
-            leading: Icon(
-              showRecentFiles ? Icons.visibility : Icons.visibility_off,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            title: const Text('Recent Files'),
-            subtitle: Text(
-              showRecentFiles ? 'Visible' : 'Hidden',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            trailing: Switch(
-              value: showRecentFiles,
-              onChanged: (value) {
-                ref.read(showRecentFilesProvider.notifier).setShowRecentFiles(value);
-              },
-            ),
+  Widget _buildRecentFilesToggle(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final showRecentFiles = ref.watch(showRecentFilesProvider);
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
             onTap: () {
               ref.read(showRecentFilesProvider.notifier).toggle();
             },
-          );
-        },
-      ),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      showRecentFiles ? Icons.visibility : Icons.visibility_off,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Recent Files',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        Text(
+                          showRecentFiles ? 'Visible' : 'Hidden',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 48,
+                    child: Switch(
+                      value: showRecentFiles,
+                      onChanged: (value) {
+                        ref.read(showRecentFilesProvider.notifier).setShowRecentFiles(value);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
