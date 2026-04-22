@@ -119,14 +119,22 @@ Fadocx supports two build flavors: **beta** and **prod**.
 - **App Name:** Fadocx Beta
 - **Icon:** `assets/fadocx_beta.png`
 - **Run Command:** `flutter run --flavor beta`
-- **Build APK:** `flutter build apk --flavor beta --debug`
+- **Build APK (per-ABI):** `flutter build apk --flavor beta --release --split-per-abi --target-platform android-arm,android-arm64`
+- **Build APK (universal):** `flutter build apk --flavor beta --release`
 
 ### Prod Flavor
 - **Package Name:** `com.fadseclab.fadocx`
 - **App Name:** Fadocx
 - **Icon:** `assets/fadocx.png`
 - **Run Command:** `flutter run --flavor prod`
-- **Build APK:** `flutter build apk --flavor prod --release`
+- **Build APK (per-ABI):** `flutter build apk --flavor prod --release --split-per-abi --target-platform android-arm,android-arm64`
+- **Build APK (universal):** `flutter build apk --flavor prod --release`
+
+### Size Optimization Notes
+- Always use `--split-per-abi --target-platform android-arm,android-arm64` for release builds
+- This generates separate APKs per architecture (arm64 ~68MB, armv7 ~59MB vs universal ~96MB)
+- BouncyCastle post-quantum crypto resources are excluded via `packaging.resources.excludes` in build.gradle.kts
+- `flutter run` automatically picks the correct ABI for the connected device
 
 ### Setup
 - Flavors are configured in `android/app/build.gradle.kts` using `flavorDimensions` and `productFlavors`
