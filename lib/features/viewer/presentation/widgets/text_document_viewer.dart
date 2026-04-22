@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:logger/logger.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/text_document_search_drawer.dart';
 
@@ -43,13 +46,16 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   final TextEditingController _searchController = TextEditingController();
   final ValueNotifier<int> _drawerVersion = ValueNotifier<int>(0);
   late final AnimationController _highlightController;
+  final GlobalKey _viewportKey = GlobalKey();
+  final Map<int, GlobalKey> _lineTextKeys = {};
 
   List<TextSearchResult> _searchResults = const [];
   int _activeSearchResultIndex = -1;
   bool _isSearching = false;
   int _searchLinesChecked = 0;
   int _searchCancellationToken = 0;
-  int? _highlightedLine;
+  int? _highlightedResultIndex;
+  Timer? _highlightReverseTimer;
 
   @override
   void initState() {
@@ -64,6 +70,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   void _initializeContent() {
     _fullContent = widget.textContent ?? '';
     _lines = _fullContent.split(RegExp(r'\r\n|\r|\n'));
+    _lineTextKeys.clear();
     _performSearch(_searchController.text);
 
     if (_fullContent.isNotEmpty) {
@@ -202,41 +209,49 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     });
   }
 
-  void _goToSearchResult(int index) {
+  Future<void> _goToSearchResult(int index) async {
     if (index < 0 || index >= _searchResults.length) return;
     final result = _searchResults[index];
 
     setState(() => _activeSearchResultIndex = index);
     _drawerVersion.value++;
     widget.onSearchHighlight?.call();
-    _jumpToLine(result.lineNumber);
-    _flashLineHighlight(result.lineNumber);
+    await _bringResultIntoView(result);
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+    _triggerHighlight(index);
   }
 
   void _goToNextResult() {
     if (_searchResults.isEmpty) return;
     final nextIndex = (_activeSearchResultIndex + 1) % _searchResults.length;
-    _goToSearchResult(nextIndex);
+    _goToSearchResult(nextIndex).ignore();
   }
 
   void _goToPreviousResult() {
     if (_searchResults.isEmpty) return;
     final prevIndex = (_activeSearchResultIndex - 1 + _searchResults.length) %
         _searchResults.length;
-    _goToSearchResult(prevIndex);
+    _goToSearchResult(prevIndex).ignore();
   }
 
-  void _jumpToLine(int lineNumber, {bool animate = true}) {
+  Future<void> _jumpToLine(int lineNumber, {bool animate = true}) async {
     if (!_scrollController.hasClients) return;
     final lineOffset = _kTopPadding + ((lineNumber - 1) * _lineExtent);
+    final viewportHeight = _scrollController.position.viewportDimension;
+    final centeredOffset = lineOffset - (viewportHeight * 0.35);
     final target = lineOffset.clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
+    final adjustedTarget = centeredOffset.clamp(
       0.0,
       _scrollController.position.maxScrollExtent,
     );
 
     if (animate) {
-      _scrollController.animateTo(
-        target,
+      await _scrollController.animateTo(
+        adjustedTarget,
         duration: const Duration(milliseconds: 260),
         curve: Curves.easeOutCubic,
       );
@@ -245,18 +260,153 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     }
   }
 
-  void _flashLineHighlight(int lineNumber) {
+  Future<void> _bringResultIntoView(TextSearchResult result) async {
+    if (!_scrollController.hasClients) return;
+    await WidgetsBinding.instance.endOfFrame;
+
+    Future<void> adjustOnce() async {
+      final rects = _buildHighlightRectsForResult(result);
+      if (rects.isEmpty) return;
+      final bounds = _combineRects(rects);
+      final viewportBox =
+          _viewportKey.currentContext?.findRenderObject() as RenderBox?;
+      if (viewportBox == null) return;
+      final viewportSize = viewportBox.size;
+
+      final desiredTop = viewportSize.height * 0.24;
+      final desiredBottom = viewportSize.height * 0.72;
+
+      double? verticalTarget;
+      if (bounds.top < desiredTop) {
+        verticalTarget =
+            (_scrollController.offset + bounds.top - desiredTop).clamp(
+          0.0,
+          _scrollController.position.maxScrollExtent,
+        );
+      } else if (bounds.bottom > desiredBottom) {
+        verticalTarget =
+            (_scrollController.offset + bounds.bottom - desiredBottom).clamp(
+          0.0,
+          _scrollController.position.maxScrollExtent,
+        );
+      }
+
+      double? horizontalTarget;
+      if (!widget.wordWrap && _horizontalScrollController.hasClients) {
+        final desiredLeft = viewportSize.width * 0.18;
+        final desiredRight = viewportSize.width * 0.82;
+        if (bounds.left < desiredLeft) {
+          horizontalTarget =
+              (_horizontalScrollController.offset + bounds.left - desiredLeft)
+                  .clamp(
+            0.0,
+            _horizontalScrollController.position.maxScrollExtent,
+          );
+        } else if (bounds.right > desiredRight) {
+          horizontalTarget =
+              (_horizontalScrollController.offset + bounds.right - desiredRight)
+                  .clamp(
+            0.0,
+            _horizontalScrollController.position.maxScrollExtent,
+          );
+        }
+      }
+
+      if (horizontalTarget != null) {
+        await _horizontalScrollController.animateTo(
+          horizontalTarget,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+        );
+      }
+
+      if (verticalTarget != null) {
+        await _scrollController.animateTo(
+          verticalTarget,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    }
+
+    await adjustOnce();
+    await WidgetsBinding.instance.endOfFrame;
+    await adjustOnce();
+  }
+
+  void _triggerHighlight(int resultIndex) {
+    _highlightReverseTimer?.cancel();
     _highlightController.stop();
-    setState(() => _highlightedLine = lineNumber);
+    setState(() => _highlightedResultIndex = resultIndex);
     _highlightController.forward(from: 0);
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    _highlightReverseTimer =
+        Timer(const Duration(milliseconds: 1500), () async {
       if (!mounted) return;
-      setState(() => _highlightedLine = null);
+      await _highlightController.reverse();
+      if (!mounted) return;
+      setState(() => _highlightedResultIndex = null);
     });
+  }
+
+  List<Rect> _buildHighlightRectsForResult(TextSearchResult result) {
+    final lineIndex = result.lineNumber - 1;
+    if (lineIndex < 0 || lineIndex >= _lines.length) return const [];
+    final lineKey = _lineTextKeys[lineIndex];
+    final lineContext = lineKey?.currentContext;
+    final viewportContext = _viewportKey.currentContext;
+    if (lineContext == null || viewportContext == null) {
+      return const [];
+    }
+
+    final renderObject = lineContext.findRenderObject();
+    final viewportBox = viewportContext.findRenderObject();
+    if (renderObject is! RenderParagraph || viewportBox is! RenderBox) {
+      return const [];
+    }
+
+    final lineText = _lines[lineIndex];
+    final start = result.matchStart.clamp(0, lineText.length);
+    final end =
+        (result.matchStart + result.matchLength).clamp(start, lineText.length);
+    final boxes = renderObject.getBoxesForSelection(
+      TextSelection(baseOffset: start, extentOffset: end),
+      boxHeightStyle: ui.BoxHeightStyle.tight,
+      boxWidthStyle: ui.BoxWidthStyle.tight,
+    );
+    if (boxes.isEmpty) {
+      return const [];
+    }
+
+    return boxes.map(
+      (box) {
+        final topLeft = renderObject.localToGlobal(
+          Offset(box.left, box.top),
+          ancestor: viewportBox,
+        );
+        return Rect.fromLTWH(
+          topLeft.dx,
+          topLeft.dy,
+          box.right - box.left,
+          box.bottom - box.top,
+        );
+      },
+    ).toList();
+  }
+
+  Rect _combineRects(List<Rect> rects) {
+    var bounds = rects.first;
+    for (final rect in rects.skip(1)) {
+      bounds = bounds.expandToInclude(rect);
+    }
+    return bounds;
   }
 
   double get _lineHeight => widget.fontSize * 1.5;
   double get _lineExtent => _lineHeight + 2;
+
+  GlobalKey _lineTextKey(int index) {
+    return _lineTextKeys.putIfAbsent(index, GlobalKey.new);
+  }
 
   double _lineNumberWidth(BuildContext context) {
     final lineNumberStyle = TextStyle(
@@ -280,6 +430,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     _scrollController.dispose();
     _horizontalScrollController.dispose();
     _searchController.dispose();
+    _highlightReverseTimer?.cancel();
     _highlightController.dispose();
     _drawerVersion.dispose();
     super.dispose();
@@ -328,108 +479,114 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
         color: Theme.of(context).colorScheme.surface,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return SingleChildScrollView(
-              controller: _scrollController,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 4,
-                  right: 8,
-                  top: _kTopPadding,
-                  bottom: _kBottomPadding,
-                ),
-                child: Stack(
-                  children: [
-                    widget.wordWrap
-                        ? Column(
-                            children: List.generate(
-                              _lines.length,
-                              (index) => _buildWrappedLineRow(
-                                context: context,
-                                index: index,
-                                lineNumberWidth: lineNumberWidth,
-                                textStyle: textStyle,
-                              ),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            controller: _horizontalScrollController,
-                            scrollDirection: Axis.horizontal,
-                            child: Align(
-                              alignment: Alignment.topLeft,
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minWidth: constraints.maxWidth,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+            return Stack(
+              key: _viewportKey,
+              children: [
+                SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 4,
+                      right: 8,
+                      top: _kTopPadding,
+                      bottom: _kBottomPadding,
+                    ),
+                    child: widget.wordWrap
+                        ? SelectionArea(
+                            child: Builder(
+                              builder: (selectionContext) {
+                                return Column(
                                   children: List.generate(
                                     _lines.length,
-                                    (index) => _buildUnwrappedLineRow(
+                                    (index) => _buildWrappedLineRow(
                                       context: context,
+                                      selectionContext: selectionContext,
                                       index: index,
                                       lineNumberWidth: lineNumberWidth,
                                       textStyle: textStyle,
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             ),
-                          ),
-                    if (_highlightedLine != null)
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: AnimatedBuilder(
-                            animation: _highlightController,
-                            builder: (context, child) {
-                              final t = 1 - _highlightController.value;
-                              final focusLeft = lineNumberWidth + 12;
-                              final focusTop =
-                                  (_highlightedLine! - 1) * _lineExtent;
-                              final focusRect = Rect.fromLTWH(
-                                focusLeft,
-                                focusTop,
-                                (constraints.maxWidth - focusLeft)
-                                    .clamp(40.0, double.infinity),
-                                _lineHeight,
-                              );
-                              return Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: _TextFocusDimmer(
-                                      rects: [focusRect],
-                                      opacity: 0.45 * t,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: focusRect.left,
-                                    top: focusRect.top,
-                                    width: focusRect.width,
-                                    height: focusRect.height,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary
-                                            .withValues(alpha: 0.25 * t),
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                              .withValues(alpha: 0.65 * t),
+                          )
+                        : SingleChildScrollView(
+                            controller: _horizontalScrollController,
+                            scrollDirection: Axis.horizontal,
+                            child: SelectionArea(
+                              child: Builder(
+                                builder: (selectionContext) {
+                                  return Align(
+                                    alignment: Alignment.topLeft,
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        minWidth: constraints.maxWidth,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: List.generate(
+                                          _lines.length,
+                                          (index) => _buildUnwrappedLineRow(
+                                            context: context,
+                                            selectionContext: selectionContext,
+                                            index: index,
+                                            lineNumberWidth: lineNumberWidth,
+                                            textStyle: textStyle,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              );
-                            },
+                                  );
+                                },
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
+                if (_highlightedResultIndex != null)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: AnimatedBuilder(
+                        animation: Listenable.merge([
+                          _highlightController,
+                          _scrollController,
+                          _horizontalScrollController,
+                        ]),
+                        builder: (context, child) {
+                          if (_highlightController.value == 0 ||
+                              _highlightedResultIndex == null ||
+                              _highlightedResultIndex! >=
+                                  _searchResults.length) {
+                            return const SizedBox.shrink();
+                          }
+                          final rects = _buildHighlightRectsForResult(
+                            _searchResults[_highlightedResultIndex!],
+                          )
+                              .where((rect) => rect
+                                  .overlaps(Offset.zero & constraints.biggest))
+                              .toList();
+                          if (rects.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return _TextSpotlightOverlay(
+                            rects: rects,
+                            progress: _highlightController.value,
+                            dimOpacity: 0.55,
+                            strokeColor: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.72),
+                            glowColor: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.22),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+              ],
             );
           },
         ),
@@ -468,16 +625,18 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     required double lineNumberWidth,
     required TextStyle lineNumberStyle,
   }) {
-    return SizedBox(
-      width: lineNumberWidth,
-      child: Align(
-        alignment: Alignment.topRight,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 1),
-          child: Text(
-            '${index + 1}',
-            textAlign: TextAlign.right,
-            style: lineNumberStyle,
+    return SelectionContainer.disabled(
+      child: SizedBox(
+        width: lineNumberWidth,
+        child: Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: Text(
+              '${index + 1}',
+              textAlign: TextAlign.right,
+              style: lineNumberStyle,
+            ),
           ),
         ),
       ),
@@ -486,6 +645,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
   Widget _buildWrappedLineRow({
     required BuildContext context,
+    required BuildContext selectionContext,
     required int index,
     required double lineNumberWidth,
     required TextStyle textStyle,
@@ -498,6 +658,9 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
           .withValues(alpha: 0.55),
       letterSpacing: -0.1,
     );
+    final selectionRegistrar = SelectionContainer.maybeOf(selectionContext);
+    final selectionColor =
+        Theme.of(selectionContext).colorScheme.primary.withValues(alpha: 0.22);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
@@ -515,10 +678,15 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
           Expanded(
             child: _lines[index].isEmpty
                 ? SizedBox(height: _lineHeight)
-                : SelectableText(
-                    _lines[index],
-                    style: textStyle,
+                : RichText(
+                    key: _lineTextKey(index),
+                    text: TextSpan(text: _lines[index], style: textStyle),
                     textAlign: TextAlign.left,
+                    softWrap: true,
+                    textDirection: Directionality.of(context),
+                    textScaler: MediaQuery.textScalerOf(context),
+                    selectionRegistrar: selectionRegistrar,
+                    selectionColor: selectionColor,
                   ),
           ),
         ],
@@ -528,6 +696,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
   Widget _buildUnwrappedLineRow({
     required BuildContext context,
+    required BuildContext selectionContext,
     required int index,
     required double lineNumberWidth,
     required TextStyle textStyle,
@@ -540,6 +709,9 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
           .withValues(alpha: 0.55),
       letterSpacing: -0.1,
     );
+    final selectionRegistrar = SelectionContainer.maybeOf(selectionContext);
+    final selectionColor =
+        Theme.of(selectionContext).colorScheme.primary.withValues(alpha: 0.22);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
@@ -556,10 +728,15 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
           const SizedBox(width: 12),
           _lines[index].isEmpty
               ? SizedBox(height: _lineHeight)
-              : SelectableText(
-                  _lines[index],
-                  style: textStyle,
+              : RichText(
+                  key: _lineTextKey(index),
+                  text: TextSpan(text: _lines[index], style: textStyle),
                   textAlign: TextAlign.left,
+                  softWrap: false,
+                  textDirection: Directionality.of(context),
+                  textScaler: MediaQuery.textScalerOf(context),
+                  selectionRegistrar: selectionRegistrar,
+                  selectionColor: selectionColor,
                 ),
         ],
       ),
@@ -567,44 +744,106 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   }
 }
 
-class _TextFocusDimmer extends StatelessWidget {
+class _TextSpotlightOverlay extends StatelessWidget {
   final List<Rect> rects;
-  final double opacity;
+  final double progress;
+  final double dimOpacity;
+  final Color strokeColor;
+  final Color glowColor;
 
-  const _TextFocusDimmer({required this.rects, required this.opacity});
+  const _TextSpotlightOverlay({
+    required this.rects,
+    required this.progress,
+    required this.dimOpacity,
+    required this.strokeColor,
+    required this.glowColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: _TextFocusClipper(rects),
-      child: Container(
-        color: Colors.black.withValues(alpha: opacity),
+    return CustomPaint(
+      painter: _TextSpotlightPainter(
+        rects: rects,
+        progress: progress,
+        dimOpacity: dimOpacity,
+        strokeColor: strokeColor,
+        glowColor: glowColor,
       ),
+      child: const SizedBox.expand(),
     );
   }
 }
 
-class _TextFocusClipper extends CustomClipper<Path> {
+class _TextSpotlightPainter extends CustomPainter {
   final List<Rect> rects;
+  final double progress;
+  final double dimOpacity;
+  final Color strokeColor;
+  final Color glowColor;
 
-  _TextFocusClipper(this.rects);
+  const _TextSpotlightPainter({
+    required this.rects,
+    required this.progress,
+    required this.dimOpacity,
+    required this.strokeColor,
+    required this.glowColor,
+  });
 
   @override
-  Path getClip(Size size) {
-    final fullPagePath = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
-    final holesPath = Path();
-    for (final rect in rects) {
-      holesPath.addRRect(
-        RRect.fromRectAndRadius(
-          rect.inflate(2),
-          const Radius.circular(6),
-        ),
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0 || rects.isEmpty) return;
+
+    final viewportRect = Offset.zero & size;
+    final overlayBounds = viewportRect;
+    final spotlightRects = rects
+        .map((rect) => rect.intersect(viewportRect))
+        .where((rect) => !rect.isEmpty)
+        .map(
+          (rect) => RRect.fromRectAndRadius(
+            rect.inflate(3),
+            const Radius.circular(8),
+          ),
+        )
+        .toList();
+    if (spotlightRects.isEmpty) return;
+
+    canvas.saveLayer(overlayBounds, Paint());
+    canvas.drawRect(
+      overlayBounds,
+      Paint()..color = Colors.black.withValues(alpha: dimOpacity * progress),
+    );
+    for (final spotlight in spotlightRects) {
+      canvas.drawRRect(
+        spotlight,
+        Paint()..blendMode = BlendMode.clear,
       );
     }
-    return Path.combine(PathOperation.difference, fullPagePath, holesPath);
+    canvas.restore();
+
+    final glowPaint = Paint()
+      ..color = glowColor.withValues(alpha: glowColor.a * progress)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+    for (final spotlight in spotlightRects) {
+      canvas.drawRRect(spotlight, glowPaint);
+    }
+
+    final strokePaint = Paint()
+      ..color = strokeColor.withValues(alpha: strokeColor.a * progress)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (final spotlight in spotlightRects) {
+      canvas.drawRRect(spotlight, strokePaint);
+    }
   }
 
   @override
-  bool shouldReclip(_TextFocusClipper oldClipper) => rects != oldClipper.rects;
+  bool shouldRepaint(_TextSpotlightPainter oldDelegate) {
+    return rects != oldDelegate.rects ||
+        progress != oldDelegate.progress ||
+        dimOpacity != oldDelegate.dimOpacity ||
+        strokeColor != oldDelegate.strokeColor ||
+        glowColor != oldDelegate.glowColor;
+  }
 }
