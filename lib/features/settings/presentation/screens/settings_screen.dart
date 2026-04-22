@@ -6,6 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
+import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
@@ -61,19 +62,64 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               _buildSectionHeader(context, 'Storage'),
               _buildSettingsGroup(context, [
-                _SettingsRow(
-                  icon: Icons.folder_outlined,
-                  title: 'Documents Size',
-                  value: '~12.4 MB',
-                  onTap: () => _showStorageInfo(context),
-                ),
-                _divider(context),
-                _SettingsRow(
-                  icon: Icons.settings_backup_restore,
-                  title: 'Custom Storage',
-                  value: 'Coming Soon',
-                  isComingSoon: true,
-                  onTap: null,
+                Consumer(
+                  builder: (context, ref, _) {
+                    final storageStatsAsync = ref.watch(storageStatsProvider);
+                    return storageStatsAsync.when(
+                      loading: () => Column(children: [
+                        _SettingsRow(
+                          icon: Icons.folder_outlined,
+                          title: 'Documents Size',
+                          value: 'Calculating...',
+                          onTap: () => _showStorageInfo(context),
+                        ),
+                        _divider(context),
+                        _SettingsRow(
+                          icon: Icons.settings_backup_restore,
+                          title: 'Custom Storage',
+                          value: 'Coming Soon',
+                          isComingSoon: true,
+                          onTap: null,
+                        ),
+                      ]),
+                      error: (error, stack) => Column(children: [
+                        _SettingsRow(
+                          icon: Icons.folder_outlined,
+                          title: 'Documents Size',
+                          value: 'Unknown',
+                          onTap: () => _showStorageInfo(context),
+                        ),
+                        _divider(context),
+                        _SettingsRow(
+                          icon: Icons.settings_backup_restore,
+                          title: 'Custom Storage',
+                          value: 'Coming Soon',
+                          isComingSoon: true,
+                          onTap: null,
+                        ),
+                      ]),
+                      data: (data) {
+                        final total = data.values.fold<int>(0, (p, e) => p + (e['bytes'] ?? 0));
+                        final value = StorageService.formatBytes(total);
+                        return Column(children: [
+                          _SettingsRow(
+                            icon: Icons.folder_outlined,
+                            title: 'Documents Size',
+                            value: value,
+                            onTap: () => _showStorageInfo(context),
+                          ),
+                          _divider(context),
+                          _SettingsRow(
+                            icon: Icons.settings_backup_restore,
+                            title: 'Custom Storage',
+                            value: 'Coming Soon',
+                            isComingSoon: true,
+                            onTap: null,
+                          ),
+                        ]);
+                      },
+                    );
+                  },
                 ),
               ]),
               const SizedBox(height: 24),
@@ -244,127 +290,222 @@ class SettingsScreen extends ConsumerWidget {
         builder: (context, scrollController) => Container(
           padding: const EdgeInsets.all(24),
           decoration: _bottomSheetDecoration(context),
-          child: ListView(
-            controller: scrollController,
-            children: [
-              Center(child: _handle(context)),
-              const SizedBox(height: 8),
-              Center(
-                  child: Text('Storage',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold))),
-              const SizedBox(height: 20),
-              SizedBox(height: 140, child: _storageChart()),
-              const SizedBox(height: 12),
-              Row(children: [
-                Expanded(
-                    child: _storageChip(
-                        Icons.picture_as_pdf, 'PDFs', '4.8 MB', Colors.red)),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: _storageChip(
-                        Icons.table_chart, 'Sheets', '4.2 MB', Colors.green)),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: _storageChip(
-                        Icons.description, 'Docs', '3.4 MB', Colors.blue)),
-              ]),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final storageStatsAsync = ref.watch(storageStatsProvider);
+              return storageStatsAsync.when(
+                loading: () => ListView(
+                  controller: scrollController,
                   children: [
-                    Icon(Icons.lock_outline,
-                        color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Documents are stored in a private folder, hidden from other apps and file managers. Only Fadocx can access them.',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                    Center(child: _handle(context)),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Text('Storage',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 20),
+                    Column(
+                      children: [
+                        SizedBox(height: 140, child: Center(child: CircularProgressIndicator())),
+                        const SizedBox(height: 12),
+                        Row(children: [
+                          Expanded(child: _storageChip(Icons.picture_as_pdf, 'PDFs', 'Calculating...', Colors.red)),
+                          const SizedBox(width: 8),
+                          Expanded(child: _storageChip(Icons.table_chart, 'Sheets', 'Calculating...', Colors.green)),
+                          const SizedBox(width: 8),
+                          Expanded(child: _storageChip(Icons.description, 'Docs', 'Calculating...', Colors.blue)),
+                        ]),
+                      ],
+                    ),
+                  ],
+                ),
+                error: (error, stack) => ListView(
+                  controller: scrollController,
+                  children: [
+                    Center(child: _handle(context)),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Text('Storage',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Text('Failed to load storage data',
+                          style: Theme.of(context).textTheme.bodyMedium),
+                    ),
+                  ],
+                ),
+                data: (data) => ListView(
+                  controller: scrollController,
+                  children: [
+                    Center(child: _handle(context)),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Text('Storage',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 20),
+                    // build slices (label -> bytes)
+                    Builder(
+                      builder: (context) {
+                        final slices = <String, int>{};
+                        for (final entry in data.entries) {
+                          final label = _labelForFolder(entry.key);
+                          slices[label] = entry.value['bytes'] ?? 0;
+                        }
+                        return Column(
+                          children: [
+                            SizedBox(height: 140, child: _storageChartFromMap(context, slices)),
+                            const SizedBox(height: 12),
+                            // Render chips from the same data to ensure colors/values match
+                            Row(children: [
+                              Expanded(child: _storageChip(Icons.picture_as_pdf, 'PDFs', '${StorageService.formatBytes(data[StorageService.pdfsFolder]?['bytes'] ?? 0)} • ${data[StorageService.pdfsFolder]?['count'] ?? 0} files', Colors.red)),
+                              const SizedBox(width: 8),
+                              Expanded(child: _storageChip(Icons.table_chart, 'Sheets', '${StorageService.formatBytes(data[StorageService.spreadsheetsFolder]?['bytes'] ?? 0)} • ${data[StorageService.spreadsheetsFolder]?['count'] ?? 0} files', Colors.green)),
+                              const SizedBox(width: 8),
+                              Expanded(child: _storageChip(Icons.description, 'Docs', '${StorageService.formatBytes(data[StorageService.documentsFolder]?['bytes'] ?? 0)} • ${data[StorageService.documentsFolder]?['count'] ?? 0} files', Colors.blue)),
+                            ]),
+                            const SizedBox(height: 12),
+                            Row(children: [
+                              Expanded(child: _storageChip(Icons.slideshow, 'Presentations', '${StorageService.formatBytes(data[StorageService.presentationsFolder]?['bytes'] ?? 0)} • ${data[StorageService.presentationsFolder]?['count'] ?? 0} files', Colors.orange)),
+                              const SizedBox(width: 8),
+                              Expanded(child: _storageChip(Icons.image, 'Images', '${StorageService.formatBytes(data[StorageService.imagesFolder]?['bytes'] ?? 0)} • ${data[StorageService.imagesFolder]?['count'] ?? 0} files', Colors.purple)),
+                              const SizedBox(width: 8),
+                              Expanded(child: _storageChip(Icons.camera, 'Scans', '${StorageService.formatBytes(data[StorageService.scansFolder]?['bytes'] ?? 0)} • ${data[StorageService.scansFolder]?['count'] ?? 0} files', Colors.teal)),
+                            ]),
+                            const SizedBox(height: 12),
+                            _storageChip(Icons.delete_outline, 'Trash', '${StorageService.formatBytes(data[StorageService.trashFolder]?['bytes'] ?? 0)} • ${data[StorageService.trashFolder]?['count'] ?? 0} files', Colors.grey),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primaryContainer
+                            .withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.lock_outline,
+                              color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Documents are stored in a private folder, hidden from other apps and file managers. Only Fadocx can access them.',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline,
+                              size: 20, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Delete documents from Danger Zone in Settings',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline,
-                        size: 20, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Delete documents from Danger Zone in Settings',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _storageChart() => TweenAnimationBuilder<double>(
+  Widget _storageChartFromMap(BuildContext context, Map<String, int> slices) {
+    final total = slices.values.fold<int>(0, (p, e) => p + e);
+    if (total == 0) {
+      return Center(child: Text('No documents', style: Theme.of(context).textTheme.bodySmall));
+    }
+
+    final sections = <PieChartSectionData>[];
+    int idx = 0;
+    slices.forEach((label, value) {
+      final color = _colorForIndex(idx);
+      final percent = value / total * 100;
+      sections.add(PieChartSectionData(
+        color: color,
+        value: value.toDouble(),
+        title: '${percent.toStringAsFixed(percent >= 10 ? 0 : 1)}%',
+        titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+        radius: 45,
+        showTitle: percent >= 0.1, // hide extremely tiny labels
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
+      ));
+      idx++;
+    });
+
+    return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 800),
       curve: Curves.easeOutCubic,
       builder: (context, value, child) => Opacity(
-          opacity: value,
-          child: Transform.scale(
-              scale: 0.8 + (0.2 * value),
-              child: PieChart(PieChartData(
-                sectionsSpace: 2,
-                centerSpaceRadius: 35,
-                sections: [
-                  PieChartSectionData(
-                      color: Colors.red,
-                      value: 40,
-                      title: '40%',
-                      titleStyle: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                      radius: 45),
-                  PieChartSectionData(
-                      color: Colors.green,
-                      value: 35,
-                      title: '35%',
-                      titleStyle: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                      radius: 45),
-                  PieChartSectionData(
-                      color: Colors.blue,
-                      value: 25,
-                      title: '25%',
-                      titleStyle: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                      radius: 45),
-                ],
-              )))));
+        opacity: value,
+        child: Transform.scale(
+          scale: 0.8 + (0.2 * value),
+          child: PieChart(PieChartData(sectionsSpace: 2, centerSpaceRadius: 35, sections: sections)),
+        ),
+      ),
+    );
+  }
+
+  Color _colorForIndex(int idx) {
+    const palette = [Colors.red, Colors.green, Colors.blue, Colors.orange, Colors.purple, Colors.teal, Colors.grey];
+    return palette[idx % palette.length];
+  }
+
+  String _labelForFolder(String folder) {
+    switch (folder) {
+      case StorageService.pdfsFolder:
+        return 'PDFs';
+      case StorageService.spreadsheetsFolder:
+        return 'Sheets';
+      case StorageService.documentsFolder:
+        return 'Docs';
+      case StorageService.presentationsFolder:
+        return 'Presentations';
+      case StorageService.imagesFolder:
+        return 'Images';
+      case StorageService.scansFolder:
+        return 'Scans';
+      case StorageService.trashFolder:
+        return 'Trash';
+      default:
+        return folder;
+    }
+  }
 
   Widget _storageChip(IconData icon, String label, String size, Color color) =>
       Container(
