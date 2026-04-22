@@ -4,14 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
-import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
-import 'package:fadocx/features/settings/data/models/hive_models.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
-import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
+import 'package:fadocx/features/viewer/presentation/widgets/text_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/modern_pdf_viewer.dart';
+import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class ViewerScreen extends ConsumerStatefulWidget {
   final String filePath;
@@ -41,11 +39,15 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   int _currentPage = 1;
   int _totalPages = 0;
   double _sidebarDragOffset = 0.0;
+  double _textFontSize = 14;
+  bool _textWordWrap = true;
+  bool _textFontIsMonoFont = true;
   late AnimationController _menuController;
   late AnimationController _sidebarController;
   late AnimationController _topBarController;
   late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
+  GlobalKey<State<TextDocumentViewer>>? _textViewerKey;
   static const double _kDragCloseThreshold = 100.0;
 
   void _toggleControls() {
@@ -378,8 +380,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   Widget _buildContentViewer({required ParsedDocumentEntity document}) {
+    final format = document.format.toUpperCase();
+    
     // For PDFs, use ModernPdfViewer with GlobalKey to access navigation
-    if (document.format.toUpperCase() == 'PDF') {
+    if (format == 'PDF') {
       return ModernPdfViewer(
         key: _pdfViewerKey,
         filePath: widget.filePath,
@@ -404,6 +408,19 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         onSearchHighlight: _onSearchHighlight,
       );
     }
+    
+    // For TXT/DOCX/DOC, use TextDocumentViewer with tap controls
+    if (format == 'TXT' || format == 'DOCX' || format == 'DOC') {
+      return TextDocumentViewer(
+        key: _textViewerKey,
+        textContent: document.textContent,
+        onTap: _toggleControls,
+        fontSize: _textFontSize,
+        wordWrap: _textWordWrap,
+        useMonoFont: _textFontIsMonoFont,
+      );
+    }
+    
     // For other document types, use the factory
     return DocumentViewerFactory.createViewer(
       document: document,
@@ -569,14 +586,33 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   Widget _buildTile({required IconData icon, required String label, required VoidCallback onTap}) {
-    return Material(color: Colors.transparent, child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(12), child: Container(padding: EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(12)), child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 20), SizedBox(height: 4), Text(label, style: Theme.of(context).textTheme.labelSmall)]))));
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20),
+              const SizedBox(height: 4),
+              Text(label, style: Theme.of(context).textTheme.labelSmall),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _copyPdfText() async {
     final viewerState = _pdfViewerKey.currentState as dynamic;
     if (viewerState == null) return;
-
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     showDialog(
       context: context,
@@ -597,14 +633,13 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       final extractMethod = viewerState.extractAllText;
       if (extractMethod == null) {
         Navigator.pop(context);
-        scaffoldMessenger.showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Text extraction not available')),
         );
         return;
       }
 
       final result = await extractMethod() as Map<String, dynamic>;
-      if (!mounted) return;
       Navigator.pop(context);
 
       final text = result['text'] as String;
@@ -612,13 +647,12 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       final pageCount = result['pageCount'] as int;
 
       if (text.isEmpty) {
-        scaffoldMessenger.showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No text found in this PDF')),
         );
         return;
       }
 
-      if (!mounted) return;
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -670,7 +704,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                 Navigator.pop(ctx);
                 await Clipboard.setData(ClipboardData(text: text));
                 if (mounted) {
-                  scaffoldMessenger.showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Copied $wordCount words from $pageCount pages'),
                       duration: const Duration(seconds: 2),
@@ -686,10 +720,112 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       );
     } catch (e) {
       Navigator.pop(context);
-      scaffoldMessenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     }
+  }
+
+  void _copyDocumentText() async {
+    // For TXT/DOCX/DOC, copy all content
+    final doc = ref.watch(documentViewerProvider);
+    if (doc.document == null) return;
+
+    final text = doc.document!.textContent ?? '';
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No text content available')),
+      );
+      return;
+    }
+
+    final wordCount = text.split(RegExp(r'\s+')).length;
+    final lineCount = text.split('\n').length;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.copy_all,
+                size: 20, color: Theme.of(ctx).colorScheme.primary),
+            const SizedBox(width: 8),
+            const Text('Copy All Text'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This will copy the entire document content to clipboard.'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.text_fields,
+                          size: 16, color: Theme.of(ctx).colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$wordCount words',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(ctx).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.format_list_numbered,
+                          size: 16, color: Theme.of(ctx).colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$lineCount lines',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(ctx).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await Clipboard.setData(ClipboardData(text: text));
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Copied $wordCount words from $lineCount lines'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.copy, size: 16),
+            label: const Text('Copy'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFloatingBottomPanel(BuildContext context, bool isDark) {
@@ -725,43 +861,44 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(
               decoration: BoxDecoration(
-              color: isDark
-                  ? Theme.of(context)
-                      .colorScheme
-                      .surface
-                      .withValues(alpha: 0.95)
-                  : Theme.of(context)
-                      .colorScheme
-                      .surface
-                      .withValues(alpha: 0.92),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.2),
-                  width: 1,
+                color: isDark
+                    ? Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.95)
+                    : Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.92),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                    width: 1,
+                  ),
                 ),
               ),
-            ),
-            child: SafeArea(
+              child: SafeArea(
                 top: false,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Main control row
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: null, // Removed tap-to-toggle from bottom panel
+                      onTap: !_bottomMenuExpanded ? _toggleControls : null,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
                         ),
-child: Row(
+                        child: Row(
                           children: [
                             // Left: hamburger
                             AnimatedHamburgerIcon(
@@ -769,35 +906,10 @@ child: Row(
                               isOpen: _sidebarOpen,
                               color: Theme.of(context).colorScheme.primary,
                             ),
-                            // Center: nav controls in Expanded
+                            // Center: format-specific nav controls
                             Expanded(
                               child: Center(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildIconButton(
-                                      context,
-                                      Icons.first_page,
-                                      _currentPage > 1 ? _goToFirstPage : null,
-                                    ),
-                                    _buildIconButton(
-                                      context,
-                                      Icons.chevron_left,
-                                      _currentPage > 1 ? _goToPreviousPage : null,
-                                    ),
-                                    _buildPageIndicator(context),
-                                    _buildIconButton(
-                                      context,
-                                      Icons.chevron_right,
-                                      _currentPage < _totalPages ? _goToNextPage : null,
-                                    ),
-                                    _buildIconButton(
-                                      context,
-                                      Icons.last_page,
-                                      _currentPage < _totalPages ? _goToLastPage : null,
-                                    ),
-                                  ],
-                                ),
+                                child: _buildFormatSpecificControls(context),
                               ),
                             ),
                             // Right: expand button
@@ -812,6 +924,7 @@ child: Row(
                         ),
                       ),
                     ),
+                    // Expandable menu
                     SizeTransition(
                       sizeFactor: CurvedAnimation(
                         parent: _menuController,
@@ -821,23 +934,19 @@ child: Row(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Divider(height: 1, indent: 16, endIndent: 16, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
-                          Padding(padding: EdgeInsets.all(12), child: Row(children: [
-                            Expanded(child: _buildTile(icon: Icons.copy_all, label: 'Copy', onTap: _copyPdfText)),
-                            SizedBox(width: 8),
-                            Expanded(child: _buildTile(icon: _invertColors ? Icons.brightness_high : Icons.brightness_low, label: 'Invert', onTap: () => setState(() => _invertColors = !_invertColors))),
-                            SizedBox(width: 8),
-                            Expanded(child: _buildTile(icon: _textMode ? Icons.picture_as_pdf : Icons.text_snippet, label: _textMode ? 'PDF' : 'Text', onTap: () => setState(() => _textMode = !_textMode))),
-                            SizedBox(width: 8),
-                            Expanded(child: _buildTile(icon: Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, label: 'Theme', onTap: () async {
-                              final notifier = ref.read(themeModeProvider.notifier);
-                              notifier.toggleThemeMode();
-                              final mode = ref.read(themeModeProvider);
-                              final box = Hive.box<HiveAppSettings>(HiveDatasource.settingsBoxName);
-                              final settings = box.values.firstOrNull ?? HiveAppSettings();
-                              await box.put(0, settings.copyWith(theme: mode.value));
-                            })),
-                          ])),
+                          Divider(
+                            height: 1,
+                            indent: 16,
+                            endIndent: 16,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.2),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: _buildExpandedMenuContent(context),
+                          ),
                         ],
                       ),
                     ),
@@ -849,6 +958,205 @@ child: Row(
         ),
       ],
     );
+  }
+
+  /// Build format-specific controls for the center of the panel
+  Widget _buildFormatSpecificControls(BuildContext context) {
+    final docState = ref.watch(documentViewerProvider);
+    if (docState.document == null) return const SizedBox.shrink();
+    
+    final format = docState.document!.format.toUpperCase();
+
+    if (format == 'PDF') {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildIconButton(
+            context,
+            Icons.first_page,
+            _currentPage > 1 ? _goToFirstPage : null,
+          ),
+          _buildIconButton(
+            context,
+            Icons.chevron_left,
+            _currentPage > 1 ? _goToPreviousPage : null,
+          ),
+          _buildPageIndicator(context),
+          _buildIconButton(
+            context,
+            Icons.chevron_right,
+            _currentPage < _totalPages ? _goToNextPage : null,
+          ),
+          _buildIconButton(
+            context,
+            Icons.last_page,
+            _currentPage < _totalPages ? _goToLastPage : null,
+          ),
+        ],
+      );
+    } else if (format == 'TXT' || format == 'DOCX' || format == 'DOC') {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildIconButton(
+            context,
+            Icons.remove,
+            _textFontSize > 10
+                ? () => setState(() => _textFontSize = (_textFontSize - 1).clamp(10, 24))
+                : null,
+          ),
+          SizedBox(
+            width: 50,
+            child: Center(
+              child: Text(
+                '${_textFontSize.toStringAsFixed(0)}pt',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ),
+          ),
+          _buildIconButton(
+            context,
+            Icons.add,
+            _textFontSize < 24
+                ? () => setState(() => _textFontSize = (_textFontSize + 1).clamp(10, 24))
+                : null,
+          ),
+          const SizedBox(width: 8),
+          _buildIconButton(
+            context,
+            _textWordWrap ? Icons.wrap_text : Icons.text_fields,
+            () => setState(() => _textWordWrap = !_textWordWrap),
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  /// Build the expanded menu content (Copy, Invert, TextMode, Theme buttons)
+  Widget _buildExpandedMenuContent(BuildContext context) {
+    final docState = ref.watch(documentViewerProvider);
+    if (docState.document == null) return const SizedBox.shrink();
+    
+    final format = docState.document!.format.toUpperCase();
+
+    if (format == 'PDF') {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildTile(
+              icon: Icons.copy_all,
+              label: 'Copy',
+              onTap: _copyPdfText,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
+              icon: _invertColors
+                  ? Icons.brightness_high
+                  : Icons.brightness_low,
+              label: 'Invert',
+              onTap: () => setState(
+                () => _invertColors = !_invertColors,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
+              icon: _textMode
+                  ? Icons.picture_as_pdf
+                  : Icons.text_snippet,
+              label: _textMode ? 'PDF' : 'Text',
+              onTap: () => setState(
+                () => _textMode = !_textMode,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
+              icon: Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+              label: 'Theme',
+              onTap: () {
+                ref.read(themeModeProvider.notifier).toggleThemeMode();
+              },
+            ),
+          ),
+        ],
+      );
+    } else if (format == 'TXT' || format == 'DOCX' || format == 'DOC') {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildTile(
+              icon: Icons.copy_all,
+              label: 'Copy',
+              onTap: _copyDocumentText,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
+              icon: Icons.font_download,
+              label: 'Font',
+              onTap: () {
+                // Toggle font between Mono and Ubuntu
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Font Style'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          title: const Text('Monospace (Courier)'),
+                          trailing: _textFontIsMonoFont 
+                            ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                            : null,
+                          onTap: () {
+                            setState(() => _textFontIsMonoFont = true);
+                            Navigator.pop(ctx);
+                          },
+                        ),
+                        ListTile(
+                          title: const Text('System (Ubuntu)'),
+                          trailing: !_textFontIsMonoFont 
+                            ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                            : null,
+                          onTap: () {
+                            setState(() => _textFontIsMonoFont = false);
+                            Navigator.pop(ctx);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
+              icon: Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+              label: 'Theme',
+              onTap: () {
+                ref.read(themeModeProvider.notifier).toggleThemeMode();
+              },
+            ),
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget _buildSidebarDrawer(BuildContext context, bool isDark) {
