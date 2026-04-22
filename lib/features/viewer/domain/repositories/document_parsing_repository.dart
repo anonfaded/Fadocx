@@ -42,6 +42,9 @@ abstract class DocumentParsingRepository {
   /// Parse PPT/PPTX file (PowerPoint presentation)
   Future<ParsedDocumentEntity> parsePPT(String filePath);
 
+  /// Parse TXT file (plain text)
+  Future<ParsedDocumentEntity> parseTXT(String filePath);
+
   /// Get cached parsing result if available and file unchanged
   ///
   /// Returns null if:
