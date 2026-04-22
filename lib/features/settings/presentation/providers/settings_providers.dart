@@ -4,6 +4,7 @@ import 'package:fadocx/features/settings/data/datasources/hive_datasource.dart';
 import 'package:fadocx/features/settings/data/repositories/repositories_impl.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/domain/repositories/repositories.dart';
+import 'package:fadocx/core/services/storage_service.dart';
 
 final log = Logger();
 
@@ -181,6 +182,7 @@ class RecentFilesMutator {
       (success) {
         log.i('Recent file added successfully');
         _ref.invalidate(recentFilesProvider);
+        _ref.invalidate(storageStatsProvider);
       },
     );
   }
@@ -227,6 +229,7 @@ class RecentFilesMutator {
         log.i('File moved to trash');
         _ref.invalidate(trashFilesProvider);
         _ref.invalidate(recentFilesProvider);
+        _ref.invalidate(storageStatsProvider);
       },
     );
   }
@@ -240,6 +243,7 @@ class RecentFilesMutator {
         log.i('File restored from trash');
         _ref.invalidate(trashFilesProvider);
         _ref.invalidate(recentFilesProvider);
+        _ref.invalidate(storageStatsProvider);
       },
     );
   }
@@ -254,6 +258,7 @@ class RecentFilesMutator {
         log.i('File permanently deleted');
         _ref.invalidate(trashFilesProvider);
         _ref.invalidate(recentFilesProvider);
+        _ref.invalidate(storageStatsProvider);
       },
     );
   }
@@ -311,3 +316,15 @@ class ShowRecentFilesNotifier extends Notifier<bool> {
     log.i('Set recent files visibility to: ${show ? 'visible' : 'hidden'}');
   }
 }
+
+// ============================================================================
+// STORAGE STATS PROVIDER
+// ============================================================================
+
+/// Storage stats provider - returns bytes and count for each category
+/// Auto-invalidated when files are added/duplicated/restored
+final storageStatsProvider =
+    FutureProvider<Map<String, Map<String, int>>>((ref) async {
+  log.i('Loading storage stats...');
+  return await StorageService.getStorageStats();
+});

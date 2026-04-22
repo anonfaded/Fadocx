@@ -263,4 +263,36 @@ class StorageService {
 
     return '${size.toStringAsFixed(2)} ${suffixes[index]}';
   }
+
+  /// Load storage sizes and counts for all categories.
+  /// Returns: {category: {'bytes': X, 'count': Y}}
+  static Future<Map<String, Map<String, int>>> getStorageStats() async {
+    final Map<String, Map<String, int>> result = {};
+    final categories = [
+      pdfsFolder,
+      spreadsheetsFolder,
+      documentsFolder,
+      presentationsFolder,
+      imagesFolder,
+      scansFolder,
+      trashFolder,
+    ];
+
+    for (final cat in categories) {
+      try {
+        final files = await getDocumentsInCategory(cat);
+        int bytes = 0;
+        for (final f in files) {
+          try {
+            bytes += await f.length();
+          } catch (_) {}
+        }
+        result[cat] = {'bytes': bytes, 'count': files.length};
+      } catch (_) {
+        result[cat] = {'bytes': 0, 'count': 0};
+      }
+    }
+
+    return result;
+  }
 }
