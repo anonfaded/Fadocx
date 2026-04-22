@@ -27,7 +27,11 @@ class DocumentViewerFactory {
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
-      'DOCX' || 'DOC' || 'TXT' => _buildTextViewer(document, onTap: onTap),
+      'DOCX' ||
+      'DOC' ||
+      'TXT' ||
+      'RTF' =>
+        _buildTextViewer(document, onTap: onTap),
       'PPT' || 'PPTX' || 'ODP' => _buildPptViewer(document),
       _ => _buildUnsupportedViewer(document.format),
     };
@@ -132,7 +136,7 @@ class DocumentViewerFactory {
     VoidCallback? onTap,
   }) {
     final textContent = document.textContent ?? '';
-    
+
     return GestureDetector(
       onTap: onTap,
       child: TextDocumentViewer(

@@ -41,7 +41,7 @@ class ParsedDocumentEntity {
   bool get isSpreadsheet => ['XLSX', 'XLS', 'CSV', 'ODS'].contains(format);
 
   /// Check if this is a text/doc format
-  bool get isText => ['DOCX', 'DOC', 'TXT'].contains(format);
+  bool get isText => ['DOCX', 'DOC', 'TXT', 'RTF'].contains(format);
 
   /// Check if this is a data format (JSON, XML, FADREC)
   bool get isData => ['JSON', 'XML', 'FADREC'].contains(format);
