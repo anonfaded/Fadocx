@@ -692,8 +692,15 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(Icons.description,
-                    size: 40, color: Colors.white),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    'assets/fadocx.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               Text(
