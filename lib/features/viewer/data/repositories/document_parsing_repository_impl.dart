@@ -9,7 +9,7 @@ import '../services/platform_channel_service.dart';
 final log = Logger();
 
 /// Production implementation of DocumentParsingRepository
-/// 
+///
 /// Orchestrates:
 /// - Native parsing via platform channels
 /// - Fallback to Dart parsing
@@ -111,7 +111,8 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       log.i('Parsing XML (Dart): $filePath');
       final dartResult = await DocumentParserService.parseXML(filePath);
       final result = _toParsedEntity(dartResult, format: 'XML');
-      log.d('XML parsed: valid=${dartResult['isValid']}, elements=${dartResult['elementCount']}');
+      log.d(
+          'XML parsed: valid=${dartResult['isValid']}, elements=${dartResult['elementCount']}');
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
@@ -163,12 +164,14 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
     // These are heavy formats, native is REQUIRED for performance
     try {
       log.d('Calling native parser channel for $format...');
-      final nativeResult = await _platformChannel.parseDocumentNative(filePath, format);
-      
-      log.d('Native parser returned: sheets=${nativeResult['sheetCount']}, format=${nativeResult['format']}');
-      
+      final nativeResult =
+          await _platformChannel.parseDocumentNative(filePath, format);
+
+      log.d(
+          'Native parser returned: sheets=${nativeResult['sheetCount']}, format=${nativeResult['format']}');
+
       final result = _toParsedEntity(nativeResult, format: format);
-      
+
       log.i('Successfully parsed $format: ${result.sheets.length} sheets');
       await cacheParsing(filePath, result);
       return result;
@@ -193,7 +196,8 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       log.i('Parsing CSV (Dart): $filePath');
       final dartResult = await DocumentParserService.parseCSV(filePath);
       final result = _toParsedEntity(dartResult, format: 'CSV');
-      log.d('CSV parsed: ${result.sheets.length} sheets, rows=${result.sheets.firstOrNull?.rowCount}');
+      log.d(
+          'CSV parsed: ${result.sheets.length} sheets, rows=${result.sheets.firstOrNull?.rowCount}');
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
@@ -241,13 +245,16 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
     // DOC MUST use native parsing - Dart binary extraction produces garbage
     try {
       log.d('Calling native parser channel for DOC...');
-      final nativeResult = await _platformChannel.parseDocumentNative(filePath, 'DOC');
+      final nativeResult =
+          await _platformChannel.parseDocumentNative(filePath, 'DOC');
 
-      log.d('Native parser returned: textContent=${(nativeResult['textContent'] as String?)?.length} chars, format=${nativeResult['format']}');
+      log.d(
+          'Native parser returned: textContent=${(nativeResult['textContent'] as String?)?.length} chars, format=${nativeResult['format']}');
 
       final result = _toParsedEntity(nativeResult, format: 'DOC');
 
-      log.i('Successfully parsed DOC: ${(result.textContent ?? '').length} characters');
+      log.i(
+          'Successfully parsed DOC: ${(result.textContent ?? '').length} characters');
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
@@ -273,9 +280,11 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
     // PPT/PPTX MUST use native parsing - Dart binary extraction produces garbage
     try {
       log.d('Calling native parser channel for $format...');
-      final nativeResult = await _platformChannel.parseDocumentNative(filePath, format);
+      final nativeResult =
+          await _platformChannel.parseDocumentNative(filePath, format);
 
-      log.d('Native parser returned: textContent length=${(nativeResult['textContent'] as String?)?.length}, slideCount=${nativeResult['slideCount']}, format=${nativeResult['format']}');
+      log.d(
+          'Native parser returned: textContent length=${(nativeResult['textContent'] as String?)?.length}, slideCount=${nativeResult['slideCount']}, format=${nativeResult['format']}');
 
       final result = _toParsedEntity(nativeResult, format: format);
 
@@ -326,6 +335,8 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
           slides: _buildSlideEntities(cachedResult['slides'] ?? []),
           sheetCount: cachedResult['sheetCount'] ?? 0,
           slideCount: cachedResult['slideCount'] ?? 0,
+          wordCount: cachedResult['wordCount'] as int?,
+          lineCount: cachedResult['lineCount'] as int?,
           parsedAt: DateTime.now(),
           sourceFilePath: filePath,
           textContent: cachedResult['textContent'],
@@ -362,6 +373,8 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
                 })
             .toList(),
         'textContent': document.textContent,
+        'wordCount': document.wordCount,
+        'lineCount': document.lineCount,
       };
 
       await _cache.cacheParsing(filePath, data);
@@ -401,60 +414,58 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
   /// Build SheetEntity list from parser result
   List<SheetEntity> _buildSheetEntities(List<dynamic> sheetsData) {
-    return sheetsData
-        .map((sheetData) {
-          // Handle both Map<String, dynamic> and Map<dynamic, dynamic>
-          final sheet = sheetData is Map<String, dynamic>
-              ? sheetData
-              : _convertDynamicMapToTyped(sheetData as Map);
-          
-          final rows = (sheet['rows'] as List<dynamic>?)
-              ?.map((row) {
-                if (row is List<String>) {
-                  return row;
-                }
-                // Handle mixed types in row data
-                return (row as List<dynamic>).map((e) => e.toString()).toList();
-              })
-              .toList() ?? [];
+    return sheetsData.map((sheetData) {
+      // Handle both Map<String, dynamic> and Map<dynamic, dynamic>
+      final sheet = sheetData is Map<String, dynamic>
+          ? sheetData
+          : _convertDynamicMapToTyped(sheetData as Map);
 
-          // Determine max column count from all rows
-          final maxColCount = rows.fold<int>(
-            0,
-            (max, row) => max > row.length ? max : row.length,
-          );
-
-          // Normalize all rows to have the same column count
-          final normalizedRows = rows.map((row) {
-            if (row.length == maxColCount) {
+      final rows = (sheet['rows'] as List<dynamic>?)?.map((row) {
+            if (row is List<String>) {
               return row;
             }
-            final normalized = List<String>.from(row);
-            if (normalized.length < maxColCount) {
-              normalized.addAll(List<String>.filled(maxColCount - normalized.length, ''));
-            } else {
-              normalized.length = maxColCount;
-            }
-            return normalized;
-          }).toList();
+            // Handle mixed types in row data
+            return (row as List<dynamic>).map((e) => e.toString()).toList();
+          }).toList() ??
+          [];
 
-          return SheetEntity(
-            name: sheet['name'] as String? ?? 'Sheet',
-            rows: normalizedRows,
-            rowCount: normalizedRows.length,
-            colCount: maxColCount,
-          );
-        })
-        .toList();
+      // Determine max column count from all rows
+      final maxColCount = rows.fold<int>(
+        0,
+        (max, row) => max > row.length ? max : row.length,
+      );
+
+      // Normalize all rows to have the same column count
+      final normalizedRows = rows.map((row) {
+        if (row.length == maxColCount) {
+          return row;
+        }
+        final normalized = List<String>.from(row);
+        if (normalized.length < maxColCount) {
+          normalized
+              .addAll(List<String>.filled(maxColCount - normalized.length, ''));
+        } else {
+          normalized.length = maxColCount;
+        }
+        return normalized;
+      }).toList();
+
+      return SheetEntity(
+        name: sheet['name'] as String? ?? 'Sheet',
+        rows: normalizedRows,
+        rowCount: normalizedRows.length,
+        colCount: maxColCount,
+      );
+    }).toList();
   }
 
   /// Convert Map with dynamic keys to typed Map with String keys
   Map<String, dynamic> _convertDynamicMapToTyped(Map map) {
     return Map<String, dynamic>.from(
       map.map((key, value) => MapEntry(
-        key.toString(),
-        _convertDynamicValue(value),
-      )),
+            key.toString(),
+            _convertDynamicValue(value),
+          )),
     );
   }
 
@@ -471,17 +482,15 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
   /// Build SlideEntity list from parser result
   List<SlideEntity> _buildSlideEntities(List<dynamic> slidesData) {
-    return slidesData
-        .map((slideData) {
-          final slide = slideData is Map<String, dynamic>
-              ? slideData
-              : _convertDynamicMapToTyped(slideData as Map);
+    return slidesData.map((slideData) {
+      final slide = slideData is Map<String, dynamic>
+          ? slideData
+          : _convertDynamicMapToTyped(slideData as Map);
 
-          return SlideEntity(
-            slideNumber: (slide['slideNumber'] as int?) ?? 0,
-            text: (slide['text'] as String?) ?? '',
-          );
-        })
-        .toList();
+      return SlideEntity(
+        slideNumber: (slide['slideNumber'] as int?) ?? 0,
+        text: (slide['text'] as String?) ?? '',
+      );
+    }).toList();
   }
 }

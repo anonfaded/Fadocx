@@ -19,6 +19,8 @@ class ParsedDocumentEntity {
   final List<SlideEntity> slides; // For PPT/PPTX presentations
   final int sheetCount; // For spreadsheets
   final int slideCount; // For presentations
+  final int? wordCount; // Exact extracted word count when available
+  final int? lineCount; // Exact extracted line count when available
   final DateTime parsedAt;
   final String sourceFilePath;
 
@@ -29,6 +31,8 @@ class ParsedDocumentEntity {
     this.slides = const [],
     this.sheetCount = 0,
     this.slideCount = 0,
+    this.wordCount,
+    this.lineCount,
     required this.parsedAt,
     required this.sourceFilePath,
   });
@@ -53,6 +57,8 @@ class ParsedDocumentEntity {
     List<SlideEntity>? slides,
     int? sheetCount,
     int? slideCount,
+    int? wordCount,
+    int? lineCount,
     DateTime? parsedAt,
     String? sourceFilePath,
   }) {
@@ -63,6 +69,8 @@ class ParsedDocumentEntity {
       slides: slides ?? this.slides,
       sheetCount: sheetCount ?? this.sheetCount,
       slideCount: slideCount ?? this.slideCount,
+      wordCount: wordCount ?? this.wordCount,
+      lineCount: lineCount ?? this.lineCount,
       parsedAt: parsedAt ?? this.parsedAt,
       sourceFilePath: sourceFilePath ?? this.sourceFilePath,
     );
