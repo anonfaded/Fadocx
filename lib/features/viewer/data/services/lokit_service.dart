@@ -75,6 +75,43 @@ class LOKitService {
     }
   }
 
+
+  static Future<String> extractText() async {
+    try {
+      final result = await _channel.invokeMethod<String>('extractText');
+      return result ?? '';
+    } on PlatformException {
+      return '';
+    }
+  }
+
+  static Future<String> extractPartText({int part = 0}) async {
+    try {
+      final result = await _channel.invokeMethod<String>('extractPartText', {
+        'part': part,
+      });
+      return result ?? '';
+    } on PlatformException {
+      return '';
+    }
+  }
+
+  static Future<Uint8List?> renderThumbnail({
+    required String filePath,
+    int part = 0,
+    int width = 400,
+    int height = 460,
+  }) async {
+    try {
+      final loadResult = await loadDocument(filePath);
+      if (loadResult == null) return null;
+      final pngBytes = await renderPageFit(part: part, maxWidth: width, maxHeight: height);
+      await closeDocument();
+      return pngBytes;
+    } on PlatformException {
+      return null;
+    }
+  }
   static Future<bool> closeDocument() async {
     final result = await _channel.invokeMethod<bool>('closeDocument');
     return result ?? false;

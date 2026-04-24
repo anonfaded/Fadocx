@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:fadocx/features/viewer/data/services/document_parser_service.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:flutter/painting.dart';
+import 'package:fadocx/features/viewer/data/services/lokit_service.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
@@ -59,10 +61,9 @@ class ThumbnailGenerationService {
             normalizedType,
             cachedDocument: cachedDocument,
           ),
-        'ppt' || 'pptx' || 'odp' => _createPlaceholderThumbnail(
-            label: 'SLIDES',
-            accent: ThumbnailColors.pptOrange,
-            caption: 'Preview coming soon',
+        'ppt' || 'pptx' || 'odp' => _generatePresentationThumbnail(
+            filePath,
+            normalizedType,
           ),
         _ => _createPlaceholderThumbnail(
             label: normalizedType.toUpperCase(),
@@ -75,6 +76,95 @@ class ThumbnailGenerationService {
           error: e, stackTrace: st);
       return null;
     }
+  }
+
+  static Future<Uint8List?> _generatePresentationThumbnail(
+    String filePath,
+    String fileType,
+  ) async {
+    try {
+      final pngBytes = await LOKitService.renderThumbnail(
+        filePath: filePath,
+        part: 0,
+        width: _thumbnailWidth,
+        height: _thumbnailHeight - 100,
+      );
+      if (pngBytes == null || pngBytes.isEmpty) {
+        return _createPlaceholderThumbnail(
+          label: 'SLIDES',
+          accent: ThumbnailColors.pptOrange,
+          caption: fileType.toUpperCase(),
+        );
+      }
+      return _buildPresentationCard(pngBytes, fileType);
+    } catch (e) {
+      _log.w('Presentation thumbnail fell back to placeholder for $filePath', error: e);
+      return _createPlaceholderThumbnail(
+        label: 'SLIDES',
+        accent: ThumbnailColors.pptOrange,
+        caption: fileType.toUpperCase(),
+      );
+    }
+  }
+
+  static Future<Uint8List?> _buildPresentationCard(Uint8List slideImage, String fileType) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final w = _thumbnailWidth.toDouble();
+    final h = _thumbnailHeight.toDouble();
+    final accent = ThumbnailColors.pptOrange;
+
+    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), Paint()..color = ui.Color.fromARGB(18, accent.r, accent.g, accent.b));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(10, 10, w - 20, h - 20), Radius.circular(22)),
+      Paint()..color = const ui.Color(0x1A000000),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(8, 8, w - 16, h - 16), Radius.circular(22)),
+      Paint()..color = const ui.Color(0xFFFFFFFF),
+    );
+
+    final headerRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(8, 8, w - 16, _compactHeaderHeight),
+      Radius.circular(22),
+    );
+    canvas.drawRRect(headerRect, Paint()..color = ui.Color.fromARGB(255, accent.r, accent.g, accent.b));
+
+    final headerPainter = TextPainter(
+      text: TextSpan(
+        text: fileType.toUpperCase(),
+        style: _previewHeaderMetaStyle,
+      ),
+      textDirection: ui.TextDirection.ltr,
+      maxLines: 1,
+    );
+    headerPainter.layout(minWidth: w - 48, maxWidth: w - 48);
+    headerPainter.paint(canvas, Offset(24, 8 + (_compactHeaderHeight - headerPainter.height) / 2));
+
+    final codec = await ui.instantiateImageCodec(slideImage);
+    final frame = await codec.getNextFrame();
+    final img = frame.image;
+
+    final imgAreaTop = 8 + _compactHeaderHeight + 4;
+    final imgAreaHeight = h - imgAreaTop - 12;
+    final imgAreaWidth = w - 16;
+    final imgScale = min<double>(imgAreaWidth / img.width, imgAreaHeight / img.height);
+    final drawW = img.width * imgScale;
+    final drawH = img.height * imgScale;
+    final drawX = 8 + (imgAreaWidth - drawW) / 2;
+    final drawY = imgAreaTop + (imgAreaHeight - drawH) / 2;
+
+    canvas.drawImageRect(
+      img,
+      Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+      Rect.fromLTWH(drawX, drawY, drawW, drawH),
+      Paint()..filterQuality = FilterQuality.high,
+    );
+
+    final picture = recorder.endRecording();
+    final finalImage = await picture.toImage(_thumbnailWidth, _thumbnailHeight);
+    final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
   }
 
   static Future<Uint8List?> _generatePdfThumbnail(

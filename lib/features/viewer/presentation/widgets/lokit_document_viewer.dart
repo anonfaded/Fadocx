@@ -35,6 +35,7 @@ class LOKitDocumentViewerState extends ConsumerState<LOKitDocumentViewer>
   Offset? _tapStartPosition;
   DateTime? _tapStartTime;
   double _currentZoom = 1.0;
+  double get currentZoom => _currentZoom;
   StreamSubscription? _pageChangeSub;
   int _lastReportedPage = -1;
 
@@ -289,21 +290,37 @@ class LOKitDocumentViewerState extends ConsumerState<LOKitDocumentViewer>
 
   Widget _buildLoading() {
     final theme = Theme.of(context);
+    final lokitState = ref.watch(lokitViewerProvider);
+    final isInit = lokitState.isInitialized;
+    final label = isInit ? 'Preparing your document...' : 'Warming up the Fadocx engine...';
+    final sublabel = isInit ? 'Almost there' : 'Just a moment';
     return Container(
       color: theme.scaffoldBackgroundColor,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color: theme.colorScheme.primary,
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: theme.colorScheme.primary,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
-              'Loading document...',
+              label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              sublabel,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               ),
             ),
           ],
@@ -351,8 +368,11 @@ class LOKitDocumentViewerState extends ConsumerState<LOKitDocumentViewer>
   void _resetZoom() {
     if (_transformController != null) {
       _transformController!.value = Matrix4.identity();
+      setState(() => _currentZoom = 1.0);
     }
   }
+
+  void resetZoom() => _resetZoom();
 }
 
 class _ImagePainter extends CustomPainter {
