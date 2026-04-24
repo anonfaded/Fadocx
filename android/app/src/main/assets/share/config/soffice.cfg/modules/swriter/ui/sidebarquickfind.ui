@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.40.0 -->
+<interface domain="sw">
+  <requires lib="gtk+" version="3.24"/>
+  <object class="GtkListStore" id="liststore">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <!-- n-columns=1 n-rows=1 -->
+  <object class="GtkGrid" id="QuickFindPanel">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
+    <property name="row-homogeneous">True</property>
+    <property name="column-homogeneous">True</property>
+    <child>
+      <object class="GtkBox" id="box">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
+        <property name="border-width">6</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkBox" id="topbar">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkComboBoxText" id="searchterm">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="valign">center</property>
+                <property name="hexpand">True</property>
+                <property name="has-entry">True</property>
+                <child internal-child="entry">
+                  <object class="GtkEntry">
+                    <property name="can-focus">True</property>
+                    <property name="activates-default">True</property>
+                    <property name="truncate-multiline">True</property>
+                  </object>
+                </child>
+                <child internal-child="accessible">
+                  <object class="AtkObject" id="searchterm-atkobject">
+                    <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|extended_tip|searchterm">Enter the text that you want to find, or select a previous search from the list.</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolbar" id="searchoptionstoolbar">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="toolbar-style">icons</property>
+                <property name="show-arrow">False</property>
+                <child>
+                  <object class="GtkToolButton" id="searchoptionsbutton">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="tooltip-text" translatable="yes" context="quickfindpanel|moresearchoptions|tooltip_text">Search Options</property>
+                    <property name="icon-name">cmd/sc_symbolshapes.flower.png</property>
+                    <child internal-child="accessible">
+                      <object class="AtkObject" id="searchoptions-atkobject">
+                        <property name="AtkObject::accessible-name" translatable="yes" context="quickfindpanel|moresearchoptions|accessible_name">Search Options</property>
+                        <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|extended_tip|moresearchoptions">Click here to show more search options.</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">False</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolbar" id="findandreplacetoolbar">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="toolbar-style">icons</property>
+                <property name="show-arrow">False</property>
+                <child>
+                  <object class="GtkToolButton" id="searchdialog">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="tooltip-text" translatable="yes" context="quickfindpanel|searchdialog|tooltip_text">Search with Find and Replace</property>
+                    <property name="icon-name">cmd/sc_searchdialog.png</property>
+                    <child internal-child="accessible">
+                      <object class="AtkObject" id="searchdialog-atkobject">
+                        <property name="AtkObject::accessible-name" translatable="yes" context="quickfindpanel|searchdialog|accessible_name">Search with Find and Replace</property>
+                        <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|extended_tip|searchdialog">Click here to transfer the search to the Find and Replace dialog to set more search options.</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">False</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="topbar1">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="spacing">2</property>
+            <child>
+              <object class="GtkBox" id="searchoptionsbox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-start">6</property>
+                <property name="margin-end">6</property>
+                <property name="hexpand">True</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <child>
+                  <!-- n-columns=1 n-rows=5 -->
+                  <object class="GtkGrid" id="grid4">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="hexpand">True</property>
+                    <property name="row-spacing">6</property>
+                    <child>
+                      <object class="GtkCheckButton" id="matchcase">
+                        <property name="label" translatable="yes" context="quickfindpanel|searchoptionsbox|matchcase">Match case</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="no-show-all">True</property>
+                        <property name="use-underline">True</property>
+                        <property name="draw-indicator">True</property>
+                        <child internal-child="accessible">
+                          <object class="AtkObject" id="matchcase-atkobject">
+                            <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|searchoptionsbox|extended_tip|matchcase">Finds only exact case matches.</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="wholewordsonly">
+                        <property name="label" translatable="yes" context="quickfindpanel|searchoptionsbox|wholewordsonly">Whole words only</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="no-show-all">True</property>
+                        <property name="use-underline">True</property>
+                        <property name="draw-indicator">True</property>
+                        <child internal-child="accessible">
+                          <object class="AtkObject" id="wholewordsonly-atkobject">
+                            <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|searchoptionsbox|extended_tip|wholewordsonly">Finds only whole words.</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="comments">
+                        <property name="label" translatable="yes" context="quickfindpanel|searchoptionsbox|comments">Comments</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="no-show-all">True</property>
+                        <property name="use-underline">True</property>
+                        <property name="draw-indicator">True</property>
+                        <child internal-child="accessible">
+                          <object class="AtkObject" id="comments-atkobject">
+                            <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|searchoptionsbox|extended_tip|comments">Allow search in comments.</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="regularexpressions">
+                        <property name="label" translatable="yes" context="quickfindpanel|searchoptionsbox|regularexpressions">Regular expressions</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="no-show-all">True</property>
+                        <property name="use-underline">True</property>
+                        <property name="draw-indicator">True</property>
+                        <child internal-child="accessible">
+                          <object class="AtkObject" id="regularexpressions-atkobject">
+                            <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|searchoptionsbox|extended_tip|regularexpressions">Search using regular expression.</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="box3">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">12</property>
+                        <child>
+                          <object class="GtkCheckButton" id="similarity">
+                            <property name="label" translatable="yes" context="quickfindpanel|searchoptionsbox|similarity">Similarity</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="no-show-all">True</property>
+                            <property name="use-underline">True</property>
+                            <property name="draw-indicator">True</property>
+                            <child internal-child="accessible">
+                              <object class="AtkObject" id="similarity-atkobject">
+                                <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|searchoptionsbox|extended_tip|similarity">Find terms that are similar to the Find text. Select this checkbox, and then click the Similarities button to define the similarity options.</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="similaritysettingsdialog">
+                            <property name="label" translatable="yes" context="quickfindpanel|searchoptionsbox|similaritybtn">Similarities...</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="no-show-all">True</property>
+                            <property name="halign">end</property>
+                            <property name="hexpand">True</property>
+                            <property name="use-underline">True</property>
+                            <child internal-child="accessible">
+                              <object class="AtkObject" id="similaritysettingsdialog-atkobject">
+                                <property name="AtkObject::accessible-description" translatable="yes" context="quickfindpanel|searchoptionsbox|extended_tip|similaritybtn">Set the options for the similarity search.</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">4</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="vscrollbar-policy">always</property>
+            <property name="shadow-type">in</property>
+            <child>
+              <object class="GtkTreeView" id="searchfinds">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="model">liststore</property>
+                <property name="headers-visible">False</property>
+                <property name="headers-clickable">False</property>
+                <property name="search-column">0</property>
+                <property name="show-expanders">False</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection"/>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn0"/>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn1">
+                    <child>
+                      <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child internal-child="accessible">
+                  <object class="AtkObject" id="searchfinds-atkobject">
+                    <property name="AtkObject::accessible-description" translatable="yes" context="sidebarquickfind|extended_tip|searchfinds">Lists the positions in the document that the searched term is found.</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="numberofsearchfinds">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left-attach">0</property>
+        <property name="top-attach">0</property>
+      </packing>
+    </child>
+  </object>
+</interface>

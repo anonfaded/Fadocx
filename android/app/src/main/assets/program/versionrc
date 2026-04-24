@@ -1,0 +1,10 @@
+[Version]
+AllLanguages=en-US
+buildid=7d4a9f683c3805f49e682a16dd72136f42a27c55
+ExtensionUpdateURL=https://updateexte.libreoffice.org/ExtensionUpdateService/check.Update
+UpdateChannel=
+ReferenceOOoMajorMinor=4.1
+UpdateID=LibreOfficeDev_26_en-US
+UpdateURL=
+UpdateUserAgent=<PRODUCT> (${buildid}; ${_OS}; ${_ARCH}; <OPTIONAL_OS_HW_DATA>)
+Vendor=faded

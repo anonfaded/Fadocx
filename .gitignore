@@ -109,3 +109,8 @@ coverage/
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+
+# LibreOfficeKit native libraries (~250MB)
+# android/app/src/main/jniLibs/
+# android/app/src/main/assets/program/
+# android/app/src/main/assets/share/

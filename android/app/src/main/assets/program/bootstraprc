@@ -1,0 +1,4 @@
+[Bootstrap]
+InstallMode=install
+ProductKey=LibreOfficeDev 26.8
+UserInstallation=file:///dummy

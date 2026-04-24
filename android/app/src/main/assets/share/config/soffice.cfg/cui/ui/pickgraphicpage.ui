@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.40.0 -->
+<interface domain="cui">
+  <requires lib="gtk+" version="3.24"/>
+  <!-- n-columns=2 n-rows=3 -->
+  <object class="GtkGrid" id="PickGraphicPage">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="margin-start">6</property>
+    <property name="margin-end">6</property>
+    <property name="margin-top">6</property>
+    <property name="margin-bottom">6</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
+    <property name="row-spacing">6</property>
+    <child>
+      <object class="GtkScrolledWindow" id="valuesetwin">
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
+        <property name="hscrollbar-policy">never</property>
+        <property name="shadow-type">in</property>
+        <child>
+          <object class="GtkViewport">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkDrawingArea" id="valueset">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="events">GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <child internal-child="accessible">
+                  <object class="AtkObject" id="valueset-atkobject">
+                    <property name="AtkObject::accessible-description" translatable="yes" context="pickgraphicpage|extended_tip|valueset">Click the graphics that you want to use as bullets.</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="left-attach">1</property>
+        <property name="top-attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="errorft">
+        <property name="can-focus">False</property>
+        <property name="no-show-all">True</property>
+        <property name="label" translatable="yes" context="pickgraphicpage|errorft">The Gallery theme 'Bullets' is empty (no images).</property>
+        <property name="wrap">True</property>
+      </object>
+      <packing>
+        <property name="left-attach">0</property>
+        <property name="top-attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="browseBtn">
+        <property name="label" translatable="yes" context="pickgraphicpage|browseBtn">Add and Resize</property>
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="receives-default">False</property>
+        <property name="halign">end</property>
+      </object>
+      <packing>
+        <property name="left-attach">1</property>
+        <property name="top-attach">2</property>
+      </packing>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="accessible">
+      <object class="AtkObject" id="PickGraphicPage-atkobject">
+        <property name="AtkObject::accessible-description" translatable="yes" context="pickgraphicpage|extended_tip|PickGraphicPage">Displays the different graphics that you can use as bullets in a bulleted list.</property>
+      </object>
+    </child>
+  </object>
+</interface>

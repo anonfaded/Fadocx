@@ -1,0 +1,6 @@
+[Bootstrap]
+URE_INTERNAL_LIB_DIR=file:///assets/program
+URE_INTERNAL_JAVA_DIR=file:///assets/program/classes
+URE_INTERNAL_JAVA_CLASSPATH=${URE_MORE_JAVA_TYPES}
+UNO_TYPES=file:///assets/program/types.rdb ${URE_MORE_TYPES}
+UNO_SERVICES=file:///assets/program/services.rdb ${URE_MORE_SERVICES}
