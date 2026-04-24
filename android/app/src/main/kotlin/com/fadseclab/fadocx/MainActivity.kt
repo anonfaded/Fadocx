@@ -20,22 +20,22 @@ import java.io.FileInputStream
 import java.io.PrintWriter
 import java.io.StringWriter
 
-/// Native document parser bridge for Flutter
 class MainActivity : FlutterActivity() {
     override fun provideFlutterEngine(context: android.content.Context): FlutterEngine? {
-        // Use the cached engine pre-warmed in FadocxApplication
         return FlutterEngineCache.getInstance().get("fadocx_engine")
     }
 
     private val CHANNEL = "com.fadseclab.fadocx/document_parser"
     private val FILE_CHANNEL = "com.fadseclab.fadocx/file_intent"
     private val PDF_CHANNEL = "com.fadseclab.fadocx/pdf"
+    private val LOKIT_CHANNEL = "com.fadseclab.fadocx/lokit"
     private val TAG = "Fadocx.DocumentParser"
     private var pendingFileIntent: String? = null
-    
-    // Cache for PDF renderers
+
     private val pdfRenderers = mutableMapOf<String, PdfRenderer>()
     private val pdfDescriptors = mutableMapOf<String, ParcelFileDescriptor>()
+
+    private val lokitWrapper by lazy { LOKitWrapper.getInstance() }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -55,10 +55,10 @@ class MainActivity : FlutterActivity() {
                                 val maxRows = call.argument<Int>("maxRows")
                                 val maxCols = call.argument<Int>("maxCols")
                                 val maxSheets = call.argument<Int>("maxSheets")
-                                
+
                                 val parserClass = Class.forName("com.fadseclab.fadocx.NativeDocumentParser")
                                 val parserInstance = parserClass.getConstructor(String::class.java).newInstance(TAG)
-                                val method = parserClass.getDeclaredMethod("handleParseDocument", 
+                                val method = parserClass.getDeclaredMethod("handleParseDocument",
                                     String::class.java,
                                     String::class.java,
                                     Int::class.javaObjectType,
@@ -87,7 +87,7 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
-            
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PDF_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -101,22 +101,22 @@ class MainActivity : FlutterActivity() {
                     "openPdf" -> openPdf(call.argument("filePath"), result)
                     "closePdf" -> closePdf(call.argument("filePath"), result)
                     "getPageCount" -> getPdfPageCount(call.argument("filePath"), result)
-                    "extractPageText" -> Thread { 
+                    "extractPageText" -> Thread {
                         try {
                             val extractorClass = Class.forName("com.fadseclab.fadocx.PdfTextExtractor")
                             val extractorInstance = extractorClass.getConstructor(String::class.java).newInstance(TAG)
-                            val method = extractorClass.getDeclaredMethod("extractPdfPageText", 
+                            val method = extractorClass.getDeclaredMethod("extractPdfPageText",
                                 String::class.java, Int::class.java, MethodChannel.Result::class.java, android.app.Activity::class.java)
                             method.invoke(extractorInstance, call.argument<String>("filePath"), call.argument<Int>("pageNumber") ?: 1, result, this@MainActivity)
                         } catch (e: Exception) {
                             runOnUiThread { result.error("REFLECTION_ERROR", e.message, null) }
                         }
                     }.start()
-                    "extractTextWithPositions" -> Thread { 
+                    "extractTextWithPositions" -> Thread {
                         try {
                             val extractorClass = Class.forName("com.fadseclab.fadocx.PdfTextExtractor")
                             val extractorInstance = extractorClass.getConstructor(String::class.java).newInstance(TAG)
-                            val method = extractorClass.getDeclaredMethod("extractTextWithPositions", 
+                            val method = extractorClass.getDeclaredMethod("extractTextWithPositions",
                                 String::class.java, Int::class.java, MethodChannel.Result::class.java, android.app.Activity::class.java)
                             method.invoke(extractorInstance, call.argument<String>("filePath"), call.argument<Int>("pageNumber") ?: 1, result, this@MainActivity)
                         } catch (e: Exception) {
@@ -128,7 +128,87 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
-        // Method channel for app settings
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, LOKIT_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                Thread {
+                    try {
+                        when (call.method) {
+                            "init" -> {
+                                val ok = lokitWrapper.init(this@MainActivity)
+                                runOnUiThread { result.success(ok) }
+                            }
+                            "loadDocument" -> {
+                                val path = call.argument<String>("filePath")
+                                if (path == null) {
+                                    runOnUiThread { result.error("INVALID_ARGS", "Missing filePath", null) }
+                                    return@Thread
+                                }
+                                val info = lokitWrapper.loadDocument(path)
+                                if (info != null) {
+                                    runOnUiThread { result.success(info) }
+                                } else {
+                                    runOnUiThread { result.error("LOAD_FAILED", "Failed to load document", null) }
+                                }
+                            }
+                            "renderPage" -> {
+                                val part = call.argument<Int>("part") ?: 0
+                                val width = call.argument<Int>("width") ?: 800
+                                val height = call.argument<Int>("height") ?: 1200
+                                val bytes = lokitWrapper.renderPage(part, width, height)
+                                if (bytes != null) {
+                                    runOnUiThread { result.success(mapOf("bytes" to bytes, "part" to part, "width" to width, "height" to height)) }
+                                } else {
+                                    runOnUiThread { result.error("RENDER_FAILED", "Failed to render page", null) }
+                                }
+                            }
+                            "renderPageFit" -> {
+                                val part = call.argument<Int>("part") ?: 0
+                                val maxWidth = call.argument<Int>("maxWidth") ?: 1080
+                                val maxHeight = call.argument<Int>("maxHeight") ?: 1920
+                                val bytes = lokitWrapper.renderPageFit(part, maxWidth, maxHeight)
+                                if (bytes != null) {
+                                    runOnUiThread { result.success(mapOf("bytes" to bytes, "part" to part)) }
+                                } else {
+                                    runOnUiThread { result.error("RENDER_FAILED", "Failed to render page", null) }
+                                }
+                            }
+                            "renderPageHighQuality" -> {
+                                val part = call.argument<Int>("part") ?: 0
+                                val maxWidth = call.argument<Int>("maxWidth") ?: 1080
+                                val maxHeight = call.argument<Int>("maxHeight") ?: 1920
+                                val scale = (call.argument<Double>("scale") ?: 2.0).toFloat()
+                                val bytes = lokitWrapper.renderPageHighQuality(part, maxWidth, maxHeight, scale)
+                                if (bytes != null) {
+                                    runOnUiThread { result.success(mapOf("bytes" to bytes, "part" to part)) }
+                                } else {
+                                    runOnUiThread { result.error("RENDER_FAILED", "Failed to render page", null) }
+                                }
+                            }
+                            "getDocumentInfo" -> {
+                                val info = lokitWrapper.getDocumentInfo()
+                                if (info != null) {
+                                    runOnUiThread { result.success(info) }
+                                } else {
+                                    runOnUiThread { result.success(null) }
+                                }
+                            }
+                            "closeDocument" -> {
+                                lokitWrapper.closeDocument()
+                                runOnUiThread { result.success(true) }
+                            }
+                            "destroy" -> {
+                                lokitWrapper.destroy()
+                                runOnUiThread { result.success(true) }
+                            }
+                            else -> runOnUiThread { result.notImplemented() }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "LOKit error", e)
+                        runOnUiThread { result.error("LOKIT_ERROR", e.message, null) }
+                    }
+                }.start()
+            }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.fadseclab.fadocx/app_settings")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -147,6 +227,7 @@ class MainActivity : FlutterActivity() {
         pdfDescriptors.values.forEach { it.close() }
         pdfRenderers.clear()
         pdfDescriptors.clear()
+        lokitWrapper.destroy()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -261,7 +342,7 @@ class MainActivity : FlutterActivity() {
             null
         }
     }
-    
+
     private fun openPdf(filePath: String?, result: MethodChannel.Result) {
         try {
             if (filePath == null) return result.error("INVALID_ARGS", "Missing filePath", null)
@@ -279,7 +360,7 @@ class MainActivity : FlutterActivity() {
             result.error("PDF_ERROR", e.message, null)
         }
     }
-    
+
     private fun closePdf(filePath: String?, result: MethodChannel.Result) {
         try {
             if (filePath == null) return result.error("INVALID_ARGS", "Missing filePath", null)
@@ -293,7 +374,7 @@ class MainActivity : FlutterActivity() {
             result.error("PDF_ERROR", e.message, null)
         }
     }
-    
+
     private fun renderPdfPage(filePath: String?, pageNumber: Int, width: Int, height: Int?, result: MethodChannel.Result) {
         try {
             if (filePath == null) return result.error("INVALID_ARGS", "Missing filePath", null)
@@ -327,7 +408,7 @@ class MainActivity : FlutterActivity() {
             result.error("PDF_RENDER_ERROR", e.message, null)
         }
     }
-    
+
     private fun getPageSize(filePath: String?, pageNumber: Int, result: MethodChannel.Result) {
         try {
             if (filePath == null) return result.error("INVALID_ARGS", "Missing filePath", null)
@@ -351,7 +432,7 @@ class MainActivity : FlutterActivity() {
             result.error("PDF_ERROR", e.message, null)
         }
     }
-    
+
     private fun getPdfPageCount(filePath: String?, result: MethodChannel.Result) {
         try {
             if (filePath == null) return result.error("INVALID_ARGS", "Missing filePath", null)

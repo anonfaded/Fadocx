@@ -11,6 +11,7 @@ import 'package:fadocx/features/viewer/presentation/widgets/text_document_viewer
 import 'package:fadocx/features/viewer/presentation/widgets/rich_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/modern_pdf_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
+import 'package:fadocx/features/viewer/presentation/widgets/lokit_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
@@ -59,6 +60,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
   late GlobalKey<State<TextDocumentViewer>> _textViewerKey;
   late GlobalKey<State<RichDocumentViewer>> _richDocumentViewerKey;
+  late GlobalKey<State<LOKitDocumentViewer>> _lokitViewerKey;
   static const double _kDragCloseThreshold = 100.0;
 
   bool _isPdfDocument() {
@@ -86,10 +88,20 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         document.hasRichDocument;
   }
 
+  bool _isLOKitDocument() {
+    final format = ref.read(documentViewerProvider).document?.format.toUpperCase();
+    return format == 'PPT' ||
+        format == 'PPTX' ||
+        format == 'ODP';
+  }
+
   bool _canOpenSidebar() {
     if (!_controlsVisible) return false;
     if (_isPdfDocument()) {
       return _pdfViewerKey.currentState != null;
+    }
+    if (_isLOKitDocument()) {
+      return _lokitViewerKey.currentState != null;
     }
     if (_isTextDocument()) {
       if (_isRichWordDocument()) {
@@ -103,6 +115,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   Widget? _resolveSidebarContent(BuildContext context) {
     if (_isPdfDocument()) {
       final viewerState = _pdfViewerKey.currentState as dynamic;
+      return viewerState?.buildDrawerContent(context) as Widget?;
+    }
+    if (_isLOKitDocument()) {
+      final viewerState = _lokitViewerKey.currentState as dynamic;
       return viewerState?.buildDrawerContent(context) as Widget?;
     }
     if (_isTextDocument()) {
@@ -154,6 +170,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     if (_isPdfDocument()) {
       (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
     }
+    if (_isLOKitDocument()) {
+      (_lokitViewerKey.currentState as dynamic)?.toggleSidebar();
+    }
     setState(() {
       _sidebarOpen = !_sidebarOpen;
     });
@@ -191,20 +210,35 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   void _goToFirstPage() {
-    (_pdfViewerKey.currentState as dynamic)?.goToFirstPage();
+    if (_isPdfDocument()) {
+      (_pdfViewerKey.currentState as dynamic)?.goToFirstPage();
+    } else if (_isLOKitDocument()) {
+      (_lokitViewerKey.currentState as dynamic)?.goToFirstPage();
+    }
   }
 
   void _goToPreviousPage() {
-    (_pdfViewerKey.currentState as dynamic)?.goToPreviousPage();
+    if (_isPdfDocument()) {
+      (_pdfViewerKey.currentState as dynamic)?.goToPreviousPage();
+    } else if (_isLOKitDocument()) {
+      (_lokitViewerKey.currentState as dynamic)?.goToPreviousPage();
+    }
   }
 
   void _goToNextPage() {
-    (_pdfViewerKey.currentState as dynamic)?.goToNextPage();
+    if (_isPdfDocument()) {
+      (_pdfViewerKey.currentState as dynamic)?.goToNextPage();
+    } else if (_isLOKitDocument()) {
+      (_lokitViewerKey.currentState as dynamic)?.goToNextPage();
+    }
   }
 
   void _closeSidebar() {
     if (_isPdfDocument()) {
       (_pdfViewerKey.currentState as dynamic)?.toggleSidebar();
+    }
+    if (_isLOKitDocument()) {
+      (_lokitViewerKey.currentState as dynamic)?.toggleSidebar();
     }
     setState(() => _sidebarOpen = false);
     _sidebarController.reverse();
@@ -233,7 +267,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   void _goToLastPage() {
-    (_pdfViewerKey.currentState as dynamic)?.goToLastPage();
+    if (_isPdfDocument()) {
+      (_pdfViewerKey.currentState as dynamic)?.goToLastPage();
+    } else if (_isLOKitDocument()) {
+      (_lokitViewerKey.currentState as dynamic)?.goToLastPage();
+    }
   }
 
   void _showGoToPageDialog() {
@@ -260,7 +298,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             onPressed: () {
               final pageNum = int.tryParse(textController.text);
               if (pageNum != null && pageNum >= 1 && pageNum <= _totalPages) {
-                (_pdfViewerKey.currentState as dynamic)?.goToPage(pageNum);
+                if (_isPdfDocument()) {
+                  (_pdfViewerKey.currentState as dynamic)?.goToPage(pageNum);
+                } else if (_isLOKitDocument()) {
+                  (_lokitViewerKey.currentState as dynamic)?.goToPage(pageNum);
+                }
                 Navigator.pop(context);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -284,6 +326,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     _pdfViewerKey = GlobalKey<State<ModernPdfViewer>>();
     _textViewerKey = GlobalKey<State<TextDocumentViewer>>();
     _richDocumentViewerKey = GlobalKey<State<RichDocumentViewer>>();
+    _lokitViewerKey = GlobalKey<State<LOKitDocumentViewer>>();
     _menuController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -527,6 +570,26 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         fontSize: _textFontSize,
         wordWrap: true,
         useMonoFont: _textFontIsMonoFont,
+      );
+    }
+
+    // For LOKit-rendered documents (presentations and LOKit-mode word docs)
+    if (format == 'PPT' ||
+        format == 'PPTX' ||
+        format == 'ODP') {
+      return LOKitDocumentViewer(
+        key: _lokitViewerKey,
+        filePath: widget.filePath,
+        fileName: widget.fileName,
+        onTap: _toggleControls,
+        onPageChanged: (current, total) {
+          if (total > 0) {
+            setState(() {
+              _currentPage = current;
+              _totalPages = total;
+            });
+          }
+        },
       );
     }
 
@@ -1256,6 +1319,35 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
+    } else if (format == 'PPT' ||
+        format == 'PPTX' ||
+        format == 'ODP') {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildIconButton(
+            context,
+            Icons.first_page,
+            _currentPage > 1 ? _goToFirstPage : null,
+          ),
+          _buildIconButton(
+            context,
+            Icons.chevron_left,
+            _currentPage > 1 ? _goToPreviousPage : null,
+          ),
+          _buildPageIndicator(context),
+          _buildIconButton(
+            context,
+            Icons.chevron_right,
+            _currentPage < _totalPages ? _goToNextPage : null,
+          ),
+          _buildIconButton(
+            context,
+            Icons.last_page,
+            _currentPage < _totalPages ? _goToLastPage : null,
+          ),
+        ],
+      );
     } else if (format == 'TXT' ||
         format == 'DOCX' ||
         format == 'DOC' ||
@@ -1342,6 +1434,32 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
               onTap: () => setState(
                 () => _textMode = !_textMode,
               ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
+              icon: Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+              label: 'Theme',
+              onTap: () {
+                ref.read(themeModeProvider.notifier).toggleThemeMode();
+              },
+            ),
+          ),
+        ],
+      );
+    } else if (format == 'PPT' ||
+        format == 'PPTX' ||
+        format == 'ODP') {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildTile(
+              icon: Icons.copy_all,
+              label: 'Copy',
+              onTap: _copyDocumentText,
             ),
           ),
           const SizedBox(width: 8),
