@@ -373,9 +373,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -387,19 +387,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-                ],
-              ),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             child: Icon(
               Icons.lightbulb_outline,
               size: 48,
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 24),
@@ -423,20 +416,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
           const SizedBox(height: 28),
           Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Color.lerp(Theme.of(context).colorScheme.primary, const Color(0xFF8B5CF6), 0.3)!,
-                ],
-              ),
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -1165,9 +1151,10 @@ class _ModernActionCard extends StatefulWidget {
 }
 
 class _ModernActionCardState extends State<_ModernActionCard>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  late AnimationController _patternController;
 
   @override
   void initState() {
@@ -1180,28 +1167,33 @@ class _ModernActionCardState extends State<_ModernActionCard>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+    _patternController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _patternController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
     final isScanning = widget.icon == Icons.document_scanner;
 
     // Different gradient colors based on card type - using theme-appropriate gray gradients
+    // Use toned-down gradients to avoid 'web' green shadows; keep warm, subtle tones
     final gradientColors = isScanning
         ? [
             const Color(0xFF4A90E2),
-            const Color(0xFF357ABD),
+            const Color(0xFF2E6FB3),
           ]
         : [
-            const Color(0xFF5A7A8A),
-            const Color(0xFF466A7A),
+            Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.primary, 0.04)!,
+            Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.primary, 0.08)!,
           ];
 
     return AnimatedBuilder(
@@ -1229,46 +1221,32 @@ class _ModernActionCardState extends State<_ModernActionCard>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.2),
-                      blurRadius: 16,
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
                     BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.1),
-                      blurRadius: 32,
-                      offset: const Offset(0, 12),
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 24,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
-                child: Container(
-                  height: 140, // Reduced height now that content is more compact
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      width: 1,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Stack(
-                      children: [
-                        Column(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 140,
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Icon container with better contrast
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
+                                color: Colors.white.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.white.withValues(alpha: 0.1),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
                               ),
                               child: Icon(
                                 widget.icon,
@@ -1277,13 +1255,10 @@ class _ModernActionCardState extends State<_ModernActionCard>
                               ),
                             ),
                             const SizedBox(height: 8),
-
-                            // Text content - left aligned
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                // Title with better contrast
                                 Text(
                                   widget.title,
                                   textAlign: TextAlign.left,
@@ -1298,8 +1273,6 @@ class _ModernActionCardState extends State<_ModernActionCard>
                                       ),
                                 ),
                                 const SizedBox(height: 4),
-
-                                // Description with better contrast - no ellipsis
                                 Text(
                                   widget.description,
                                   textAlign: TextAlign.left,
@@ -1316,19 +1289,51 @@ class _ModernActionCardState extends State<_ModernActionCard>
                             ),
                           ],
                         ),
+                      ),
 
-                        // Chevron icon closer to top right corner
-                        Positioned(
-                          top: 2,
-                          right: 2,
-                          child: Icon(
-                            Icons.chevron_right,
-                            size: 18,
-                            color: Colors.white.withValues(alpha: 0.8),
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          ignoring: true,
+                          child: AnimatedBuilder(
+                            animation: _patternController,
+                            builder: (context, child) {
+                              final dx = (_patternController.value * 2 - 1) * 220;
+                              return Transform.translate(
+                                offset: Offset(dx, 0),
+                                child: Transform.rotate(
+                                  angle: -0.6,
+                                  child: Container(
+                                    width: 200,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Colors.white.withValues(alpha: 0.0),
+                                          Colors.white.withValues(alpha: 0.06),
+                                          Colors.white.withValues(alpha: 0.0),
+                                        ],
+                                        stops: const [0.0, 0.5, 1.0],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+
+                      Positioned(
+                        top: 6,
+                        right: 8,
+                        child: Icon(
+                          Icons.chevron_right,
+                          size: 18,
+                          color: Colors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
