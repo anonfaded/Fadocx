@@ -139,7 +139,7 @@ class ThumbnailGenerationService {
             cachedDocument: cachedDocument,
             brightness: ui.Brightness.light,
           ),
-        'doc' || 'docx' || 'txt' || 'rtf' || 'odt' || 'java' || 'py' || 'sh' || 'html' || 'md' || 'log' || 'json' || 'xml' || 'ott' => _generateTextThumbnail(
+        'doc' || 'docx' || 'txt' || 'rtf' || 'odt' || 'java' || 'py' || 'sh' || 'html' || 'md' || 'log' || 'json' || 'xml' || 'ott' || 'fadrec' => _generateTextThumbnail(
             filePath,
             normalizedType,
             cachedDocument: cachedDocument,
@@ -304,17 +304,36 @@ class ThumbnailGenerationService {
         brightness: brightness,
       );
     } on PlatformException catch (e, st) {
-      _log.e('PDF thumbnail render failed: ${e.code}',
+      _log.e('PDF thumbnail render failed: \${e.code}',
           error: e, stackTrace: st);
+      final msg = (e.message ?? '').toLowerCase();
+      if (msg.contains('password') || msg.contains('encrypted') || e.code.toLowerCase().contains('password')) {
+        return _createPlaceholderThumbnail(
+          label: 'PDF',
+          accent: ThumbnailColors.pdfRed,
+          caption: 'Password protected',
+          brightness: ui.Brightness.light,
+          icon: Icons.lock_outline,
+        );
+      }
     } catch (e, st) {
       _log.e('PDF thumbnail render failed', error: e, stackTrace: st);
+      if (e.toString().toLowerCase().contains('password') || e.toString().toLowerCase().contains('encrypted')) {
+        return _createPlaceholderThumbnail(
+          label: 'PDF',
+          accent: ThumbnailColors.pdfRed,
+          caption: 'Password protected',
+          brightness: ui.Brightness.light,
+          icon: Icons.lock_outline,
+        );
+      }
     }
 
     return _createPlaceholderThumbnail(
       label: 'PDF',
       accent: ThumbnailColors.pdfRed,
       caption: 'Unable to render preview',
-      brightness: brightness,
+      brightness: ui.Brightness.light,
     );
   }
 

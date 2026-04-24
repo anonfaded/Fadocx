@@ -112,6 +112,25 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
   Future<void> _deleteSelectedFiles() async {
     final count = _selectedFiles.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete selected?'),
+        content: Text('Move $count ${count == 1 ? 'file' : 'files'} to trash? You can restore them later.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     final ids = _selectedFiles.toList();
     for (final id in ids) {
       ref.read(recentFilesMutatorProvider).softDeleteFile(id);
@@ -414,32 +433,37 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
           Padding(
             padding: const EdgeInsets.only(top: 4, bottom: 2),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '${filteredFiles.length} ${_selectedCategory == 'all' ? 'items' : _selectedCategory}',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Text(
+                        '${filteredFiles.length} ${_selectedCategory == 'all' ? 'items' : _selectedCategory}',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color:
+                                  Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                       ),
-                ),
-                if (_isSelecting && filteredFiles.isNotEmpty)
-                  GestureDetector(
-                    onTap: () => _selectAll(filteredFiles),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        _selectedFiles.length == filteredFiles.length
-                            ? 'Deselect all'
-                            : 'Select all',
-                        style:
-                            Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.primary,
-                                ),
-                      ),
-                    ),
+                      if (_isSelecting && filteredFiles.isNotEmpty)
+                        GestureDetector(
+                          onTap: () => _selectAll(filteredFiles),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 12),
+                            child: Text(
+                              _selectedFiles.length == filteredFiles.length
+                                  ? 'Deselect all'
+                                  : 'Select all',
+                              style:
+                                  Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color:
+                                            Theme.of(context).colorScheme.primary,
+                                      ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
+                ),
                 IconButton(
                   icon: const Icon(Icons.sort, size: 20),
                   onPressed: () => _showSortSheet(context),
@@ -1049,11 +1073,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1064,71 +1088,404 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.3),
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: ListTile(
-                leading: const Icon(Icons.delete_outline,
-                    color: Colors.red, size: 20),
-                title: const Text('Delete',
-                    style: TextStyle(color: Colors.red)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _softDeleteFile(file);
-                },
-                contentPadding: EdgeInsets.zero,
-                dense: true,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Column(
+                children: [
+                  Text(
+                    file.fileName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'File actions and management',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 8),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: ListTile(
-                leading: const Icon(Icons.copy, size: 20),
-                title: const Text('Duplicate'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _duplicateFile(file);
-                },
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              ),
+            _buildActionRow(
+              icon: Icons.edit_outlined,
+              title: 'Rename',
+              iconColor: Theme.of(context).colorScheme.primary,
+              subtitle: 'Change file name',
+              onTap: () {
+                Navigator.pop(ctx);
+                _renameFile(file);
+              },
+            ),
+            _buildActionRow(
+              icon: Icons.content_copy,
+              title: 'Duplicate',
+              iconColor: Colors.blue,
+              showChevron: true,
+              onTap: () {
+                Navigator.pop(ctx);
+                _duplicateFile(file);
+              },
+            ),
+            _buildActionRow(
+              icon: Icons.save_alt,
+              title: 'Export / Save As',
+              iconColor: Colors.green,
+              subtitle: 'Save a copy to Downloads',
+              showChevron: true,
+              onTap: () {
+                Navigator.pop(ctx);
+                _exportFile(file);
+              },
+            ),
+            _buildActionRow(
+              icon: Icons.info_outline,
+              title: 'File info',
+              iconColor: Colors.grey,
+              onTap: () {
+                Navigator.pop(ctx);
+                _showFileInfoDialog(context, file);
+              },
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: ListTile(
-                leading: const Icon(Icons.info_outline, size: 20),
-                title: const Text('File info'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showFileInfoDialog(context, file);
-                },
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 6),
+              child: Divider(height: 1, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
             ),
+            _buildActionRow(
+              icon: Icons.delete_outline,
+              title: 'Delete',
+              iconColor: Colors.red,
+              titleColor: Colors.red,
+              onTap: () {
+                Navigator.pop(ctx);
+                _softDeleteFile(file);
+              },
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildActionRow({
+    required IconData icon,
+    required String title,
+    required Color iconColor,
+    String? subtitle,
+    bool showChevron = false,
+    Color? titleColor,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, size: 18, color: iconColor),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: titleColor,
+                      )),
+                      if (subtitle != null)
+                        Text(subtitle, style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )),
+                    ],
+                  ),
+                ),
+                if (showChevron)
+                  Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _renameFile(RecentFile file) async {
+    final dot = file.fileName.lastIndexOf('.');
+    final baseName = dot > 0 ? file.fileName.substring(0, dot) : file.fileName;
+    final extension = dot > 0 ? file.fileName.substring(dot) : '';
+    final controller = TextEditingController(text: baseName);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename file'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: 'File name',
+            suffixText: extension,
+            border: const OutlineInputBorder(),
+          ),
+          onSubmitted: (v) => Navigator.pop(ctx, v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName == null || newName.trim().isEmpty || newName.trim() == baseName) return;
+
+    final fullNewName = '${newName.trim()}$extension';
+    final sourceFile = File(file.filePath);
+    final dir = sourceFile.parent.path;
+    final newPath = '$dir/$fullNewName';
+
+    if (await File(newPath).exists()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('A file with this name already exists')),
+        );
+      }
+      return;
+    }
+
+    try {
+      await sourceFile.rename(newPath);
+      final mutator = ref.read(recentFilesMutatorProvider);
+      final updatedFile = RecentFile(
+        id: file.id,
+        filePath: newPath,
+        fileName: fullNewName,
+        fileType: file.fileType,
+        fileSizeBytes: file.fileSizeBytes,
+        dateOpened: file.dateOpened,
+        dateModified: await File(newPath).lastModified(),
+        pagePosition: file.pagePosition,
+        syncStatus: file.syncStatus,
+        isRead: file.isRead,
+      );
+      await mutator.removeRecentFile(file.id);
+      await mutator.addRecentFile(updatedFile);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Renamed to $fullNewName')),
+        );
+      }
+    } catch (e) {
+      log.e('Failed to rename file', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to rename file')),
+        );
+      }
+    }
+  }
+
+  Future<void> _exportFile(RecentFile file) async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Export', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+            ),
+            _buildActionRow(
+              icon: Icons.download,
+              title: 'Save to Downloads',
+              iconColor: Colors.green,
+              subtitle: 'Download/Fadocx/${file.fileName}',
+              onTap: () async {
+                Navigator.pop(ctx);
+                await _saveToDownloads(file);
+              },
+            ),
+            _buildActionRow(
+              icon: Icons.drive_file_rename_outline,
+              title: 'Save with new name',
+              iconColor: Colors.blue,
+              subtitle: 'Save a copy with a different name',
+              onTap: () async {
+                Navigator.pop(ctx);
+                await _saveToDownloadsWithName(file);
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveToDownloads(RecentFile file) async {
+    try {
+      final downloadsDir = Directory('/storage/emulated/0/Download/Fadocx');
+      if (!await downloadsDir.exists()) {
+        await downloadsDir.create(recursive: true);
+      }
+      final source = File(file.filePath);
+      final dest = '${downloadsDir.path}/${file.fileName}';
+      var finalDest = dest;
+      var counter = 1;
+      while (await File(finalDest).exists()) {
+        final dot = file.fileName.lastIndexOf('.');
+        final base = dot > 0 ? file.fileName.substring(0, dot) : file.fileName;
+        final ext = dot > 0 ? file.fileName.substring(dot) : '';
+        finalDest = '${downloadsDir.path}/$base ($counter)$ext';
+        counter++;
+      }
+      await source.copy(finalDest);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved to Download/Fadocx/${finalDest.split('/').last}')),
+        );
+      }
+    } catch (e) {
+      log.e('Failed to export file', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to export file')),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveToDownloadsWithName(RecentFile file) async {
+    final dot = file.fileName.lastIndexOf('.');
+    final baseName = dot > 0 ? file.fileName.substring(0, dot) : file.fileName;
+    final extension = dot > 0 ? file.fileName.substring(dot) : '';
+    final controller = TextEditingController(text: '${baseName}_copy');
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Save with new name'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: 'File name',
+            suffixText: extension,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName == null || newName.trim().isEmpty) return;
+
+    try {
+      final downloadsDir = Directory('/storage/emulated/0/Download/Fadocx');
+      if (!await downloadsDir.exists()) {
+        await downloadsDir.create(recursive: true);
+      }
+      final source = File(file.filePath);
+      final dest = '${downloadsDir.path}/${newName.trim()}$extension';
+      await source.copy(dest);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved to Download/Fadocx/${newName.trim()}$extension')),
+        );
+      }
+    } catch (e) {
+      log.e('Failed to export file', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to export file')),
+        );
+      }
+    }
+  }
+
+
   void _softDeleteFile(RecentFile file) {
-    ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${file.fileName} moved to trash'),
-        duration: const Duration(seconds: 2),
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete file?'),
+        content: Text('Move "${file.fileName}" to trash? You can restore it later.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${file.fileName} moved to trash'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
