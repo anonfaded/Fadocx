@@ -12,6 +12,7 @@ import 'package:fadocx/features/viewer/presentation/widgets/rich_document_viewer
 import 'package:fadocx/features/viewer/presentation/widgets/modern_pdf_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/lokit_document_viewer.dart';
+import 'package:fadocx/features/viewer/presentation/providers/lokit_viewer_notifier.dart';
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
@@ -92,7 +93,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     final format = ref.read(documentViewerProvider).document?.format.toUpperCase();
     return format == 'PPT' ||
         format == 'PPTX' ||
-        format == 'ODP';
+        format == 'ODP' ||
+        format == 'DOCX' ||
+        format == 'DOC' ||
+        format == 'RTF' ||
+        format == 'ODT';
   }
 
   bool _canOpenSidebar() {
@@ -576,7 +581,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     // For LOKit-rendered documents (presentations and LOKit-mode word docs)
     if (format == 'PPT' ||
         format == 'PPTX' ||
-        format == 'ODP') {
+        format == 'ODP' ||
+        format == 'DOCX' ||
+        format == 'DOC' ||
+        format == 'RTF' ||
+        format == 'ODT') {
       return LOKitDocumentViewer(
         key: _lokitViewerKey,
         filePath: widget.filePath,
@@ -625,6 +634,137 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     );
   }
 
+
+  bool _isZoomed() {
+    if (!_isLOKitDocument()) return false;
+    final viewerState = _lokitViewerKey.currentState;
+    if (viewerState == null) return false;
+    final zoom = (viewerState as dynamic).currentZoom as double;
+    return (zoom - 1.0).abs() > 0.05;
+  }
+
+  Widget _buildResetZoomButton() {
+    if (!_isZoomed()) {
+      return const SizedBox(width: 32, height: 32);
+    }
+    return IconButton(
+      icon: const Icon(Icons.fit_screen),
+      onPressed: () {
+        (_lokitViewerKey.currentState as dynamic)?.resetZoom();
+      },
+      tooltip: 'Reset zoom',
+      iconSize: 18,
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      padding: EdgeInsets.zero,
+      color: Theme.of(context).colorScheme.primary,
+    );
+  }
+
+  void _copyLOKitText() async {
+    final notifier = ref.read(lokitViewerProvider.notifier);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Extracting content from all slides...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final text = await notifier.extractAllText();
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      if (text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No text content found in this document')),
+        );
+        return;
+      }
+
+      final wordCount = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+      final lokitState = ref.read(lokitViewerProvider);
+      final partCount = lokitState.totalParts;
+
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.copy_all, size: 20, color: Theme.of(ctx).colorScheme.primary),
+              const SizedBox(width: 8),
+              const Text('Copy All Text'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Extract text from all $partCount ${partCount == 1 ? 'page' : 'pages'} and copy to clipboard.'),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.text_fields, size: 16, color: Theme.of(ctx).colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$wordCount words found',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(ctx).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton.icon(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await Clipboard.setData(ClipboardData(text: text));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Copied $wordCount words from $partCount ${partCount == 1 ? 'page' : 'pages'}'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.copy, size: 16),
+              label: const Text('Copy'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
   Widget _buildFloatingTopBar(BuildContext context, bool isDark) {
     return GestureDetector(
       onTap: () {}, // Absorb taps to prevent triggering PDF tap
@@ -705,12 +845,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                               padding: EdgeInsets.zero,
                             ),
                           ),
-                          const Align(
+                          Align(
                             alignment: Alignment.centerRight,
-                            child: SizedBox(
-                              width: 32,
-                              height: 32,
-                            ),
+                            child: _buildResetZoomButton(),
                           ),
                           Center(
                             child: ConstrainedBox(
@@ -1459,7 +1596,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             child: _buildTile(
               icon: Icons.copy_all,
               label: 'Copy',
-              onTap: _copyDocumentText,
+              onTap: _copyLOKitText,
             ),
           ),
           const SizedBox(width: 8),

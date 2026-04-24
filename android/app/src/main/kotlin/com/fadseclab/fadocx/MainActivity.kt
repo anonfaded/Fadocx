@@ -192,6 +192,15 @@ class MainActivity : FlutterActivity() {
                                     runOnUiThread { result.success(null) }
                                 }
                             }
+                            "extractText" -> {
+                                val text = lokitWrapper.extractText()
+                                runOnUiThread { result.success(text ?: "") }
+                            }
+                            "extractPartText" -> {
+                                val part = call.argument<Int>("part") ?: 0
+                                val text = lokitWrapper.extractPartText(part)
+                                runOnUiThread { result.success(text ?: "") }
+                            }
                             "closeDocument" -> {
                                 lokitWrapper.closeDocument()
                                 runOnUiThread { result.success(true) }

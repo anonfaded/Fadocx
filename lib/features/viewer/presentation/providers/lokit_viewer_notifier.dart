@@ -18,6 +18,7 @@ class LOKitViewerState {
   final Uint8List? currentPageImage;
   final int renderedPart;
   final double renderedZoom;
+  final Map<int, Uint8List> preloadedPages;
 
   const LOKitViewerState({
     this.isInitialized = false,
@@ -34,6 +35,7 @@ class LOKitViewerState {
     this.currentPageImage,
     this.renderedPart = -1,
     this.renderedZoom = 0,
+    this.preloadedPages = const {},
   });
 
   LOKitViewerState copyWith({
@@ -51,6 +53,7 @@ class LOKitViewerState {
     Uint8List? currentPageImage,
     int? renderedPart,
     double? renderedZoom,
+    Map<int, Uint8List>? preloadedPages,
     bool clearError = false,
     bool clearImage = false,
   }) {
@@ -69,6 +72,7 @@ class LOKitViewerState {
       currentPageImage: clearImage ? null : (currentPageImage ?? this.currentPageImage),
       renderedPart: renderedPart ?? this.renderedPart,
       renderedZoom: renderedZoom ?? this.renderedZoom,
+      preloadedPages: preloadedPages ?? this.preloadedPages,
     );
   }
 }
@@ -144,6 +148,16 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
   Future<void> renderCurrentPage({int maxWidth = 1080, int maxHeight = 1920}) async {
     if (state.isRendering) return;
     final part = state.currentPart;
+    final preloaded = getPreloadedPage(part);
+    if (preloaded != null) {
+      state = state.copyWith(
+        isRendering: false,
+        currentPageImage: preloaded,
+        renderedPart: part,
+      );
+      preloadAdjacentPages();
+      return;
+    }
     state = state.copyWith(isRendering: true);
     try {
       final pngBytes = await LOKitService.renderPageHighQuality(
@@ -153,11 +167,15 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
         scale: 2.0,
       );
       if (pngBytes != null) {
+        final pages = Map<int, Uint8List>.from(state.preloadedPages);
+        pages[part] = pngBytes;
         state = state.copyWith(
           isRendering: false,
           currentPageImage: pngBytes,
           renderedPart: part,
+          preloadedPages: pages,
         );
+        preloadAdjacentPages();
       } else {
         state = state.copyWith(isRendering: false, error: 'Rendering returned null');
       }
@@ -169,6 +187,17 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
 
   Future<void> goToPart(int index) async {
     if (index < 0 || index >= state.totalParts || index == state.currentPart) return;
+    final preloaded = getPreloadedPage(index);
+    if (preloaded != null) {
+      state = state.copyWith(
+        currentPart: index,
+        currentPageImage: preloaded,
+        renderedPart: index,
+        preloadedPages: state.preloadedPages,
+      );
+      preloadAdjacentPages();
+      return;
+    }
     state = state.copyWith(currentPart: index, clearImage: true);
     await renderCurrentPage();
   }
@@ -183,6 +212,67 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
     if (state.currentPart > 0) {
       await goToPart(state.currentPart - 1);
     }
+  }
+
+  Uint8List? getPreloadedPage(int part) {
+    if (state.preloadedPages.containsKey(part)) {
+      return state.preloadedPages[part];
+    }
+    return null;
+  }
+
+  Future<void> preloadAdjacentPages() async {
+    final current = state.currentPart;
+    final total = state.totalParts;
+    final pages = Map<int, Uint8List>.from(state.preloadedPages);
+    pages.removeWhere((k, _) => (k - current).abs() > 2);
+
+    final toPreload = <int>[];
+    if (current + 1 < total && !pages.containsKey(current + 1)) {
+      toPreload.add(current + 1);
+    }
+    if (current - 1 >= 0 && !pages.containsKey(current - 1)) {
+      toPreload.add(current - 1);
+    }
+    if (current + 2 < total && !pages.containsKey(current + 2)) {
+      toPreload.add(current + 2);
+    }
+
+    for (final part in toPreload) {
+      try {
+        final pngBytes = await LOKitService.renderPageHighQuality(
+          part: part,
+          maxWidth: 1080,
+          maxHeight: 1920,
+          scale: 2.0,
+        );
+        if (pngBytes != null) {
+          pages[part] = pngBytes;
+          if (!state.isRendering) {
+            state = state.copyWith(preloadedPages: pages);
+          }
+        }
+      } catch (_) {}
+    }
+    state = state.copyWith(preloadedPages: pages);
+  }
+
+  Future<String> extractAllText() async {
+    final total = state.totalParts;
+    if (total <= 0) return '';
+    if (total == 1) {
+      return LOKitService.extractText();
+    }
+    final buffer = StringBuffer();
+    for (int i = 0; i < total; i++) {
+      final text = await LOKitService.extractPartText(part: i);
+      if (text.isNotEmpty) {
+        if (i > 0) buffer.writeln();
+        buffer.writeln('--- Slide ${i + 1} ---');
+        buffer.write(text);
+      }
+    }
+    return buffer.toString();
   }
 
   void _closeDocument() {

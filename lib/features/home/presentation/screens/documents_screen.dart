@@ -870,11 +870,6 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
   @override
   void initState() {
     super.initState();
-    // Skip thumbnail generation for presentation formats (not yet supported)
-    final type = widget.file.fileType.toLowerCase();
-    if (type == 'ppt' || type == 'pptx' || type == 'odp') {
-      return;
-    }
     // Trigger thumbnail generation once via side effect
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(generateAndCacheThumbnailProvider(
@@ -890,8 +885,6 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
 
   @override
   Widget build(BuildContext context) {
-    final isPresentation = _isPresentationFormat(widget.file.fileType);
-
     return Stack(
       children: [
         Container(
@@ -921,45 +914,11 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
             ),
           ),
         ),
-        // Coming Soon badge for presentations
-        if (isPresentation)
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-                color: Colors.black.withValues(alpha: 0.4),
-              ),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Coming Soon',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+
       ],
     );
   }
 
-  bool _isPresentationFormat(String fileType) {
-    final type = fileType.toLowerCase();
-    return type == 'ppt' || type == 'pptx' || type == 'odp';
-  }
 
   Widget _buildThumbnailIcon(String fileType) {
     IconData iconData;

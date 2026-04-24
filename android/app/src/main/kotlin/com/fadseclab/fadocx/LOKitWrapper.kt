@@ -187,6 +187,38 @@ UserInstallation=file://$cacheDir/lo_user
         }
     }
 
+
+    fun extractText(): String? {
+        synchronized(syncLock) {
+            val doc = document ?: return null
+            try {
+                doc.postUnoCommand(".uno:SelectAll", "", false)
+                val text = doc.getTextSelection("text/plain;charset=utf-8")
+                doc.resetSelection()
+                return text
+            } catch (e: Exception) {
+                Log.e(TAG, "extractText failed", e)
+                return null
+            }
+        }
+    }
+
+    fun extractPartText(part: Int): String? {
+        synchronized(syncLock) {
+            val doc = document ?: return null
+            try {
+                doc.setPart(part)
+                doc.postUnoCommand(".uno:SelectAll", "", false)
+                val text = doc.getTextSelection("text/plain;charset=utf-8")
+                doc.resetSelection()
+                return text
+            } catch (e: Exception) {
+                Log.e(TAG, "extractPartText failed for part $part", e)
+                return null
+            }
+        }
+    }
+
     fun closeDocument() {
         synchronized(syncLock) { closeDocumentInternal() }
     }
