@@ -51,7 +51,12 @@ class ThumbnailGenerationService {
             filePath,
             cachedDocument: cachedDocument,
           ),
-        'doc' || 'docx' || 'txt' || 'rtf' || 'odt' => _generateTextThumbnail(
+        'txt' => _generateTextThumbnail(
+            filePath,
+            normalizedType,
+            cachedDocument: cachedDocument,
+          ),
+        'doc' || 'docx' || 'rtf' || 'odt' => _generateDocumentThumbnail(
             filePath,
             normalizedType,
             cachedDocument: cachedDocument,
@@ -76,6 +81,94 @@ class ThumbnailGenerationService {
           error: e, stackTrace: st);
       return null;
     }
+  }
+
+  static Future<Uint8List?> _generateDocumentThumbnail(
+    String filePath,
+    String fileType, {
+    ParsedDocumentEntity? cachedDocument,
+  }) async {
+    try {
+      final pngBytes = await LOKitService.renderThumbnail(
+        filePath: filePath,
+        part: 0,
+        width: _thumbnailWidth,
+        height: _thumbnailHeight - 100,
+      );
+      if (pngBytes != null && pngBytes.isNotEmpty) {
+        return _buildDocumentCard(pngBytes, fileType, cachedDocument: cachedDocument);
+      }
+    } catch (e) {
+      _log.w('LOKit thumbnail failed, falling back to text for $filePath', error: e);
+    }
+    return _generateTextThumbnail(filePath, fileType, cachedDocument: cachedDocument);
+  }
+
+  static Future<Uint8List?> _buildDocumentCard(Uint8List pageImage, String fileType, {ParsedDocumentEntity? cachedDocument}) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final w = _thumbnailWidth.toDouble();
+    final h = _thumbnailHeight.toDouble();
+    final accent = fileType == 'doc' || fileType == 'docx'
+        ? ThumbnailColors.docBlue
+        : ThumbnailColors.docBlue;
+
+    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), Paint()..color = ui.Color.fromARGB(18, accent.r, accent.g, accent.b));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(10, 10, w - 20, h - 20), Radius.circular(22)),
+      Paint()..color = const ui.Color(0x1A000000),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(8, 8, w - 16, h - 16), Radius.circular(22)),
+      Paint()..color = const ui.Color(0xFFFFFFFF),
+    );
+
+    final headerRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(8, 8, w - 16, _compactHeaderHeight),
+      Radius.circular(22),
+    );
+    canvas.drawRRect(headerRect, Paint()..color = ui.Color.fromARGB(255, accent.r, accent.g, accent.b));
+
+    String headerText = fileType.toUpperCase();
+    if (cachedDocument != null) {
+      final wc = cachedDocument.wordCount ?? 0;
+      if (wc > 0) {
+        final minutes = (wc / _readingWordsPerMinute).ceil().clamp(1, 999);
+        headerText = '${fileType.toUpperCase()} - ${minutes}m - ${wc}w';
+      }
+    }
+    final headerPainter = TextPainter(
+      text: TextSpan(text: headerText, style: _previewHeaderMetaStyle),
+      textDirection: ui.TextDirection.ltr,
+      maxLines: 1,
+    );
+    headerPainter.layout(minWidth: w - 48, maxWidth: w - 48);
+    headerPainter.paint(canvas, Offset(24, 8 + (_compactHeaderHeight - headerPainter.height) / 2));
+
+    final codec = await ui.instantiateImageCodec(pageImage);
+    final frame = await codec.getNextFrame();
+    final img = frame.image;
+
+    final imgAreaTop = 8 + _compactHeaderHeight + 4;
+    final imgAreaHeight = h - imgAreaTop - 12;
+    final imgAreaWidth = w - 16;
+    final imgScale = min<double>(imgAreaWidth / img.width, imgAreaHeight / img.height);
+    final drawW = img.width * imgScale;
+    final drawH = img.height * imgScale;
+    final drawX = 8 + (imgAreaWidth - drawW) / 2;
+    final drawY = imgAreaTop + (imgAreaHeight - drawH) / 2;
+
+    canvas.drawImageRect(
+      img,
+      Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+      Rect.fromLTWH(drawX, drawY, drawW, drawH),
+      Paint()..filterQuality = FilterQuality.high,
+    );
+
+    final picture = recorder.endRecording();
+    final finalImage = await picture.toImage(_thumbnailWidth, _thumbnailHeight);
+    final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
   }
 
   static Future<Uint8List?> _generatePresentationThumbnail(

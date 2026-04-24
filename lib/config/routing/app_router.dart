@@ -9,7 +9,6 @@ import 'package:fadocx/features/home/presentation/screens/whats_new_screen.dart'
 import 'package:fadocx/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fadocx/features/viewer/presentation/screens/viewer_screen.dart';
 import 'package:fadocx/features/scanner/presentation/screens/scanner_screen.dart';
-import 'package:fadocx/features/viewer/presentation/screens/lokit_test_screen.dart';
 
 final log = Logger();
 
@@ -23,7 +22,6 @@ class RouteNames {
   static const String settings = '/settings';
   static const String scanner = '/scanner';
   static const String whatsNew = '/whats-new';
-  static const String lokitTest = '/lokit-test';
 }
 
 /// Global router instance - singleton to prevent navigation reset on rebuild
@@ -178,15 +176,6 @@ GoRouter createGoRouter() {
         },
       ),
 
-
-       // LOKit test screen
-       GoRoute(
-          path: RouteNames.lokitTest,
-          name: 'lokit_test',
-          pageBuilder: (context, state) {
-            return _fadeTransitionPage(context, state, const LOKitTestScreen());
-          },
-        ),
 
        // Scanner screen
        GoRoute(

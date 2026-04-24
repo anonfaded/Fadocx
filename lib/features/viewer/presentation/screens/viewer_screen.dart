@@ -8,11 +8,11 @@ import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/features/viewer/data/providers/repository_providers.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/text_document_viewer.dart';
-import 'package:fadocx/features/viewer/presentation/widgets/rich_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/modern_pdf_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/lokit_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/providers/lokit_viewer_notifier.dart';
+import 'package:fadocx/features/viewer/data/services/lokit_service.dart';
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
@@ -46,6 +46,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   bool _textMode = false;
   bool _bottomMenuExpanded = false;
   bool _sidebarOpen = false;
+  double _lokitZoom = 1.0;
   int _currentPage = 1;
   int _totalPages = 0;
   int? _documentWordCount;
@@ -60,33 +61,12 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
   late GlobalKey<State<TextDocumentViewer>> _textViewerKey;
-  late GlobalKey<State<RichDocumentViewer>> _richDocumentViewerKey;
   late GlobalKey<State<LOKitDocumentViewer>> _lokitViewerKey;
   static const double _kDragCloseThreshold = 100.0;
 
   bool _isPdfDocument() {
     final doc = ref.read(documentViewerProvider).document;
     return doc?.format.toUpperCase() == 'PDF';
-  }
-
-  bool _isTextDocument() {
-    final format =
-        ref.read(documentViewerProvider).document?.format.toUpperCase();
-    return format == 'TXT' ||
-        format == 'DOCX' ||
-        format == 'DOC' ||
-        format == 'RTF' ||
-        format == 'ODT';
-  }
-
-  bool _isRichWordDocument() {
-    final document = ref.read(documentViewerProvider).document;
-    if (document == null) return false;
-    return (document.format == 'DOCX' ||
-            document.format == 'DOC' ||
-            document.format == 'RTF' ||
-            document.format == 'ODT') &&
-        document.hasRichDocument;
   }
 
   bool _isLOKitDocument() {
@@ -108,12 +88,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     if (_isLOKitDocument()) {
       return _lokitViewerKey.currentState != null;
     }
-    if (_isTextDocument()) {
-      if (_isRichWordDocument()) {
-        return _richDocumentViewerKey.currentState != null;
-      }
-      return _textViewerKey.currentState != null;
-    }
     return false;
   }
 
@@ -124,12 +98,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
     if (_isLOKitDocument()) {
       final viewerState = _lokitViewerKey.currentState as dynamic;
-      return viewerState?.buildDrawerContent(context) as Widget?;
-    }
-    if (_isTextDocument()) {
-      final viewerState = _isRichWordDocument()
-          ? _richDocumentViewerKey.currentState as dynamic
-          : _textViewerKey.currentState as dynamic;
       return viewerState?.buildDrawerContent(context) as Widget?;
     }
     return null;
@@ -330,7 +298,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     super.initState();
     _pdfViewerKey = GlobalKey<State<ModernPdfViewer>>();
     _textViewerKey = GlobalKey<State<TextDocumentViewer>>();
-    _richDocumentViewerKey = GlobalKey<State<RichDocumentViewer>>();
     _lokitViewerKey = GlobalKey<State<LOKitDocumentViewer>>();
     _menuController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -559,26 +526,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       );
     }
 
-    if ((format == 'DOCX' ||
-            format == 'DOC' ||
-            format == 'RTF' ||
-            format == 'ODT') &&
-        document.hasRichDocument) {
-      return RichDocumentViewer(
-        key: _richDocumentViewerKey,
-        documentBlocks: document.documentBlocks,
-        plainTextContent: document.plainTextContent,
-        parseWarnings: document.parseWarnings,
-        fidelityLevel: document.fidelityLevel,
-        onTap: _toggleControls,
-        onSearchHighlight: _onSearchHighlight,
-        fontSize: _textFontSize,
-        wordWrap: true,
-        useMonoFont: _textFontIsMonoFont,
-      );
-    }
-
-    // For LOKit-rendered documents (presentations and LOKit-mode word docs)
+    // For LOKit-rendered documents (presentations and word docs)
     if (format == 'PPT' ||
         format == 'PPTX' ||
         format == 'ODP' ||
@@ -599,15 +547,16 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             });
           }
         },
+        onZoomChanged: (zoom) {
+          if ((zoom - _lokitZoom).abs() > 0.01) {
+            setState(() => _lokitZoom = zoom);
+          }
+        },
       );
     }
 
-    // For TXT/plain-text fallback documents, use TextDocumentViewer with tap controls
-    if (format == 'TXT' ||
-        format == 'DOCX' ||
-        format == 'DOC' ||
-        format == 'RTF' ||
-        format == 'ODT') {
+    // For TXT documents, use TextDocumentViewer
+    if (format == 'TXT') {
       return TextDocumentViewer(
         key: _textViewerKey,
         textContent: document.searchableText,
@@ -637,10 +586,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   bool _isZoomed() {
     if (!_isLOKitDocument()) return false;
-    final viewerState = _lokitViewerKey.currentState;
-    if (viewerState == null) return false;
-    final zoom = (viewerState as dynamic).currentZoom as double;
-    return (zoom - 1.0).abs() > 0.05;
+    return (_lokitZoom - 1.0).abs() > 0.05;
   }
 
   Widget _buildResetZoomButton() {
@@ -661,38 +607,95 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   void _copyLOKitText() async {
+    final lokitState = ref.read(lokitViewerProvider);
+    final totalParts = lokitState.totalParts;
+    final currentPage = lokitState.currentPart + 1;
+    final isSinglePage = totalParts <= 1;
+
+    if (isSinglePage) {
+      _doExtractAndCopy(allPages: true, totalParts: totalParts, currentPage: currentPage);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.copy_all, size: 20, color: Theme.of(ctx).colorScheme.primary),
+            const SizedBox(width: 8),
+            const Text('Copy Text'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Choose what to copy:'),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: Icon(Icons.looks_one, color: Theme.of(ctx).colorScheme.primary),
+              title: Text('Page $currentPage only'),
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              onTap: () {
+                Navigator.pop(ctx);
+                _doExtractAndCopy(allPages: false, totalParts: totalParts, currentPage: currentPage);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.copy_all, color: Theme.of(ctx).colorScheme.primary),
+              title: Text('All $totalParts pages'),
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              onTap: () {
+                Navigator.pop(ctx);
+                _doExtractAndCopy(allPages: true, totalParts: totalParts, currentPage: currentPage);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _doExtractAndCopy({required bool allPages, required int totalParts, required int currentPage}) async {
     final notifier = ref.read(lokitViewerProvider.notifier);
+    final label = allPages ? 'all pages' : 'page $currentPage';
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => const AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+      builder: (ctx) => AlertDialog(
+        content: Row(
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Extracting content from all slides...'),
+            const CircularProgressIndicator(strokeWidth: 2),
+            const SizedBox(width: 16),
+            Expanded(child: Text('Extracting text from $label...')),
           ],
         ),
       ),
     );
 
     try {
-      final text = await notifier.extractAllText();
+      final String text;
+      if (allPages) {
+        text = await notifier.extractAllText();
+      } else {
+        text = await LOKitService.extractPartText(part: currentPage - 1);
+      }
       if (!mounted) return;
       Navigator.pop(context);
 
       if (text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No text content found in this document')),
+          const SnackBar(content: Text('No text content found')),
         );
         return;
       }
 
       final wordCount = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-      final lokitState = ref.read(lokitViewerProvider);
-      final partCount = lokitState.totalParts;
+      final pageLabel = allPages ? '$totalParts pages' : 'page $currentPage';
 
       showDialog(
         context: context,
@@ -701,14 +704,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             children: [
               Icon(Icons.copy_all, size: 20, color: Theme.of(ctx).colorScheme.primary),
               const SizedBox(width: 8),
-              const Text('Copy All Text'),
+              const Text('Copy Text'),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Extract text from all $partCount ${partCount == 1 ? 'page' : 'pages'} and copy to clipboard.'),
+              Text('Text extracted from $pageLabel.'),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -744,7 +747,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Copied $wordCount words from $partCount ${partCount == 1 ? 'page' : 'pages'}'),
+                      content: Text('Copied $wordCount words from $pageLabel'),
                       duration: const Duration(seconds: 2),
                     ),
                   );
@@ -1456,9 +1459,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    } else if (format == 'PPT' ||
-        format == 'PPTX' ||
-        format == 'ODP') {
+    } else if (_isLOKitDocument()) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1485,13 +1486,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    } else if (format == 'TXT' ||
-        format == 'DOCX' ||
-        format == 'DOC' ||
-        format == 'RTF' ||
-        format == 'ODT') {
-      final isRichWordDoc =
-          ref.watch(documentViewerProvider).document?.hasRichDocument ?? false;
+    } else if (format == 'TXT') {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1520,14 +1515,12 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     () => _textFontSize = (_textFontSize + 1).clamp(10, 24))
                 : null,
           ),
-          if (!isRichWordDoc) ...[
-            const SizedBox(width: 8),
-            _buildIconButton(
-              context,
-              _textWordWrap ? Icons.wrap_text : Icons.text_fields,
-              () => setState(() => _textWordWrap = !_textWordWrap),
-            ),
-          ],
+          const SizedBox(width: 8),
+          _buildIconButton(
+            context,
+            _textWordWrap ? Icons.wrap_text : Icons.text_fields,
+            () => setState(() => _textWordWrap = !_textWordWrap),
+          ),
         ],
       );
     }
