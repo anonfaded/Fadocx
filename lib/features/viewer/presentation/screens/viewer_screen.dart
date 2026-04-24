@@ -69,6 +69,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     return doc?.format.toUpperCase() == 'PDF';
   }
 
+  bool _isSpreadsheet() {
+    final format = ref.read(documentViewerProvider).document?.format.toUpperCase();
+    return format == 'XLS' || format == 'XLSX' || format == 'CSV' || format == 'ODS';
+  }
+
   bool _isLOKitDocument() {
     final format = ref.read(documentViewerProvider).document?.format.toUpperCase();
     return format == 'PPT' ||
@@ -530,6 +535,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     if (format == 'PPT' ||
         format == 'PPTX' ||
         format == 'ODP' ||
+        format == 'ODS' ||
         format == 'DOCX' ||
         format == 'DOC' ||
         format == 'RTF' ||
@@ -1525,6 +1531,22 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       );
     }
 
+    if (_isSpreadsheet()) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.table_chart, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Text(
+            ref.watch(documentViewerProvider).document?.format.toUpperCase() ?? '',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      );
+    }
+
     return const SizedBox.shrink();
   }
 
@@ -1658,6 +1680,62 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                         ),
                       ],
                     ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
+              icon: Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+              label: 'Theme',
+              onTap: () {
+                ref.read(themeModeProvider.notifier).toggleThemeMode();
+              },
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (_isSpreadsheet()) {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildTile(
+              icon: Icons.edit_outlined,
+              label: 'Edit',
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    icon: Icon(Icons.edit_outlined, color: Theme.of(ctx).colorScheme.primary),
+                    title: const Text('Edit with Fadocx Engine'),
+                    content: const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Open this spreadsheet in the Fadocx rendering engine for a faithful visual preview with full formatting, charts, and layout fidelity.'),
+                        SizedBox(height: 16),
+                        Text(
+                          'Note: Interactive editing is coming in a future update.',
+                          style: TextStyle(fontStyle: FontStyle.italic),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Not Now'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Got It'),
+                      ),
+                    ],
                   ),
                 );
               },

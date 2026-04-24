@@ -200,7 +200,7 @@ UserInstallation=file://$cacheDir/lo_user
             val doc = document ?: return 0
             val rects = try { doc.partPageRectangles } catch (e: Exception) { null } ?: return doc.parts
             if (doc.documentType == Document.DOCTYPE_TEXT) {
-                return rects.trim().split("""s+""".toRegex()).size / 4
+                return rects.trim().split("[,;\\s]+".toRegex()).size / 4
             }
             return doc.parts
         }
@@ -212,7 +212,7 @@ UserInstallation=file://$cacheDir/lo_user
             if (doc.documentType != Document.DOCTYPE_TEXT) return null
             try {
                 val rects = doc.partPageRectangles ?: return null
-                val tokens = rects.trim().split("""s+""".toRegex())
+                val tokens = rects.trim().split("[,;\\s]+".toRegex())
                 if (tokens.size < (pageIndex + 1) * 4) return null
                 val baseIdx = pageIndex * 4
                 val pageX = tokens[baseIdx].toDouble().toInt()

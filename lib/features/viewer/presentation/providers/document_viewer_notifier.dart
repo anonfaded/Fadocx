@@ -87,11 +87,17 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
             useNativeParsing: true,
           );
         case 'csv':
-          log.d('Routing to parseCSV');
-          document = await repository.parseCSV(_filePath);
+          log.d('Routing to native CSV parser');
+          document = await repository.parseXLSX(_filePath, useNativeParsing: true);
         case 'ods':
-          log.d('Routing to parseODS');
-          document = await repository.parseODS(_filePath);
+          log.d('ODS format - creating stub entity for LOKit viewer');
+          document = ParsedDocumentEntity(
+            format: extension.toUpperCase(),
+            sheets: const [],
+            sheetCount: 0,
+            parsedAt: DateTime.now(),
+            sourceFilePath: _filePath,
+          );
 
         // Data formats
         case 'json':
@@ -121,7 +127,7 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
           log.d('Routing to parseODT');
           document = await repository.parseODT(_filePath);
 
-        // Presentation formats - rendered natively by LOKit
+        // LOKit-rendered formats (presentations + ODS)
         case 'ppt':
         case 'pptx':
         case 'odp':

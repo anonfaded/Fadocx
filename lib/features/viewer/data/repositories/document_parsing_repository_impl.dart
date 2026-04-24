@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
@@ -63,7 +64,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
     try {
       log.i('Parsing JSON (Dart): $filePath');
-      final dartResult = await DocumentParserService.parseJSON(filePath);
+      final dartResult = await compute(DocumentParserService.parseJSON, filePath);
       final result = _toParsedEntity(dartResult, format: 'JSON');
       log.d('JSON parsed: ${result.textContent?.length} chars');
       await cacheParsing(filePath, result);
@@ -87,7 +88,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
     try {
       log.i('Parsing FADREC (Dart): $filePath');
-      final dartResult = await DocumentParserService.parseJSON(filePath);
+      final dartResult = await compute(DocumentParserService.parseJSON, filePath);
       final result = _toParsedEntity(dartResult, format: 'FADREC');
       log.d('FADREC parsed as JSON');
       await cacheParsing(filePath, result);
@@ -110,7 +111,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
     try {
       log.i('Parsing XML (Dart): $filePath');
-      final dartResult = await DocumentParserService.parseXML(filePath);
+      final dartResult = await compute(DocumentParserService.parseXML, filePath);
       final result = _toParsedEntity(dartResult, format: 'XML');
       log.d(
           'XML parsed: valid=${dartResult['isValid']}, elements=${dartResult['elementCount']}');
@@ -134,7 +135,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
     try {
       log.i('Parsing ODS (Dart): $filePath');
-      final dartResult = await DocumentParserService.parseODS(filePath);
+      final dartResult = await compute(DocumentParserService.parseODS, filePath);
       final result = _toParsedEntity(dartResult, format: 'ODS');
       log.d('ODS parsed: ${result.sheets.length} sheets');
       await cacheParsing(filePath, result);
@@ -186,23 +187,22 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
 
   @override
   Future<ParsedDocumentEntity> parseCSV(String filePath) async {
-    // Check cache first (skip if format is UNKNOWN or invalid)
     final cached = await getCachedParsing(filePath);
     if (cached != null && cached.format != 'UNKNOWN') {
       log.i('Using cached CSV: $filePath');
       return cached;
     }
 
+    log.i('Parsing CSV (NATIVE): $filePath');
     try {
-      log.i('Parsing CSV (Dart): $filePath');
-      final dartResult = await DocumentParserService.parseCSV(filePath);
-      final result = _toParsedEntity(dartResult, format: 'CSV');
-      log.d(
-          'CSV parsed: ${result.sheets.length} sheets, rows=${result.sheets.firstOrNull?.rowCount}');
+      final nativeResult =
+          await _platformChannel.parseDocumentNative(filePath, 'CSV');
+      final result = _toParsedEntity(nativeResult, format: 'CSV');
+      log.i('Successfully parsed CSV: ${result.sheets.length} sheets');
       await cacheParsing(filePath, result);
       return result;
     } catch (e, st) {
-      log.e('CSV parsing failed: $e', error: e, stackTrace: st);
+      log.e('NATIVE CSV parsing failed: $e', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -339,7 +339,7 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
     log.i('Parsing TXT (Dart): $filePath');
 
     // TXT: Pure Dart, no native needed - lightweight format
-    final textContent = await DocumentParserService.parseTXT(filePath);
+    final textContent = await compute(DocumentParserService.parseTXT, filePath);
     final result = ParsedDocumentEntity(
       format: 'TXT',
       sheets: const [],

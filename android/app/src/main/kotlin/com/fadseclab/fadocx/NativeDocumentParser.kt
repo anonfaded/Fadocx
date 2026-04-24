@@ -51,14 +51,7 @@ class NativeDocumentParser(private val TAG: String) {
                 "DOCX" -> parseDOCX(filePath)
                 "DOC" -> parseDOC(filePath)
                 "PDF" -> mapOf("format" to "PDF", "filePath" to filePath) // PDF page count handled in MainActivity for now
-                "PPT", "PPTX", "ODP" -> {
-                    mapOf(
-                        "format" to format.uppercase(),
-                        "filePath" to filePath,
-                        "comingSoon" to true,
-                        "message" to "${format.uppercase()} viewing coming in a future update"
-                    )
-                }
+                "PPT", "PPTX", "ODP", "ODS" -> throw IllegalArgumentException("${format.uppercase()} is handled by LOKit renderer")
                 else -> throw IllegalArgumentException("Unsupported format: $format")
             }
 
