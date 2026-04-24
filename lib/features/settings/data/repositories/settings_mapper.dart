@@ -16,6 +16,7 @@ class SettingsMapper {
       pagePosition: hive.pagePosition,
       syncedAt: hive.syncedAt,
       syncStatus: hive.syncStatus,
+      isRead: hive.isRead,
     );
   }
 
@@ -32,6 +33,7 @@ class SettingsMapper {
       pagePosition: domain.pagePosition,
       syncedAt: domain.syncedAt,
       syncStatus: domain.syncStatus,
+      isRead: domain.isRead,
     );
   }
 

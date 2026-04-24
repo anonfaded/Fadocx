@@ -61,6 +61,8 @@ abstract class RecentFilesRepository {
   /// Permanently delete a file
   Future<Result<void>> permanentlyDeleteFile(String fileId);
 
+  Future<Result<void>> markAsRead(String fileId);
+
   /// Get recent files as stream for reactive updates
   Stream<Result<List<RecentFile>>> watchRecentFiles();
 

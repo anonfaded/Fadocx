@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/material.dart' show Icons, IconData;
 import 'dart:ui' as ui;
 
 import 'package:fadocx/features/viewer/data/services/document_parser_service.dart';
@@ -38,6 +38,7 @@ class ThumbnailGenerationService {
       case 'xml': return 'xml';
       case 'md': return 'markdown';
       case 'json': return 'json';
+      case 'fadrec': return 'json';
       default: return null;
     }
   }
@@ -864,6 +865,7 @@ class ThumbnailGenerationService {
     required ColorRgb accent,
     required String caption,
     ui.Brightness brightness = ui.Brightness.light,
+    IconData? icon,
   }) {
     return _renderCanvas((canvas, size) {
       _paintShadowBackground(canvas, size, accent);
@@ -879,13 +881,36 @@ class ThumbnailGenerationService {
       final accentPaint = ui.Paint()..color = _uiColor(accent);
       canvas.drawCircle(ui.Offset(size.width / 2, 178), 52, accentPaint);
 
+      if (icon == Icons.lock_outline) {
+        final lockPaint = ui.Paint()
+          ..color = const ui.Color(0xFFFFFFFF)
+          ..style = ui.PaintingStyle.stroke
+          ..strokeWidth = 3.0
+          ..strokeCap = ui.StrokeCap.round;
+        final lockFill = ui.Paint()
+          ..color = const ui.Color(0xFFFFFFFF)
+          ..style = ui.PaintingStyle.fill;
+        final cx = size.width / 2;
+        final cy = 178.0;
+        final body = ui.Rect.fromCenter(center: ui.Offset(cx, cy + 8), width: 28, height: 22);
+        canvas.drawRRect(ui.RRect.fromRectAndRadius(body, const ui.Radius.circular(4)), lockFill);
+        final arcRect = ui.Rect.fromCenter(center: ui.Offset(cx, cy - 4), width: 18, height: 20);
+        canvas.drawArc(arcRect, 3.14, 3.14, false, lockPaint);
+      } else {
+        final tp = TextPainter(
+          text: TextSpan(text: label, style: const TextStyle(color: ui.Color(0xFFFFFFFF), fontSize: 22, fontWeight: FontWeight.w700, fontFamily: 'Ubuntu')),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        tp.paint(canvas, ui.Offset(size.width / 2 - tp.width / 2, 178 - tp.height / 2));
+      }
+
       _paintCenteredText(
         canvas,
-        text: label,
-        top: 250,
+        text: icon == Icons.lock_outline ? 'Password Protected' : label,
+        top: icon == Icons.lock_outline ? 250 : 250,
         maxWidth: size.width - 80,
         style: TextStyle(
-          color: _uiColor(accent),
+          color: icon == Icons.lock_outline ? _uiColor(accent) : _uiColor(accent),
           fontSize: 26,
           fontWeight: FontWeight.w700,
           fontFamily: 'Ubuntu',
@@ -1029,10 +1054,24 @@ class ThumbnailGenerationService {
   static String _buildReadingStats(String text, {String? language}) {
     final words = RegExp(r'\S+').allMatches(text).length;
     final lines = text.split(RegExp(r'\r\n|\r|\n')).length;
-    if (language != null) {
-      final funcs = RegExp(r'\b(function|def|class|void|int|String|public|private|static)\s+\w+').allMatches(text).length;
+    if (language == 'markdown') {
+      final minutes = words == 0 ? 0 : (words / _readingWordsPerMinute).ceil();
+      return '${minutes == 0 ? '<1' : minutes} min read • $words words • $lines lines';
+    }
+    if (language == 'json') {
+      final objectCount = '{'.allMatches(text).length;
+      final arrayCount = '['.allMatches(text).length;
       final parts = <String>['$lines lines'];
-      if (funcs > 0) parts.add('$funcs symbols');
+      if (objectCount > 0) parts.add('$objectCount ${objectCount == 1 ? 'object' : 'objects'}');
+      if (arrayCount > 0) parts.add('$arrayCount ${arrayCount == 1 ? 'array' : 'arrays'}');
+      return parts.join(' • ');
+    }
+    if (language != null) {
+      final classCount = RegExp(r'\b(class|interface|enum)\s+\w+').allMatches(text).length;
+      final funcCount = RegExp(r'\b(function|def|void|int|String|bool|var|let|const|public|private|static|async)\s+\w+\s*[(<]').allMatches(text).length;
+      final parts = <String>['$lines lines'];
+      if (classCount > 0) parts.add('$classCount ${classCount == 1 ? 'class' : 'classes'}');
+      if (funcCount > 0) parts.add('$funcCount ${funcCount == 1 ? 'function' : 'functions'}');
       return parts.join(' • ');
     }
     final minutes = words == 0 ? 0 : (words / _readingWordsPerMinute).ceil();

@@ -254,6 +254,15 @@ class RecentFilesMutator {
     );
   }
 
+  Future<void> markAsRead(String fileId) async {
+    log.i('Marking file as read: $fileId');
+    final result = await _repository.markAsRead(fileId);
+    result.fold(
+      (failure) => log.e('Failed to mark as read: \${failure.message}'),
+      (success) => _ref.invalidate(recentFilesProvider),
+    );
+  }
+
   Future<void> permanentlyDeleteFile(String fileId) async {
     log.i('Permanently deleting file: $fileId');
     final result = await _repository.permanentlyDeleteFile(fileId);

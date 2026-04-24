@@ -646,6 +646,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       child: InkWell(
         onTap: () {
           log.i('Opening recent file: ${file.fileName}');
+          if (!file.isRead) {
+            ref.read(recentFilesMutatorProvider).markAsRead(file.id);
+          }
           context.push(
               '${RouteNames.viewer}?path=${Uri.encodeComponent(file.filePath)}&name=${Uri.encodeComponent(file.fileName)}');
         },
