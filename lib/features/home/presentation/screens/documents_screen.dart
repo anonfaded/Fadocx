@@ -34,6 +34,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
   final Set<String> _selectedFiles = {};
   bool _isSelecting = false;
+  String _sortBy = 'latest';
 
   @override
   void initState() {
@@ -351,6 +352,16 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               f.fileType.toLowerCase().contains(q))
           .toList();
     }
+    switch (_sortBy) {
+      case 'latest':
+        filteredFiles.sort((a, b) => b.dateOpened.compareTo(a.dateOpened));
+      case 'oldest':
+        filteredFiles.sort((a, b) => a.dateOpened.compareTo(b.dateOpened));
+      case 'largest':
+        filteredFiles.sort((a, b) => b.fileSizeBytes.compareTo(a.fileSizeBytes));
+      case 'smallest':
+        filteredFiles.sort((a, b) => a.fileSizeBytes.compareTo(b.fileSizeBytes));
+    }
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -429,6 +440,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                       ),
                     ),
                   ),
+                IconButton(
+                  icon: const Icon(Icons.sort, size: 20),
+                  onPressed: () => _showSortSheet(context),
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
                 IconButton(
                   icon:
                       Icon(isGridView ? Icons.grid_view : Icons.list, size: 20),
@@ -659,6 +677,27 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                           ),
                         ),
                       ),
+                    if (!file.isRead)
+                      Positioned(
+                        top: 6,
+                        left: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade600,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'NEW',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -683,17 +722,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                   fontSize: 10,
                                 ),
                           ),
-                          Text(
-                            file.formattedSize,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                  fontSize: 9,
-                                ),
+                          Row(
+                            children: [
+                              Icon(Icons.sd_card_outlined, size: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                              const SizedBox(width: 3),
+                              Text(
+                                file.formattedSize,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                      fontSize: 9,
+                                    ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -992,6 +1037,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
   void _openFile(RecentFile file) {
     log.i('Opening file: ${file.fileName}');
+    if (!file.isRead) {
+      ref.read(recentFilesMutatorProvider).markAsRead(file.id);
+    }
     final encodedPath = Uri.encodeComponent(file.filePath);
     final encodedName = Uri.encodeComponent(file.fileName);
     context.push(
@@ -1223,6 +1271,57 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         );
       }
     }
+  }
+
+  void _showSortSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(ctx).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Sort by', style: Theme.of(ctx).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+            ),
+            _buildSortOption(ctx, 'latest', Icons.schedule, 'Latest first'),
+            _buildSortOption(ctx, 'oldest', Icons.history, 'Oldest first'),
+            _buildSortOption(ctx, 'largest', Icons.file_download, 'Largest size'),
+            _buildSortOption(ctx, 'smallest', Icons.file_upload, 'Smallest size'),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortOption(BuildContext context, String value, IconData icon, String label) {
+    final isActive = _sortBy == value;
+    return ListTile(
+      leading: Icon(icon, size: 20, color: isActive ? Theme.of(context).colorScheme.primary : null),
+      title: Text(label, style: TextStyle(
+        fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+        color: isActive ? Theme.of(context).colorScheme.primary : null,
+      )),
+      trailing: isActive ? Icon(Icons.check, size: 18, color: Theme.of(context).colorScheme.primary) : null,
+      onTap: () {
+        setState(() => _sortBy = value);
+        Navigator.pop(context);
+      },
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      dense: true,
+    );
   }
 
   Widget _buildSkeletonLoader() {

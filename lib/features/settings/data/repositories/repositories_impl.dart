@@ -395,6 +395,22 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   }
 
   @override
+  Future<Result<void>> markAsRead(String fileId) async {
+    try {
+      final existing = await _datasource.getRecentFile(fileId);
+      if (existing != null) {
+        final updated = existing.copyWith(isRead: true);
+        await _datasource.updateRecentFile(updated);
+        log.i('Marked file as read: \$fileId');
+      }
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to mark file as read', error: e, stackTrace: st);
+      return ResultFailure(UnknownFailure(message: 'Failed to mark as read'));
+    }
+  }
+
+  @override
   Stream<Result<List<RecentFile>>> watchRecentFiles() async* {
     try {
       // CRITICAL FIX: Yield empty list immediately, then load data in background

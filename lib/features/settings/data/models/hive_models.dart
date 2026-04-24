@@ -43,6 +43,9 @@ class HiveRecentFile {
   @HiveField(11)
   final DateTime? deletedAt; // When the file was soft deleted
 
+  @HiveField(12)
+  final bool isRead;
+
   HiveRecentFile({
     String? id,
     required this.filePath,
@@ -56,6 +59,7 @@ class HiveRecentFile {
     this.syncStatus = 'pending',
     bool? isDeleted,
     this.deletedAt,
+    this.isRead = false,
   }) : id = id ?? const Uuid().v4(),
        isDeleted = isDeleted ?? false;
 
@@ -73,6 +77,7 @@ class HiveRecentFile {
     String? syncStatus,
     bool? isDeleted,
     DateTime? deletedAt,
+    bool? isRead,
   }) {
     return HiveRecentFile(
       id: id ?? this.id,
@@ -87,6 +92,7 @@ class HiveRecentFile {
       syncStatus: syncStatus ?? this.syncStatus,
       isDeleted: isDeleted ?? this.isDeleted,
       deletedAt: deletedAt ?? this.deletedAt,
+      isRead: isRead ?? this.isRead,
     );
   }
 

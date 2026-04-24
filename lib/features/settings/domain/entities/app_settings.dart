@@ -15,6 +15,7 @@ class RecentFile {
   final String syncStatus;
   final bool isDeleted;
   final DateTime? deletedAt;
+  final bool isRead;
 
   RecentFile({
     required this.id,
@@ -29,6 +30,7 @@ class RecentFile {
     required this.syncStatus,
     this.isDeleted = false,
     this.deletedAt,
+    this.isRead = false,
   });
 
   /// Format file size to human-readable string
