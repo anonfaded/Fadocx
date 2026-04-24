@@ -101,8 +101,9 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                       ]),
                       data: (data) {
-                        final total = data.values.fold<int>(0, (p, e) => p + (e['bytes'] ?? 0));
-                        final value = StorageService.formatBytes(total);
+                        final totalBytes = data.values.fold<int>(0, (p, e) => p + (e['bytes'] ?? 0));
+                        final totalCount = data.values.fold<int>(0, (p, e) => p + (e['count'] ?? 0));
+                        final value = '${StorageService.formatBytes(totalBytes)} • $totalCount files';
                         return Column(children: [
                           _SettingsRow(
                             icon: Icons.folder_outlined,
@@ -503,6 +504,8 @@ class SettingsScreen extends ConsumerWidget {
         return 'Sheets';
       case StorageService.documentsFolder:
         return 'Docs';
+      case StorageService.codeFolder:
+        return 'Code';
       case StorageService.presentationsFolder:
         return 'Presentations';
       case StorageService.imagesFolder:
