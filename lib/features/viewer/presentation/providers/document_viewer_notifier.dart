@@ -117,6 +117,9 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         case 'rtf':
           log.d('Routing to parseRTF');
           document = await repository.parseRTF(_filePath);
+        case 'odt':
+          log.d('Routing to parseODT');
+          document = await repository.parseODT(_filePath);
 
         // Presentation formats (PPT, PPTX, ODP - all require LibreOffice, Coming Soon)
         case 'ppt':
@@ -155,10 +158,19 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
       log.i(
           'Document loaded successfully: $_fileName (format: ${document.format})');
 
-      // Auto-cache document to fadocx_docs folder
+      // Keep external-entry flows importing into managed storage, but do not
+      // recopy files that are already the app-managed copy.
       try {
-        await StorageService.cacheDocument(_filePath, _fileName);
-        log.i('Document cached: $_fileName');
+        final alreadyManaged = await StorageService.isManagedPath(_filePath);
+        if (alreadyManaged) {
+          log.d(
+            'Skipping auto-cache for already-managed file: $_filePath',
+          );
+        } else {
+          final cachedFile =
+              await StorageService.cacheDocument(_filePath, _fileName);
+          log.i('Document cached: ${cachedFile.path}');
+        }
       } catch (e) {
         log.w('Failed to cache document: $e');
       }

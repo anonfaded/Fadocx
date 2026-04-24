@@ -5,6 +5,7 @@ import 'package:fadocx/features/viewer/domain/repositories/document_parsing_repo
 import '../services/cache_service.dart';
 import '../services/document_parser_service.dart';
 import '../services/platform_channel_service.dart';
+import '../services/word_document_parser_service.dart';
 
 final log = Logger();
 
@@ -215,20 +216,40 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       return cached;
     }
 
-    log.i('Parsing DOCX (Dart): $filePath');
+    log.i('Parsing DOCX (native preferred): $filePath');
 
-    // DOCX: Pure Dart, no native needed - lightweight format
-    final textContent = await DocumentParserService.parseDOCX(filePath);
-    final result = ParsedDocumentEntity(
-      format: 'DOCX',
-      sheets: [],
-      sheetCount: 0,
-      parsedAt: DateTime.now(),
-      sourceFilePath: filePath,
-      textContent: textContent,
-    );
-    await cacheParsing(filePath, result);
-    return result;
+    try {
+      final nativeResult =
+          await _platformChannel.parseDocumentNative(filePath, 'DOCX');
+      final result = _toParsedEntity(nativeResult, format: 'DOCX');
+      log.i(
+          'Successfully parsed DOCX natively: ${(result.searchableText).length} characters');
+      await cacheParsing(filePath, result);
+      return result;
+    } catch (e, st) {
+      log.w('Native DOCX parsing failed, falling back to Dart parser: $e',
+          error: e, stackTrace: st);
+      final structuredResult =
+          await WordDocumentParserService.parseDocx(filePath);
+      final result = ParsedDocumentEntity(
+        format: 'DOCX',
+        sheets: const [],
+        sheetCount: 0,
+        parsedAt: DateTime.now(),
+        sourceFilePath: filePath,
+        plainTextContent: structuredResult.plainTextContent,
+        documentBlocks: structuredResult.documentBlocks,
+        parseWarnings: [
+          'Using Dart DOCX fallback parser because native parsing was unavailable.',
+          ...structuredResult.parseWarnings,
+        ],
+        fidelityLevel: DocumentFidelityLevel.partial,
+        wordCount: _countWords(structuredResult.plainTextContent),
+        lineCount: _countLines(structuredResult.plainTextContent),
+      );
+      await cacheParsing(filePath, result);
+      return result;
+    }
   }
 
   @override
@@ -251,7 +272,14 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       log.d(
           'Native parser returned: textContent=${(nativeResult['textContent'] as String?)?.length} chars, format=${nativeResult['format']}');
 
-      final result = _toParsedEntity(nativeResult, format: 'DOC');
+      final result = _toParsedEntity(nativeResult, format: 'DOC').copyWith(
+        fidelityLevel: nativeResult['documentBlocks'] != null
+            ? DocumentFidelityLevel.partial
+            : DocumentFidelityLevel.plainText,
+        parseWarnings: ((nativeResult['parseWarnings'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+      );
 
       log.i(
           'Successfully parsed DOC: ${(result.textContent ?? '').length} characters');
@@ -314,11 +342,14 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
     final textContent = await DocumentParserService.parseTXT(filePath);
     final result = ParsedDocumentEntity(
       format: 'TXT',
-      sheets: [],
+      sheets: const [],
       sheetCount: 0,
       parsedAt: DateTime.now(),
       sourceFilePath: filePath,
-      textContent: textContent,
+      plainTextContent: textContent,
+      fidelityLevel: DocumentFidelityLevel.plainText,
+      wordCount: _countWords(textContent),
+      lineCount: _countLines(textContent),
     );
     await cacheParsing(filePath, result);
     return result;
@@ -332,16 +363,48 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       return cached;
     }
 
-    log.i('Parsing RTF (Dart): $filePath');
+    log.i('Parsing RTF (structured Dart parser): $filePath');
 
-    final textContent = await DocumentParserService.parseRTF(filePath);
+    final structuredResult = await WordDocumentParserService.parseRtf(filePath);
     final result = ParsedDocumentEntity(
       format: 'RTF',
-      sheets: [],
+      sheets: const [],
       sheetCount: 0,
       parsedAt: DateTime.now(),
       sourceFilePath: filePath,
-      textContent: textContent,
+      plainTextContent: structuredResult.plainTextContent,
+      documentBlocks: structuredResult.documentBlocks,
+      parseWarnings: structuredResult.parseWarnings,
+      fidelityLevel: structuredResult.fidelityLevel,
+      wordCount: _countWords(structuredResult.plainTextContent),
+      lineCount: _countLines(structuredResult.plainTextContent),
+    );
+    await cacheParsing(filePath, result);
+    return result;
+  }
+
+  @override
+  Future<ParsedDocumentEntity> parseODT(String filePath) async {
+    final cached = await getCachedParsing(filePath);
+    if (cached != null && cached.format != 'UNKNOWN') {
+      log.i('Using cached ODT: $filePath');
+      return cached;
+    }
+
+    log.i('Parsing ODT (structured Dart parser): $filePath');
+    final structuredResult = await WordDocumentParserService.parseOdt(filePath);
+    final result = ParsedDocumentEntity(
+      format: 'ODT',
+      sheets: const [],
+      sheetCount: 0,
+      parsedAt: DateTime.now(),
+      sourceFilePath: filePath,
+      plainTextContent: structuredResult.plainTextContent,
+      documentBlocks: structuredResult.documentBlocks,
+      parseWarnings: structuredResult.parseWarnings,
+      fidelityLevel: structuredResult.fidelityLevel,
+      wordCount: _countWords(structuredResult.plainTextContent),
+      lineCount: _countLines(structuredResult.plainTextContent),
     );
     await cacheParsing(filePath, result);
     return result;
@@ -356,13 +419,20 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
           format: cachedResult['format'] ?? 'UNKNOWN',
           sheets: _buildSheetEntities(cachedResult['sheets'] ?? []),
           slides: _buildSlideEntities(cachedResult['slides'] ?? []),
+          documentBlocks:
+              _buildDocumentBlocks(cachedResult['documentBlocks'] ?? []),
+          parseWarnings: ((cachedResult['parseWarnings'] as List?) ?? const [])
+              .map((e) => e.toString())
+              .toList(),
+          fidelityLevel: _parseFidelityLevel(cachedResult['fidelityLevel']),
           sheetCount: cachedResult['sheetCount'] ?? 0,
           slideCount: cachedResult['slideCount'] ?? 0,
           wordCount: cachedResult['wordCount'] as int?,
           lineCount: cachedResult['lineCount'] as int?,
           parsedAt: DateTime.now(),
           sourceFilePath: filePath,
-          textContent: cachedResult['textContent'],
+          plainTextContent: (cachedResult['plainTextContent'] ??
+              cachedResult['textContent']) as String?,
         );
       }
     } catch (e) {
@@ -396,6 +466,11 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
                 })
             .toList(),
         'textContent': document.textContent,
+        'plainTextContent': document.plainTextContent,
+        'documentBlocks':
+            document.documentBlocks.map((block) => block.toJson()).toList(),
+        'parseWarnings': document.parseWarnings,
+        'fidelityLevel': document.fidelityLevel.name,
         'wordCount': document.wordCount,
         'lineCount': document.lineCount,
       };
@@ -429,10 +504,53 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
       sheetCount: parserResult['sheetCount'] ?? sheets.length,
       slideCount: parserResult['slideCount'] ?? slides.length,
       slides: slides,
+      documentBlocks:
+          _buildDocumentBlocks(parserResult['documentBlocks'] ?? []),
+      parseWarnings: ((parserResult['parseWarnings'] as List?) ?? const [])
+          .map((e) => e.toString())
+          .toList(),
+      fidelityLevel: _parseFidelityLevel(parserResult['fidelityLevel']),
       parsedAt: DateTime.now(),
       sourceFilePath: parserResult['filePath'] ?? '',
-      textContent: parserResult['textContent'],
+      plainTextContent: (parserResult['plainTextContent'] ??
+          parserResult['textContent']) as String?,
+      wordCount: (parserResult['wordCount'] as int?) ??
+          _countWords((parserResult['plainTextContent'] ??
+              parserResult['textContent']) as String?),
+      lineCount: (parserResult['lineCount'] as int?) ??
+          _countLines((parserResult['plainTextContent'] ??
+              parserResult['textContent']) as String?),
     );
+  }
+
+  List<DocumentBlock> _buildDocumentBlocks(List<dynamic> blockData) {
+    return blockData
+        .whereType<Map>()
+        .map(
+            (block) => DocumentBlock.fromJson(_convertDynamicMapToTyped(block)))
+        .toList();
+  }
+
+  DocumentFidelityLevel _parseFidelityLevel(dynamic raw) {
+    if (raw is String) {
+      return DocumentFidelityLevel.values.firstWhere(
+        (value) => value.name == raw,
+        orElse: () => DocumentFidelityLevel.plainText,
+      );
+    }
+    return DocumentFidelityLevel.plainText;
+  }
+
+  int? _countWords(String? text) {
+    final value = text?.trim() ?? '';
+    if (value.isEmpty) return null;
+    return RegExp(r'\S+').allMatches(value).length;
+  }
+
+  int? _countLines(String? text) {
+    final value = text ?? '';
+    if (value.isEmpty) return null;
+    return value.split(RegExp(r'\r\n|\r|\n')).length;
   }
 
   /// Build SheetEntity list from parser result

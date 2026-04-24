@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:archive/archive.dart';
+import 'package:fadocx/features/viewer/data/services/word_document_parser_service.dart';
 import 'package:xml/xml.dart';
 import 'package:logger/logger.dart';
 
@@ -61,41 +62,7 @@ class DocumentParserService {
       log.i('Parsing CSV file: $filePath');
       final file = File(filePath);
       final content = await file.readAsString();
-
-      // Simple CSV parsing - split by newlines and commas
-      final lines = content.split('\n');
-      final rows = <List<String>>[];
-
-      for (var line in lines) {
-        if (line.trim().isEmpty) continue;
-
-        // Handle basic CSV parsing (quoted fields, escaped commas)
-        final cells = <String>[];
-        var currentCell = StringBuffer();
-        var inQuotes = false;
-
-        for (int i = 0; i < line.length; i++) {
-          final char = line[i];
-
-          if (char == '"') {
-            inQuotes = !inQuotes;
-          } else if (char == ',' && !inQuotes) {
-            cells.add(currentCell.toString().trim());
-            currentCell.clear();
-          } else {
-            currentCell.write(char);
-          }
-        }
-
-        // Add last cell
-        if (currentCell.isNotEmpty) {
-          cells.add(currentCell.toString().trim());
-        }
-
-        if (cells.isNotEmpty) {
-          rows.add(cells);
-        }
-      }
+      final rows = _parseCsvRows(content);
 
       return {
         'sheets': [
@@ -194,27 +161,12 @@ class DocumentParserService {
   }
 
   /// Parse RTF format (Rich Text Format)
-  /// Returns plain text (formatting stripped)
+  /// Returns plain text from the structured RTF parser
   static Future<String> parseRTF(String filePath) async {
     try {
       log.i('Parsing RTF file: $filePath');
-      final file = File(filePath);
-      final content = await file.readAsString();
-
-      // Simple RTF text extraction - remove RTF control codes
-      String text = content;
-
-      // Remove RTF header
-      text = text.replaceFirst(RegExp(r'^\{\\rtf1[^}]*\}'), '');
-
-      // Remove control words and symbols
-      text = text.replaceAll(RegExp(r'\\[a-z]+\d*\s?'), '');
-      text = text.replaceAll(RegExp(r'\\[^a-z]'), '');
-      text = text.replaceAll(RegExp(r'\{|\}'), '');
-
-      // Clean up extra whitespace
-      text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
-
+      final parsed = await WordDocumentParserService.parseRtf(filePath);
+      final text = parsed.plainTextContent;
       log.i('RTF extracted: ${text.length} characters');
       return text;
     } catch (e, st) {
@@ -297,18 +249,17 @@ class DocumentParserService {
             break;
           }
 
-          final rowRepeat =
-              int.tryParse(row.getAttribute('table:number-rows-repeated') ?? '') ??
+          final rowRepeat = int.tryParse(
+                  row.getAttribute('table:number-rows-repeated') ?? '') ??
               1;
           final cells = <String>[];
 
           for (var cell in row.findElements('table:table-cell')) {
             final cellText = cell.innerText.trim();
-            final cellRepeat =
-                int.tryParse(
-                      cell.getAttribute('table:number-columns-repeated') ?? '',
-                    ) ??
-                    1;
+            final cellRepeat = int.tryParse(
+                  cell.getAttribute('table:number-columns-repeated') ?? '',
+                ) ??
+                1;
 
             for (var repeatIndex = 0;
                 repeatIndex < cellRepeat && cells.length < colLimit;
@@ -378,6 +329,56 @@ class DocumentParserService {
     }
 
     return buffer.toString();
+  }
+
+  static List<List<String>> _parseCsvRows(String content) {
+    final rows = <List<String>>[];
+    final row = <String>[];
+    final cell = StringBuffer();
+    var inQuotes = false;
+
+    for (var index = 0; index < content.length; index++) {
+      final char = content[index];
+      final next = index + 1 < content.length ? content[index + 1] : null;
+
+      if (char == '"') {
+        if (inQuotes && next == '"') {
+          cell.write('"');
+          index++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        continue;
+      }
+
+      if (char == ',' && !inQuotes) {
+        row.add(cell.toString());
+        cell.clear();
+        continue;
+      }
+
+      if ((char == '\n' || char == '\r') && !inQuotes) {
+        if (char == '\r' && next == '\n') {
+          index++;
+        }
+        row.add(cell.toString());
+        cell.clear();
+        if (row.any((value) => value.isNotEmpty)) {
+          rows.add(List<String>.from(row));
+        }
+        row.clear();
+        continue;
+      }
+
+      cell.write(char);
+    }
+
+    row.add(cell.toString());
+    if (row.any((value) => value.isNotEmpty)) {
+      rows.add(List<String>.from(row));
+    }
+
+    return rows;
   }
 
   /// Parse PPT format (PowerPoint)
@@ -456,35 +457,13 @@ class DocumentParserService {
   }
 
   /// Parse DOCX format (Modern Word)
-  /// Returns text content as string
+  /// Returns flattened plain text from the structured parser
   static Future<String> parseDOCX(String filePath) async {
     try {
       log.i('Parsing DOCX file: $filePath');
-      final file = File(filePath);
-      final bytes = await file.readAsBytes();
-
-      // DOCX files are ZIP archives containing XML
-      final archive = ZipDecoder().decodeBytes(bytes);
-      final documentFile = archive.findFile('word/document.xml');
-
-      if (documentFile == null) {
-        throw Exception('word/document.xml not found in DOCX file');
-      }
-
-      final xmlContent = utf8.decode(documentFile.content as List<int>);
-      final document = XmlDocument.parse(xmlContent);
-
-      // Extract all text nodes from paragraphs and runs
-      final texts = <String>[];
-      for (var elem in document.findAllElements('w:p')) {
-        final pText = elem.innerText.trim();
-        if (pText.isNotEmpty) {
-          texts.add(pText);
-        }
-      }
-
-      log.i('DOCX extracted: ${texts.join().length} characters');
-      return texts.join('\n');
+      final parsed = await WordDocumentParserService.parseDocx(filePath);
+      log.i('DOCX extracted: ${parsed.plainTextContent.length} characters');
+      return parsed.plainTextContent;
     } catch (e, st) {
       log.e('Error parsing DOCX', error: e, stackTrace: st);
       rethrow;
@@ -649,16 +628,18 @@ class DocumentParserService {
       const maxPreviewSizeMB = 50;
       if (fileSizeMB > maxPreviewSizeMB) {
         log.w('Large TXT file detected: $fileSizeMB MB. Reading preview only.');
-        final bytes = await file.openRead(0, maxPreviewSizeMB * 1024 * 1024).toList();
+        final bytes =
+            await file.openRead(0, maxPreviewSizeMB * 1024 * 1024).toList();
         final combinedBytes = <int>[];
         for (var chunk in bytes) {
           combinedBytes.addAll(chunk);
         }
-        
+
         try {
           // Try UTF-8 first
           var content = utf8.decode(combinedBytes, allowMalformed: true);
-          content += '\n\n[Preview truncated - file is ${fileSizeMB.toStringAsFixed(1)} MB]';
+          content +=
+              '\n\n[Preview truncated - file is ${fileSizeMB.toStringAsFixed(1)} MB]';
           log.i('TXT preview extracted: ${content.length} characters');
           return content;
         } catch (e) {
@@ -679,7 +660,8 @@ class DocumentParserService {
           final bytes = await file.readAsBytes();
           content = latin1.decode(bytes);
         } catch (latin1Error) {
-          log.w('Latin-1 decoding failed, using UTF-8 with malformed tolerance');
+          log.w(
+              'Latin-1 decoding failed, using UTF-8 with malformed tolerance');
           final bytes = await file.readAsBytes();
           content = utf8.decode(bytes, allowMalformed: true);
         }
@@ -693,7 +675,8 @@ class DocumentParserService {
       // Normalize line endings to \n for consistency
       content = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
 
-      log.i('TXT extracted: ${content.length} characters, ${content.split('\n').length} lines');
+      log.i(
+          'TXT extracted: ${content.length} characters, ${content.split('\n').length} lines');
       return content;
     } catch (e, st) {
       log.e('Error parsing TXT', error: e, stackTrace: st);
