@@ -126,6 +126,17 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ]),
               const SizedBox(height: 24),
+              _buildSectionHeader(context, 'Security'),
+              _buildSettingsGroup(context, [
+                _SettingsRow(
+                  icon: Icons.lock_outline,
+                  title: 'App Lock',
+                  value: 'Coming Soon',
+                  isComingSoon: true,
+                  onTap: null,
+                ),
+              ]),
+              const SizedBox(height: 24),
               _buildSectionHeader(context, 'About'),
               _buildSettingsGroup(context, [
                 _SettingsRow(

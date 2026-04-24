@@ -88,7 +88,7 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
           );
         case 'csv':
           log.d('Routing to native CSV parser');
-          document = await repository.parseXLSX(_filePath, useNativeParsing: true);
+          document = await repository.parseCSV(_filePath);
         case 'ods':
           log.d('ODS format - creating stub entity for LOKit viewer');
           document = ParsedDocumentEntity(

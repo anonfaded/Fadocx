@@ -1888,36 +1888,41 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   Widget _buildErrorState(
       BuildContext context, WidgetRef ref, ParsedDocumentState state) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              state.error ?? 'Error loading document',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 100),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  state.error ?? 'Error loading document',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref
+                      .read(documentViewerProvider.notifier)
+                      .initializeAndLoad(widget.filePath, widget.fileName);
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Go Back'),
+              ),
+            ],
           ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: () {
-              ref
-                  .read(documentViewerProvider.notifier)
-                  .initializeAndLoad(widget.filePath, widget.fileName);
-            },
-            icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Go Back'),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -12,6 +12,8 @@ import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
 
 final log = Logger();
@@ -1079,7 +1081,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
           color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
@@ -1128,7 +1131,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               icon: Icons.content_copy,
               title: 'Duplicate',
               iconColor: Colors.blue,
-              showChevron: true,
+              subtitle: 'Create a copy',
               onTap: () {
                 Navigator.pop(ctx);
                 _duplicateFile(file);
@@ -1143,6 +1146,32 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               onTap: () {
                 Navigator.pop(ctx);
                 _exportFile(file);
+              },
+            ),
+            _buildActionRow(
+              icon: Icons.transform,
+              title: 'Convert',
+              subtitle: 'Convert to another format',
+              iconColor: Colors.purple,
+              showComingSoonBadge: true,
+              onTap: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Convert feature coming soon!')),
+                );
+              },
+            ),
+            _buildActionRow(
+              icon: Icons.cloud_upload_outlined,
+              title: 'Upload to FadDrive',
+              subtitle: 'Sync to cloud storage',
+              iconColor: Colors.blue,
+              showComingSoonBadge: true,
+              onTap: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('FadDrive coming soon!')),
+                );
               },
             ),
             _buildActionRow(
@@ -1171,6 +1200,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             const SizedBox(height: 16),
           ],
         ),
+        ),
       ),
     );
   }
@@ -1181,6 +1211,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     required Color iconColor,
     String? subtitle,
     bool showChevron = false,
+    bool showComingSoonBadge = false,
     Color? titleColor,
     required VoidCallback onTap,
   }) {
@@ -1223,6 +1254,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                     ],
                   ),
                 ),
+                if (showComingSoonBadge)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    margin: const EdgeInsets.only(left: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Coming Soon',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.orange.shade700,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 if (showChevron)
                   Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ],
@@ -1324,7 +1372,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
           color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
@@ -1353,25 +1402,34 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               },
             ),
             _buildActionRow(
-              icon: Icons.drive_file_rename_outline,
-              title: 'Save with new name',
+              icon: Icons.folder_open,
+              title: 'Choose location',
               iconColor: Colors.blue,
-              subtitle: 'Save a copy with a different name',
+              subtitle: 'Pick a custom save directory',
               onTap: () async {
                 Navigator.pop(ctx);
-                await _saveToDownloadsWithName(file);
+                await _saveToCustomLocation(file);
               },
             ),
             const SizedBox(height: 16),
           ],
         ),
+        ),
       ),
     );
   }
 
+  Future<Directory> _getFadocxDownloadsDir() async {
+    final dir = await getDownloadsDirectory();
+    if (dir == null) {
+      throw UnsupportedError('Downloads directory not available');
+    }
+    return Directory('${dir.path}/Fadocx');
+  }
+
   Future<void> _saveToDownloads(RecentFile file) async {
     try {
-      final downloadsDir = Directory('/storage/emulated/0/Download/Fadocx');
+      final downloadsDir = await _getFadocxDownloadsDir();
       if (!await downloadsDir.exists()) {
         await downloadsDir.create(recursive: true);
       }
@@ -1402,55 +1460,31 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     }
   }
 
-  Future<void> _saveToDownloadsWithName(RecentFile file) async {
-    final dot = file.fileName.lastIndexOf('.');
-    final baseName = dot > 0 ? file.fileName.substring(0, dot) : file.fileName;
-    final extension = dot > 0 ? file.fileName.substring(dot) : '';
-    final controller = TextEditingController(text: '${baseName}_copy');
-
-    final newName = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Save with new name'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: 'File name',
-            suffixText: extension,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-
-    if (newName == null || newName.trim().isEmpty) return;
-
+  Future<void> _saveToCustomLocation(RecentFile file) async {
     try {
-      final downloadsDir = Directory('/storage/emulated/0/Download/Fadocx');
-      if (!await downloadsDir.exists()) {
-        await downloadsDir.create(recursive: true);
-      }
+      final directory = await FilePicker.getDirectoryPath(
+        dialogTitle: 'Choose save location',
+      );
+      if (directory == null) return;
+
       final source = File(file.filePath);
-      final dest = '${downloadsDir.path}/${newName.trim()}$extension';
+      var dest = '$directory/${file.fileName}';
+      var counter = 1;
+      while (await File(dest).exists()) {
+        final dot = file.fileName.lastIndexOf('.');
+        final base = dot > 0 ? file.fileName.substring(0, dot) : file.fileName;
+        final ext = dot > 0 ? file.fileName.substring(dot) : '';
+        dest = '$directory/$base ($counter)$ext';
+        counter++;
+      }
       await source.copy(dest);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved to Download/Fadocx/${newName.trim()}$extension')),
+          SnackBar(content: Text('Saved to ${dest.split('/').last}')),
         );
       }
     } catch (e) {
-      log.e('Failed to export file', error: e);
+      log.e('Failed to export file to custom location', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to export file')),
@@ -1638,7 +1672,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
           color: Theme.of(ctx).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
@@ -1658,6 +1693,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             _buildSortOption(ctx, 'smallest', Icons.file_upload, 'Smallest size'),
             const SizedBox(height: 16),
           ],
+        ),
         ),
       ),
     );
