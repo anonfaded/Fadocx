@@ -73,6 +73,16 @@ class StorageService {
       case 'odt':
       case 'rtf':
       case 'txt':
+      case 'java':
+      case 'py':
+      case 'sh':
+      case 'html':
+      case 'md':
+      case 'log':
+      case 'epub':
+      case 'ott':
+      case 'json':
+      case 'xml':
         return documentsFolder;
       case 'xlsx':
       case 'xls':

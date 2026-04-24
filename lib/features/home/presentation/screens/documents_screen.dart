@@ -25,11 +25,19 @@ class DocumentsScreen extends ConsumerStatefulWidget {
 
 class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   late String _selectedCategory;
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _selectedCategory = 'all';
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -131,7 +139,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   Widget _buildDocumentsGrid(
       BuildContext context, List<RecentFile> allFiles, bool isGridView) {
-    // Filter files by category
     List<RecentFile> filteredFiles = allFiles;
     if (_selectedCategory != 'all') {
       filteredFiles = allFiles
@@ -139,70 +146,98 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               (f) => _getCategoryFromFileType(f.fileType) == _selectedCategory)
           .toList();
     }
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      filteredFiles = filteredFiles
+          .where((f) =>
+              f.fileName.toLowerCase().contains(q) ||
+              f.fileType.toLowerCase().contains(q))
+          .toList();
+    }
 
     return RefreshIndicator(
       onRefresh: () async {
-        // Clear thumbnail cache for fresh thumbnails
         try {
           final hiveDatasource = ref.read(hiveDatasourceProvider);
           await hiveDatasource.clearThumbnailCache();
-          log.i('📦 Thumbnail cache cleared on refresh');
+          log.i('Thumbnail cache cleared on refresh');
         } catch (e) {
           log.e('Error clearing thumbnail cache: $e');
         }
-
-        // Invalidate the provider to force a refresh
         ref.invalidate(recentFilesProvider);
-        // Wait for the new data to be fetched
         await ref.read(recentFilesProvider.future);
       },
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
+        padding: const EdgeInsets.fromLTRB(12, 88, 12, 100),
         children: [
-          // Category filter tabs
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search documents...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (v) => setState(() => _searchQuery = v),
+            ),
+          ),
+
+          // Compact category chips
           SizedBox(
-            height: 50,
+            height: 36,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
                 _buildCategoryChip(context, 'all', 'All', Icons.apps),
                 _buildCategoryChip(context, 'pdf', 'PDF', Icons.picture_as_pdf),
-                _buildCategoryChip(
-                    context, 'documents', 'Docs', Icons.description),
-                _buildCategoryChip(
-                    context, 'spreadsheets', 'Sheets', Icons.table_chart),
-                _buildCategoryChip(
-                    context, 'other', 'Other', Icons.file_present),
+                _buildCategoryChip(context, 'documents', 'Docs', Icons.description),
+                _buildCategoryChip(context, 'spreadsheets', 'Sheets', Icons.table_chart),
+                _buildCategoryChip(context, 'presentations', 'Slides', Icons.slideshow),
+                _buildCategoryChip(context, 'code', 'Code', Icons.code),
+                _buildCategoryChip(context, 'other', 'Other', Icons.file_present),
               ],
             ),
           ),
-          const SizedBox(height: 8),
 
-          // View toggle + sort
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${filteredFiles.length} ${_selectedCategory == 'all' ? 'Documents' : 'Files'}',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(isGridView ? Icons.grid_view : Icons.list),
-                    onPressed: () {
-                      ref
-                          .read(gridViewPreferenceProvider.notifier)
-                          .toggleViewMode();
-                    },
+          // Count + view toggle
+          Padding(
+            padding: const EdgeInsets.only(top: 6, bottom: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${filteredFiles.length} ${_selectedCategory == 'all' ? 'documents' : _selectedCategory}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                ],
-              ),
-            ],
+                ),
+                IconButton(
+                  icon: Icon(isGridView ? Icons.grid_view : Icons.list, size: 20),
+                  onPressed: () {
+                    ref.read(gridViewPreferenceProvider.notifier).toggleViewMode();
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
 
-          // Documents grid/list
           if (filteredFiles.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32),
@@ -218,24 +253,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio:
-                    0.714, // Matches 200x280 thumbnail aspect ratio
+                crossAxisCount: 3,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 0.62,
               ),
               itemCount: filteredFiles.length,
               itemBuilder: (context, index) =>
                   _buildFileGridItem(context, filteredFiles[index]),
             )
           else
-            Column(
-              children: filteredFiles
-                  .asMap()
-                  .entries
-                  .map((e) => _buildFileListItem(context, e.value, e.key))
-                  .toList(),
-            ),
+            ...filteredFiles
+                .map((f) => _buildFileListItem(context, f)),
         ],
       ),
     );
@@ -245,28 +274,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       BuildContext context, String category, String label, IconData icon) {
     final isActive = _selectedCategory == category;
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16),
-            const SizedBox(width: 6),
-            Text(label),
-          ],
-        ),
+      padding: const EdgeInsets.only(right: 6),
+      child: ChoiceChip(
+        label: Text(label, style: TextStyle(fontSize: 12)),
+        avatar: Icon(icon, size: 14),
         selected: isActive,
         onSelected: (selected) {
           setState(() => _selectedCategory = category);
         },
-        backgroundColor: Colors.transparent,
-        selectedColor:
-            Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-        side: BorderSide(
-          color: isActive
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-        ),
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.zero,
+        labelPadding: const EdgeInsets.only(left: 2, right: 6),
       ),
     );
   }
@@ -342,9 +360,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                   ],
                 ),
               ),
-              // Info and actions section
               Padding(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.fromLTRB(6, 4, 2, 4),
                 child: Row(
                   children: [
                     Expanded(
@@ -361,9 +378,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                                 .labelSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w500,
+                                  fontSize: 10,
                                 ),
                           ),
-                          const SizedBox(height: 2),
                           Text(
                             file.formattedSize,
                             style: Theme.of(context)
@@ -373,22 +390,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .onSurfaceVariant,
-                                  fontSize: 11,
+                                  fontSize: 9,
                                 ),
                           ),
                         ],
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.more_vert,
-                          size: 18,
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant),
-                      onPressed: () =>
-                          _showFileActionBottomSheet(context, file),
-                      padding: EdgeInsets.zero,
-                      constraints:
-                          const BoxConstraints(minWidth: 40, minHeight: 40),
+                    GestureDetector(
+                      onTap: () => _showFileActionBottomSheet(context, file),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(Icons.more_vert,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      ),
                     ),
                   ],
                 ),
@@ -400,7 +415,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  Widget _buildFileListItem(BuildContext context, RecentFile file, int index) {
+  Widget _buildFileListItem(BuildContext context, RecentFile file) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Material(
@@ -555,6 +570,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       case 'pptx':
       case 'odp':
         return 'presentations';
+      case 'java':
+      case 'py':
+      case 'sh':
+      case 'html':
+      case 'md':
+      case 'json':
+      case 'xml':
+      case 'log':
+        return 'code';
       default:
         return 'other';
     }
@@ -589,6 +613,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       case 'odp':
         iconData = Icons.slideshow;
         color = AppColors.categorySlide;
+        break;
+      case 'java':
+      case 'py':
+      case 'sh':
+      case 'html':
+      case 'md':
+      case 'json':
+      case 'xml':
+      case 'log':
+        iconData = Icons.code;
+        color = AppColors.categoryDoc;
         break;
       default:
         iconData = Icons.insert_drive_file;
@@ -949,6 +984,17 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
       case 'odp':
         iconData = Icons.slideshow;
         color = AppColors.categorySlide;
+        break;
+      case 'java':
+      case 'py':
+      case 'sh':
+      case 'html':
+      case 'md':
+      case 'json':
+      case 'xml':
+      case 'log':
+        iconData = Icons.code;
+        color = AppColors.categoryDoc;
         break;
       default:
         iconData = Icons.insert_drive_file;

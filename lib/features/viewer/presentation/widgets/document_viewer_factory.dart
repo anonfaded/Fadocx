@@ -22,8 +22,7 @@ class DocumentViewerFactory {
     Function(int currentPage, int totalPages)? onPageChanged,
   }) {
     return switch (document.format.toUpperCase()) {
-      'JSON' || 'FADREC' => _buildJsonViewer(document),
-      'XML' => _buildXmlViewer(document),
+      'FADREC' => _buildJsonViewer(document),
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
@@ -34,34 +33,6 @@ class DocumentViewerFactory {
 
   static Widget _buildJsonViewer(ParsedDocumentEntity document) {
     return _JsonDocumentView(jsonString: document.textContent ?? '{}');
-  }
-
-  static Widget _buildXmlViewer(ParsedDocumentEntity document) {
-    return Builder(
-      builder: (context) {
-        final theme = Theme.of(context);
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: theme.colorScheme.outlineVariant),
-            ),
-            child: SelectableText(
-              document.textContent ?? 'No content',
-              style: const TextStyle(
-                fontFamily: 'Courier',
-                fontSize: 12,
-                height: 1.5,
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   static Widget _buildSpreadsheetViewer(ParsedDocumentEntity document) {

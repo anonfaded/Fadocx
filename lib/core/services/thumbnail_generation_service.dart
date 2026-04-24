@@ -7,8 +7,79 @@ import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.da
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
+import 'package:highlight/highlight_core.dart';
+import 'package:highlight/languages/java.dart';
+import 'package:highlight/languages/python.dart';
+import 'package:highlight/languages/bash.dart';
+import 'package:highlight/languages/xml.dart';
+import 'package:highlight/languages/markdown.dart';
+import 'package:highlight/languages/json.dart' as hl_json_lang;
 
 class ThumbnailGenerationService {
+  static bool _hlRegistered = false;
+
+  static void _ensureHighlightLanguages() {
+    if (_hlRegistered) return;
+    _hlRegistered = true;
+    highlight.registerLanguage('java', java);
+    highlight.registerLanguage('python', python);
+    highlight.registerLanguage('bash', bash);
+    highlight.registerLanguage('xml', xml);
+    highlight.registerLanguage('markdown', markdown);
+    highlight.registerLanguage('json', hl_json_lang.json);
+  }
+
+  static String? _languageForThumbnailType(String type) {
+    switch (type) {
+      case 'java': return 'java';
+      case 'py': return 'python';
+      case 'sh': return 'bash';
+      case 'html': return 'xml';
+      case 'xml': return 'xml';
+      case 'md': return 'markdown';
+      case 'json': return 'json';
+      default: return null;
+    }
+  }
+
+  static const Map<String, ui.Color> _syntaxColors = {
+    'keyword': ui.Color(0xFFC678DD),
+    'selector-tag': ui.Color(0xFFE06C75),
+    'addition': ui.Color(0xFF98C379),
+    'built_in': ui.Color(0xFF56B6C2),
+    'type': ui.Color(0xFF56B6C2),
+    'title': ui.Color(0xFF61AFEF),
+    'section': ui.Color(0xFF61AFEF),
+    'attr': ui.Color(0xFFD19A66),
+    'attribute': ui.Color(0xFFD19A66),
+    'string': ui.Color(0xFF98C379),
+    'regexp': ui.Color(0xFF98C379),
+    'symbol': ui.Color(0xFF56B6C2),
+    'variable': ui.Color(0xFFE06C75),
+    'template-variable': ui.Color(0xFFE06C75),
+    'link': ui.Color(0xFF56B6C2),
+    'meta': ui.Color(0xFF7F848E),
+    'comment': ui.Color(0xFF7F848E),
+    'deletion': ui.Color(0xFFE06C75),
+    'number': ui.Color(0xFFD19A66),
+    'literal': ui.Color(0xFFD19A66),
+    'params': ui.Color(0xFFABB2BF),
+    'subst': ui.Color(0xFFE06C75),
+    'tag': ui.Color(0xFFE06C75),
+    'name': ui.Color(0xFFE06C75),
+    'selector-id': ui.Color(0xFF61AFEF),
+    'selector-class': ui.Color(0xFFD19A66),
+    'selector-attr': ui.Color(0xFFD19A66),
+    'selector-pseudo': ui.Color(0xFFD19A66),
+    'property': ui.Color(0xFFE06C75),
+    'operator': ui.Color(0xFF56B6C2),
+    'punctuation': ui.Color(0xFFABB2BF),
+    'bullet': ui.Color(0xFFD19A66),
+    'code': ui.Color(0xFF98C379),
+    'emphasis': ui.Color(0xFFC678DD),
+    'strong': ui.Color(0xFFD19A66),
+    'formula': ui.Color(0xFF56B6C2),
+  };
   static const MethodChannel pdfChannel = MethodChannel(
     'com.fadseclab.fadocx/pdf',
   );
@@ -50,7 +121,7 @@ class ThumbnailGenerationService {
             filePath,
             cachedDocument: cachedDocument,
           ),
-        'doc' || 'docx' || 'txt' || 'rtf' || 'odt' => _generateTextThumbnail(
+        'doc' || 'docx' || 'txt' || 'rtf' || 'odt' || 'java' || 'py' || 'sh' || 'html' || 'md' || 'log' || 'json' || 'xml' || 'ott' => _generateTextThumbnail(
             filePath,
             normalizedType,
             cachedDocument: cachedDocument,
@@ -60,7 +131,7 @@ class ThumbnailGenerationService {
             normalizedType,
             cachedDocument: cachedDocument,
           ),
-        'ppt' || 'pptx' || 'odp' => _generatePresentationThumbnail(
+        'ppt' || 'pptx' || 'odp' || 'epub' || 'ods' => _generatePresentationThumbnail(
             filePath,
             normalizedType,
           ),
@@ -316,11 +387,13 @@ class ThumbnailGenerationService {
         );
       }
 
+      final language = _languageForThumbnailType(normalizedType);
       return _createTextDocumentPreview(
         text: previewText,
         fullText: fullText,
         accent: _accentForType(normalizedType),
         label: normalizedType.toUpperCase(),
+        language: language,
       );
     } catch (e, st) {
       _log.e('Text thumbnail parse failed for $filePath',
@@ -390,14 +463,22 @@ class ThumbnailGenerationService {
         return result?['textContent'] as String?;
       case 'docx':
         return await DocumentParserService.parseDOCX(filePath);
-      case 'txt':
-        return await DocumentParserService.parseTXT(filePath);
       case 'rtf':
         return await DocumentParserService.parseRTF(filePath);
       case 'odt':
         return await DocumentParserService.parseODT(filePath);
+      case 'json':
+        return await DocumentParserService.parseJSON(filePath).then((r) => r['textContent'] as String? ?? '');
+      case 'xml':
+        return await DocumentParserService.parseXML(filePath).then((r) => r['textContent'] as String? ?? '');
+      case 'ott':
+        return await DocumentParserService.parseODT(filePath);
       default:
-        return null;
+        try {
+          return await DocumentParserService.parseTXT(filePath);
+        } catch (_) {
+          return File(filePath).readAsString();
+        }
     }
   }
 
@@ -463,6 +544,7 @@ class ThumbnailGenerationService {
     required String fullText,
     required ColorRgb accent,
     required String label,
+    String? language,
   }) {
     return _renderCanvas((canvas, size) {
       _paintShadowBackground(canvas, size, accent);
@@ -483,7 +565,7 @@ class ThumbnailGenerationService {
         canvas,
         rect: headerRect.outerRect,
         color: _uiColor(accent),
-        text: _buildReadingStats(fullText),
+        text: _buildReadingStats(fullText, language: language),
       );
 
       _paintText(
@@ -501,22 +583,89 @@ class ThumbnailGenerationService {
         ),
       );
 
-      _paintText(
-        canvas,
-        text: text,
-        left: 44,
-        top: 134,
-        maxWidth: size.width - 88,
-        maxLines: 16,
-        style: const TextStyle(
-          color: ui.Color(0xFF2B2B2B),
-          fontSize: 19,
-          height: 1.28,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Ubuntu',
-        ),
-      );
+      if (language != null) {
+        _paintSyntaxText(
+          canvas,
+          text: text,
+          language: language,
+          left: 44,
+          top: 134,
+          maxWidth: size.width - 88,
+          maxLines: 16,
+          baseStyle: const TextStyle(
+            color: ui.Color(0xFF2B2B2B),
+            fontSize: 19,
+            height: 1.28,
+            fontWeight: FontWeight.w400,
+            fontFamily: 'Ubuntu',
+          ),
+        );
+      } else {
+        _paintText(
+          canvas,
+          text: text,
+          left: 44,
+          top: 134,
+          maxWidth: size.width - 88,
+          maxLines: 16,
+          style: const TextStyle(
+            color: ui.Color(0xFF2B2B2B),
+            fontSize: 19,
+            height: 1.28,
+            fontWeight: FontWeight.w400,
+            fontFamily: 'Ubuntu',
+          ),
+        );
+      }
     });
+  }
+
+  static void _paintSyntaxText(
+    ui.Canvas canvas, {
+    required String text,
+    required String language,
+    required double left,
+    required double top,
+    required double maxWidth,
+    required TextStyle baseStyle,
+    int? maxLines,
+  }) {
+    _ensureHighlightLanguages();
+    final result = highlight.parse(text, language: language);
+    final spans = <TextSpan>[];
+    _flattenNodes(result.nodes, null, spans, baseStyle);
+
+    final painter = TextPainter(
+      text: TextSpan(children: spans, style: baseStyle),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+      maxLines: maxLines,
+      ellipsis: maxLines == null ? null : '\u2026',
+    )..layout(maxWidth: maxWidth);
+
+    painter.paint(canvas, ui.Offset(left, top));
+  }
+
+  static void _flattenNodes(
+    List<Node>? nodes,
+    String? parentClass,
+    List<TextSpan> spans,
+    TextStyle baseStyle,
+  ) {
+    if (nodes == null) return;
+    for (final node in nodes) {
+      if (node.value != null) {
+        const defaultColor = ui.Color(0xFFABB2BF);
+        final color = parentClass != null ? (_syntaxColors[parentClass] ?? defaultColor) : defaultColor;
+        spans.add(TextSpan(
+          text: node.value,
+          style: TextStyle(color: color, fontSize: baseStyle.fontSize, fontWeight: baseStyle.fontWeight, fontFamily: baseStyle.fontFamily, height: baseStyle.height),
+        ));
+      } else if (node.children != null) {
+        final effectiveClass = node.className ?? parentClass;
+        _flattenNodes(node.children, effectiveClass, spans, baseStyle);
+      }
+    }
   }
 
   static Future<Uint8List> _createSpreadsheetPreview({
@@ -831,9 +980,15 @@ class ThumbnailGenerationService {
     return extracted;
   }
 
-  static String _buildReadingStats(String text) {
+  static String _buildReadingStats(String text, {String? language}) {
     final words = RegExp(r'\S+').allMatches(text).length;
     final lines = text.split(RegExp(r'\r\n|\r|\n')).length;
+    if (language != null) {
+      final funcs = RegExp(r'\b(function|def|class|void|int|String|public|private|static)\s+\w+').allMatches(text).length;
+      final parts = <String>['$lines lines'];
+      if (funcs > 0) parts.add('$funcs symbols');
+      return parts.join(' • ');
+    }
     final minutes = words == 0 ? 0 : (words / _readingWordsPerMinute).ceil();
     final minuteLabel = minutes == 1 ? 'minute' : 'minutes';
     return '${minutes == 0 ? '<1' : minutes} $minuteLabel read • $words words • $lines lines';
@@ -970,7 +1125,7 @@ class ThumbnailGenerationService {
       'pdf' => ThumbnailColors.pdfRed,
       'doc' || 'docx' || 'odt' || 'rtf' || 'txt' => ThumbnailColors.docBlue,
       'xls' || 'xlsx' || 'csv' || 'ods' => ThumbnailColors.sheetGreen,
-      'ppt' || 'pptx' || 'odp' => ThumbnailColors.pptOrange,
+      'ppt' || 'pptx' || 'odp' || 'epub' || 'ods' => ThumbnailColors.pptOrange,
       _ => ThumbnailColors.gray,
     };
   }
