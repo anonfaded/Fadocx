@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
@@ -22,17 +20,12 @@ class DocumentViewerFactory {
     Function(int currentPage, int totalPages)? onPageChanged,
   }) {
     return switch (document.format.toUpperCase()) {
-      'FADREC' => _buildJsonViewer(document),
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
       'TXT' => _buildTextViewer(document, onTap: onTap),
       _ => _buildUnsupportedViewer(document.format),
     };
-  }
-
-  static Widget _buildJsonViewer(ParsedDocumentEntity document) {
-    return _JsonDocumentView(jsonString: document.textContent ?? '{}');
   }
 
   static Widget _buildSpreadsheetViewer(ParsedDocumentEntity document) {
@@ -122,66 +115,6 @@ class DocumentViewerFactory {
           Text(
             'Format not supported: $format',
             style: const TextStyle(fontSize: 16),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _JsonDocumentView extends StatelessWidget {
-  final String jsonString;
-
-  const _JsonDocumentView({required this.jsonString});
-
-  @override
-  Widget build(BuildContext context) {
-    String prettyJson;
-
-    try {
-      final decoded = jsonDecode(jsonString);
-      prettyJson = const JsonEncoder.withIndent('  ').convert(decoded);
-    } catch (_) {
-      prettyJson = jsonString;
-    }
-
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          const TabBar(
-            tabs: [
-              Tab(text: 'Pretty'),
-              Tab(text: 'Raw'),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: SelectableText(
-                    prettyJson,
-                    style: const TextStyle(
-                      fontFamily: 'Courier',
-                      fontSize: 12,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: SelectableText(
-                    jsonString,
-                    style: const TextStyle(
-                      fontFamily: 'Courier',
-                      fontSize: 12,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

@@ -103,9 +103,6 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         case 'json':
           log.d('Routing to parseJSON');
           document = await repository.parseJSON(_filePath);
-        case 'fadrec':
-          log.d('Routing to parseFadrec');
-          document = await repository.parseFadrec(_filePath);
         case 'xml':
           log.d('Routing to parseXML');
           document = await repository.parseXML(_filePath);
@@ -124,6 +121,7 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         case 'html':
         case 'md':
         case 'log':
+        case 'fadrec':
           log.d('Routing to parseTXT for: $extension');
           document = await repository.parseTXT(_filePath);
           if (extension != 'txt') {

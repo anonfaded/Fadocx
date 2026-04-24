@@ -901,6 +901,9 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
 
   String _pdfLoadErrorMessage(Object error) {
     final message = error.toString().toLowerCase();
+    if (message.contains('password') || message.contains('encrypted')) {
+      return 'This PDF is password-protected. Please enter the password to view it.';
+    }
     if (message.contains('fpdf_err_format') ||
         message.contains('file not in pdf format') ||
         message.contains('corrupted')) {
@@ -966,6 +969,45 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
     );
   }
 
+  Future<String?> _showPasswordDialog() async {
+    final controller = TextEditingController();
+    final password = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('PDF Password Required'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('This PDF is password-protected. Enter the password to unlock.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              obscureText: true,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: (v) => Navigator.pop(ctx, v),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, null),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: const Text('Unlock'),
+          ),
+        ],
+      ),
+    );
+    return password;
+  }
+
   Widget _buildPdfViewer() {
     // ROOT CAUSE FIX: Always wrap in ColorFiltered with conditional colorFilter
     // This keeps the PdfViewer widget stable and prevents _state from becoming null
@@ -997,6 +1039,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
     final viewer = PdfViewer.file(
       widget.filePath,
       controller: _controller,
+      passwordProvider: () => _showPasswordDialog(),
       params: PdfViewerParams(
         textSelectionParams: widget.invertColors
             ? null

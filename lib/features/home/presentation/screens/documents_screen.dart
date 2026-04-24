@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +16,6 @@ import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.d
 
 final log = Logger();
 
-/// Documents screen - displays all imported documents with category filtering
 class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
 
@@ -23,21 +23,107 @@ class DocumentsScreen extends ConsumerStatefulWidget {
   ConsumerState<DocumentsScreen> createState() => _DocumentsScreenState();
 }
 
-class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
+class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
+    with SingleTickerProviderStateMixin {
   late String _selectedCategory;
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  bool _isSearching = false;
+  late AnimationController _searchAnimController;
+  Timer? _debounce;
+
+  final Set<String> _selectedFiles = {};
+  bool _isSelecting = false;
 
   @override
   void initState() {
     super.initState();
     _selectedCategory = 'all';
+    _searchAnimController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchAnimController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _enterSearchMode() {
+    setState(() => _isSearching = true);
+    _searchAnimController.forward();
+  }
+
+  void _exitSearchMode() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+      _isSearching = false;
+    });
+    _searchAnimController.reverse();
+    FocusScope.of(context).unfocus();
+  }
+
+  void _enterSelectionMode(String fileId) {
+    setState(() {
+      _isSelecting = true;
+      _selectedFiles.add(fileId);
+    });
+  }
+
+  void _exitSelectionMode() {
+    setState(() {
+      _isSelecting = false;
+      _selectedFiles.clear();
+    });
+  }
+
+  void _toggleFileSelection(String fileId) {
+    setState(() {
+      if (_selectedFiles.contains(fileId)) {
+        _selectedFiles.remove(fileId);
+        if (_selectedFiles.isEmpty) {
+          _isSelecting = false;
+        }
+      } else {
+        _selectedFiles.add(fileId);
+      }
+    });
+  }
+
+  void _selectAll(List<RecentFile> files) {
+    setState(() {
+      if (_selectedFiles.length == files.length) {
+        _selectedFiles.clear();
+        _isSelecting = false;
+      } else {
+        _selectedFiles.clear();
+        _selectedFiles.addAll(files.map((f) => f.id));
+        _isSelecting = true;
+      }
+    });
+  }
+
+  Future<void> _deleteSelectedFiles() async {
+    final count = _selectedFiles.length;
+    final ids = _selectedFiles.toList();
+    for (final id in ids) {
+      ref.read(recentFilesMutatorProvider).softDeleteFile(id);
+    }
+    _exitSelectionMode();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$count ${count == 1 ? 'item' : 'items'} moved to trash'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -50,13 +136,124 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Widget _buildAppBarContent(BuildContext context) {
-    return Center(
-      child: Text(
-        'Documents',
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+    if (_isSelecting) {
+      return _buildSelectionAppBar(context);
+    }
+    return _buildNormalAppBar(context);
+  }
+
+  Widget _buildNormalAppBar(BuildContext context) {
+    return Row(
+      children: [
+        if (!_isSearching)
+          const SizedBox(width: 40),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: _isSearching
+                ? Row(
+                    key: const ValueKey('search'),
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, size: 20),
+                        onPressed: _exitSearchMode,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                            minWidth: 36, minHeight: 36),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: 'Search library...',
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          onChanged: (v) {
+                            _debounce?.cancel();
+                            _debounce = Timer(
+                                const Duration(milliseconds: 200), () {
+                              setState(() => _searchQuery = v);
+                            });
+                          },
+                        ),
+                      ),
+                      if (_searchQuery.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                              minWidth: 36, minHeight: 36),
+                        ),
+                    ],
+                  )
+                : Center(
+                    key: const ValueKey('title'),
+                    child: Text(
+                      'Library',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+          ),
+        ),
+        if (!_isSearching)
+          SizedBox(
+            width: 40,
+            child: IconButton(
+              icon: const Icon(Icons.search, size: 20),
+              onPressed: _enterSearchMode,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             ),
-      ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSelectionAppBar(BuildContext context) {
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.close, size: 20),
+          onPressed: _exitSelectionMode,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        ),
+        Expanded(
+          child: Text(
+            '${_selectedFiles.length} selected',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.select_all, size: 20),
+          onPressed: () {
+            final recentFiles = ref.read(recentFilesProvider);
+            recentFiles.whenData((files) => _selectAll(files));
+          },
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+          onPressed: _deleteSelectedFiles,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        ),
+      ],
     );
   }
 
@@ -80,7 +277,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   Widget _buildEmptyState(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
       children: [
         Center(
           child: Column(
@@ -93,7 +290,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'No Documents',
+                'No Library Items',
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
@@ -129,7 +326,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error loading documents: $error'),
+              Text('Error loading library: $error'),
             ],
           ),
         ),
@@ -168,71 +365,81 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         await ref.read(recentFilesProvider.future);
       },
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 88, 12, 100),
+        padding: const EdgeInsets.fromLTRB(12, 80, 12, 100),
         children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search documents...',
-                prefixIcon: const Icon(Icons.search, size: 20),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, size: 20),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchQuery = '');
-                        },
-                      )
-                    : null,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+          SizedBox(
+            height: 34,
+            child: ShaderMask(
+              shaderCallback: (bounds) => LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Colors.transparent,
+                  Colors.white,
+                  Colors.white,
+                  Colors.transparent,
+                ],
+                stops: [0.0, 0.05, 0.95, 1.0],
+              ).createShader(bounds),
+              blendMode: BlendMode.dstIn,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _buildCategoryChip(context, 'all', 'All'),
+                    _buildCategoryChip(context, 'pdf', 'PDF'),
+                    _buildCategoryChip(context, 'documents', 'Docs'),
+                    _buildCategoryChip(context, 'spreadsheets', 'Sheets'),
+                    _buildCategoryChip(context, 'presentations', 'Slides'),
+                    _buildCategoryChip(context, 'code', 'Code'),
+                    _buildCategoryChip(context, 'other', 'Other'),
+                  ],
                 ),
               ),
-              onChanged: (v) => setState(() => _searchQuery = v),
             ),
           ),
 
-          // Compact category chips
-          SizedBox(
-            height: 36,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildCategoryChip(context, 'all', 'All', Icons.apps),
-                _buildCategoryChip(context, 'pdf', 'PDF', Icons.picture_as_pdf),
-                _buildCategoryChip(context, 'documents', 'Docs', Icons.description),
-                _buildCategoryChip(context, 'spreadsheets', 'Sheets', Icons.table_chart),
-                _buildCategoryChip(context, 'presentations', 'Slides', Icons.slideshow),
-                _buildCategoryChip(context, 'code', 'Code', Icons.code),
-                _buildCategoryChip(context, 'other', 'Other', Icons.file_present),
-              ],
-            ),
-          ),
-
-          // Count + view toggle
           Padding(
-            padding: const EdgeInsets.only(top: 6, bottom: 4),
+            padding: const EdgeInsets.only(top: 4, bottom: 2),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${filteredFiles.length} ${_selectedCategory == 'all' ? 'documents' : _selectedCategory}',
+                  '${filteredFiles.length} ${_selectedCategory == 'all' ? 'items' : _selectedCategory}',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color:
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
+                if (_isSelecting && filteredFiles.isNotEmpty)
+                  GestureDetector(
+                    onTap: () => _selectAll(filteredFiles),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        _selectedFiles.length == filteredFiles.length
+                            ? 'Deselect all'
+                            : 'Select all',
+                        style:
+                            Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                      ),
+                    ),
+                  ),
                 IconButton(
-                  icon: Icon(isGridView ? Icons.grid_view : Icons.list, size: 20),
+                  icon:
+                      Icon(isGridView ? Icons.grid_view : Icons.list, size: 20),
                   onPressed: () {
-                    ref.read(gridViewPreferenceProvider.notifier).toggleViewMode();
+                    ref
+                        .read(gridViewPreferenceProvider.notifier)
+                        .toggleViewMode();
                   },
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints:
+                      const BoxConstraints(minWidth: 32, minHeight: 32),
                 ),
               ],
             ),
@@ -243,7 +450,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 32),
               child: Center(
                 child: Text(
-                  'No ${_selectedCategory == 'all' ? 'documents' : _selectedCategory} found',
+                  'No ${_selectedCategory == 'all' ? 'items' : _selectedCategory} found',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
@@ -253,10 +460,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
+                crossAxisCount: 2,
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
-                childAspectRatio: 0.62,
+                childAspectRatio: 0.714,
               ),
               itemCount: filteredFiles.length,
               itemBuilder: (context, index) =>
@@ -270,44 +477,104 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'all':
+        return Icons.apps;
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'documents':
+        return Icons.description;
+      case 'spreadsheets':
+        return Icons.table_chart;
+      case 'presentations':
+        return Icons.slideshow;
+      case 'code':
+        return Icons.code;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
   Widget _buildCategoryChip(
-      BuildContext context, String category, String label, IconData icon) {
+      BuildContext context, String category, String label) {
     final isActive = _selectedCategory == category;
+    final icon = _getCategoryIcon(category);
     return Padding(
       padding: const EdgeInsets.only(right: 6),
-      child: ChoiceChip(
-        label: Text(label, style: TextStyle(fontSize: 12)),
-        avatar: Icon(icon, size: 14),
-        selected: isActive,
-        onSelected: (selected) {
-          setState(() => _selectedCategory = category);
-        },
-        visualDensity: VisualDensity.compact,
-        padding: EdgeInsets.zero,
-        labelPadding: const EdgeInsets.only(left: 2, right: 6),
+      child: InkWell(
+        onTap: () => setState(() => _selectedCategory = category),
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isActive
+                ? Theme.of(context).colorScheme.secondaryContainer
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isActive
+                  ? Theme.of(context).colorScheme.secondary
+                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(icon, size: 14, color: isActive
+                  ? Theme.of(context).colorScheme.onSecondaryContainer
+                  : Theme.of(context).colorScheme.onSurfaceVariant),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.onSecondaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildFileGridItem(BuildContext context, RecentFile file) {
+    final isSelected = _selectedFiles.contains(file.id);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _openFile(file),
+        onTap: _isSelecting
+            ? () => _toggleFileSelection(file.id)
+            : () => _openFile(file),
+        onLongPress: () {
+          if (!_isSelecting) {
+            _enterSelectionMode(file.id);
+          }
+        },
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color:
-                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+              width: isSelected ? 2.0 : 1.0,
             ),
-            color: Theme.of(context).colorScheme.surface,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.15)
+                : Theme.of(context).colorScheme.surface,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Thumbnail section
               Expanded(
                 child: Stack(
                   children: [
@@ -341,7 +608,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                         );
                       },
                     ),
-                    // File type icon overlay (bottom right)
                     Positioned(
                       bottom: 8,
                       right: 8,
@@ -357,6 +623,42 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                         child: _getFileIcon(file.fileType, size: 16),
                       ),
                     ),
+                    if (_isSelecting)
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: AnimatedOpacity(
+                          opacity: _isSelecting ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surface
+                                      .withValues(alpha: 0.8),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.outline,
+                              ),
+                            ),
+                            child: isSelected
+                                ? Icon(
+                                    Icons.check,
+                                    size: 14,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -371,7 +673,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                         children: [
                           Text(
                             file.fileName,
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context)
                                 .textTheme
@@ -396,15 +698,19 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                         ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => _showFileActionBottomSheet(context, file),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(Icons.more_vert,
-                            size: 14,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    if (!_isSelecting)
+                      GestureDetector(
+                        onTap: () =>
+                            _showFileActionBottomSheet(context, file),
+                        child: Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: Icon(Icons.more_vert,
+                              size: 20,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -416,35 +722,79 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Widget _buildFileListItem(BuildContext context, RecentFile file) {
+    final isSelected = _selectedFiles.contains(file.id);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _openFile(file),
+          onTap: _isSelecting
+              ? () => _toggleFileSelection(file.id)
+              : () => _openFile(file),
+          onLongPress: () {
+            if (!_isSelecting) {
+              _enterSelectionMode(file.id);
+            }
+          },
           borderRadius: BorderRadius.circular(12),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .outline
-                    .withValues(alpha: 0.2),
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                width: isSelected ? 2.0 : 1.0,
               ),
-              color: Theme.of(context).colorScheme.surface,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.15)
+                  : Theme.of(context).colorScheme.surface,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                  // Thumbnail preview
+                  if (_isSelecting)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: AnimatedOpacity(
+                        opacity: _isSelecting ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.outline,
+                            ),
+                          ),
+                          child: isSelected
+                              ? Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary,
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
                   Consumer(
                     builder: (context, ref, _) {
                       final thumbnail = ref.watch(thumbnailProvider(file.id));
 
-                      // Watch generation to trigger and refresh when complete
-                      // (result is unused intentionally - just triggers watching)
                       // ignore: unused_local_variable
                       final generation =
                           ref.watch(generateAndCacheThumbnailProvider(
@@ -490,34 +840,41 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                           file.fileName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '${file.fileType.toUpperCase()} • ${file.formattedSize}',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                    fontSize: 11,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                                fontSize: 11,
+                              ),
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.more_vert,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    onPressed: () => _showFileActionBottomSheet(context, file),
-                    padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 40, minHeight: 40),
-                  ),
+                  if (!_isSelecting)
+                    IconButton(
+                      icon: Icon(Icons.more_vert,
+                          size: 18,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant),
+                      onPressed: () =>
+                          _showFileActionBottomSheet(context, file),
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
+                    ),
                 ],
               ),
             ),
@@ -635,8 +992,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   void _openFile(RecentFile file) {
     log.i('Opening file: ${file.fileName}');
+    final encodedPath = Uri.encodeComponent(file.filePath);
+    final encodedName = Uri.encodeComponent(file.fileName);
     context.push(
-        '${RouteNames.viewer}?path=${file.filePath}&name=${file.fileName}');
+        '${RouteNames.viewer}?path=$encodedPath&name=$encodedName');
   }
 
   void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
@@ -645,12 +1004,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Container(
@@ -665,14 +1024,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 ),
               ),
             ),
-            // Delete action
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: ListTile(
                 leading: const Icon(Icons.delete_outline,
                     color: Colors.red, size: 20),
-                title:
-                    const Text('Delete', style: TextStyle(color: Colors.red)),
+                title: const Text('Delete',
+                    style: TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
                   _softDeleteFile(file);
@@ -682,9 +1041,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // Duplicate action
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ListTile(
                 leading: const Icon(Icons.copy, size: 20),
                 title: const Text('Duplicate'),
@@ -696,9 +1055,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 dense: true,
               ),
             ),
-            // File info action
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ListTile(
                 leading: const Icon(Icons.info_outline, size: 20),
                 title: const Text('File info'),
@@ -835,7 +1194,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       final destPath = '$dir/$newName';
       final copied = await src.copy(destPath);
 
-      // Create recent file entry for the duplicated file
       final mutator = ref.read(recentFilesMutatorProvider);
       final newRecent = RecentFile(
         id: const Uuid().v4(),
@@ -869,7 +1227,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   Widget _buildSkeletonLoader() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
       children: List.generate(
         6,
         (index) => Padding(
@@ -890,7 +1248,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 }
 
-/// Helper widget to trigger thumbnail generation once via side effect
 class _ThumbnailPlaceholder extends ConsumerStatefulWidget {
   final RecentFile file;
 
@@ -905,7 +1262,6 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
   @override
   void initState() {
     super.initState();
-    // Trigger thumbnail generation once via side effect
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(generateAndCacheThumbnailProvider(
         (
@@ -942,18 +1298,17 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
                 Text(
                   widget.file.fileType.toUpperCase(),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color:
+                            Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],
             ),
           ),
         ),
-
       ],
     );
   }
-
 
   Widget _buildThumbnailIcon(String fileType) {
     IconData iconData;

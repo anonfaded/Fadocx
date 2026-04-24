@@ -90,46 +90,89 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     highlight.registerLanguage('json', hl_json_lang.json);
   }
 
-  static const Color _defaultSyntaxColor = Color(0xFFABB2BF);
+  static const Color _defaultDarkSyntaxColor = Color(0xFFABB2BF);
+  static const Color _defaultLightSyntaxColor = Color(0xFF383A42);
 
-  static const Map<String, Color> _syntaxColors = {
-    'keyword': Color(0xFFC678DD),
-    'selector-tag': Color(0xFFE06C75),
-    'addition': Color(0xFF98C379),
-    'built_in': Color(0xFF56B6C2),
-    'type': Color(0xFF56B6C2),
-    'title': Color(0xFF61AFEF),
-    'section': Color(0xFF61AFEF),
-    'attr': Color(0xFFD19A66),
-    'attribute': Color(0xFFD19A66),
-    'string': Color(0xFF98C379),
-    'regexp': Color(0xFF98C379),
-    'symbol': Color(0xFF56B6C2),
-    'variable': Color(0xFFE06C75),
-    'template-variable': Color(0xFFE06C75),
-    'link': Color(0xFF56B6C2),
-    'meta': Color(0xFF7F848E),
-    'comment': Color(0xFF7F848E),
-    'deletion': Color(0xFFE06C75),
-    'number': Color(0xFFD19A66),
-    'literal': Color(0xFFD19A66),
-    'params': Color(0xFFABB2BF),
-    'subst': Color(0xFFE06C75),
-    'tag': Color(0xFFE06C75),
-    'name': Color(0xFFE06C75),
-    'selector-id': Color(0xFF61AFEF),
-    'selector-class': Color(0xFFD19A66),
-    'selector-attr': Color(0xFFD19A66),
-    'selector-pseudo': Color(0xFFD19A66),
-    'property': Color(0xFFE06C75),
-    'operator': Color(0xFF56B6C2),
-    'punctuation': Color(0xFFABB2BF),
-    'bullet': Color(0xFFD19A66),
-    'code': Color(0xFF98C379),
-    'emphasis': Color(0xFFC678DD),
-    'strong': Color(0xFFD19A66),
-    'formula': Color(0xFF56B6C2),
-  };
+  static Map<String, Color> _getSyntaxColors(Brightness brightness) {
+    if (brightness == Brightness.dark) {
+      return const {
+        'keyword': Color(0xFFC678DD),
+        'selector-tag': Color(0xFFE06C75),
+        'addition': Color(0xFF98C379),
+        'built_in': Color(0xFF56B6C2),
+        'type': Color(0xFF56B6C2),
+        'title': Color(0xFF61AFEF),
+        'section': Color(0xFF61AFEF),
+        'attr': Color(0xFFD19A66),
+        'attribute': Color(0xFFD19A66),
+        'string': Color(0xFF98C379),
+        'regexp': Color(0xFF98C379),
+        'symbol': Color(0xFF56B6C2),
+        'variable': Color(0xFFE06C75),
+        'template-variable': Color(0xFFE06C75),
+        'link': Color(0xFF56B6C2),
+        'meta': Color(0xFF7F848E),
+        'comment': Color(0xFF7F848E),
+        'deletion': Color(0xFFE06C75),
+        'number': Color(0xFFD19A66),
+        'literal': Color(0xFFD19A66),
+        'params': Color(0xFFABB2BF),
+        'subst': Color(0xFFE06C75),
+        'tag': Color(0xFFE06C75),
+        'name': Color(0xFFE06C75),
+        'selector-id': Color(0xFF61AFEF),
+        'selector-class': Color(0xFFD19A66),
+        'selector-attr': Color(0xFFD19A66),
+        'selector-pseudo': Color(0xFFD19A66),
+        'property': Color(0xFFE06C75),
+        'operator': Color(0xFF56B6C2),
+        'punctuation': Color(0xFFABB2BF),
+        'bullet': Color(0xFFD19A66),
+        'code': Color(0xFF98C379),
+        'emphasis': Color(0xFFC678DD),
+        'strong': Color(0xFFD19A66),
+        'formula': Color(0xFF56B6C2),
+      };
+    }
+    return const {
+      'keyword': Color(0xFFA626A4),
+      'selector-tag': Color(0xFFE45649),
+      'addition': Color(0xFF50A14F),
+      'built_in': Color(0xFF0184BC),
+      'type': Color(0xFF0184BC),
+      'title': Color(0xFF4078F2),
+      'section': Color(0xFF4078F2),
+      'attr': Color(0xFF986801),
+      'attribute': Color(0xFF986801),
+      'string': Color(0xFF50A14F),
+      'regexp': Color(0xFF50A14F),
+      'symbol': Color(0xFF0184BC),
+      'variable': Color(0xFFE45649),
+      'template-variable': Color(0xFFE45649),
+      'link': Color(0xFF0184BC),
+      'meta': Color(0xFFA0A1A7),
+      'comment': Color(0xFFA0A1A7),
+      'deletion': Color(0xFFE45649),
+      'number': Color(0xFF986801),
+      'literal': Color(0xFF986801),
+      'params': Color(0xFF383A42),
+      'subst': Color(0xFFE45649),
+      'tag': Color(0xFFE45649),
+      'name': Color(0xFFE45649),
+      'selector-id': Color(0xFF4078F2),
+      'selector-class': Color(0xFF986801),
+      'selector-attr': Color(0xFF986801),
+      'selector-pseudo': Color(0xFF986801),
+      'property': Color(0xFFE45649),
+      'operator': Color(0xFF0184BC),
+      'punctuation': Color(0xFF383A42),
+      'bullet': Color(0xFF986801),
+      'code': Color(0xFF50A14F),
+      'emphasis': Color(0xFFA626A4),
+      'strong': Color(0xFF986801),
+      'formula': Color(0xFF0184BC),
+    };
+  }
 
   void _initializeContent() {
     _fullContent = widget.textContent ?? '';
@@ -207,10 +250,13 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     if (tokens.isEmpty) {
       return TextSpan(text: _lines[lineIndex], style: baseStyle);
     }
+    final brightness = Theme.of(context).brightness;
+    final colors = _getSyntaxColors(brightness);
+    final defaultColor = brightness == Brightness.dark ? _defaultDarkSyntaxColor : _defaultLightSyntaxColor;
     return TextSpan(
       style: baseStyle,
       children: tokens.map((t) {
-        final color = t.className != null ? (_syntaxColors[t.className] ?? _defaultSyntaxColor) : _defaultSyntaxColor;
+        final color = t.className != null ? (colors[t.className] ?? defaultColor) : defaultColor;
         return TextSpan(
           text: t.text,
           style: TextStyle(color: color),

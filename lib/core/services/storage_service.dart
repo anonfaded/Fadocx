@@ -8,6 +8,7 @@ class StorageService {
   static const String pdfsFolder = 'PDFs';
   static const String documentsFolder = 'Documents';
   static const String spreadsheetsFolder = 'Spreadsheets';
+  static const String codeFolder = 'Code';
   static const String presentationsFolder = 'Presentations';
   static const String imagesFolder = 'Images';
   static const String scansFolder = 'Scans';
@@ -79,10 +80,11 @@ class StorageService {
       case 'html':
       case 'md':
       case 'log':
-      case 'epub':
-      case 'ott':
       case 'json':
       case 'xml':
+        return codeFolder;
+      case 'epub':
+      case 'ott':
         return documentsFolder;
       case 'xlsx':
       case 'xls':
@@ -303,6 +305,7 @@ class StorageService {
     final categories = [
       pdfsFolder,
       spreadsheetsFolder,
+      codeFolder,
       documentsFolder,
       presentationsFolder,
       imagesFolder,

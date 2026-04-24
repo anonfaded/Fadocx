@@ -96,6 +96,21 @@ class ThumbnailGenerationService {
   static const int _readingWordsPerMinute = 200;
   static const double _compactHeaderHeight = 56.0;
 
+  static const ui.Color _lightPageBg = ui.Color(0xFFF8F6F1);
+  static const ui.Color _darkPageBg = ui.Color(0xFF1E1E2E);
+  static const ui.Color _lightText = ui.Color(0xFF2B2B2B);
+  static const ui.Color _darkText = ui.Color(0xFFCDD6F4);
+  static const ui.Color _lightCardBg = ui.Color(0xFFFBFCFA);
+  static const ui.Color _darkCardBg = ui.Color(0xFF181825);
+  static const ui.Color _lightGridLine = ui.Color(0xFFD6DDD2);
+  static const ui.Color _darkGridLine = ui.Color(0xFF45475A);
+  static const ui.Color _lightCellText = ui.Color(0xFF2C332F);
+  static const ui.Color _darkCellText = ui.Color(0xFFCDD6F4);
+  static const ui.Color _lightPlaceholderBg = ui.Color(0xFFF9FAF8);
+  static const ui.Color _darkPlaceholderBg = ui.Color(0xFF181825);
+  static const ui.Color _lightCaptionText = ui.Color(0xFF5D635F);
+  static const ui.Color _darkCaptionText = ui.Color(0xFFA6ADC8);
+
   static final Logger _log = Logger();
   static const TextStyle _previewHeaderMetaStyle = TextStyle(
     color: ui.Color(0xFFFDFDFD),
@@ -106,7 +121,8 @@ class ThumbnailGenerationService {
 
   static Future<Uint8List?> generateThumbnail(
       String filePath, String fileName, String fileType,
-      {ParsedDocumentEntity? cachedDocument}) async {
+      {ParsedDocumentEntity? cachedDocument,
+      ui.Brightness brightness = ui.Brightness.light}) async {
     try {
       final file = File(filePath);
       if (!file.existsSync()) {
@@ -120,25 +136,30 @@ class ThumbnailGenerationService {
         'pdf' => _generatePdfThumbnail(
             filePath,
             cachedDocument: cachedDocument,
+            brightness: ui.Brightness.light,
           ),
         'doc' || 'docx' || 'txt' || 'rtf' || 'odt' || 'java' || 'py' || 'sh' || 'html' || 'md' || 'log' || 'json' || 'xml' || 'ott' => _generateTextThumbnail(
             filePath,
             normalizedType,
             cachedDocument: cachedDocument,
+            brightness: brightness,
           ),
         'xls' || 'xlsx' || 'csv' || 'ods' => _generateSpreadsheetThumbnail(
             filePath,
             normalizedType,
             cachedDocument: cachedDocument,
+            brightness: brightness,
           ),
         'ppt' || 'pptx' || 'odp' || 'epub' || 'ods' => _generatePresentationThumbnail(
             filePath,
             normalizedType,
+            brightness: brightness,
           ),
         _ => _createPlaceholderThumbnail(
             label: normalizedType.toUpperCase(),
             accent: ThumbnailColors.gray,
             caption: fileName,
+            brightness: brightness,
           ),
       };
     } catch (e, st) {
@@ -152,6 +173,7 @@ class ThumbnailGenerationService {
     String filePath,
     String fileType, {
     ParsedDocumentEntity? cachedDocument,
+    ui.Brightness brightness = ui.Brightness.light,
   }) async {
     try {
       final accent = ThumbnailColors.pptOrange;
@@ -165,9 +187,9 @@ class ThumbnailGenerationService {
         final wc = cachedDocument.wordCount ?? 0;
         if (wc > 0) metaText += ' - ${wc}w';
       }
-      return _createSlideThumbnailCard(accent: accent, label: formatLabel, meta: metaText);
+      return _createSlideThumbnailCard(accent: accent, label: formatLabel, meta: metaText, brightness: brightness);
     } catch (e) {
-      return _createPlaceholderThumbnail(label: fileType.toUpperCase(), accent: ThumbnailColors.pptOrange, caption: fileType.toUpperCase());
+      return _createPlaceholderThumbnail(label: fileType.toUpperCase(), accent: ThumbnailColors.pptOrange, caption: fileType.toUpperCase(), brightness: brightness);
     }
   }
 
@@ -175,6 +197,7 @@ class ThumbnailGenerationService {
     required ColorRgb accent,
     required String label,
     required String meta,
+    ui.Brightness brightness = ui.Brightness.light,
   }) async {
     return _renderCanvas((canvas, size) {
       _paintShadowBackground(canvas, size, accent);
@@ -183,7 +206,8 @@ class ThumbnailGenerationService {
         ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
         const ui.Radius.circular(22),
       );
-      canvas.drawRRect(cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
+      final cardBg = brightness == ui.Brightness.dark ? _darkCardBg : _lightCardBg;
+      canvas.drawRRect(cardRect, ui.Paint()..color = cardBg);
 
       final headerHeight = _compactHeaderHeight;
       final headerRect = ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight);
@@ -239,6 +263,7 @@ class ThumbnailGenerationService {
   static Future<Uint8List?> _generatePdfThumbnail(
     String filePath, {
     ParsedDocumentEntity? cachedDocument,
+    ui.Brightness brightness = ui.Brightness.light,
   }) async {
     try {
       final result = await pdfChannel.invokeMethod<Map<dynamic, dynamic>>(
@@ -258,6 +283,7 @@ class ThumbnailGenerationService {
           label: 'PDF',
           accent: ThumbnailColors.pdfRed,
           caption: 'Unable to render preview',
+          brightness: brightness,
         );
       }
 
@@ -274,6 +300,7 @@ class ThumbnailGenerationService {
         pageCount: pageCount,
         wordCount: cachedDocument?.wordCount,
         lineCount: cachedDocument?.lineCount,
+        brightness: brightness,
       );
     } on PlatformException catch (e, st) {
       _log.e('PDF thumbnail render failed: ${e.code}',
@@ -286,6 +313,7 @@ class ThumbnailGenerationService {
       label: 'PDF',
       accent: ThumbnailColors.pdfRed,
       caption: 'Unable to render preview',
+      brightness: brightness,
     );
   }
 
@@ -294,6 +322,7 @@ class ThumbnailGenerationService {
     required int pageCount,
     int? wordCount,
     int? lineCount,
+    ui.Brightness brightness = ui.Brightness.light,
   }) async {
     final codec = await ui.instantiateImageCodec(pageBytes);
     final frame = await codec.getNextFrame();
@@ -307,8 +336,9 @@ class ThumbnailGenerationService {
           ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
           const ui.Radius.circular(22),
         );
+        final pdfCardBg = brightness == ui.Brightness.dark ? _darkCardBg : _lightCardBg;
         canvas.drawRRect(
-            cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
+            cardRect, ui.Paint()..color = pdfCardBg);
 
         final headerHeight = _compactHeaderHeight;
         final headerRect = ui.RRect.fromRectAndRadius(
@@ -360,6 +390,7 @@ class ThumbnailGenerationService {
     String filePath,
     String normalizedType, {
     ParsedDocumentEntity? cachedDocument,
+    ui.Brightness brightness = ui.Brightness.light,
   }) async {
     try {
       final fullText = cachedDocument?.searchableText.isNotEmpty == true
@@ -374,6 +405,7 @@ class ThumbnailGenerationService {
           label: normalizedType.toUpperCase(),
           accent: _accentForType(normalizedType),
           caption: 'No readable text found',
+          brightness: brightness,
         );
       }
 
@@ -384,6 +416,7 @@ class ThumbnailGenerationService {
           label: normalizedType.toUpperCase(),
           accent: _accentForType(normalizedType),
           caption: 'No readable text found',
+          brightness: brightness,
         );
       }
 
@@ -394,6 +427,7 @@ class ThumbnailGenerationService {
         accent: _accentForType(normalizedType),
         label: normalizedType.toUpperCase(),
         language: language,
+        brightness: brightness,
       );
     } catch (e, st) {
       _log.e('Text thumbnail parse failed for $filePath',
@@ -402,6 +436,7 @@ class ThumbnailGenerationService {
         label: normalizedType.toUpperCase(),
         accent: _accentForType(normalizedType),
         caption: 'Preview unavailable',
+        brightness: brightness,
       );
     }
   }
@@ -410,6 +445,7 @@ class ThumbnailGenerationService {
     String filePath,
     String normalizedType, {
     ParsedDocumentEntity? cachedDocument,
+    ui.Brightness brightness = ui.Brightness.light,
   }) async {
     try {
       final sheets = cachedDocument != null && cachedDocument.sheets.isNotEmpty
@@ -431,6 +467,7 @@ class ThumbnailGenerationService {
           label: normalizedType.toUpperCase(),
           accent: _accentForType(normalizedType),
           caption: 'No cells available',
+          brightness: brightness,
         );
       }
 
@@ -438,6 +475,7 @@ class ThumbnailGenerationService {
         sheets: sheets,
         accent: _accentForType(normalizedType),
         label: normalizedType.toUpperCase(),
+        brightness: brightness,
       );
     } catch (e, st) {
       _log.e('Spreadsheet thumbnail parse failed for $filePath',
@@ -446,6 +484,7 @@ class ThumbnailGenerationService {
         label: normalizedType.toUpperCase(),
         accent: _accentForType(normalizedType),
         caption: 'Preview unavailable',
+        brightness: brightness,
       );
     }
   }
@@ -545,6 +584,7 @@ class ThumbnailGenerationService {
     required ColorRgb accent,
     required String label,
     String? language,
+    ui.Brightness brightness = ui.Brightness.light,
   }) {
     return _renderCanvas((canvas, size) {
       _paintShadowBackground(canvas, size, accent);
@@ -553,8 +593,9 @@ class ThumbnailGenerationService {
         ui.Rect.fromLTWH(20, 20, size.width - 40, size.height - 40),
         const ui.Radius.circular(22),
       );
+      final pageBg = brightness == ui.Brightness.dark ? _darkPageBg : _lightPageBg;
       canvas.drawRRect(
-          pageRect, ui.Paint()..color = const ui.Color(0xFFF8F6F1));
+          pageRect, ui.Paint()..color = pageBg);
 
       final headerHeight = _compactHeaderHeight;
       final headerRect = ui.RRect.fromRectAndRadius(
@@ -592,8 +633,8 @@ class ThumbnailGenerationService {
           top: 134,
           maxWidth: size.width - 88,
           maxLines: 16,
-          baseStyle: const TextStyle(
-            color: ui.Color(0xFF2B2B2B),
+          baseStyle: TextStyle(
+            color: brightness == ui.Brightness.dark ? _darkText : _lightText,
             fontSize: 19,
             height: 1.28,
             fontWeight: FontWeight.w400,
@@ -608,8 +649,8 @@ class ThumbnailGenerationService {
           top: 134,
           maxWidth: size.width - 88,
           maxLines: 16,
-          style: const TextStyle(
-            color: ui.Color(0xFF2B2B2B),
+          style: TextStyle(
+            color: brightness == ui.Brightness.dark ? _darkText : _lightText,
             fontSize: 19,
             height: 1.28,
             fontWeight: FontWeight.w400,
@@ -672,6 +713,7 @@ class ThumbnailGenerationService {
     required List<dynamic> sheets,
     required ColorRgb accent,
     required String label,
+    ui.Brightness brightness = ui.Brightness.light,
   }) {
     return _renderCanvas((canvas, size) {
       _paintShadowBackground(canvas, size, accent);
@@ -680,8 +722,9 @@ class ThumbnailGenerationService {
         ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
         const ui.Radius.circular(22),
       );
+      final sheetCardBg = brightness == ui.Brightness.dark ? _darkCardBg : _lightCardBg;
       canvas.drawRRect(
-          cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
+          cardRect, ui.Paint()..color = sheetCardBg);
 
       final topBandRect = ui.RRect.fromRectAndRadius(
         ui.Rect.fromLTWH(18, 18, size.width - 36, _compactHeaderHeight),
@@ -719,12 +762,13 @@ class ThumbnailGenerationService {
       final totalRows = visibleRows.isEmpty ? 6 : visibleRows.length + 1;
       final rowHeight = gridHeight / totalRows;
 
+      final gridLineColor = brightness == ui.Brightness.dark ? _darkGridLine : _lightGridLine;
       final borderPaint = ui.Paint()
-        ..color = const ui.Color(0xFFD6DDD2)
+        ..color = gridLineColor
         ..style = ui.PaintingStyle.stroke
         ..strokeWidth = 1.0;
 
-      final headerFill = ui.Paint()..color = _uiColor(accent, alpha: 36);
+      final headerFill = ui.Paint()..color = _uiColor(accent, alpha: brightness == ui.Brightness.dark ? 20 : 36);
       canvas.drawRect(
         ui.Rect.fromLTWH(gridLeft, gridTop, gridWidth, rowHeight),
         headerFill,
@@ -802,8 +846,8 @@ class ThumbnailGenerationService {
             top: top,
             maxWidth: dataColWidth - 10,
             maxLines: 1,
-            style: const TextStyle(
-              color: ui.Color(0xFF2C332F),
+            style: TextStyle(
+              color: brightness == ui.Brightness.dark ? _darkCellText : _lightCellText,
               fontSize: 14,
               height: 1.15,
               fontWeight: FontWeight.w400,
@@ -819,6 +863,7 @@ class ThumbnailGenerationService {
     required String label,
     required ColorRgb accent,
     required String caption,
+    ui.Brightness brightness = ui.Brightness.light,
   }) {
     return _renderCanvas((canvas, size) {
       _paintShadowBackground(canvas, size, accent);
@@ -827,8 +872,9 @@ class ThumbnailGenerationService {
         ui.Rect.fromLTWH(26, 32, size.width - 52, size.height - 64),
         const ui.Radius.circular(26),
       );
+      final placeholderBg = brightness == ui.Brightness.dark ? _darkPlaceholderBg : _lightPlaceholderBg;
       canvas.drawRRect(
-          cardRect, ui.Paint()..color = const ui.Color(0xFFF9FAF8));
+          cardRect, ui.Paint()..color = placeholderBg);
 
       final accentPaint = ui.Paint()..color = _uiColor(accent);
       canvas.drawCircle(ui.Offset(size.width / 2, 178), 52, accentPaint);
@@ -851,8 +897,8 @@ class ThumbnailGenerationService {
         text: caption,
         top: 294,
         maxWidth: size.width - 100,
-        style: const TextStyle(
-          color: ui.Color(0xFF5D635F),
+        style: TextStyle(
+          color: brightness == ui.Brightness.dark ? _darkCaptionText : _lightCaptionText,
           fontSize: 18,
           fontWeight: FontWeight.w500,
           fontFamily: 'Ubuntu',

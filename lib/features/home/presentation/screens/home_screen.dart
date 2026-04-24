@@ -647,7 +647,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         onTap: () {
           log.i('Opening recent file: ${file.fileName}');
           context.push(
-              '${RouteNames.viewer}?path=${file.filePath}&name=${file.fileName}');
+              '${RouteNames.viewer}?path=${Uri.encodeComponent(file.filePath)}&name=${Uri.encodeComponent(file.fileName)}');
         },
         borderRadius: BorderRadius.circular(8),
         child: Container(
