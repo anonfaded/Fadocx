@@ -265,6 +265,40 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
     setState(() => _resizingCol = null);
   }
 
+  void _showEditDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(Icons.edit_outlined, color: Theme.of(ctx).colorScheme.primary),
+        title: const Text('Edit with Fadocx Engine'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Open this spreadsheet in the Fadocx rendering engine for a faithful visual preview of your document with full formatting, charts, and layout fidelity.'),
+            SizedBox(height: 16),
+            Text(
+              'Note: Interactive editing is coming in a future update. For now, you can view the document as it appears in desktop office suites.',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Not Now'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+            },
+            child: const Text('Coming Soon'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _vRowController.removeListener(_syncRowToData);
@@ -402,6 +436,8 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
             _zoomBtn(Icons.add, _zoomIn, c),
             const SizedBox(width: 6),
             _zoomBtn(Icons.restart_alt, _resetZoom, c),
+            const SizedBox(width: 8),
+            _zoomBtn(Icons.edit_outlined, _showEditDialog, c),
             const Spacer(),
             Text(
               '${widget.sheet.name}  •  ${_rows.length}R × ${_headers.length}C',

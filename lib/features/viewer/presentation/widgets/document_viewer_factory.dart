@@ -6,7 +6,6 @@ import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
 import 'professional_sheet_viewer.dart';
 import 'modern_pdf_viewer.dart';
 import 'text_document_viewer.dart';
-import 'rich_document_viewer.dart';
 
 /// Returns embedded viewer content only.
 /// The owning screen provides the outer Scaffold/AppBar.
@@ -28,13 +27,7 @@ class DocumentViewerFactory {
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
-      'DOCX' ||
-      'DOC' ||
-      'TXT' ||
-      'RTF' ||
-      'ODT' =>
-        _buildTextViewer(document, onTap: onTap),
-      'PPT' || 'PPTX' || 'ODP' => _buildPptViewer(document),
+      'TXT' => _buildTextViewer(document, onTap: onTap),
       _ => _buildUnsupportedViewer(document.format),
     };
   }
@@ -137,23 +130,6 @@ class DocumentViewerFactory {
     ParsedDocumentEntity document, {
     VoidCallback? onTap,
   }) {
-    if (document.hasRichDocument &&
-        (document.format == 'DOCX' ||
-            document.format == 'DOC' ||
-            document.format == 'RTF' ||
-            document.format == 'ODT')) {
-      return GestureDetector(
-        onTap: onTap,
-        child: RichDocumentViewer(
-          documentBlocks: document.documentBlocks,
-          plainTextContent: document.plainTextContent,
-          parseWarnings: document.parseWarnings,
-          fidelityLevel: document.fidelityLevel,
-          onTap: onTap,
-        ),
-      );
-    }
-
     final textContent = document.searchableText;
 
     return GestureDetector(
@@ -162,120 +138,6 @@ class DocumentViewerFactory {
         textContent: textContent,
         onTap: onTap,
       ),
-    );
-  }
-
-  static Widget _buildPptViewer(ParsedDocumentEntity document) {
-    // Coming Soon: PPT/PPTX/ODP viewing requires LibreOffice integration
-    // This is planned for a future update
-    return _buildComingSoonViewer(
-      format: document.format,
-      icon: Icons.slideshow,
-      description:
-          'PowerPoint and OpenDocument presentations will be supported in a future update.',
-    );
-  }
-
-  static Widget _buildComingSoonViewer({
-    required String format,
-    required IconData icon,
-    required String description,
-  }) {
-    return Builder(
-      builder: (context) {
-        final theme = Theme.of(context);
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withAlpha(50),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 64,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  '$format Viewer',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.schedule,
-                        size: 16,
-                        color: theme.colorScheme.onSecondaryContainer,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Coming Soon',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: theme.colorScheme.onSecondaryContainer,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  description,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                FilledButton.tonalIcon(
-                  onPressed: () {
-                    // Show feature request dialog or roadmap
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Feature Request'),
-                        content: const Text(
-                          'PowerPoint viewing is on our roadmap! '
-                          'We\'re working on integrating LibreOffice for professional presentation viewing.',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Got it'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.info_outline),
-                  label: const Text('Learn More'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 

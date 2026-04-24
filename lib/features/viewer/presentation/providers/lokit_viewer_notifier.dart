@@ -19,6 +19,7 @@ class LOKitViewerState {
   final int renderedPart;
   final double renderedZoom;
   final Map<int, Uint8List> preloadedPages;
+  final bool isTextDocument;
 
   const LOKitViewerState({
     this.isInitialized = false,
@@ -36,6 +37,7 @@ class LOKitViewerState {
     this.renderedPart = -1,
     this.renderedZoom = 0,
     this.preloadedPages = const {},
+    this.isTextDocument = false,
   });
 
   LOKitViewerState copyWith({
@@ -54,6 +56,7 @@ class LOKitViewerState {
     int? renderedPart,
     double? renderedZoom,
     Map<int, Uint8List>? preloadedPages,
+    bool? isTextDocument,
     bool clearError = false,
     bool clearImage = false,
   }) {
@@ -73,6 +76,7 @@ class LOKitViewerState {
       renderedPart: renderedPart ?? this.renderedPart,
       renderedZoom: renderedZoom ?? this.renderedZoom,
       preloadedPages: preloadedPages ?? this.preloadedPages,
+      isTextDocument: isTextDocument ?? this.isTextDocument,
     );
   }
 }
@@ -123,11 +127,16 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
         state = state.copyWith(isLoading: false, error: 'Failed to load document');
         return false;
       }
-      final parts = (info['parts'] as int?) ?? 1;
+      final type = (info['type'] as int?) ?? 0;
+      final isText = type == 0;
       final width = (info['width'] as int?) ?? 0;
       final height = (info['height'] as int?) ?? 0;
-      final type = (info['type'] as int?) ?? 0;
       final tName = (info['typeName'] as String?) ?? LOKitService.getDocTypeName(type);
+      int parts = (info['parts'] as int?) ?? 1;
+      if (isText && parts == 1) {
+        final pageCount = await LOKitService.getPageCount();
+        if (pageCount > 0) parts = pageCount;
+      }
       state = state.copyWith(
         isLoading: false,
         totalParts: parts,
@@ -136,6 +145,7 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
         documentType: type,
         typeName: tName,
         currentPart: 0,
+        isTextDocument: isText,
       );
       return true;
     } catch (e) {
@@ -149,7 +159,7 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
     if (state.isRendering) return;
     final part = state.currentPart;
     final preloaded = getPreloadedPage(part);
-    if (preloaded != null) {
+    if (preloaded != null && !state.isTextDocument) {
       state = state.copyWith(
         isRendering: false,
         currentPageImage: preloaded,
@@ -160,12 +170,22 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
     }
     state = state.copyWith(isRendering: true);
     try {
-      final pngBytes = await LOKitService.renderPageHighQuality(
+      final Uint8List? pngBytes;
+      if (state.isTextDocument) {
+        pngBytes = await LOKitService.renderTextPage(
+          page: part,
+          maxWidth: maxWidth,
+          maxHeight: maxHeight,
+          scale: 2.0,
+        );
+      } else {
+        pngBytes = await LOKitService.renderPageHighQuality(
         part: part,
         maxWidth: maxWidth,
         maxHeight: maxHeight,
         scale: 2.0,
       );
+      }
       if (pngBytes != null) {
         final pages = Map<int, Uint8List>.from(state.preloadedPages);
         pages[part] = pngBytes;
@@ -175,7 +195,7 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
           renderedPart: part,
           preloadedPages: pages,
         );
-        preloadAdjacentPages();
+        if (!state.isTextDocument) preloadAdjacentPages();
       } else {
         state = state.copyWith(isRendering: false, error: 'Rendering returned null');
       }

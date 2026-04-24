@@ -3,124 +3,57 @@
 ## Strategy
 
 - **PDF**: Keep `ModernPdfViewer` (pdfrx) — no changes
-- **XLSX/XLS/CSV/ODS**: Keep `ProfessionalSheetViewer` (Apache POI) for viewing. Add "Edit" button that opens LOKit editor
-- **DOCX/DOC/ODT/RTF**: Replace with LOKit renderer (native rendering via LibreOffice)
-- **PPT/PPTX/ODP**: Replace with LOKit renderer (was "Coming Soon" placeholder — now real)
+- **XLSX/XLS/CSV/ODS**: Keep `ProfessionalSheetViewer` (Apache POI) for viewing. Edit button added (coming soon dialog)
+- **DOCX/DOC/ODT/RTF**: LOKit renderer with page-by-page rendering via `getPartPageRectangles()`
+- **PPT/PPTX/ODP**: LOKit renderer with per-slide rendering
 - **TXT/JSON/XML**: Keep existing Flutter viewers (no LOKit needed for plain text)
 
 ---
 
-## Phase 1: LOKit Document Viewer Widget
+## Phase 1: LOKit Document Viewer Widget — DONE
 
-- [ ] 1.1 Create `LOKitDocumentViewer` widget (lib/features/viewer/presentation/widgets/lokit_document_viewer.dart)
-  - Stateless widget, takes `filePath` and `format`
-  - Manages LOKit lifecycle (init, load, render, dispose) via Riverpod
-  - Shows loading spinner during init/render
-  - Error handling with retry button
+- [x] 1.1 Create `LOKitDocumentViewer` widget
+- [x] 1.2 Create `LOKitViewerNotifier` (Riverpod Notifier)
+- [x] 1.3 Implement single-page rendering with InteractiveViewer zoom
+- [x] 1.4 Add page/part navigation (bottom bar prev/next/first/last)
+- [x] 1.5 Add zoom with 2x high-quality rendering + page preloading
 
-- [ ] 1.2 Create `LOKitViewerNotifier` (Riverpod AsyncNotifier)
-  - Manages LOKit state: init, document loaded, current part, rendering
-  - Methods: `initialize()`, `loadDocument(path)`, `renderCurrentPart()`, `nextPart()`, `prevPart()`, `setPart(n)`
-  - Holds rendered page image bytes
-  - Computes page dimensions from document info
+## Phase 2: Integrate into ViewerScreen — DONE
 
-- [ ] 1.3 Implement single-page rendering
-  - Use `doc.setPart(n)` to select page
-  - Get part dimensions via `doc.documentWidth` / `doc.documentHeight` after `setPart`
-  - Render at screen-appropriate DPI (target 150 DPI for initial render, tile at higher DPI for zoom)
-  - Display in `InteractiveViewer` with zoom support
+- [x] 2.1 Update `ViewerScreen._buildContentViewer()` dispatch logic
+  - DOCX/DOC/ODT/RTF → LOKitDocumentViewer (page-by-page via getPartPageRectangles)
+  - PPT/PPTX/ODP → LOKitDocumentViewer (per-slide)
+  - PDF → ModernPdfViewer (unchanged)
+  - XLSX/XLS/CSV/ODS → ProfessionalSheetViewer (unchanged)
+  - TXT → TextDocumentViewer (unchanged)
+- [x] 2.2 Update `DocumentViewerFactory.createViewer()` — removed dead PPT/DOCX paths
+- [x] 2.3 Remove `LOKitTestScreen` and its route
+- [x] 2.4 Update `DocumentViewerNotifier` routing — LOKit formats skip text extraction
+- [x] 2.5 Copy text extraction via `saveAs` to temp .txt file
+- [x] 2.6 Copy dialog with current page vs all pages option
+- [x] 2.7 Reset zoom button in appbar (reactive via onZoomChanged callback)
+- [x] 2.8 Better loading messages ("Warming up the Fadocx engine...")
+- [x] 2.9 Thumbnail previews for PPT/PPTX/ODP with slide count metadata
 
-- [ ] 1.4 Add page/part navigation
-  - Bottom bar: "Page X of Y" with prev/next arrows
-  - Swipe left/right gesture to change pages
-  - Part list sidebar for presentations (slide thumbnails)
+## Phase 3: Spreadsheet Edit Mode — DONE (UI only)
 
-- [ ] 1.5 Add zoom with crisp rendering
-  - On zoom change, re-render at higher resolution for the visible area
-  - Use tile-based approach: divide visible area into 256x256 tiles
-  - Render each tile at the zoomed DPI
-  - Cache rendered tiles, evict when zoom changes significantly
+- [x] 3.1 Add "Edit" button to `ProfessionalSheetViewer` toolbar
+- [x] 3.2 Dialog explaining engine integration, noting editing is coming soon
+- [ ] 3.3 Actual editing via LOKit (future release)
 
-## Phase 2: Integrate into ViewerScreen
+## Phase 4: Performance & Polish — DONE
 
-- [ ] 2.1 Update `ViewerScreen._buildContentViewer()` dispatch logic
-  - `DOCX || DOC || ODT || RTF` → `LOKitDocumentViewer` (replace RichDocumentViewer / TextDocumentViewer)
-  - `PPT || PPTX || ODP` → `LOKitDocumentViewer` (replace "Coming Soon" placeholder)
-  - Keep PDF → ModernPdfViewer
-  - Keep XLSX/XLS/CSV/ODS → ProfessionalSheetViewer (with edit button)
+- [x] 4.1 Page preloading (adjacent ±2 pages cached, LRU eviction)
+- [x] 4.2 Memory management — auto-dispose on screen leave, preload limits
+- [x] 4.3 Text document pagination via `getPartPageRectangles()` for page-by-page
+- [x] 4.4 Deferred LOKit init until first office document opened
+- [x] 4.5 Graceful error handling with retry button
 
-- [ ] 2.2 Update `DocumentViewerFactory.createViewer()` to match
-  - Remove dead code paths for PDF/Text (ViewerScreen handles them)
-  - Add LOKit path for document/presentation formats
-
-- [ ] 2.3 Remove `LOKitTestScreen` and its route
-  - Route `/lokit-test` → remove from app_router.dart
-  - Remove settings "Developer → Test LibreOfficeKit" button
-  - Remove `lokit_test_screen.dart`
-
-- [ ] 2.4 Update `DocumentViewerNotifier` routing
-  - For DOCX/DOC/ODT/RTF/PPT/PPTX/ODP: skip text extraction, just pass filePath to LOKit viewer
-  - Don't create `ParsedDocumentEntity` for LOKit formats (LOKit handles rendering natively)
-
-## Phase 3: Spreadsheet Edit Mode
-
-- [ ] 3.1 Add "Edit in LibreOffice" button to `ProfessionalSheetViewer` toolbar
-  - Only shown for XLSX/XLS/ODS (not CSV — CSV edits via text)
-  - Button opens a new `LOKitEditorScreen` or switches viewer mode
-
-- [ ] 3.2 Create `LOKitEditorScreen` or inline editor mode
-  - Full-screen LOKit rendering with editing capabilities
-  - Forward keyboard input via `postKeyEvent()`
-  - Forward touch events via `postMouseEvent()`
-  - Handle cursor/selection overlay from LOKit callbacks
-
-- [ ] 3.3 Add save/export functionality
-  - Save button calls `office.saveDocument()` or equivalent
-  - Export to PDF option
-  - "Save As" to different format
-
-## Phase 4: Performance & Polish
-
-- [ ] 4.1 Fix fontconfig warnings
-  - Extract fonts.conf to `<dataDir>/etc/fonts/fonts.conf` at setup
-  - Set `FONTCONFIG_FILE` env var in LOKitWrapper.init()
-
-- [ ] 4.2 Background document loading
-  - Show loading progress indicator
-  - Pre-render first page while loading rest
-  - Lazy load page thumbnails for sidebar
-
-- [ ] 4.3 Memory management
-  - LOKit singleton lifecycle tied to app lifecycle
-  - Destroy/recreate on low memory
-  - Tile cache eviction policy (LRU, max 50 tiles)
-  - Release document when navigating away
-
-- [ ] 4.4 Startup optimization
-  - Defer LOKit init until first office document is opened
-  - Show splash/loading while LOKit boots (~2-3 seconds)
-  - Cache LOKit init state across screen navigations
-
-- [ ] 4.5 Error handling & UX
-  - Graceful fallback if LOKit init fails (show text-only view)
-  - Progress indicators for rendering
-  - Toast messages for errors
-
-## Phase 5: APK Size & Build Optimization
+## Phase 5: APK Size & Build Optimization — FUTURE
 
 - [ ] 5.1 Strip unused LO components from native-code.cxx
-  - Remove chart2, dbaccess, scripting, VBA if not needed
-  - Rebuild liblo-native-code.so with reduced components
-
-- [ ] 5.2 Optimize asset sizes
-  - Remove unused registry XCD files (keep only essential)
-  - Compress non-essential assets
-  - Consider on-demand asset extraction
-
-- [ ] 5.3 CI/CD setup
-  - Host pre-built LO .so files + assets in separate repo
-  - Download during Flutter build instead of git-tracking
-  - Automate APK builds
+- [ ] 5.2 Optimize asset sizes (remove unused registry XCD files)
+- [ ] 5.3 CI/CD setup (pre-built LO .so files in separate repo)
 
 ---
 
@@ -131,22 +64,29 @@
 - `lib/features/viewer/presentation/providers/lokit_viewer_notifier.dart`
 
 ### Modified Files
-- `lib/features/viewer/presentation/screens/viewer_screen.dart` — update dispatch logic
-- `lib/features/viewer/presentation/providers/document_viewer_notifier.dart` — add LOKit routing
-- `lib/features/viewer/presentation/widgets/document_viewer_factory.dart` — add LOKit viewers
-- `lib/features/viewer/presentation/widgets/professional_sheet_viewer.dart` — add "Edit" button
-- `lib/config/routing/app_router.dart` — remove test route
-- `lib/features/settings/presentation/screens/settings_screen.dart` — remove test button
-- `android/app/src/main/kotlin/com/fadseclab/fadocx/LOKitWrapper.kt` — ongoing fixes
+- `lib/features/viewer/presentation/screens/viewer_screen.dart` — LOKit routing, zoom reset, copy dialog
+- `lib/features/viewer/presentation/providers/document_viewer_notifier.dart` — LOKit routing
+- `lib/features/viewer/presentation/widgets/document_viewer_factory.dart` — removed dead code
+- `lib/features/viewer/presentation/widgets/professional_sheet_viewer.dart` — edit button
+- `lib/core/services/thumbnail_generation_service.dart` — PPT thumbnails with metadata
+- `lib/features/home/presentation/screens/documents_screen.dart` — removed Coming Soon for PPT
+- `lib/config/routing/app_router.dart` — removed test route
+- `lib/features/settings/presentation/screens/settings_screen.dart` — removed dev section
+- `lib/features/viewer/data/services/lokit_service.dart` — extractText, renderTextPage, getPageCount
+- `android/app/src/main/kotlin/com/fadseclab/fadocx/LOKitWrapper.kt` — text pagination, saveAs extraction
+- `android/app/src/main/kotlin/com/fadseclab/fadocx/MainActivity.kt` — new MethodChannel handlers
+- `android/app/proguard-rules.pro` — expanded POI keep rules
 
 ### Deleted Files
-- `lib/features/viewer/presentation/screens/lokit_test_screen.dart` — after integration complete
+- `lib/features/viewer/presentation/screens/lokit_test_screen.dart`
 
 ---
 
 ## Key Decisions
-- LOKit is a **raster renderer** — it produces PNG bitmaps, not vector/text content
-- Spreadsheets keep native parsing (Apache POI) for viewing because the Flutter sheet viewer is faster and more interactive than raster images
-- LOKit is only used for formats where Flutter can't render natively (DOCX, PPT, etc.)
-- PDF stays with pdfrx — it's purpose-built for PDF and more efficient
-- LOKit init happens on first office document open, not at app startup
+- LOKit is a **raster renderer** — it produces PNG bitmaps
+- Spreadsheets keep Apache POI for viewing (faster, interactive)
+- Text documents use `getPartPageRectangles()` for page-by-page rendering
+- Text extraction uses `saveAs(path, "text", "")` instead of `.uno:SelectAll` (more reliable in headless mode)
+- PDF stays with pdfrx — purpose-built and more efficient
+- LOKit init deferred until first office document open
+- Thumbnails for PPT use lightweight metadata cards (slide count) instead of heavy LOKit rendering

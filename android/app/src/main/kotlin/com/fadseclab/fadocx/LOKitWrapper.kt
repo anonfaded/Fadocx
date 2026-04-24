@@ -188,13 +188,66 @@ UserInstallation=file://$cacheDir/lo_user
     }
 
 
+    fun getPartPageRectangles(): String? {
+        synchronized(syncLock) {
+            val doc = document ?: return null
+            return try { doc.partPageRectangles } catch (e: Exception) { null }
+        }
+    }
+
+    fun getPageCount(): Int {
+        synchronized(syncLock) {
+            val doc = document ?: return 0
+            val rects = try { doc.partPageRectangles } catch (e: Exception) { null } ?: return doc.parts
+            if (doc.documentType == Document.DOCTYPE_TEXT) {
+                return rects.trim().split("\s+".toRegex()).size / 4
+            }
+            return doc.parts
+        }
+    }
+
+    fun renderTextPage(pageIndex: Int, maxWidth: Int, maxHeight: Int, scale: Float): ByteArray? {
+        synchronized(syncLock) {
+            val doc = document ?: return null
+            if (doc.documentType != Document.DOCTYPE_TEXT) return null
+            try {
+                val rects = doc.partPageRectangles ?: return null
+                val tokens = rects.trim().split("\s+".toRegex())
+                if (tokens.size < (pageIndex + 1) * 4) return null
+                val baseIdx = pageIndex * 4
+                val pageX = tokens[baseIdx].toDouble().toInt()
+                val pageY = tokens[baseIdx + 1].toDouble().toInt()
+                val pageW = tokens[baseIdx + 2].toDouble().toInt()
+                val pageH = tokens[baseIdx + 3].toDouble().toInt()
+                if (pageW <= 0 || pageH <= 0) return null
+                val ratio = minOf(maxWidth.toDouble() / pageW, maxHeight.toDouble() / pageH) * scale
+                val renderW = (pageW * ratio).toInt().coerceAtLeast(1)
+                val renderH = (pageH * ratio).toInt().coerceAtLeast(1)
+                val buffer = ByteBuffer.allocateDirect(renderW * renderH * 4) ?: return null
+                doc.paintTile(buffer, renderW, renderH, pageX, pageY, pageW, pageH)
+                val bitmap = Bitmap.createBitmap(renderW, renderH, Bitmap.Config.ARGB_8888)
+                buffer.rewind()
+                bitmap.copyPixelsFromBuffer(buffer)
+                val stream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
+                bitmap.recycle()
+                return stream.toByteArray()
+            } catch (e: Exception) {
+                Log.e(TAG, "renderTextPage failed for page $pageIndex", e)
+                return null
+            }
+        }
+    }
+
     fun extractText(): String? {
         synchronized(syncLock) {
             val doc = document ?: return null
             try {
-                doc.postUnoCommand(".uno:SelectAll", "", false)
-                val text = doc.getTextSelection("text/plain;charset=utf-8")
-                doc.resetSelection()
+                val tempFile = File.createTempFile("lokit_text_", ".txt")
+                tempFile.deleteOnExit()
+                doc.saveAs(tempFile.absolutePath, "text", "")
+                val text = tempFile.readText()
+                tempFile.delete()
                 return text
             } catch (e: Exception) {
                 Log.e(TAG, "extractText failed", e)
@@ -208,9 +261,11 @@ UserInstallation=file://$cacheDir/lo_user
             val doc = document ?: return null
             try {
                 doc.setPart(part)
-                doc.postUnoCommand(".uno:SelectAll", "", false)
-                val text = doc.getTextSelection("text/plain;charset=utf-8")
-                doc.resetSelection()
+                val tempFile = File.createTempFile("lokit_text_", ".txt")
+                tempFile.deleteOnExit()
+                doc.saveAs(tempFile.absolutePath, "text", "")
+                val text = tempFile.readText()
+                tempFile.delete()
                 return text
             } catch (e: Exception) {
                 Log.e(TAG, "extractPartText failed for part $part", e)
