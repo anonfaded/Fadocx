@@ -121,12 +121,18 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
           log.d('Routing to parseODT');
           document = await repository.parseODT(_filePath);
 
-        // Presentation formats (PPT, PPTX, ODP - all require LibreOffice, Coming Soon)
+        // Presentation formats - rendered natively by LOKit
         case 'ppt':
         case 'pptx':
         case 'odp':
-          log.d('Routing to parsePPT');
-          document = await repository.parsePPT(_filePath);
+          log.d('Presentation format - creating stub entity for LOKit viewer');
+          document = ParsedDocumentEntity(
+            format: extension.toUpperCase(),
+            sheets: const [],
+            sheetCount: 0,
+            parsedAt: DateTime.now(),
+            sourceFilePath: _filePath,
+          );
 
         case 'pdf':
           log.d('Routing to PDF viewer');

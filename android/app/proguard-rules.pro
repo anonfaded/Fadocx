@@ -5,11 +5,11 @@
 -keep class com.fadseclab.fadocx.NativeDocumentParser { *; }
 -keep class com.fadseclab.fadocx.PdfTextExtractor { *; }
 
-# Apache POI - Surgical keep to reduce class load time
--keep class org.apache.poi.ss.usermodel.WorkbookFactory { *; }
--keep class org.apache.poi.ss.usermodel.CellType { *; }
--keep class org.apache.poi.hssf.usermodel.HSSFWorkbook { *; }
--keep class org.apache.poi.hwpf.** { *; }
+# Apache POI - keep all (uses heavy reflection + XMLBeans codegen)
+-keep class org.apache.poi.** { *; }
+-keep class org.apache.xmlbeans.** { *; }
+-keep class org.openxmlformats.** { *; }
+-keep class schemaorg_apache_xmlbeans.** { *; }
 
 # PDFBox
 -keep class com.tom_roush.pdfbox.** { *; }
@@ -30,3 +30,8 @@
 
 -dontwarn com.google.android.play.core.**
 -dontwarn io.flutter.embedding.android.FlutterPlayStoreSplitApplication
+
+# LibreOfficeKit
+-keep class org.libreoffice.kit.** { *; }
+-keep class com.fadseclab.fadocx.LOKitWrapper { *; }
+-dontwarn org.libreoffice.**

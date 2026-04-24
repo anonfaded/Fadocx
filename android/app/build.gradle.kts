@@ -26,6 +26,12 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
+        }
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.fadseclab.fadocx"
@@ -80,6 +86,16 @@ android {
                 "org/bouncycastle/pqc/**"
             )
         }
+    }
+
+    aaptOptions {
+        noCompress += listOf(
+            "rdb", "rc", "xcu", "xcs", "xcl", "xcsa", "xcul", "xcd",
+            "xslt", "xml", "py", "ttf", "otf", "ttc",
+            "dat", "res", "zip", "jar", "class", "txt",
+            "conf", "cfg", "svg", "css", "ui", "dtd",
+            "sor", "sample", "lm", "mod", ""
+        )
     }
 }
 

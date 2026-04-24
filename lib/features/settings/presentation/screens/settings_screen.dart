@@ -162,6 +162,16 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ]),
               const SizedBox(height: 24),
+              _buildSectionHeader(context, 'Developer'),
+              _buildSettingsGroup(context, [
+                _SettingsRow(
+                  icon: Icons.science_outlined,
+                  title: 'Test LibreOfficeKit',
+                  value: 'LOKit Spike',
+                  onTap: () => context.push(RouteNames.lokitTest),
+                ),
+              ]),
+              const SizedBox(height: 24),
               _buildSectionHeader(context, 'Danger Zone', color: Colors.red),
               _buildDangerGroup(context, [
                 _DangerRow(
