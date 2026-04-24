@@ -1,0 +1,12 @@
+[Bootstrap]
+BRAND_BASE_DIR=file:///assets
+BRAND_INI_DIR=file:///assets/program
+BRAND_SHARE_SUBDIR=share
+BRAND_SHARE_RESOURCE_SUBDIR=program/resource
+CONFIGURATION_LAYERS=xcsxcu:${BRAND_BASE_DIR}/share/registry res:${BRAND_BASE_DIR}/share/registry
+LO_LIB_DIR=file:///assets/program
+LO_JAVA_DIR=file:///assets/program/classes
+URE_BIN_DIR=file:///assets/ure/bin/dir/nothing-here
+URE_MORE_JAVA_CLASSPATH_URLS=
+URE_MORE_SERVICES=<$ORIGIN/services>*
+URE_MORE_TYPES=<$ORIGIN/types>*

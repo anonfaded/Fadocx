@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.40.0 -->
+<interface domain="sm">
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAdjustment" id="adjustment_cols">
+    <property name="lower">1</property>
+    <property name="upper">10</property>
+    <property name="value">1</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_rows">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="value">3</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkListStore" id="matrixmodel">
+    <columns>
+      <!-- column-name 1 -->
+      <column type="gchararray"/>
+      <!-- column-name 2 -->
+      <column type="gchararray"/>
+      <!-- column-name 3 -->
+      <column type="gchararray"/>
+      <!-- column-name 4 -->
+      <column type="gchararray"/>
+      <!-- column-name 5 -->
+      <column type="gchararray"/>
+      <!-- column-name 6 -->
+      <column type="gchararray"/>
+      <!-- column-name 7 -->
+      <column type="gchararray"/>
+      <!-- column-name 8 -->
+      <column type="gchararray"/>
+      <!-- column-name 9 -->
+      <column type="gchararray"/>
+      <!-- column-name 10 -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="gchararray"/>
+      <!-- column-name weight1 -->
+      <column type="gint"/>
+      <!-- column-name weight2 -->
+      <column type="gint"/>
+      <!-- column-name weight3 -->
+      <column type="gint"/>
+      <!-- column-name weight4 -->
+      <column type="gint"/>
+      <!-- column-name weight5 -->
+      <column type="gint"/>
+      <!-- column-name weight6 -->
+      <column type="gint"/>
+      <!-- column-name weight7 -->
+      <column type="gint"/>
+      <!-- column-name weight8 -->
+      <column type="gint"/>
+      <!-- column-name weight9 -->
+      <column type="gint"/>
+      <!-- column-name weight10 -->
+      <column type="gint"/>
+      <!-- column-name sensitive1 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive2 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive3 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive4 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive5 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive6 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive7 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive8 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive9 -->
+      <column type="gboolean"/>
+      <!-- column-name sensitive10 -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
+  <object class="GtkDialog" id="MatrixEditor">
+    <property name="width-request">800</property>
+    <property name="height-request">600</property>
+    <property name="can-focus">False</property>
+    <property name="border-width">6</property>
+    <property name="title" translatable="yes" context="matrixeditor|MatrixEditorDialog">Matrix Editor</property>
+    <property name="type-hint">dialog</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog-vbox3">
+        <property name="can-focus">False</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
+        <property name="hexpand">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area3">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="button_ok">
+                <property name="label" translatable="yes" context="stock">_OK</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="can-default">True</property>
+                <property name="has-default">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_cancel">
+                <property name="label" translatable="yes" context="stock">_Cancel</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="can-default">True</property>
+                <property name="has-default">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack-type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="spacing">24</property>
+            <child>
+              <object class="GtkFrame">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+                <property name="valign">start</property>
+                <property name="margin-start">12</property>
+                <property name="margin-top">6</property>
+                <property name="label-xalign">0</property>
+                <property name="shadow-type">none</property>
+                <child>
+                  <!-- n-columns=2 n-rows=7 -->
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-top">6</property>
+                    <property name="row-spacing">3</property>
+                    <property name="column-spacing">6</property>
+                    <child>
+                      <object class="GtkLabel" id="label_columns">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes" context="matrixeditor|Columns">Columns:</property>
+                        <accessibility>
+                          <relation type="label-for" target="num_cols"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="num_cols">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
+                        <property name="max-width-chars">2</property>
+                        <property name="text">2</property>
+                        <property name="adjustment">adjustment_cols</property>
+                        <property name="climb-rate">1</property>
+                        <property name="value">1</property>
+                        <accessibility>
+                          <relation type="labelled-by" target="label_columns"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_rows">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes" context="matrixeditor|Rows">Rows:</property>
+                        <accessibility>
+                          <relation type="label-for" target="num_rows"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="num_rows">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="max-width-chars">3</property>
+                        <property name="text">3</property>
+                        <property name="adjustment">adjustment_rows</property>
+                        <property name="climb-rate">1</property>
+                        <property name="value">3</property>
+                        <accessibility>
+                          <relation type="labelled-by" target="label_rows"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_name">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes" context="matrixeditor|Name">Name:</property>
+                        <accessibility>
+                          <relation type="label-for" target="matrixname"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="matrixname">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="width-chars">5</property>
+                        <property name="text">x</property>
+                        <accessibility>
+                          <relation type="labelled-by" target="label_name"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="unitmatrix">
+                        <property name="label" translatable="yes" context="matrixeditor|UnitMatrix">Unit matrix</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="margin-start">18</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                        <property name="group">fullmatrix</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">3</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="diagmatrix">
+                        <property name="label" translatable="yes" context="matrixeditor|DiagonalMatrix">Diagonal matrix</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="margin-start">18</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                        <property name="group">fullmatrix</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">4</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="symmatrix">
+                        <property name="label" translatable="yes" context="matrixeditor|SymmetrixMatrix">Symmetric matrix</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="margin-start">18</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                        <property name="group">fullmatrix</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">5</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="fullmatrix">
+                        <property name="label" translatable="yes" context="matrixeditor|FullMatrix">Full matrix</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="margin-start">18</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">6</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
+                    <property name="label" translatable="yes" context="matrixeditor|Properties">Properties</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="width-request">600</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="shadow-type">in</property>
+                <child>
+                  <object class="GtkTreeView" id="matrix">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="model">matrixmodel</property>
+                    <property name="headers-visible">False</property>
+                    <property name="enable-search">False</property>
+                    <property name="search-column">0</property>
+                    <property name="show-expanders">False</property>
+                    <property name="enable-grid-lines">both</property>
+                    <property name="enable-tree-lines">True</property>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col1">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">1</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text1">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">21</attribute>
+                            <attribute name="text">0</attribute>
+                            <attribute name="weight">11</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col2">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">2</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text2">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">22</attribute>
+                            <attribute name="text">1</attribute>
+                            <attribute name="weight">12</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col3">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">3</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text3">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">23</attribute>
+                            <attribute name="text">2</attribute>
+                            <attribute name="weight">13</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col4">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">4</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text4">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">24</attribute>
+                            <attribute name="text">3</attribute>
+                            <attribute name="weight">14</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col5">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">5</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text5">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">25</attribute>
+                            <attribute name="text">4</attribute>
+                            <attribute name="weight">15</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col6">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">6</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text6">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">26</attribute>
+                            <attribute name="text">5</attribute>
+                            <attribute name="weight">16</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col7">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">7</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text7">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">27</attribute>
+                            <attribute name="text">6</attribute>
+                            <attribute name="weight">17</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col8">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">8</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text8">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">28</attribute>
+                            <attribute name="text">7</attribute>
+                            <attribute name="weight">18</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col9">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">9</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text9">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">29</attribute>
+                            <attribute name="text">8</attribute>
+                            <attribute name="weight">19</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col10">
+                        <property name="sizing">autosize</property>
+                        <property name="min-width">75</property>
+                        <property name="title">10</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text10">
+                            <property name="alignment">center</property>
+                            <property name="editable">True</property>
+                          </object>
+                          <attributes>
+                            <attribute name="sensitive">30</attribute>
+                            <attribute name="text">9</attribute>
+                            <attribute name="weight">20</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-5">button_ok</action-widget>
+      <action-widget response="-5">button_cancel</action-widget>
+    </action-widgets>
+    <child internal-child="accessible">
+      <object class="AtkObject" id="MatrixEditor-atkobject">
+        <property name="AtkObject::accessible-description" translatable="yes" context="matrixeditor|extended_tip|MatrixEditorDialog">You can edit a vector or a matrix.</property>
+      </object>
+    </child>
+  </object>
+</interface>
