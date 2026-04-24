@@ -105,58 +105,64 @@ class ThumbnailGenerationService {
     required String label,
     required String meta,
   }) async {
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    final w = _thumbnailWidth.toDouble();
-    final h = _thumbnailHeight.toDouble();
+    return _renderCanvas((canvas, size) {
+      _paintShadowBackground(canvas, size, accent);
 
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), Paint()..color = ui.Color.fromARGB(18, accent.r, accent.g, accent.b));
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(10, 10, w - 20, h - 20), Radius.circular(22)),
-      Paint()..color = const ui.Color(0x1A000000),
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(8, 8, w - 16, h - 16), Radius.circular(22)),
-      Paint()..color = const ui.Color(0xFFFFFFFF),
-    );
+      final cardRect = ui.RRect.fromRectAndRadius(
+        ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
+        const ui.Radius.circular(22),
+      );
+      canvas.drawRRect(cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
 
-    final headerRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(8, 8, w - 16, _compactHeaderHeight),
-      Radius.circular(22),
-    );
-    canvas.drawRRect(headerRect, Paint()..color = ui.Color.fromARGB(255, accent.r, accent.g, accent.b));
+      final headerHeight = _compactHeaderHeight;
+      final headerRect = ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight);
+      _paintPreviewHeader(
+        canvas,
+        rect: headerRect,
+        color: _uiColor(accent),
+        text: meta,
+      );
 
-    final headerPainter = TextPainter(
-      text: TextSpan(text: meta, style: _previewHeaderMetaStyle),
-      textDirection: ui.TextDirection.ltr,
-      maxLines: 1,
-    )..layout(minWidth: w - 48, maxWidth: w - 48);
-    headerPainter.paint(canvas, Offset(24, 8 + (_compactHeaderHeight - headerPainter.height) / 2));
+      final contentTop = 18.0 + headerHeight;
+      final contentHeight = size.height - 36 - headerHeight;
+      final contentWidth = size.width - 36;
+      final centerX = 18.0 + contentWidth / 2;
+      final centerY = contentTop + contentHeight / 2;
 
-    final iconCenter = Offset(w / 2, 8 + _compactHeaderHeight + (h - _compactHeaderHeight - 24) / 2);
-    canvas.drawCircle(iconCenter, 44, Paint()..color = ui.Color.fromARGB(30, accent.r, accent.g, accent.b));
-    final iconPainter = TextPainter(
-      text: TextSpan(
+      canvas.drawCircle(
+        Offset(centerX, centerY),
+        40,
+        ui.Paint()..color = _uiColor(accent, alpha: 30),
+      );
+
+      _paintCenteredText(
+        canvas,
         text: String.fromCharCode(Icons.slideshow.codePoint),
-        style: TextStyle(fontSize: 36, fontFamily: Icons.slideshow.fontFamily, package: Icons.slideshow.fontPackage, color: ui.Color.fromARGB(180, accent.r, accent.g, accent.b)),
-      ),
-      textDirection: ui.TextDirection.ltr,
-    )..layout();
-    iconPainter.paint(canvas, Offset(iconCenter.dx - iconPainter.width / 2, iconCenter.dy - iconPainter.height / 2));
+        top: centerY - 18,
+        maxWidth: 72,
+        left: centerX - 36,
+        style: TextStyle(
+          fontSize: 36,
+          fontFamily: Icons.slideshow.fontFamily,
+          package: Icons.slideshow.fontPackage,
+          color: _uiColor(accent, alpha: 180),
+        ),
+      );
 
-    final labelPainter = TextPainter(
-      text: TextSpan(
+      _paintCenteredText(
+        canvas,
         text: label,
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Ubuntu', color: ui.Color.fromARGB(150, accent.r, accent.g, accent.b)),
-      ),
-      textDirection: ui.TextDirection.ltr,
-    )..layout(maxWidth: w - 48);
-    labelPainter.paint(canvas, Offset((w - labelPainter.width) / 2, iconCenter.dy + 54));
-
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(_thumbnailWidth, _thumbnailHeight);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    return byteData?.buffer.asUint8List();
+        top: centerY + 30,
+        maxWidth: contentWidth,
+        left: 18,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Ubuntu',
+          color: _uiColor(accent, alpha: 150),
+        ),
+      );
+    });
   }
 
   static Future<Uint8List?> _generatePdfThumbnail(
@@ -234,10 +240,9 @@ class ThumbnailGenerationService {
             cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
 
         final headerHeight = _compactHeaderHeight;
-        final headerRect = ui.RRect.fromRectAndCorners(
+        final headerRect = ui.RRect.fromRectAndRadius(
           ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight),
-          topLeft: const ui.Radius.circular(22),
-          topRight: const ui.Radius.circular(22),
+          const ui.Radius.circular(22),
         );
         _paintPreviewHeader(
           canvas,
@@ -470,10 +475,9 @@ class ThumbnailGenerationService {
           pageRect, ui.Paint()..color = const ui.Color(0xFFF8F6F1));
 
       final headerHeight = _compactHeaderHeight;
-      final headerRect = ui.RRect.fromRectAndCorners(
+      final headerRect = ui.RRect.fromRectAndRadius(
         ui.Rect.fromLTWH(20, 20, size.width - 40, headerHeight),
-        topLeft: const ui.Radius.circular(22),
-        topRight: const ui.Radius.circular(22),
+        const ui.Radius.circular(22),
       );
       _paintPreviewHeader(
         canvas,
@@ -530,10 +534,9 @@ class ThumbnailGenerationService {
       canvas.drawRRect(
           cardRect, ui.Paint()..color = const ui.Color(0xFFFBFCFA));
 
-      final topBandRect = ui.RRect.fromRectAndCorners(
+      final topBandRect = ui.RRect.fromRectAndRadius(
         ui.Rect.fromLTWH(18, 18, size.width - 36, _compactHeaderHeight),
-        topLeft: const ui.Radius.circular(22),
-        topRight: const ui.Radius.circular(22),
+        const ui.Radius.circular(22),
       );
 
       final firstSheet = sheets.first;
@@ -884,10 +887,9 @@ class ThumbnailGenerationService {
     required String text,
   }) {
     canvas.drawRRect(
-      ui.RRect.fromRectAndCorners(
+      ui.RRect.fromRectAndRadius(
         rect,
-        topLeft: const ui.Radius.circular(22),
-        topRight: const ui.Radius.circular(22),
+        const ui.Radius.circular(22),
       ),
       ui.Paint()..color = color,
     );

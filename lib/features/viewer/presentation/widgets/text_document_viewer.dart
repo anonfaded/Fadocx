@@ -262,6 +262,17 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
   Future<void> _bringResultIntoView(TextSearchResult result) async {
     if (!_scrollController.hasClients) return;
+
+    final lineIndex = result.lineNumber - 1;
+    final lineKey = _lineTextKeys[lineIndex];
+    if (lineKey?.currentContext == null) {
+      final approxOffset = _kTopPadding + (lineIndex * _lineExtent);
+      _scrollController.jumpTo(
+        approxOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+    }
+
     await WidgetsBinding.instance.endOfFrame;
 
     Future<void> adjustOnce() async {
@@ -482,68 +493,73 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
             return Stack(
               key: _viewportKey,
               children: [
-                SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 4,
-                      right: 8,
-                      top: _kTopPadding,
-                      bottom: _kBottomPadding,
+                if (widget.wordWrap)
+                  SelectionArea(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.only(
+                        left: 4,
+                        right: 8,
+                        top: _kTopPadding,
+                        bottom: _kBottomPadding,
+                      ),
+                      itemCount: _lines.length,
+                      cacheExtent: 800,
+                      itemBuilder: (itemContext, index) {
+                        return _buildWrappedLineRow(
+                          context: context,
+                          selectionContext: itemContext,
+                          index: index,
+                          lineNumberWidth: lineNumberWidth,
+                          textStyle: textStyle,
+                        );
+                      },
                     ),
-                    child: widget.wordWrap
-                        ? SelectionArea(
-                            child: Builder(
-                              builder: (selectionContext) {
-                                return Column(
-                                  children: List.generate(
-                                    _lines.length,
-                                    (index) => _buildWrappedLineRow(
-                                      context: context,
-                                      selectionContext: selectionContext,
-                                      index: index,
-                                      lineNumberWidth: lineNumberWidth,
-                                      textStyle: textStyle,
+                  )
+                else
+                  SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 4,
+                        right: 8,
+                        top: _kTopPadding,
+                        bottom: _kBottomPadding,
+                      ),
+                      child: SingleChildScrollView(
+                        controller: _horizontalScrollController,
+                        scrollDirection: Axis.horizontal,
+                        child: SelectionArea(
+                          child: Builder(
+                            builder: (selectionContext) {
+                              return Align(
+                                alignment: Alignment.topLeft,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minWidth: constraints.maxWidth,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: List.generate(
+                                      _lines.length,
+                                      (index) => _buildUnwrappedLineRow(
+                                        context: context,
+                                        selectionContext: selectionContext,
+                                        index: index,
+                                        lineNumberWidth: lineNumberWidth,
+                                        textStyle: textStyle,
+                                      ),
                                     ),
                                   ),
-                                );
-                              },
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            controller: _horizontalScrollController,
-                            scrollDirection: Axis.horizontal,
-                            child: SelectionArea(
-                              child: Builder(
-                                builder: (selectionContext) {
-                                  return Align(
-                                    alignment: Alignment.topLeft,
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        minWidth: constraints.maxWidth,
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: List.generate(
-                                          _lines.length,
-                                          (index) => _buildUnwrappedLineRow(
-                                            context: context,
-                                            selectionContext: selectionContext,
-                                            index: index,
-                                            lineNumberWidth: lineNumberWidth,
-                                            textStyle: textStyle,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
+                                ),
+                              );
+                            },
                           ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
                 if (_highlightedResultIndex != null)
                   Positioned.fill(
                     child: IgnorePointer(

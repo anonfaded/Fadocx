@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
@@ -126,7 +127,7 @@ class HiveCacheService implements CacheService {
       
       // Return parsed data from stored JSON
       try {
-        return _jsonToParsedData(cached.parsedDataJson);
+        return compute(_decodeJsonInIsolate, cached.parsedDataJson);
       } catch (e) {
         log.e('Failed to deserialize cached data: $e');
         await _cacheBox.delete(filePath);
@@ -200,14 +201,12 @@ class HiveCacheService implements CacheService {
     return jsonEncode(data);
   }
 
-  /// Convert JSON string back to parsed data map
-  Map<String, dynamic> _jsonToParsedData(String json) {
-    final decoded = jsonDecode(json);
-    if (decoded is Map<String, dynamic>) {
-      return decoded;
-    }
-    // Fallback for unexpected types
-    log.w('Unexpected cached data type: ${decoded.runtimeType}');
-    return {};
-  }
+  // JSON decode moved to background isolate via _decodeJsonInIsolate
+}
+
+/// Top-level function for compute() — decodes JSON in a background isolate
+Map<String, dynamic> _decodeJsonInIsolate(String json) {
+  final decoded = jsonDecode(json);
+  if (decoded is Map<String, dynamic>) return decoded;
+  return {};
 }
