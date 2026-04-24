@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fadocx/core/services/thumbnail_generation_service.dart';
 import 'package:logger/logger.dart';
@@ -37,11 +38,13 @@ final generateAndCacheThumbnailProvider = FutureProvider.family<Uint8List?,
       final cachedDocument =
           await documentRepository.getCachedParsing(params.filePath);
 
+      final brightness = ui.PlatformDispatcher.instance.platformBrightness;
       final thumbnailBytes = await ThumbnailGenerationService.generateThumbnail(
         params.filePath,
         params.fileName,
         params.fileType,
         cachedDocument: cachedDocument,
+        brightness: brightness,
       );
 
       if (thumbnailBytes != null) {

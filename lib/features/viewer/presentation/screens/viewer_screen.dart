@@ -87,7 +87,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   bool _isTextDocument() {
-    const txtFormats = {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML'};
+    const txtFormats = {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML', 'FADREC'};
     final format = ref.read(documentViewerProvider).document?.format.toUpperCase() ?? '';
     return txtFormats.contains(format);
   }
@@ -520,6 +520,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         return 'json';
       case 'XML':
         return 'xml';
+      case 'FADREC':
+        return 'json';
       default:
         return null;
     }
@@ -602,7 +604,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
 
     // For text/code documents, use TextDocumentViewer with optional syntax highlighting
-    const txtFormats = {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML'};
+    const txtFormats = {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML', 'FADREC'};
     if (txtFormats.contains(format)) {
       return TextDocumentViewer(
         key: _textViewerKey,
@@ -611,7 +613,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         onSearchHighlight: _onSearchHighlight,
         fontSize: _textFontSize,
         wordWrap: _textWordWrap,
-        useMonoFont: _textFontIsMonoFont || format != 'TXT',
+        useMonoFont: _textFontIsMonoFont,
         language: _syntaxHighlightEnabled ? _languageForFormat(format) : null,
       );
     }
@@ -1534,7 +1536,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    } else if (const {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML'}.contains(format)) {
+    } else if (const {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML', 'FADREC'}.contains(format)) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1670,7 +1672,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    } else if (const {'TXT', 'DOCX', 'DOC', 'RTF', 'ODT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML'}.contains(format)) {
+    } else if (const {'TXT', 'DOCX', 'DOC', 'RTF', 'ODT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML', 'FADREC'}.contains(format)) {
       final hasSyntax = _getHighlightLanguage(format) != null;
       return Row(
         children: [

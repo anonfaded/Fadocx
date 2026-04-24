@@ -256,8 +256,8 @@ class _FloatingDock extends StatelessWidget {
                         ),
                         Expanded(
                           child: _DockItem(
-                            icon: Icons.description,
-                            label: 'Documents',
+                            icon: Icons.auto_stories,
+                            label: 'Library',
                             isActive: currentRoute == RouteNames.documents,
                             onTap: () {
                               if (currentRoute != RouteNames.documents) {
