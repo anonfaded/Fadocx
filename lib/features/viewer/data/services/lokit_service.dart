@@ -96,6 +96,33 @@ class LOKitService {
     }
   }
 
+  static Future<int> getPageCount() async {
+    try {
+      final result = await _channel.invokeMethod<int>('getPageCount');
+      return result ?? 0;
+    } on PlatformException {
+      return 0;
+    }
+  }
+
+  static Future<Uint8List?> renderTextPage({
+    int page = 0,
+    int maxWidth = 1080,
+    int maxHeight = 1920,
+    double scale = 2.0,
+  }) async {
+    try {
+      final result = await _channel.invokeMethod<Map>(
+        'renderTextPage',
+        {'page': page, 'maxWidth': maxWidth, 'maxHeight': maxHeight, 'scale': scale},
+      );
+      if (result == null) return null;
+      return result['bytes'] as Uint8List;
+    } on PlatformException {
+      return null;
+    }
+  }
+
   static Future<Uint8List?> renderThumbnail({
     required String filePath,
     int part = 0,

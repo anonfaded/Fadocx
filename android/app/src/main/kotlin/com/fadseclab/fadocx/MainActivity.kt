@@ -192,6 +192,22 @@ class MainActivity : FlutterActivity() {
                                     runOnUiThread { result.success(null) }
                                 }
                             }
+                            "getPageCount" -> {
+                                val count = lokitWrapper.getPageCount()
+                                runOnUiThread { result.success(count) }
+                            }
+                            "renderTextPage" -> {
+                                val page = call.argument<Int>("page") ?: 0
+                                val maxWidth = call.argument<Int>("maxWidth") ?: 1080
+                                val maxHeight = call.argument<Int>("maxHeight") ?: 1920
+                                val scale = (call.argument<Double>("scale") ?: 2.0).toFloat()
+                                val bytes = lokitWrapper.renderTextPage(page, maxWidth, maxHeight, scale)
+                                if (bytes != null) {
+                                    runOnUiThread { result.success(mapOf("bytes" to bytes, "page" to page)) }
+                                } else {
+                                    runOnUiThread { result.error("RENDER_FAILED", "Failed to render text page", null) }
+                                }
+                            }
                             "extractText" -> {
                                 val text = lokitWrapper.extractText()
                                 runOnUiThread { result.success(text ?: "") }
