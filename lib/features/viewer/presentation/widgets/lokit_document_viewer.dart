@@ -12,6 +12,7 @@ class LOKitDocumentViewer extends ConsumerStatefulWidget {
   final VoidCallback? onTap;
   final VoidCallback? onSearchHighlight;
   final Function(int currentPage, int totalPages)? onPageChanged;
+  final Function(double zoom)? onZoomChanged;
 
   const LOKitDocumentViewer({
     super.key,
@@ -20,6 +21,7 @@ class LOKitDocumentViewer extends ConsumerStatefulWidget {
     this.onTap,
     this.onSearchHighlight,
     this.onPageChanged,
+    this.onZoomChanged,
   });
 
   @override
@@ -166,6 +168,7 @@ class LOKitDocumentViewerState extends ConsumerState<LOKitDocumentViewer>
     final scale = _transformController!.value.getMaxScaleOnAxis();
     if ((scale - _currentZoom).abs() > 0.01) {
       _currentZoom = scale;
+      widget.onZoomChanged?.call(scale);
     }
   }
 
