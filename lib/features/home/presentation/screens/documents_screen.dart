@@ -298,12 +298,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 80, 16, 100),
-      children: [
-        Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height - 180,
+        ),
+        child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.inbox_outlined,
@@ -334,7 +337,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 
