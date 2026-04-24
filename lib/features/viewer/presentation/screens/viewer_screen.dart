@@ -55,6 +55,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   double _textFontSize = 14;
   bool _textWordWrap = true;
   bool _textFontIsMonoFont = false;
+  bool _syntaxHighlightEnabled = true;
   late AnimationController _menuController;
   late AnimationController _sidebarController;
   late AnimationController _topBarController;
@@ -85,6 +86,12 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         format == 'ODT';
   }
 
+  bool _isTextDocument() {
+    const txtFormats = {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML'};
+    final format = ref.read(documentViewerProvider).document?.format.toUpperCase() ?? '';
+    return txtFormats.contains(format);
+  }
+
   bool _canOpenSidebar() {
     if (!_controlsVisible) return false;
     if (_isPdfDocument()) {
@@ -92,6 +99,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
     if (_isLOKitDocument()) {
       return _lokitViewerKey.currentState != null;
+    }
+    if (_isTextDocument()) {
+      return _textViewerKey.currentState != null;
     }
     return false;
   }
@@ -103,6 +113,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
     if (_isLOKitDocument()) {
       final viewerState = _lokitViewerKey.currentState as dynamic;
+      return viewerState?.buildDrawerContent(context) as Widget?;
+    }
+    if (_isTextDocument()) {
+      final viewerState = _textViewerKey.currentState as dynamic;
       return viewerState?.buildDrawerContent(context) as Widget?;
     }
     return null;
@@ -487,6 +501,30 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     );
   }
 
+
+  static String? _getHighlightLanguage(String format) => _languageForFormat(format);
+
+  static String? _languageForFormat(String format) {
+    switch (format) {
+      case 'JAVA':
+        return 'java';
+      case 'PY':
+        return 'python';
+      case 'SH':
+        return 'bash';
+      case 'HTML':
+        return 'xml';
+      case 'MD':
+        return 'markdown';
+      case 'JSON':
+        return 'json';
+      case 'XML':
+        return 'xml';
+      default:
+        return null;
+    }
+  }
+
   Widget _buildContentViewer({required ParsedDocumentEntity document}) {
     final format = document.format.toUpperCase();
     _log.d(
@@ -539,7 +577,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         format == 'DOCX' ||
         format == 'DOC' ||
         format == 'RTF' ||
-        format == 'ODT') {
+        format == 'ODT' ||
+        format == 'EPUB' ||
+        format == 'OTT') {
       return LOKitDocumentViewer(
         key: _lokitViewerKey,
         filePath: widget.filePath,
@@ -561,8 +601,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       );
     }
 
-    // For TXT documents, use TextDocumentViewer
-    if (format == 'TXT') {
+    // For text/code documents, use TextDocumentViewer with optional syntax highlighting
+    const txtFormats = {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML'};
+    if (txtFormats.contains(format)) {
       return TextDocumentViewer(
         key: _textViewerKey,
         textContent: document.searchableText,
@@ -570,7 +611,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         onSearchHighlight: _onSearchHighlight,
         fontSize: _textFontSize,
         wordWrap: _textWordWrap,
-        useMonoFont: _textFontIsMonoFont,
+        useMonoFont: _textFontIsMonoFont || format != 'TXT',
+        language: _syntaxHighlightEnabled ? _languageForFormat(format) : null,
       );
     }
 
@@ -1492,7 +1534,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    } else if (format == 'TXT') {
+    } else if (const {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML'}.contains(format)) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1628,11 +1670,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    } else if (format == 'TXT' ||
-        format == 'DOCX' ||
-        format == 'DOC' ||
-        format == 'RTF' ||
-        format == 'ODT') {
+    } else if (const {'TXT', 'DOCX', 'DOC', 'RTF', 'ODT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML'}.contains(format)) {
+      final hasSyntax = _getHighlightLanguage(format) != null;
       return Row(
         children: [
           Expanded(
@@ -1643,6 +1682,16 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             ),
           ),
           const SizedBox(width: 8),
+          if (hasSyntax) ...[
+            Expanded(
+              child: _buildTile(
+                icon: _syntaxHighlightEnabled ? Icons.code : Icons.code_outlined,
+                label: 'Syntax',
+                onTap: () => setState(() => _syntaxHighlightEnabled = !_syntaxHighlightEnabled),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
           Expanded(
             child: _buildTile(
               icon: Icons.font_download,

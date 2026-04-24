@@ -888,6 +888,16 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       case 'odt':
       case 'rtf':
       case 'txt':
+      case 'java':
+      case 'py':
+      case 'sh':
+      case 'html':
+      case 'md':
+      case 'log':
+      case 'epub':
+      case 'ott':
+      case 'json':
+      case 'xml':
         return 'documents';
       case 'xlsx':
       case 'xls':
@@ -1163,7 +1173,18 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         'csv',
         'ppt',
         'pptx',
-        'odp'
+        'odp',
+        'java',
+        'py',
+        'sh',
+        'html',
+        'md',
+        'epub',
+        'ott',
+        'log',
+        'json',
+        'xml',
+        'fadrec',
       };
 
       for (final entity in entities) {
@@ -1256,6 +1277,17 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
           'ppt',
           'pptx',
           'odp',
+          'java',
+          'py',
+          'sh',
+          'html',
+          'md',
+          'epub',
+          'ott',
+          'log',
+          'json',
+          'xml',
+          'fadrec',
         ],
         allowMultiple: true,
       );

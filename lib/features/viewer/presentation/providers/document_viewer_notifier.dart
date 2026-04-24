@@ -118,8 +118,17 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
           log.d('Routing to parseDOC');
           document = await repository.parseDOC(_filePath);
         case 'txt':
-          log.d('Routing to parseTXT');
+        case 'java':
+        case 'py':
+        case 'sh':
+        case 'html':
+        case 'md':
+        case 'log':
+          log.d('Routing to parseTXT for: $extension');
           document = await repository.parseTXT(_filePath);
+          if (extension != 'txt') {
+            document = document.copyWith(format: extension.toUpperCase());
+          }
         case 'rtf':
           log.d('Routing to parseRTF');
           document = await repository.parseRTF(_filePath);
@@ -131,7 +140,9 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         case 'ppt':
         case 'pptx':
         case 'odp':
-          log.d('Presentation format - creating stub entity for LOKit viewer');
+        case 'epub':
+        case 'ott':
+          log.d('Presentation/LOKit format - creating stub entity for LOKit viewer ($extension)');
           document = ParsedDocumentEntity(
             format: extension.toUpperCase(),
             sheets: const [],

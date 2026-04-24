@@ -3,6 +3,13 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:logger/logger.dart';
+import 'package:highlight/highlight_core.dart';
+import 'package:highlight/languages/java.dart';
+import 'package:highlight/languages/python.dart';
+import 'package:highlight/languages/bash.dart';
+import 'package:highlight/languages/xml.dart';
+import 'package:highlight/languages/markdown.dart';
+import 'package:highlight/languages/json.dart' as hl_json_lang;
 import 'package:fadocx/features/viewer/presentation/widgets/text_document_search_drawer.dart';
 
 final log = Logger();
@@ -16,6 +23,7 @@ class TextDocumentViewer extends StatefulWidget {
   final double fontSize;
   final bool wordWrap;
   final bool useMonoFont;
+  final String? language;
 
   const TextDocumentViewer({
     required this.textContent,
@@ -24,6 +32,7 @@ class TextDocumentViewer extends StatefulWidget {
     this.fontSize = 14,
     this.wordWrap = true,
     this.useMonoFont = false,
+    this.language,
     super.key,
   });
 
@@ -39,6 +48,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
   late String _fullContent;
   List<String> _lines = const [];
+  List<List<_HighlightToken>> _highlightedLines = const [];
   DateTime? _tapStartTime;
   Offset? _tapStartPosition;
   final ScrollController _scrollController = ScrollController();
@@ -48,6 +58,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   late final AnimationController _highlightController;
   final GlobalKey _viewportKey = GlobalKey();
   final Map<int, GlobalKey> _lineTextKeys = {};
+  static bool _languagesRegistered = false;
 
   List<TextSearchResult> _searchResults = const [];
   int _activeSearchResultIndex = -1;
@@ -67,21 +78,151 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     _initializeContent();
   }
 
+  static void _ensureLanguagesRegistered() {
+    if (_languagesRegistered) return;
+    _languagesRegistered = true;
+    highlight.registerLanguage('java', java);
+    highlight.registerLanguage('python', python);
+    highlight.registerLanguage('bash', bash);
+    highlight.registerLanguage('shell', bash);
+    highlight.registerLanguage('xml', xml);
+    highlight.registerLanguage('markdown', markdown);
+    highlight.registerLanguage('json', hl_json_lang.json);
+  }
+
+  static const Color _defaultSyntaxColor = Color(0xFFABB2BF);
+
+  static const Map<String, Color> _syntaxColors = {
+    'keyword': Color(0xFFC678DD),
+    'selector-tag': Color(0xFFE06C75),
+    'addition': Color(0xFF98C379),
+    'built_in': Color(0xFF56B6C2),
+    'type': Color(0xFF56B6C2),
+    'title': Color(0xFF61AFEF),
+    'section': Color(0xFF61AFEF),
+    'attr': Color(0xFFD19A66),
+    'attribute': Color(0xFFD19A66),
+    'string': Color(0xFF98C379),
+    'regexp': Color(0xFF98C379),
+    'symbol': Color(0xFF56B6C2),
+    'variable': Color(0xFFE06C75),
+    'template-variable': Color(0xFFE06C75),
+    'link': Color(0xFF56B6C2),
+    'meta': Color(0xFF7F848E),
+    'comment': Color(0xFF7F848E),
+    'deletion': Color(0xFFE06C75),
+    'number': Color(0xFFD19A66),
+    'literal': Color(0xFFD19A66),
+    'params': Color(0xFFABB2BF),
+    'subst': Color(0xFFE06C75),
+    'tag': Color(0xFFE06C75),
+    'name': Color(0xFFE06C75),
+    'selector-id': Color(0xFF61AFEF),
+    'selector-class': Color(0xFFD19A66),
+    'selector-attr': Color(0xFFD19A66),
+    'selector-pseudo': Color(0xFFD19A66),
+    'property': Color(0xFFE06C75),
+    'operator': Color(0xFF56B6C2),
+    'punctuation': Color(0xFFABB2BF),
+    'bullet': Color(0xFFD19A66),
+    'code': Color(0xFF98C379),
+    'emphasis': Color(0xFFC678DD),
+    'strong': Color(0xFFD19A66),
+    'formula': Color(0xFF56B6C2),
+  };
+
   void _initializeContent() {
     _fullContent = widget.textContent ?? '';
     _lines = _fullContent.split(RegExp(r'\r\n|\r|\n'));
+    _highlightedLines = const [];
     _lineTextKeys.clear();
+
+    if (widget.language != null && _fullContent.isNotEmpty) {
+      _ensureLanguagesRegistered();
+      try {
+        final result = highlight.parse(_fullContent, language: widget.language!);
+        _highlightedLines = _tokenizeResult(result.nodes);
+      } catch (e) {
+        log.w('Syntax highlighting failed, falling back to plain text: $e');
+        _highlightedLines = const [];
+      }
+    }
+
     _performSearch(_searchController.text);
 
     if (_fullContent.isNotEmpty) {
-      log.d('Text document initialized with ${_lines.length} lines');
+      log.d('Text document initialized with ${_lines.length} lines (lang: ${widget.language})');
     }
+  }
+
+  List<List<_HighlightToken>> _tokenizeResult(List<Node>? nodes) {
+    final tokens = <_HighlightToken>[];
+    _flattenNodes(nodes, null, tokens);
+
+    final lines = <List<_HighlightToken>>[];
+    var currentLine = <_HighlightToken>[];
+
+    for (final token in tokens) {
+      var text = token.text;
+      final className = token.className;
+      while (text.contains('\n')) {
+        final idx = text.indexOf('\n');
+        final before = text.substring(0, idx);
+        final after = text.substring(idx + 1);
+        if (before.isNotEmpty) {
+          currentLine.add(_HighlightToken(before, className));
+        }
+        lines.add(currentLine);
+        currentLine = <_HighlightToken>[];
+        text = after;
+      }
+      if (text.isNotEmpty) {
+        currentLine.add(_HighlightToken(text, className));
+      }
+    }
+    lines.add(currentLine);
+
+    while (lines.length < _lines.length) {
+      lines.add(const []);
+    }
+
+    return lines;
+  }
+
+  void _flattenNodes(List<Node>? nodes, String? parentClass, List<_HighlightToken> tokens) {
+    if (nodes == null) return;
+    for (final node in nodes) {
+      final effectiveClass = node.className ?? parentClass;
+      if (node.value != null) {
+        tokens.add(_HighlightToken(node.value!, effectiveClass));
+      }
+      if (node.children != null) {
+        _flattenNodes(node.children, effectiveClass, tokens);
+      }
+    }
+  }
+
+  TextSpan _buildHighlightedSpan(int lineIndex, TextStyle baseStyle) {
+    final tokens = lineIndex < _highlightedLines.length ? _highlightedLines[lineIndex] : const [];
+    if (tokens.isEmpty) {
+      return TextSpan(text: _lines[lineIndex], style: baseStyle);
+    }
+    return TextSpan(
+      style: baseStyle,
+      children: tokens.map((t) {
+        final color = t.className != null ? (_syntaxColors[t.className] ?? _defaultSyntaxColor) : _defaultSyntaxColor;
+        return TextSpan(
+          text: t.text,
+          style: TextStyle(color: color),
+        );
+      }).toList(),
+    );
   }
 
   @override
   void didUpdateWidget(TextDocumentViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.textContent != widget.textContent) {
+    if (oldWidget.textContent != widget.textContent || oldWidget.language != widget.language) {
       _initializeContent();
     }
   }
@@ -696,7 +837,9 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
                 ? SizedBox(height: _lineHeight)
                 : RichText(
                     key: _lineTextKey(index),
-                    text: TextSpan(text: _lines[index], style: textStyle),
+                    text: _highlightedLines.isEmpty
+                        ? TextSpan(text: _lines[index], style: textStyle)
+                        : _buildHighlightedSpan(index, textStyle),
                     textAlign: TextAlign.left,
                     softWrap: true,
                     textDirection: Directionality.of(context),
@@ -746,7 +889,9 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
               ? SizedBox(height: _lineHeight)
               : RichText(
                   key: _lineTextKey(index),
-                  text: TextSpan(text: _lines[index], style: textStyle),
+                  text: _highlightedLines.isEmpty
+                      ? TextSpan(text: _lines[index], style: textStyle)
+                      : _buildHighlightedSpan(index, textStyle),
                   textAlign: TextAlign.left,
                   softWrap: false,
                   textDirection: Directionality.of(context),
@@ -758,6 +903,12 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
       ),
     );
   }
+}
+
+class _HighlightToken {
+  final String text;
+  final String? className;
+  const _HighlightToken(this.text, this.className);
 }
 
 class _TextSpotlightOverlay extends StatelessWidget {
