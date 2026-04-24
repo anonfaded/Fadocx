@@ -34,9 +34,8 @@ final generateAndCacheThumbnailProvider = FutureProvider.family<Uint8List?,
     try {
       final hiveDatasource = ref.watch(hiveDatasourceProvider);
       final documentRepository = ref.watch(documentParsingRepositoryProvider);
-      final cachedDocument = params.fileType.toLowerCase() == 'pdf'
-          ? await documentRepository.getCachedParsing(params.filePath)
-          : null;
+      final cachedDocument =
+          await documentRepository.getCachedParsing(params.filePath);
 
       final thumbnailBytes = await ThumbnailGenerationService.generateThumbnail(
         params.filePath,

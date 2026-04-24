@@ -49,17 +49,16 @@ class ThumbnailGenerationService {
             filePath,
             cachedDocument: cachedDocument,
           ),
-        'doc' ||
-        'docx' ||
-        'txt' ||
-        'rtf' ||
-        'odt' =>
-          _generateTextThumbnail(filePath, normalizedType),
-        'xls' ||
-        'xlsx' ||
-        'csv' ||
-        'ods' =>
-          _generateSpreadsheetThumbnail(filePath, normalizedType),
+        'doc' || 'docx' || 'txt' || 'rtf' || 'odt' => _generateTextThumbnail(
+            filePath,
+            normalizedType,
+            cachedDocument: cachedDocument,
+          ),
+        'xls' || 'xlsx' || 'csv' || 'ods' => _generateSpreadsheetThumbnail(
+            filePath,
+            normalizedType,
+            cachedDocument: cachedDocument,
+          ),
         'ppt' || 'pptx' || 'odp' => _createPlaceholderThumbnail(
             label: 'SLIDES',
             accent: ThumbnailColors.pptOrange,
@@ -201,10 +200,16 @@ class ThumbnailGenerationService {
 
   static Future<Uint8List?> _generateTextThumbnail(
     String filePath,
-    String normalizedType,
-  ) async {
+    String normalizedType, {
+    ParsedDocumentEntity? cachedDocument,
+  }) async {
     try {
-      final fullText = await _extractTextContent(filePath, normalizedType);
+      final fullText = cachedDocument?.searchableText.isNotEmpty == true
+          ? cachedDocument!.searchableText
+          : await _extractTextContent(filePath, normalizedType);
+      if (cachedDocument?.searchableText.isNotEmpty == true) {
+        _log.d('Using cached parsed text for thumbnail: $filePath');
+      }
       if (fullText == null || fullText.trim().isEmpty) {
         _log.w('Text thumbnail fallback for $filePath');
         return _createPlaceholderThumbnail(
@@ -243,10 +248,23 @@ class ThumbnailGenerationService {
 
   static Future<Uint8List?> _generateSpreadsheetThumbnail(
     String filePath,
-    String normalizedType,
-  ) async {
+    String normalizedType, {
+    ParsedDocumentEntity? cachedDocument,
+  }) async {
     try {
-      final sheets = await _extractSheetPreview(filePath, normalizedType);
+      final sheets = cachedDocument != null && cachedDocument.sheets.isNotEmpty
+          ? cachedDocument.sheets
+              .map((sheet) => {
+                    'name': sheet.name,
+                    'rows': sheet.rows,
+                    'rowCount': sheet.rowCount,
+                    'colCount': sheet.colCount,
+                  })
+              .toList()
+          : await _extractSheetPreview(filePath, normalizedType);
+      if (cachedDocument != null && cachedDocument.sheets.isNotEmpty) {
+        _log.d('Using cached parsed sheets for thumbnail: $filePath');
+      }
       if (sheets == null || sheets.isEmpty) {
         _log.w('Spreadsheet thumbnail fallback for $filePath');
         return _createPlaceholderThumbnail(

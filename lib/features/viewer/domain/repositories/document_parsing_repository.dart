@@ -48,6 +48,9 @@ abstract class DocumentParsingRepository {
   /// Parse RTF file (Rich Text Format)
   Future<ParsedDocumentEntity> parseRTF(String filePath);
 
+  /// Parse ODT file (OpenDocument Text)
+  Future<ParsedDocumentEntity> parseODT(String filePath);
+
   /// Get cached parsing result if available and file unchanged
   ///
   /// Returns null if:

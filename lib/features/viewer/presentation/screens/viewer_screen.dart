@@ -8,6 +8,7 @@ import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/features/viewer/data/providers/repository_providers.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/text_document_viewer.dart';
+import 'package:fadocx/features/viewer/presentation/widgets/rich_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/modern_pdf_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
@@ -57,6 +58,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
   late GlobalKey<State<TextDocumentViewer>> _textViewerKey;
+  late GlobalKey<State<RichDocumentViewer>> _richDocumentViewerKey;
   static const double _kDragCloseThreshold = 100.0;
 
   bool _isPdfDocument() {
@@ -70,7 +72,18 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     return format == 'TXT' ||
         format == 'DOCX' ||
         format == 'DOC' ||
-        format == 'RTF';
+        format == 'RTF' ||
+        format == 'ODT';
+  }
+
+  bool _isRichWordDocument() {
+    final document = ref.read(documentViewerProvider).document;
+    if (document == null) return false;
+    return (document.format == 'DOCX' ||
+            document.format == 'DOC' ||
+            document.format == 'RTF' ||
+            document.format == 'ODT') &&
+        document.hasRichDocument;
   }
 
   bool _canOpenSidebar() {
@@ -79,6 +92,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       return _pdfViewerKey.currentState != null;
     }
     if (_isTextDocument()) {
+      if (_isRichWordDocument()) {
+        return _richDocumentViewerKey.currentState != null;
+      }
       return _textViewerKey.currentState != null;
     }
     return false;
@@ -90,7 +106,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       return viewerState?.buildDrawerContent(context) as Widget?;
     }
     if (_isTextDocument()) {
-      final viewerState = _textViewerKey.currentState as dynamic;
+      final viewerState = _isRichWordDocument()
+          ? _richDocumentViewerKey.currentState as dynamic
+          : _textViewerKey.currentState as dynamic;
       return viewerState?.buildDrawerContent(context) as Widget?;
     }
     return null;
@@ -265,6 +283,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     super.initState();
     _pdfViewerKey = GlobalKey<State<ModernPdfViewer>>();
     _textViewerKey = GlobalKey<State<TextDocumentViewer>>();
+    _richDocumentViewerKey = GlobalKey<State<RichDocumentViewer>>();
     _menuController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -450,6 +469,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   Widget _buildContentViewer({required ParsedDocumentEntity document}) {
     final format = document.format.toUpperCase();
+    _log.d(
+      'Building viewer for format=$format rich=${document.hasRichDocument} '
+      'fidelity=${document.fidelityLevel.name} warnings=${document.parseWarnings.length}',
+    );
 
     // For PDFs, use ModernPdfViewer with GlobalKey to access navigation
     if (format == 'PDF') {
@@ -488,14 +511,34 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       );
     }
 
-    // For TXT/DOCX/DOC, use TextDocumentViewer with tap controls
+    if ((format == 'DOCX' ||
+            format == 'DOC' ||
+            format == 'RTF' ||
+            format == 'ODT') &&
+        document.hasRichDocument) {
+      return RichDocumentViewer(
+        key: _richDocumentViewerKey,
+        documentBlocks: document.documentBlocks,
+        plainTextContent: document.plainTextContent,
+        parseWarnings: document.parseWarnings,
+        fidelityLevel: document.fidelityLevel,
+        onTap: _toggleControls,
+        onSearchHighlight: _onSearchHighlight,
+        fontSize: _textFontSize,
+        wordWrap: true,
+        useMonoFont: _textFontIsMonoFont,
+      );
+    }
+
+    // For TXT/plain-text fallback documents, use TextDocumentViewer with tap controls
     if (format == 'TXT' ||
         format == 'DOCX' ||
         format == 'DOC' ||
-        format == 'RTF') {
+        format == 'RTF' ||
+        format == 'ODT') {
       return TextDocumentViewer(
         key: _textViewerKey,
-        textContent: document.textContent,
+        textContent: document.searchableText,
         onTap: _toggleControls,
         onSearchHighlight: _onSearchHighlight,
         fontSize: _textFontSize,
@@ -650,7 +693,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
 
     final document = docState.document!;
-    final textContent = document.textContent ?? '';
+    final textContent = document.searchableText;
     final hasEmbeddedText = textContent.isNotEmpty;
     final wordCount = hasEmbeddedText
         ? textContent.split(RegExp(r'\s+')).length
@@ -937,7 +980,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     final doc = ref.watch(documentViewerProvider);
     if (doc.document == null) return;
 
-    final text = doc.document!.textContent ?? '';
+    final text = doc.document!.searchableText;
     if (text.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1216,7 +1259,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     } else if (format == 'TXT' ||
         format == 'DOCX' ||
         format == 'DOC' ||
-        format == 'RTF') {
+        format == 'RTF' ||
+        format == 'ODT') {
+      final isRichWordDoc =
+          ref.watch(documentViewerProvider).document?.hasRichDocument ?? false;
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1245,12 +1291,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     () => _textFontSize = (_textFontSize + 1).clamp(10, 24))
                 : null,
           ),
-          const SizedBox(width: 8),
-          _buildIconButton(
-            context,
-            _textWordWrap ? Icons.wrap_text : Icons.text_fields,
-            () => setState(() => _textWordWrap = !_textWordWrap),
-          ),
+          if (!isRichWordDoc) ...[
+            const SizedBox(width: 8),
+            _buildIconButton(
+              context,
+              _textWordWrap ? Icons.wrap_text : Icons.text_fields,
+              () => setState(() => _textWordWrap = !_textWordWrap),
+            ),
+          ],
         ],
       );
     }
@@ -1313,7 +1361,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     } else if (format == 'TXT' ||
         format == 'DOCX' ||
         format == 'DOC' ||
-        format == 'RTF') {
+        format == 'RTF' ||
+        format == 'ODT') {
       return Row(
         children: [
           Expanded(

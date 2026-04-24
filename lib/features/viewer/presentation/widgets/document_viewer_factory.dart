@@ -6,6 +6,7 @@ import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
 import 'professional_sheet_viewer.dart';
 import 'modern_pdf_viewer.dart';
 import 'text_document_viewer.dart';
+import 'rich_document_viewer.dart';
 
 /// Returns embedded viewer content only.
 /// The owning screen provides the outer Scaffold/AppBar.
@@ -30,7 +31,8 @@ class DocumentViewerFactory {
       'DOCX' ||
       'DOC' ||
       'TXT' ||
-      'RTF' =>
+      'RTF' ||
+      'ODT' =>
         _buildTextViewer(document, onTap: onTap),
       'PPT' || 'PPTX' || 'ODP' => _buildPptViewer(document),
       _ => _buildUnsupportedViewer(document.format),
@@ -135,7 +137,24 @@ class DocumentViewerFactory {
     ParsedDocumentEntity document, {
     VoidCallback? onTap,
   }) {
-    final textContent = document.textContent ?? '';
+    if (document.hasRichDocument &&
+        (document.format == 'DOCX' ||
+            document.format == 'DOC' ||
+            document.format == 'RTF' ||
+            document.format == 'ODT')) {
+      return GestureDetector(
+        onTap: onTap,
+        child: RichDocumentViewer(
+          documentBlocks: document.documentBlocks,
+          plainTextContent: document.plainTextContent,
+          parseWarnings: document.parseWarnings,
+          fidelityLevel: document.fidelityLevel,
+          onTap: onTap,
+        ),
+      );
+    }
+
+    final textContent = document.searchableText;
 
     return GestureDetector(
       onTap: onTap,

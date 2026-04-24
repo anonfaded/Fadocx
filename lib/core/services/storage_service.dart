@@ -11,7 +11,8 @@ class StorageService {
   static const String presentationsFolder = 'Presentations';
   static const String imagesFolder = 'Images';
   static const String scansFolder = 'Scans';
-  static const String trashFolder = 'Trash'; // Normal visible folder for deleted files
+  static const String trashFolder =
+      'Trash'; // Normal visible folder for deleted files
 
   /// Single source of truth: App's external scoped storage
   /// Path: /storage/emulated/0/Android/data/{package}/files/
@@ -22,11 +23,11 @@ class StorageService {
     // On Android API 19+: /storage/emulated/0/Android/data/{package}/files/
     // It returns a list where the first item is the primary external storage
     final externalDirs = await getExternalStorageDirectories();
-    
+
     if (externalDirs == null || externalDirs.isEmpty) {
       throw Exception('External storage not available');
     }
-    
+
     final storageDir = externalDirs.first;
     log.i('Using external scoped storage: ${storageDir.path}');
     return storageDir;
@@ -40,6 +41,14 @@ class StorageService {
       log.i('Created category dir: ${categoryDir.path}');
     }
     return categoryDir;
+  }
+
+  static Future<bool> isManagedPath(String filePath) async {
+    final baseDir = await _getStorageDir();
+    final normalizedBase = File(baseDir.path).absolute.path;
+    final normalizedPath = File(filePath).absolute.path;
+    return normalizedPath == normalizedBase ||
+        normalizedPath.startsWith('$normalizedBase/');
   }
 
   /// Get trash folder - stores soft-deleted files
@@ -99,16 +108,28 @@ class StorageService {
       // Determine category from file extension
       final fileExtension = fileName.split('.').last;
       final category = _getCategoryFromExtension(fileExtension);
-      
+
       // Get destination category folder
       final categoryDir = await getCategoryDir(category);
       final destPath = '${categoryDir.path}/$fileName';
       final destFile = File(destPath);
+      final normalizedSourcePath = sourceFile.absolute.path;
+      final normalizedDestPath = destFile.absolute.path;
+
+      if (normalizedSourcePath == normalizedDestPath) {
+        final existingSize = await sourceFile.length();
+        log.i(
+          'Skipping cache copy for already-managed file: $fileName '
+          '(path unchanged, $existingSize bytes)',
+        );
+        return sourceFile;
+      }
 
       // Copy file to app storage
       final copied = await sourceFile.copy(destFile.path);
-      log.i('Copied file: $fileName to ${copied.path}');
-      
+      final copiedSize = await copied.length();
+      log.i('Copied file: $fileName to ${copied.path} ($copiedSize bytes)');
+
       return copied;
     } catch (e) {
       log.e('Failed to copy file $fileName', error: e);
@@ -128,12 +149,13 @@ class StorageService {
 
       final trashDir = await _getTrashDir();
       final fileName = filePath.split('/').last;
-      
+
       // Extract category from path: /.../*.../PDFs/document.pdf -> PDFs
       final pathParts = filePath.split('/');
       final categoryIndex = pathParts.length - 2;
-      final category = categoryIndex >= 0 ? pathParts[categoryIndex] : documentsFolder;
-      
+      final category =
+          categoryIndex >= 0 ? pathParts[categoryIndex] : documentsFolder;
+
       // Encode category in trash filename: [PDFs]_document.pdf
       final trashFileName = '[$category]_$fileName';
       final trashPath = '${trashDir.path}/$trashFileName';
@@ -142,7 +164,7 @@ class StorageService {
       // Move file to trash (rename operation)
       final moved = await sourceFile.rename(trashFile.path);
       log.i('Moved to trash: $filePath -> ${moved.path}');
-      
+
       return moved;
     } catch (e) {
       log.e('Failed to move file to trash: $filePath', error: e);
@@ -160,16 +182,16 @@ class StorageService {
       }
 
       final trashFileName = trashFilePath.split('/').last;
-      
+
       // Extract category: [PDFs]_document.pdf -> PDFs
       if (!trashFileName.startsWith('[') || !trashFileName.contains(']_')) {
         throw Exception('Invalid trash file format: $trashFileName');
       }
-      
+
       final endBracket = trashFileName.indexOf(']');
       final category = trashFileName.substring(1, endBracket);
       final originalFileName = trashFileName.substring(endBracket + 2);
-      
+
       // Get original category folder
       final categoryDir = await getCategoryDir(category);
       final originalPath = '${categoryDir.path}/$originalFileName';
@@ -178,7 +200,7 @@ class StorageService {
       // Move file from trash to original category
       final moved = await trashFile.rename(restoredFile.path);
       log.i('Restored from trash: $trashFilePath -> ${moved.path}');
-      
+
       return moved;
     } catch (e) {
       log.e('Failed to restore file from trash: $trashFilePath', error: e);
