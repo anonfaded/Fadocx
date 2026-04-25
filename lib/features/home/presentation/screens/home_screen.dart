@@ -14,6 +14,9 @@ import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
+import 'package:fadocx/features/home/presentation/widgets/file_action_bottom_sheet.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
 
 final log = Logger();
 
@@ -1036,79 +1039,292 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     }
   }
 
-  void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
+
+  Future<void> _renameFile(RecentFile file) async {
+    final dot = file.fileName.lastIndexOf('.');
+    final baseName = dot > 0 ? file.fileName.substring(0, dot) : file.fileName;
+    final extension = dot > 0 ? file.fileName.substring(dot) : '';
+    final controller = TextEditingController(text: baseName);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename file'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: 'File name',
+            suffixText: extension,
+            border: const OutlineInputBorder(),
+          ),
+          onSubmitted: (v) => Navigator.pop(ctx, v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName == null || newName.trim().isEmpty || newName.trim() == baseName) return;
+
+    final fullNewName = '${newName.trim()}$extension';
+    final sourceFile = File(file.filePath);
+    final dir = sourceFile.parent.path;
+    final newPath = '$dir/$fullNewName';
+
+    if (await File(newPath).exists()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('A file with this name already exists')),
+        );
+      }
+      return;
+    }
+
+    try {
+      await sourceFile.rename(newPath);
+      final mutator = ref.read(recentFilesMutatorProvider);
+      final updatedFile = RecentFile(
+        id: file.id,
+        filePath: newPath,
+        fileName: fullNewName,
+        fileType: file.fileType,
+        fileSizeBytes: file.fileSizeBytes,
+        dateOpened: file.dateOpened,
+        dateModified: await File(newPath).lastModified(),
+        pagePosition: file.pagePosition,
+        syncStatus: file.syncStatus,
+        isRead: file.isRead,
+      );
+      await mutator.removeRecentFile(file.id);
+      await mutator.addRecentFile(updatedFile);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Renamed to $fullNewName')),
+        );
+      }
+    } catch (e) {
+      log.e('Failed to rename file', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to rename file')),
+        );
+      }
+    }
+  }
+
+  Future<void> _exportFile(RecentFile file) async {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Container(
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.3),
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
-            // Delete action
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: ListTile(
-                leading: const Icon(Icons.delete_outline,
-                    color: Colors.red, size: 20),
-                title:
-                    const Text('Delete', style: TextStyle(color: Colors.red)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _softDeleteRecentFile(file);
-                },
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              ),
+              padding: const EdgeInsets.all(16),
+              child: Text('Export', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
             ),
-            const SizedBox(height: 8),
-            // Duplicate action
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: ListTile(
-                leading: const Icon(Icons.copy, size: 20),
-                title: const Text('Duplicate'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _duplicateFile(file);
-                },
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              ),
+            _buildExportActionRow(
+              icon: Icons.download,
+              title: 'Save to Downloads',
+              iconColor: Colors.green,
+              subtitle: 'Download/Fadocx/${file.fileName}',
+              onTap: () async {
+                Navigator.pop(ctx);
+                await _saveToDownloads(file);
+              },
             ),
-            // File info action
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: ListTile(
-                leading: const Icon(Icons.info_outline, size: 20),
-                title: const Text('File info'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showFileInfoDialog(context, file);
-                },
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              ),
+            _buildExportActionRow(
+              icon: Icons.folder_open,
+              title: 'Choose location',
+              iconColor: Colors.blue,
+              subtitle: 'Pick a custom save directory',
+              onTap: () async {
+                Navigator.pop(ctx);
+                await _saveToCustomLocation(file);
+              },
             ),
+            const SizedBox(height: 16),
           ],
         ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExportActionRow({
+    required IconData icon,
+    required String title,
+    required Color iconColor,
+    String? subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, size: 18, color: iconColor),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      )),
+                      if (subtitle != null)
+                        Text(subtitle, style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<Directory> _getFadocxDownloadsDir() async {
+    final dir = await getDownloadsDirectory();
+    if (dir == null) {
+      throw UnsupportedError('Downloads directory not available');
+    }
+    return Directory('${dir.path}/Fadocx');
+  }
+
+  Future<void> _saveToDownloads(RecentFile file) async {
+    try {
+      final downloadsDir = await _getFadocxDownloadsDir();
+      if (!await downloadsDir.exists()) {
+        await downloadsDir.create(recursive: true);
+      }
+      final source = File(file.filePath);
+      final dest = '${downloadsDir.path}/${file.fileName}';
+      var finalDest = dest;
+      var counter = 1;
+      while (await File(finalDest).exists()) {
+        final dot = file.fileName.lastIndexOf('.');
+        final base = dot > 0 ? file.fileName.substring(0, dot) : file.fileName;
+        final ext = dot > 0 ? file.fileName.substring(dot) : '';
+        finalDest = '${downloadsDir.path}/$base ($counter)$ext';
+        counter++;
+      }
+      await source.copy(finalDest);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved to Download/Fadocx/${finalDest.split('/').last}')),
+        );
+      }
+    } catch (e) {
+      log.e('Failed to export file', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to export file')),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveToCustomLocation(RecentFile file) async {
+    try {
+      final directory = await FilePicker.getDirectoryPath(
+        dialogTitle: 'Choose save location',
+      );
+      if (directory == null) return;
+
+      final source = File(file.filePath);
+      var dest = '$directory/${file.fileName}';
+      var counter = 1;
+      while (await File(dest).exists()) {
+        final dot = file.fileName.lastIndexOf('.');
+        final base = dot > 0 ? file.fileName.substring(0, dot) : file.fileName;
+        final ext = dot > 0 ? file.fileName.substring(dot) : '';
+        dest = '$directory/$base ($counter)$ext';
+        counter++;
+      }
+      await source.copy(dest);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved to ${dest.split('/').last}')),
+        );
+      }
+    } catch (e) {
+      log.e('Failed to export file to custom location', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to export file')),
+        );
+      }
+    }
+  }
+
+  void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
+    showFileActionBottomSheet(
+      context: context,
+      file: file,
+      callbacks: FileActionCallbacks(
+        onRename: () => _renameFile(file),
+        onDuplicate: () => _duplicateFile(file),
+        onExport: () => _exportFile(file),
+        onConvert: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Convert feature coming soon!')),
+          );
+        },
+        onUpload: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('FadDrive coming soon!')),
+          );
+        },
+        onFileInfo: () => _showFileInfoDialog(context, file),
+        onDelete: () => _softDeleteRecentFile(file),
       ),
     );
   }

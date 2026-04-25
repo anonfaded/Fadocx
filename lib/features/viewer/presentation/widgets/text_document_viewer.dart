@@ -55,6 +55,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   final ScrollController _scrollController = ScrollController();
   final ScrollController _horizontalScrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _drawerScrollController = ScrollController();
   final ValueNotifier<int> _drawerVersion = ValueNotifier<int>(0);
   late final AnimationController _highlightController;
   final GlobalKey _viewportKey = GlobalKey();
@@ -308,6 +309,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
       builder: (context, _, __) {
         return TextDocumentSearchDrawer(
           searchController: _searchController,
+          scrollController: _drawerScrollController,
           results: _searchResults,
           activeResultIndex: _activeSearchResultIndex,
           isSearching: _isSearching,
@@ -403,11 +405,22 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
     setState(() => _activeSearchResultIndex = index);
     _drawerVersion.value++;
+    _scrollDrawerToResult(index);
     widget.onSearchHighlight?.call();
-    await _bringResultIntoView(result);
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
     _triggerHighlight(index);
+    await _bringResultIntoView(result);
+  }
+
+  /// Scroll the search drawer's result list so the active card is visible.
+  void _scrollDrawerToResult(int index) {
+    if (!_drawerScrollController.hasClients) return;
+    // Each card is ~76px tall (12+12 padding + 12 vertical + ~40 content)
+    // plus 12px margin top+bottom = ~88px per item. Use estimate for instant jump.
+    const estimatedItemHeight = 88.0;
+    const padding = 8.0;
+    final targetOffset =
+        (index * estimatedItemHeight - padding).clamp(0.0, _drawerScrollController.position.maxScrollExtent);
+    _drawerScrollController.jumpTo(targetOffset);
   }
 
   void _goToNextResult() {
@@ -428,19 +441,15 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     final lineOffset = _kTopPadding + ((lineNumber - 1) * _lineExtent);
     final viewportHeight = _scrollController.position.viewportDimension;
     final centeredOffset = lineOffset - (viewportHeight * 0.35);
-    final target = lineOffset.clamp(
-      0.0,
-      _scrollController.position.maxScrollExtent,
-    );
-    final adjustedTarget = centeredOffset.clamp(
+    final target = centeredOffset.clamp(
       0.0,
       _scrollController.position.maxScrollExtent,
     );
 
     if (animate) {
       await _scrollController.animateTo(
-        adjustedTarget,
-        duration: const Duration(milliseconds: 260),
+        target,
+        duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
       );
     } else {
@@ -453,84 +462,72 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
 
     final lineIndex = result.lineNumber - 1;
     final lineKey = _lineTextKeys[lineIndex];
+
+    // Step 1: Jump immediately to approximate position
     if (lineKey?.currentContext == null) {
       final approxOffset = _kTopPadding + (lineIndex * _lineExtent);
+      final viewportHeight = _scrollController.position.viewportDimension;
+      final centered = approxOffset - (viewportHeight * 0.35);
       _scrollController.jumpTo(
-        approxOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+        centered.clamp(0.0, _scrollController.position.maxScrollExtent),
       );
-      await WidgetsBinding.instance.endOfFrame;
     }
 
+    // Step 2: Wait one frame for the line to be built, then fine-tune
     await WidgetsBinding.instance.endOfFrame;
 
-    Future<void> adjustOnce() async {
-      final rects = _buildHighlightRectsForResult(result);
-      if (rects.isEmpty) return;
-      final bounds = _combineRects(rects);
-      final viewportBox =
-          _viewportKey.currentContext?.findRenderObject() as RenderBox?;
-      if (viewportBox == null) return;
-      final viewportSize = viewportBox.size;
+    final rects = _buildHighlightRectsForResult(result);
+    if (rects.isEmpty) return;
+    final bounds = _combineRects(rects);
+    final viewportBox =
+        _viewportKey.currentContext?.findRenderObject() as RenderBox?;
+    if (viewportBox == null) return;
+    final viewportSize = viewportBox.size;
 
-      final desiredTop = viewportSize.height * 0.24;
-      final desiredBottom = viewportSize.height * 0.72;
+    final desiredTop = viewportSize.height * 0.3;
+    final desiredBottom = viewportSize.height * 0.7;
 
-      double? verticalTarget;
-      if (bounds.top < desiredTop) {
-        verticalTarget =
-            (_scrollController.offset + bounds.top - desiredTop).clamp(
+    // Vertical adjustment — jump instantly for responsiveness
+    double? verticalTarget;
+    if (bounds.top < desiredTop) {
+      verticalTarget =
+          (_scrollController.offset + bounds.top - desiredTop).clamp(
+        0.0,
+        _scrollController.position.maxScrollExtent,
+      );
+    } else if (bounds.bottom > desiredBottom) {
+      verticalTarget =
+          (_scrollController.offset + bounds.bottom - desiredBottom).clamp(
+        0.0,
+        _scrollController.position.maxScrollExtent,
+      );
+    }
+
+    // Horizontal adjustment for unwrapped mode
+    double? horizontalTarget;
+    if (!widget.wordWrap && _horizontalScrollController.hasClients) {
+      final desiredLeft = viewportSize.width * 0.2;
+      final desiredRight = viewportSize.width * 0.8;
+      if (bounds.left < desiredLeft) {
+        horizontalTarget =
+            (_horizontalScrollController.offset + bounds.left - desiredLeft)
+                .clamp(
           0.0,
-          _scrollController.position.maxScrollExtent,
+          _horizontalScrollController.position.maxScrollExtent,
         );
-      } else if (bounds.bottom > desiredBottom) {
-        verticalTarget =
-            (_scrollController.offset + bounds.bottom - desiredBottom).clamp(
+      } else if (bounds.right > desiredRight) {
+        horizontalTarget =
+            (_horizontalScrollController.offset + bounds.right - desiredRight)
+                .clamp(
           0.0,
-          _scrollController.position.maxScrollExtent,
-        );
-      }
-
-      double? horizontalTarget;
-      if (!widget.wordWrap && _horizontalScrollController.hasClients) {
-        final desiredLeft = viewportSize.width * 0.18;
-        final desiredRight = viewportSize.width * 0.82;
-        if (bounds.left < desiredLeft) {
-          horizontalTarget =
-              (_horizontalScrollController.offset + bounds.left - desiredLeft)
-                  .clamp(
-            0.0,
-            _horizontalScrollController.position.maxScrollExtent,
-          );
-        } else if (bounds.right > desiredRight) {
-          horizontalTarget =
-              (_horizontalScrollController.offset + bounds.right - desiredRight)
-                  .clamp(
-            0.0,
-            _horizontalScrollController.position.maxScrollExtent,
-          );
-        }
-      }
-
-      if (horizontalTarget != null) {
-        await _horizontalScrollController.animateTo(
-          horizontalTarget,
-          duration: const Duration(milliseconds: 260),
-          curve: Curves.easeOutCubic,
-        );
-      }
-
-      if (verticalTarget != null) {
-        await _scrollController.animateTo(
-          verticalTarget,
-          duration: const Duration(milliseconds: 260),
-          curve: Curves.easeOutCubic,
+          _horizontalScrollController.position.maxScrollExtent,
         );
       }
     }
 
-    await adjustOnce();
-    await WidgetsBinding.instance.endOfFrame;
-    await adjustOnce();
+    // Apply both adjustments instantly — no animation for immediate feel
+    if (verticalTarget != null) _scrollController.jumpTo(verticalTarget);
+    if (horizontalTarget != null) _horizontalScrollController.jumpTo(horizontalTarget);
   }
 
   void _triggerHighlight(int resultIndex) {
@@ -629,6 +626,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
     _scrollController.dispose();
     _horizontalScrollController.dispose();
     _searchController.dispose();
+    _drawerScrollController.dispose();
     _highlightReverseTimer?.cancel();
     _highlightController.dispose();
     _drawerVersion.dispose();

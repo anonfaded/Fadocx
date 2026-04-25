@@ -294,40 +294,6 @@ class DocumentParsingRepositoryImpl implements DocumentParsingRepository {
   }
 
   @override
-  Future<ParsedDocumentEntity> parsePPT(String filePath) async {
-    // Check cache first (skip if format is UNKNOWN or invalid)
-    final cached = await getCachedParsing(filePath);
-    if (cached != null && cached.format != 'UNKNOWN') {
-      log.i('Using cached PPT: $filePath');
-      return cached;
-    }
-
-    final format = filePath.toLowerCase().endsWith('.pptx') ? 'PPTX' : 'PPT';
-    log.i('Parsing $format (NATIVE, no fallback): $filePath');
-
-    // PPT/PPTX MUST use native parsing - Dart binary extraction produces garbage
-    try {
-      log.d('Calling native parser channel for $format...');
-      final nativeResult =
-          await _platformChannel.parseDocumentNative(filePath, format);
-
-      log.d(
-          'Native parser returned: textContent length=${(nativeResult['textContent'] as String?)?.length}, slideCount=${nativeResult['slideCount']}, format=${nativeResult['format']}');
-
-      final result = _toParsedEntity(nativeResult, format: format);
-
-      log.i('Successfully parsed $format: slideCount=${result.slideCount}');
-      await cacheParsing(filePath, result);
-      return result;
-    } catch (e, st) {
-      log.e('NATIVE PARSING FAILED for $format: $e', error: e, stackTrace: st);
-      log.d('Failed file path: $filePath');
-      log.d('Native channel may not be available or file may be corrupted');
-      rethrow; // Let it fail - this is critical
-    }
-  }
-
-  @override
   Future<ParsedDocumentEntity> parseTXT(String filePath) async {
     // Check cache first (skip if format is UNKNOWN or invalid)
     final cached = await getCachedParsing(filePath);
