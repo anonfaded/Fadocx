@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
+import 'package:fadocx/features/home/presentation/widgets/file_action_bottom_sheet.dart';
 
 final log = Logger();
 
@@ -1077,210 +1078,25 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
-    showModalBottomSheet(
+    showFileActionBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Column(
-                children: [
-                  Text(
-                    file.fileName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'File actions and management',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildActionRow(
-              icon: Icons.edit_outlined,
-              title: 'Rename',
-              iconColor: Theme.of(context).colorScheme.primary,
-              subtitle: 'Change file name',
-              onTap: () {
-                Navigator.pop(ctx);
-                _renameFile(file);
-              },
-            ),
-            _buildActionRow(
-              icon: Icons.content_copy,
-              title: 'Duplicate',
-              iconColor: Colors.blue,
-              subtitle: 'Create a copy',
-              onTap: () {
-                Navigator.pop(ctx);
-                _duplicateFile(file);
-              },
-            ),
-            _buildActionRow(
-              icon: Icons.save_alt,
-              title: 'Export / Save As',
-              iconColor: Colors.green,
-              subtitle: 'Save a copy to Downloads',
-              showChevron: true,
-              onTap: () {
-                Navigator.pop(ctx);
-                _exportFile(file);
-              },
-            ),
-            _buildActionRow(
-              icon: Icons.transform,
-              title: 'Convert',
-              subtitle: 'Convert to another format',
-              iconColor: Colors.purple,
-              showComingSoonBadge: true,
-              onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Convert feature coming soon!')),
-                );
-              },
-            ),
-            _buildActionRow(
-              icon: Icons.cloud_upload_outlined,
-              title: 'Upload to FadDrive',
-              subtitle: 'Sync to cloud storage',
-              iconColor: Colors.blue,
-              showComingSoonBadge: true,
-              onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('FadDrive coming soon!')),
-                );
-              },
-            ),
-            _buildActionRow(
-              icon: Icons.info_outline,
-              title: 'File info',
-              iconColor: Colors.grey,
-              onTap: () {
-                Navigator.pop(ctx);
-                _showFileInfoDialog(context, file);
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 6),
-              child: Divider(height: 1, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
-            ),
-            _buildActionRow(
-              icon: Icons.delete_outline,
-              title: 'Delete',
-              iconColor: Colors.red,
-              titleColor: Colors.red,
-              onTap: () {
-                Navigator.pop(ctx);
-                _softDeleteFile(file);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionRow({
-    required IconData icon,
-    required String title,
-    required Color iconColor,
-    String? subtitle,
-    bool showChevron = false,
-    bool showComingSoonBadge = false,
-    Color? titleColor,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Theme.of(context).colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, size: 18, color: iconColor),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: titleColor,
-                      )),
-                      if (subtitle != null)
-                        Text(subtitle, style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        )),
-                    ],
-                  ),
-                ),
-                if (showComingSoonBadge)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      'Coming Soon',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.orange.shade700,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                if (showChevron)
-                  Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ],
-            ),
-          ),
-        ),
+      file: file,
+      callbacks: FileActionCallbacks(
+        onRename: () => _renameFile(file),
+        onDuplicate: () => _duplicateFile(file),
+        onExport: () => _exportFile(file),
+        onConvert: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Convert feature coming soon!')),
+          );
+        },
+        onUpload: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('FadDrive coming soon!')),
+          );
+        },
+        onFileInfo: () => _showFileInfoDialog(context, file),
+        onDelete: () => _softDeleteFile(file),
       ),
     );
   }
@@ -1395,7 +1211,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               padding: const EdgeInsets.all(16),
               child: Text('Export', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
             ),
-            _buildActionRow(
+            _buildExportActionRow(
               icon: Icons.download,
               title: 'Save to Downloads',
               iconColor: Colors.green,
@@ -1405,7 +1221,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                 await _saveToDownloads(file);
               },
             ),
-            _buildActionRow(
+            _buildExportActionRow(
               icon: Icons.folder_open,
               title: 'Choose location',
               iconColor: Colors.blue,
@@ -1418,6 +1234,59 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             const SizedBox(height: 16),
           ],
         ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExportActionRow({
+    required IconData icon,
+    required String title,
+    required Color iconColor,
+    String? subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, size: 18, color: iconColor),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      )),
+                      if (subtitle != null)
+                        Text(subtitle, style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

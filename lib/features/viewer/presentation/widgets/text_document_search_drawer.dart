@@ -25,6 +25,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
   final ValueChanged<int> onResultTap;
   final VoidCallback onNextResult;
   final VoidCallback onPreviousResult;
+  final ScrollController? scrollController;
 
   const TextDocumentSearchDrawer({
     super.key,
@@ -38,6 +39,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
     required this.onResultTap,
     required this.onNextResult,
     required this.onPreviousResult,
+    this.scrollController,
   });
 
   @override
@@ -140,6 +142,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
               : results.isEmpty
                   ? _buildNoResultsState(context)
                   : ListView.builder(
+                      controller: scrollController,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: results.length,
                       itemBuilder: (context, index) {

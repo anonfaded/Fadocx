@@ -9,38 +9,6 @@ final log = Logger();
 
 /// Service to parse and extract data from various document formats
 class DocumentParserService {
-  /// Parse XLS format (legacy Excel)
-  /// Returns a simplified table structure as map
-  static Future<Map<String, dynamic>> parseXLS(String filePath) async {
-    try {
-      log.i('Parsing XLS file: $filePath');
-
-      // XLS is a complex binary format - native parser on Android handles this
-      // For Dart fallback, we can only extract basic info
-      final file = File(filePath);
-      final fileBytes = await file.readAsBytes();
-
-      // Basic check for OLE2 compound file signature
-      if (fileBytes.length >= 8) {
-        final signature = String.fromCharCodes(fileBytes.take(8));
-        if (signature == '\u00D0\u00CF\u0011\u00E0\u00A1\u00B1\u001A') {
-          log.i('Valid OLE2 compound file detected for XLS');
-          return {
-            'sheets': [],
-            'format': 'XLS',
-            'note':
-                'Native parser required for full XLS support. Basic structure detected.',
-          };
-        }
-      }
-
-      throw Exception('Invalid or unsupported XLS file format');
-    } catch (e, st) {
-      log.e('Error parsing XLS', error: e, stackTrace: st);
-      rethrow;
-    }
-  }
-
   /// Parse XLSX format (modern Excel)
   ///
   /// XLSX is fully handled by the native Android parser via Apache POI
@@ -112,50 +80,6 @@ class DocumentParserService {
       );
     } catch (e, st) {
       log.e('Error parsing ODS', error: e, stackTrace: st);
-      rethrow;
-    }
-  }
-
-  /// Parse ODP format (OpenDocument Presentation)
-  /// Returns slides data
-  static Future<List<Map<String, dynamic>>> parseODP(String filePath) async {
-    try {
-      log.i('Parsing ODP file: $filePath');
-      final file = File(filePath);
-      final bytes = await file.readAsBytes();
-      final archive = ZipDecoder().decodeBytes(bytes);
-
-      final slides = <Map<String, dynamic>>[];
-
-      // ODP contains slides as XML files
-      for (var i = 1;; i++) {
-        final slideFile = archive.findFile('ppt/slides/slide$i.xml');
-        if (slideFile == null) break;
-
-        try {
-          final slideXml = utf8.decode(slideFile.content as List<int>);
-          final document = XmlDocument.parse(slideXml);
-
-          // Extract text from slide
-          final texts = <String>[];
-          for (var elem in document.findAllElements('a:t')) {
-            texts.add(elem.innerText);
-          }
-
-          slides.add({
-            'slideNumber': i,
-            'text': texts.join('\n'),
-          });
-          log.d('Parsed ODP slide $i');
-        } catch (e) {
-          log.w('Could not parse ODP slide $i: $e');
-        }
-      }
-
-      log.i('ODP parsed: ${slides.length} slides');
-      return slides;
-    } catch (e, st) {
-      log.e('Error parsing ODP', error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -303,34 +227,6 @@ class DocumentParserService {
     }
   }
 
-  // Helper: Extract text from binary data
-  static String _extractTextFromBytes(List<int> bytes) {
-    final buffer = StringBuffer();
-
-    // Simple binary text extraction - looks for readable ASCII sequences
-    var currentWord = StringBuffer();
-
-    for (final byte in bytes) {
-      if (byte >= 32 && byte < 127) {
-        // Printable ASCII
-        currentWord.writeCharCode(byte);
-      } else {
-        if (currentWord.length > 4) {
-          // Only include words with length > 4 to avoid artifacts
-          buffer.write(currentWord.toString());
-          buffer.write('\n');
-        }
-        currentWord.clear();
-      }
-    }
-
-    if (currentWord.length > 4) {
-      buffer.write(currentWord.toString());
-    }
-
-    return buffer.toString();
-  }
-
   static List<List<String>> _parseCsvRows(String content) {
     final rows = <List<String>>[];
     final row = <String>[];
@@ -379,81 +275,6 @@ class DocumentParserService {
     }
 
     return rows;
-  }
-
-  /// Parse PPT format (PowerPoint)
-  /// Returns slides data similar to ODP
-  static Future<List<Map<String, dynamic>>> parsePPT(String filePath) async {
-    try {
-      log.i('Parsing PPT file: $filePath');
-      final file = File(filePath);
-      final bytes = await file.readAsBytes();
-
-      try {
-        // Try new format (PPTX)
-        return await _parsePPTX(bytes);
-      } catch (e) {
-        log.i('PPT is old format, extracting text from binary: $e');
-        // Fall back to binary text extraction for old PPT format
-        final text = _extractTextFromBytes(bytes);
-        return [
-          {
-            'slideNumber': 1,
-            'text':
-                text.isEmpty ? 'Could not extract text from PPT file' : text,
-          }
-        ];
-      }
-    } catch (e, st) {
-      log.e('Error parsing PPT', error: e, stackTrace: st);
-      rethrow;
-    }
-  }
-
-  /// Parse PPTX format (Modern PowerPoint - essentially same as ODP internally)
-  static Future<List<Map<String, dynamic>>> _parsePPTX(List<int> bytes) async {
-    try {
-      final archive = ZipDecoder().decodeBytes(bytes);
-      final slides = <Map<String, dynamic>>[];
-
-      // PPTX contains slides in ppt/slides/ directory
-      for (var i = 1;; i++) {
-        final slideFile = archive.findFile('ppt/slides/slide$i.xml');
-        if (slideFile == null) break;
-
-        try {
-          final slideXml = utf8.decode(slideFile.content as List<int>);
-          final document = XmlDocument.parse(slideXml);
-
-          // Extract text from slide
-          final texts = <String>[];
-          for (var elem in document.findAllElements('a:t')) {
-            final text = elem.innerText.trim();
-            if (text.isNotEmpty) {
-              texts.add(text);
-            }
-          }
-
-          slides.add({
-            'slideNumber': i,
-            'text': texts.isEmpty ? '[Slide $i - no text]' : texts.join('\n'),
-          });
-          log.d('Parsed PPTX slide $i');
-        } catch (e) {
-          log.w('Could not parse PPTX slide $i: $e');
-        }
-      }
-
-      if (slides.isEmpty) {
-        throw Exception('No slides found in PPTX');
-      }
-
-      log.i('PPTX parsed: ${slides.length} slides');
-      return slides;
-    } catch (e) {
-      log.w('PPTX parsing failed: $e');
-      rethrow;
-    }
   }
 
   /// Parse DOCX format (Modern Word)
