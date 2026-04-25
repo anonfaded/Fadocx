@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'dart:ui' as ui;
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -235,8 +235,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
   Widget _buildHomeContent(BuildContext context, List<RecentFile> files, bool showRecentFiles, AppSettings? appSettings) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
+      padding: const EdgeInsets.fromLTRB(12, 88, 12, 16),
       children: [
+        // Stats Card Section
+        _buildStatsCard(context, files, appSettings),
+        const SizedBox(height: 12),
+
         // Action Cards Section - 2 cards in one row
         Row(
           children: [
@@ -247,13 +251,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 title: 'Scan to Extract Text',
                 description: 'Extract text from documents using OCR',
                 icon: Icons.document_scanner,
+                cardType: 'scan',
                 onTap: () {
                   log.i('Navigating to scanner');
                   context.push(RouteNames.scanner);
                 },
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             // Import a Document card
             Expanded(
               child: _buildActionCard(
@@ -261,6 +266,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 title: 'Import a Document',
                 description: 'Browse and import files from your device',
                 icon: Icons.folder_open,
+                cardType: 'import',
                 onTap: () {
                   log.i('Navigating to browse');
                   context.push(RouteNames.browse);
@@ -269,7 +275,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 14),
 
         // Recent Files Section - show header only when not onboarding
         if (showRecentFiles && (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles))) ...[
@@ -351,150 +357,245 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     required String title,
     required String description,
     required IconData icon,
+    required String cardType,
     required VoidCallback onTap,
   }) {
     return _ModernActionCard(
       title: title,
       description: description,
       icon: icon,
+      cardType: cardType,
       onTap: onTap,
     );
   }
 
-  Widget _buildEmptyRecentState(BuildContext context) {
+  Widget _buildStatsCard(BuildContext context, List<RecentFile> files, AppSettings? appSettings) {
+    final filesCount = files.length;
+    final totalSizeBytes = files.fold<int>(0, (sum, f) => sum + f.fileSizeBytes);
+    final totalSizeGB = (totalSizeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1);
+    
+    final today = DateTime.now();
+    final openedToday = files.where((f) {
+      final isToday = f.dateOpened.year == today.year &&
+          f.dateOpened.month == today.month &&
+          f.dateOpened.day == today.day;
+      return isToday;
+    }).length;
+    
+    final lastFile = files.isNotEmpty ? files.first : null;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
-          width: 1.5,
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.12),
+          width: 1,
         ),
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildStatItem(
+                context,
+                icon: Icons.insert_drive_file,
+                value: filesCount.toString(),
+                label: 'Files',
+              ),
+              _buildStatItem(
+                context,
+                icon: Icons.storage,
+                value: '${totalSizeGB}GB',
+                label: 'Used',
+              ),
+              _buildStatItem(
+                context,
+                icon: Icons.today,
+                value: openedToday.toString(),
+                label: 'Today',
+              ),
+            ],
           ),
+          if (lastFile != null) ...[
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    // Navigate to last opened file
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.history,
+                          size: 14,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Last: ${lastFile.fileName}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ]
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            ),
-            child: Icon(
-              Icons.lightbulb_outline,
-              size: 48,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+    );
+  }
+
+  Widget _buildStatItem(BuildContext context, {required IconData icon, required String value, required String label}) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Welcome to Fadocx',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
-            ),
-            textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 10,
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Start by exploring our curated sample files or upload your own documents to get started',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyRecentState(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height * 0.4,
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+            width: 1,
           ),
-          const SizedBox(height: 28),
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _importSampleFiles(context),
-                borderRadius: BorderRadius.circular(14),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.download_for_offline,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Import Sample Files',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              'or',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              child: Icon(
+                Icons.lightbulb_outline,
+                size: 28,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              children: [
-                TextSpan(
-                  text: 'scan',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Color.lerp(Theme.of(context).colorScheme.primary, const Color(0xFF3B82F6), 0.6),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const TextSpan(text: ' or '),
-                TextSpan(
-                  text: 'import',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Color.lerp(Theme.of(context).colorScheme.primary, const Color(0xFF10B981), 0.6),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const TextSpan(text: ' your own documents'),
-              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'Welcome to Fadocx',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                'Explore sample files or import your own documents',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _importSampleFiles(context),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.download_for_offline,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Import Sample Files',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -979,7 +1080,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
               radius: _kSidebarRadius,
             ),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -1137,12 +1238,14 @@ class _ModernActionCard extends StatefulWidget {
   final String title;
   final String description;
   final IconData icon;
+  final String cardType; // 'scan' or 'import'
   final VoidCallback onTap;
 
   const _ModernActionCard({
     required this.title,
     required this.description,
     required this.icon,
+    required this.cardType,
     required this.onTap,
   });
 
@@ -1154,7 +1257,10 @@ class _ModernActionCardState extends State<_ModernActionCard>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  late AnimationController _patternController;
+  late AnimationController _shimmerController;
+  late Animation<double> _shimmerAnimation;
+  late AnimationController _binaryController;
+  late Animation<double> _binaryAnimation;
 
   @override
   void initState() {
@@ -1167,37 +1273,53 @@ class _ModernActionCardState extends State<_ModernActionCard>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
-    _patternController = AnimationController(
+
+    // Shimmer animation for continuous subtle effect
+    _shimmerController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
+
+    _shimmerAnimation = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
+    );
+
+    // Binary animation for extraction card
+    _binaryController = AnimationController(
+      duration: const Duration(seconds: 15),
+      vsync: this,
+    )..repeat();
+
+    _binaryAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _binaryController, curve: Curves.linear),
+    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _patternController.dispose();
+    _shimmerController.dispose();
+    _binaryController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isScanning = widget.icon == Icons.document_scanner;
+    final isScanning = widget.cardType == 'scan';
 
-    // Different gradient colors based on card type - using theme-appropriate gray gradients
-    // Use toned-down gradients to avoid 'web' green shadows; keep warm, subtle tones
+    // Use theme colors with better contrast and visual appeal
     final gradientColors = isScanning
         ? [
-            const Color(0xFF4A90E2),
-            const Color(0xFF2E6FB3),
+            const Color(0xFF16A085),  // Emerald
+            const Color(0xFF27AE60),  // Green
           ]
         : [
-            Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.primary, 0.04)!,
-            Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.primary, 0.08)!,
+            const Color(0xFF2C3E50),  // Deep blue-gray
+            const Color(0xFF34495E),  // Slate
           ];
 
     return AnimatedBuilder(
-      animation: _scaleAnimation,
+      animation: Listenable.merge([_scaleAnimation, _shimmerAnimation, _binaryAnimation]),
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
@@ -1210,10 +1332,10 @@ class _ModernActionCardState extends State<_ModernActionCard>
                   widget.onTap();
                 });
               },
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(16),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -1221,116 +1343,118 @@ class _ModernActionCardState extends State<_ModernActionCard>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   child: Stack(
                     children: [
-                      Container(
-                        height: 140,
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Icon(
-                                widget.icon,
-                                size: 24,
-                                color: Colors.white,
+                      // Animation background (bottom layer) - small black section on right
+                      if (isScanning)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            ignoring: true,
+                            child: CustomPaint(
+                              painter: _BinaryDigitsPainter(
+                                progress: _binaryAnimation.value,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  widget.title,
-                                  textAlign: TextAlign.left,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                        height: 1.1,
-                                        letterSpacing: 0.2,
-                                      ),
+                          ),
+                        )
+                      else
+                        Positioned.fill(
+                            child: IgnorePointer(
+                              ignoring: true,
+                              child: CustomPaint(
+                                painter: _IconAnimationPainter(
+                                  progress: _binaryAnimation.value,
+                                  preserveIdentity: true,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  widget.description,
-                                  textAlign: TextAlign.left,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.white.withValues(alpha: 0.9),
-                                        height: 1.3,
-                                        fontSize: 12,
-                                      ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
 
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          ignoring: true,
-                          child: AnimatedBuilder(
-                            animation: _patternController,
-                            builder: (context, child) {
-                              final dx = (_patternController.value * 2 - 1) * 220;
-                              return Transform.translate(
-                                offset: Offset(dx, 0),
-                                child: Transform.rotate(
-                                  angle: -0.6,
-                                  child: Container(
-                                    width: 200,
+                      // Main content (top layer) - left aligned, overlaid on animation
+                      LayoutBuilder(builder: (context, constraints) {
+                        // Reserve right-side space based on diagonal start so text fits
+                        final diagStartX = constraints.maxWidth * 0.85; // matches painter diagonal
+                        final rightReserve = (constraints.maxWidth - diagStartX).clamp(32.0, constraints.maxWidth * 0.35);
+                        return Padding(
+                          padding: EdgeInsets.fromLTRB(6, 6, rightReserve + 6, 6),
+                          child: ConstrainedBox(
+                            // restore compact card height (previously 120)
+                            constraints: BoxConstraints(minHeight: 96),
+                            child: SizedBox(
+                              width: constraints.maxWidth - rightReserve - 12,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Colors.white.withValues(alpha: 0.0),
-                                          Colors.white.withValues(alpha: 0.06),
-                                          Colors.white.withValues(alpha: 0.0),
-                                        ],
-                                        stops: const [0.0, 0.5, 1.0],
-                                      ),
+                                      color: Colors.white.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      widget.icon,
+                                      size: 20,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                ),
-                              );
-                            },
+                                  const SizedBox(height: 6),
+                                  // Title - keep compact: single line with ellipsis if needed
+                                  Text(
+                                    widget.title,
+                                    textAlign: TextAlign.left,
+                                    softWrap: false,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          height: 1.15,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  // Description - keep to 2 lines to avoid tall cards
+                                  Text(
+                                    widget.description,
+                                    textAlign: TextAlign.left,
+                                    softWrap: true,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: Colors.white.withValues(alpha: 0.9),
+                                          fontSize: 11,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      }),
 
+                      // Chevron arrow (top right)
                       Positioned(
-                        top: 6,
-                        right: 8,
+                        top: 8,
+                        right: 10,
                         child: Icon(
                           Icons.chevron_right,
-                          size: 18,
-                          color: Colors.white.withValues(alpha: 0.85),
+                          size: 20,
+                          color: Colors.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -1343,6 +1467,206 @@ class _ModernActionCardState extends State<_ModernActionCard>
       },
     );
   }
+}
+
+// Binary digits painter for extraction card - shows animated 0s and 1s on pitch black background (diagonal right)
+class _BinaryDigitsPainter extends CustomPainter {
+  final double progress;
+
+  _BinaryDigitsPainter({
+    required this.progress,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Diagonal cut path - small black area (top-right to bottom-left)
+    final diagRect = Path();
+    diagRect.moveTo(size.width, 0);
+    diagRect.lineTo(size.width * 0.85, 0);  // Consistent with import card
+    diagRect.lineTo(size.width * 0.65, size.height);  // Consistent with import card
+    diagRect.lineTo(size.width, size.height);
+    diagRect.close();
+
+    final blackPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(diagRect, blackPaint);
+
+    // Clip animation to only appear in black area
+    canvas.save();
+    canvas.clipPath(diagRect);
+
+    // Draw animated binary digits (0s and 1s) in 2 columns with offset
+    const textStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 10,
+      fontFamily: 'monospace',
+      fontWeight: FontWeight.bold,
+      letterSpacing: 0.8,
+    );
+
+    final textPainter = TextPainter(textDirection: ui.TextDirection.ltr);
+
+    // Seamless binary sequence
+    const binarySequence = '0110101001101011010110100110';
+    const spacing = 12.0;
+    const colWidth = 15.0;
+
+    // Slow animation - progress moves downward continuously
+    final totalHeight = spacing * 20; // Enough rows to cover size.height
+    final scrollOffset = progress * totalHeight;
+
+    // Draw in 2 columns with offset so they don't sync
+    for (int col = 0; col < 2; col++) {
+      // Offset second column by half spacing for async animation
+      final colOffset = col == 0 ? 0 : spacing / 2;
+      
+      for (int row = 0; row < 20; row++) {
+        // Static digit assignment per row/column - remove progress shift to stop swapping
+        final digitIndex = ((row + col * 13) + (progress * binarySequence.length).round()) % binarySequence.length;
+        final digit = binarySequence[digitIndex];
+
+        // Y position moves downward smoothly with wrapping
+        double yPos = (row * spacing + colOffset + scrollOffset) % totalHeight;
+        
+        final xPos = (size.width * 0.82) + (col * colWidth);
+
+        // Fade in/out at edges for seamless effect
+        final distanceFromCenter = (yPos - size.height / 2).abs();
+        final opacity = (1 - (distanceFromCenter / (size.height / 2))).clamp(0.0, 1.0);
+
+        textPainter.text = TextSpan(
+          text: digit,
+          style: textStyle.copyWith(
+            color: Colors.white.withValues(alpha: opacity * 0.75),
+          ),
+        );
+        textPainter.layout();
+        textPainter.paint(
+          canvas,
+          Offset(xPos - textPainter.width / 2, yPos - textPainter.height / 2),
+        );
+      }
+    }
+
+    canvas.restore();  // Restore clipping
+  }
+
+  @override
+  bool shouldRepaint(_BinaryDigitsPainter oldDelegate) => oldDelegate.progress != progress;
+}
+
+// Icon animation painter for import card - shows animated Material document icons on black background (diagonal right)
+class _IconAnimationPainter extends CustomPainter {
+  final double progress;
+  final bool preserveIdentity;
+
+  _IconAnimationPainter({
+    required this.progress,
+    this.preserveIdentity = false,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Diagonal cut path - small black area (top-right to bottom-left)
+    final diagRect = Path();
+    diagRect.moveTo(size.width, 0);
+    diagRect.lineTo(size.width * 0.85, 0);  // Even smaller
+    diagRect.lineTo(size.width * 0.65, size.height);  // Much smaller
+    diagRect.lineTo(size.width, size.height);
+    diagRect.close();
+
+    final blackPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(diagRect, blackPaint);
+
+    // Clip animation to only appear in black area
+    canvas.save();
+    canvas.clipPath(diagRect);
+
+    // Draw animated Material Design icons with 2 columns for consistency
+    const iconSpacing = 24.0;
+    const colWidth = 22.0;
+
+    // Document type icons to use - real Material icons for different file types
+    const iconList = [
+      Icons.picture_as_pdf,   // PDF
+      Icons.table_chart,      // Spreadsheet/Sheet
+      Icons.description,      // Word/Document
+      Icons.code,             // Code/Programming
+      Icons.slideshow,        // PowerPoint/Presentation
+      Icons.image,            // Image
+      Icons.text_fields,      // Text
+      Icons.folder,           // Folder
+    ];
+
+    // Compute rows needed to fill the visible height
+    const rows = 12;
+    const totalHeight = rows * iconSpacing;
+
+    // Use same perceived speed as binary: move by totalHeight per animation progress unit
+    final scrollOffset = progress * totalHeight;
+
+    // Draw in 2 columns with offset (matching scan card pattern)
+    for (int col = 0; col < 2; col++) {
+      // Offset second column by half spacing for async animation
+      final colOffset = col == 0 ? 0.0 : iconSpacing / 2;
+
+      for (int i = 0; i < rows; i++) {
+        // Static icon assignment per logical row - strictly index based
+        final iconIndex = (i + col * 3) % iconList.length;
+
+        // Y position moves downward smoothly with wrapping
+        double yPos = (i * iconSpacing + colOffset + scrollOffset) % totalHeight;
+        if (yPos < -iconSpacing) yPos += totalHeight;
+
+        final xPos = (size.width * 0.80) + (col * colWidth);
+
+        // Fade in/out at edges for seamless effect
+        final distanceFromCenter = (yPos - size.height / 2).abs();
+        final opacity = (1 - (distanceFromCenter / (size.height / 2))).clamp(0.0, 1.0);
+
+        // Draw icon as a real Material glyph
+        _drawIconGlyph(canvas, Offset(xPos, yPos), iconList[iconIndex], opacity);
+      }
+    }
+
+    canvas.restore();  // Restore clipping
+  }
+
+  void _drawIconGlyph(Canvas canvas, Offset center, IconData icon, double opacity) {
+    // Render actual Material Design icons using TextPainter
+    final textPainter = TextPainter(
+      textDirection: ui.TextDirection.ltr,
+    );
+
+    // Create Material icon text span with proper styling
+    textPainter.text = TextSpan(
+      text: String.fromCharCode(icon.codePoint),
+      style: TextStyle(
+        inherit: false,
+        color: Colors.white.withValues(alpha: opacity * 0.85),
+        fontSize: 14.0,
+        fontFamily: icon.fontFamily,
+        package: icon.fontPackage,
+      ),
+    );
+
+    textPainter.layout();
+    
+    // Draw the icon centered at the given position
+    textPainter.paint(
+      canvas,
+      Offset(
+        center.dx - textPainter.width / 2,
+        center.dy - textPainter.height / 2,
+      ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_IconAnimationPainter oldDelegate) => oldDelegate.progress != progress;
 }
 
 class _HomeDrawerContent extends ConsumerWidget {
