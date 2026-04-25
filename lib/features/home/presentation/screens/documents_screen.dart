@@ -6,7 +6,6 @@ import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/config/routing/app_router.dart';
-import 'package:fadocx/config/theme/app_theme.dart';
 import 'package:logger/logger.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
@@ -1016,13 +1015,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _getFileIcon(String fileType, {double size = 24}) {
+    final theme = Theme.of(context);
     IconData iconData;
     Color color;
 
     switch (fileType.toLowerCase()) {
       case 'pdf':
         iconData = Icons.picture_as_pdf;
-        color = AppColors.categoryPdf;
+        color = theme.colorScheme.error;
         break;
       case 'docx':
       case 'doc':
@@ -1030,20 +1030,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       case 'rtf':
       case 'txt':
         iconData = Icons.description;
-        color = AppColors.categoryDoc;
+        color = theme.colorScheme.primary;
         break;
       case 'xlsx':
       case 'xls':
       case 'ods':
       case 'csv':
         iconData = Icons.table_chart;
-        color = AppColors.categorySheet;
+        color = theme.colorScheme.tertiary;
         break;
       case 'ppt':
       case 'pptx':
       case 'odp':
         iconData = Icons.slideshow;
-        color = AppColors.categorySlide;
+        color = theme.colorScheme.error;
         break;
       case 'java':
       case 'py':
@@ -1054,11 +1054,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       case 'xml':
       case 'log':
         iconData = Icons.code;
-        color = AppColors.categoryDoc;
+        color = theme.colorScheme.primary;
         break;
       default:
         iconData = Icons.insert_drive_file;
-        color = AppColors.categoryDefault;
+        color = theme.colorScheme.onSurfaceVariant;
     }
 
     return Icon(iconData, color: color, size: size);
@@ -1806,13 +1806,14 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
   }
 
   Widget _buildThumbnailIcon(String fileType) {
+    final theme = Theme.of(context);
     IconData iconData;
     Color color;
 
     switch (fileType.toLowerCase()) {
       case 'pdf':
         iconData = Icons.picture_as_pdf;
-        color = AppColors.categoryPdf;
+        color = theme.colorScheme.error;
         break;
       case 'docx':
       case 'doc':
@@ -1820,20 +1821,20 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
       case 'rtf':
       case 'txt':
         iconData = Icons.description;
-        color = AppColors.categoryDoc;
+        color = theme.colorScheme.primary;
         break;
       case 'xlsx':
       case 'xls':
       case 'ods':
       case 'csv':
         iconData = Icons.table_chart;
-        color = AppColors.categorySheet;
+        color = theme.colorScheme.tertiary;
         break;
       case 'ppt':
       case 'pptx':
       case 'odp':
         iconData = Icons.slideshow;
-        color = AppColors.categorySlide;
+        color = theme.colorScheme.error;
         break;
       case 'java':
       case 'py':
@@ -1844,11 +1845,11 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
       case 'xml':
       case 'log':
         iconData = Icons.code;
-        color = AppColors.categoryDoc;
+        color = theme.colorScheme.primary;
         break;
       default:
         iconData = Icons.insert_drive_file;
-        color = AppColors.categoryDefault;
+        color = theme.colorScheme.onSurfaceVariant;
     }
 
     return Icon(iconData, color: color, size: 40);

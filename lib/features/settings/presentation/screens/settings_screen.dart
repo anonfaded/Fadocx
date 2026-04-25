@@ -66,8 +66,8 @@ class SettingsScreen extends ConsumerWidget {
               _buildSettingsGroup(context, [
                 Consumer(
                   builder: (context, ref, _) {
-                    final storageStatsAsync = ref.watch(storageStatsProvider);
-                    return storageStatsAsync.when(
+                    final recentFilesAsync = ref.watch(recentFilesProvider);
+                    return recentFilesAsync.when(
                       loading: () => Column(children: [
                         _SettingsRow(
                           icon: Icons.folder_outlined,
@@ -100,9 +100,10 @@ class SettingsScreen extends ConsumerWidget {
                           onTap: null,
                         ),
                       ]),
-                      data: (data) {
-                        final totalBytes = data.values.fold<int>(0, (p, e) => p + (e['bytes'] ?? 0));
-                        final totalCount = data.values.fold<int>(0, (p, e) => p + (e['count'] ?? 0));
+                      data: (files) {
+                        final activeFiles = files.where((f) => !f.isDeleted).toList();
+                        final totalBytes = activeFiles.fold<int>(0, (sum, f) => sum + f.fileSizeBytes);
+                        final totalCount = activeFiles.length;
                         final value = '${StorageService.formatBytes(totalBytes)} • $totalCount files';
                         return Column(children: [
                           _SettingsRow(
