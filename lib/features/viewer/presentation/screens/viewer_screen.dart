@@ -995,13 +995,15 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
 
     final readingMinutes =
-        (wordCount / _readingWordsPerMinute).ceil().clamp(1, 999);
-    final minuteLabel = readingMinutes == 1 ? 'minute' : 'minutes';
+        (wordCount / _readingWordsPerMinute).ceil().clamp(1, 99999);
+    final readingTimeStr = readingMinutes >= 60
+        ? '${readingMinutes ~/ 60}h ${readingMinutes % 60}m read'
+        : '$readingMinutes ${readingMinutes == 1 ? "minute" : "minutes"} read';
 
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Text(
-        '$readingMinutes $minuteLabel read • $wordCount words • $lineCount lines',
+        '$readingTimeStr • $wordCount words • $lineCount lines',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.center,

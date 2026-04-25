@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -704,46 +705,54 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
                     ),
                   )
                 else
+                  // Virtualized unwrapped mode: horizontal SingleChildScrollView
+                  // wrapping vertical ListView.builder — axes don't conflict.
                   SingleChildScrollView(
-                    controller: _scrollController,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: 4,
-                        right: 8,
-                        top: _kTopPadding,
-                        bottom: _kBottomPadding,
-                      ),
-                      child: SingleChildScrollView(
-                        controller: _horizontalScrollController,
-                        scrollDirection: Axis.horizontal,
-                        child: SelectionArea(
-                          child: Builder(
-                            builder: (selectionContext) {
-                              return Align(
-                                alignment: Alignment.topLeft,
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    minWidth: constraints.maxWidth,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: List.generate(
-                                      _lines.length,
-                                      (index) => _buildUnwrappedLineRow(
-                                        context: context,
-                                        selectionContext: selectionContext,
-                                        index: index,
-                                        lineNumberWidth: lineNumberWidth,
-                                        textStyle: textStyle,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                    controller: _horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: SelectionArea(
+                      child: Builder(
+                        builder: (selectionContext) {
+                          // Estimate max line width for horizontal scroll extent.
+                          // Uses character count × approximate char width.
+                          final maxLineLen = _lines.isEmpty
+                              ? 0
+                              : _lines
+                                  .map((l) => l.length)
+                                  .reduce((a, b) => a > b ? a : b);
+                          final estimatedMaxLineWidth =
+                              maxLineLen * fontSize * 0.602;
+                          final contentWidth = max(
+                            constraints.maxWidth,
+                            estimatedMaxLineWidth +
+                                lineNumberWidth +
+                                20, // padding
+                          );
+                          return SizedBox(
+                            width: contentWidth,
+                            height: constraints.maxHeight,
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.only(
+                                left: 4,
+                                right: 8,
+                                top: _kTopPadding,
+                                bottom: _kBottomPadding,
+                              ),
+                              itemCount: _lines.length,
+                              cacheExtent: 800,
+                              itemBuilder: (itemContext, index) {
+                                return _buildUnwrappedLineRow(
+                                  context: context,
+                                  selectionContext: selectionContext,
+                                  index: index,
+                                  lineNumberWidth: lineNumberWidth,
+                                  textStyle: textStyle,
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -949,6 +958,8 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
       ),
     );
   }
+
+
 }
 
 class _HighlightToken {
