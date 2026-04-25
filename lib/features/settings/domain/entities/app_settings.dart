@@ -16,6 +16,8 @@ class RecentFile {
   final bool isDeleted;
   final DateTime? deletedAt;
   final bool isRead;
+  final int totalTimeSpentMs;
+  final DateTime? sessionStartTime;
 
   RecentFile({
     required this.id,
@@ -31,9 +33,28 @@ class RecentFile {
     this.isDeleted = false,
     this.deletedAt,
     this.isRead = false,
+    this.totalTimeSpentMs = 0,
+    this.sessionStartTime,
   });
 
-  /// Format file size to human-readable string
+  /// Format total time spent to human-readable string
+  String get formattedTimeSpent {
+    if (totalTimeSpentMs <= 0) return '0m';
+    final seconds = totalTimeSpentMs ~/ 1000;
+    final minutes = seconds ~/ 60;
+    final hours = minutes ~/ 60;
+    
+    if (hours > 0) {
+      final remainingMinutes = minutes % 60;
+      return '${hours}h ${remainingMinutes}m';
+    } else if (minutes > 0) {
+      return '${minutes}m';
+    } else {
+      return '${seconds}s';
+    }
+  }
+
+  // Format file size to human-readable string
   String get formattedSize {
     const kb = 1024;
     const mb = kb * 1024;

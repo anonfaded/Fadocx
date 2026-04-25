@@ -66,6 +66,12 @@ abstract class RecentFilesRepository {
 
   Future<Result<void>> markAsRead(String fileId);
 
+  /// Start a viewing session (record start time)
+  Future<Result<void>> startViewingSession(String filePath);
+
+  /// End a viewing session (calculate and add duration)
+  Future<Result<void>> endViewingSession(String filePath);
+
   /// Get recent files as stream for reactive updates
   Stream<Result<List<RecentFile>>> watchRecentFiles();
 

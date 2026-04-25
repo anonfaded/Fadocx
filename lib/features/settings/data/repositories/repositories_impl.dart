@@ -420,12 +420,78 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       if (existing != null) {
         final updated = existing.copyWith(isRead: true);
         await _datasource.updateRecentFile(updated);
-        log.i('Marked file as read: \$fileId');
+        log.i('Marked file as read: $fileId');
       }
       return const ResultSuccess(null);
     } catch (e, st) {
       log.e('Failed to mark file as read', error: e, stackTrace: st);
       return ResultFailure(UnknownFailure(message: 'Failed to mark as read'));
+    }
+  }
+
+  @override
+  Future<Result<void>> startViewingSession(String filePath) async {
+    try {
+      final recentFiles = await _datasource.getRecentFiles();
+      final existing = recentFiles.where((f) => f.filePath == filePath).firstOrNull;
+      log.i('startViewingSession: Searching for "$filePath" in ${recentFiles.length} files');
+      if (existing != null) {
+        log.i('FOUND file in recentFiles, current time: ${existing.totalTimeSpentMs}ms');
+        final updated = existing.copyWith(sessionStartTime: DateTime.now());
+        await _datasource.updateRecentFile(updated);
+        log.i('Started viewing session: $filePath');
+      } else {
+        log.w('File NOT FOUND in recentFiles - creating new entry');
+        // Create new recent file entry if not exists
+        final newFile = HiveRecentFile(
+          filePath: filePath,
+          fileName: filePath.split('/').last,
+          fileType: filePath.split('.').last.toLowerCase(),
+          fileSizeBytes: 0, // Unknown for now
+          dateOpened: DateTime.now(),
+          dateModified: DateTime.now(),
+          sessionStartTime: DateTime.now(),
+        );
+        await _datasource.addRecentFile(newFile);
+        log.i('Created new recent file entry for: $filePath');
+      }
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to start viewing session', error: e, stackTrace: st);
+      return ResultFailure(UnknownFailure(message: 'Failed to start session'));
+    }
+  }
+
+  @override
+  Future<Result<void>> endViewingSession(String filePath) async {
+    try {
+      final recentFiles = await _datasource.getRecentFiles();
+      final existing = recentFiles.where((f) => f.filePath == filePath).firstOrNull;
+      if (existing != null) {
+        final startTime = existing.sessionStartTime;
+        if (startTime != null) {
+          final duration = DateTime.now().difference(startTime).inMilliseconds;
+          log.i('endViewingSession: session was ${duration}ms, previous total: ${existing.totalTimeSpentMs}ms');
+          final newTotal = existing.totalTimeSpentMs + duration;
+          final updated = existing.copyWith(
+            totalTimeSpentMs: newTotal,
+            sessionStartTime: null,
+          );
+          await _datasource.updateRecentFile(updated);
+          log.i('Ended viewing session: $filePath, added ${duration}ms, new total: ${newTotal}ms');
+        } else {
+          log.w('No active session start time found');
+          // Just clear session start time
+          final updated = existing.copyWith(sessionStartTime: null);
+          await _datasource.updateRecentFile(updated);
+        }
+      } else {
+        log.w('File not found when ending session: $filePath');
+      }
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to end viewing session', error: e, stackTrace: st);
+      return ResultFailure(UnknownFailure(message: 'Failed to end session'));
     }
   }
 
@@ -488,6 +554,9 @@ List<RecentFile> _processRecentFiles(List<HiveRecentFile> hiveFiles) {
   final sorted = List<HiveRecentFile>.from(hiveFiles)
     ..sort((a, b) => b.dateOpened.compareTo(a.dateOpened));
 
+  // 1b. Debug sort order
+  final sortOrder = sorted.map((f) => '${f.fileName}@${f.dateOpened.toIso8601String()}').join(' > ');
+  log.d('Sorted recent files: $sortOrder');
   // 2. Filter out soft-deleted files
   final notDeleted = sorted.where((file) => !file.isDeleted).toList();
 

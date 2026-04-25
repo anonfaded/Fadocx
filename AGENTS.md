@@ -67,6 +67,23 @@ dart run pdfrx:remove_wasm_modules
 dart run pdfrx:remove_wasm_modules --revert
 ```
 
+
+## Managing Hive Models (Code Generation)
+When adding/modifying `@HiveField` annotations in `hive_models.dart`, regenerate the adapter:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+**Important:** The generated file `hive_models.g.dart` must be regenerated whenever:
+- A new `@HiveField(n)` is added to any Hive model class
+- An existing field index changes
+- A new `@HiveType(typeId: n)` class is added
+
+**Verification:** After regeneration, confirm the adapter's `read()` and `write()` methods include all fields.
+
+**Gotcha:** If fields exist in the model but are missing from the generated adapter, Hive will silently drop those values on read/write — no errors, just lost data.
+
 ## Startup Optimization Best Practices
 1. **Zero-Dependency MainActivity:** Ensure `MainActivity.kt` has ZERO direct imports of heavy third-party libraries (POI, PDFBox). Use reflection for initialization and method channel handlers to keep the classloader from hitting bottlenecks.
 2. **Reflection-based Lazy Loading:** Load heavy parser classes only when their specific MethodChannel is called.

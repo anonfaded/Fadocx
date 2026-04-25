@@ -46,6 +46,12 @@ class HiveRecentFile {
   @HiveField(12)
   final bool isRead;
 
+  @HiveField(13)
+  final int totalTimeSpentMs; // Total time spent viewing in milliseconds
+
+  @HiveField(14)
+  final DateTime? sessionStartTime; // When current viewing session started
+
   HiveRecentFile({
     String? id,
     required this.filePath,
@@ -60,6 +66,8 @@ class HiveRecentFile {
     bool? isDeleted,
     this.deletedAt,
     this.isRead = false,
+    this.totalTimeSpentMs = 0,
+    this.sessionStartTime,
   }) : id = id ?? const Uuid().v4(),
        isDeleted = isDeleted ?? false;
 
@@ -78,6 +86,8 @@ class HiveRecentFile {
     bool? isDeleted,
     DateTime? deletedAt,
     bool? isRead,
+    int? totalTimeSpentMs,
+    DateTime? sessionStartTime,
   }) {
     return HiveRecentFile(
       id: id ?? this.id,
@@ -93,6 +103,8 @@ class HiveRecentFile {
       isDeleted: isDeleted ?? this.isDeleted,
       deletedAt: deletedAt ?? this.deletedAt,
       isRead: isRead ?? this.isRead,
+      totalTimeSpentMs: totalTimeSpentMs ?? this.totalTimeSpentMs,
+      sessionStartTime: sessionStartTime ?? this.sessionStartTime,
     );
   }
 

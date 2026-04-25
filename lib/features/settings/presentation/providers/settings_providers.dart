@@ -270,8 +270,32 @@ class RecentFilesMutator {
     log.i('Marking file as read: $fileId');
     final result = await _repository.markAsRead(fileId);
     result.fold(
-      (failure) => log.e('Failed to mark as read: \${failure.message}'),
+      (failure) => log.e('Failed to mark as read: ${failure.message}'),
       (success) => _ref.invalidate(recentFilesProvider),
+    );
+  }
+
+  Future<void> startViewingSession(String filePath) async {
+    log.d('Starting viewing session: $filePath');
+    final result = await _repository.startViewingSession(filePath);
+    result.fold(
+      (failure) => log.e('Failed to start session: ${failure.message}'),
+      (success) {
+        log.d('Session started successfully');
+        _ref.invalidate(recentFilesProvider);
+      },
+    );
+  }
+
+  Future<void> endViewingSession(String filePath) async {
+    log.d('Ending viewing session: $filePath');
+    final result = await _repository.endViewingSession(filePath);
+    result.fold(
+      (failure) => log.e('Failed to end session: ${failure.message}'),
+      (success) {
+        log.d('Session ended, time will be added');
+        _ref.invalidate(recentFilesProvider);
+      },
     );
   }
 
