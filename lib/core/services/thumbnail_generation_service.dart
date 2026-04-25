@@ -788,6 +788,7 @@ class ThumbnailGenerationService {
         ..style = ui.PaintingStyle.stroke
         ..strokeWidth = 1.0;
 
+      // 1. Draw header fill
       final headerFill = ui.Paint()..color = _uiColor(accent, alpha: brightness == ui.Brightness.dark ? 20 : 36);
       canvas.drawRect(
         ui.Rect.fromLTWH(gridLeft, gridTop, gridWidth, rowHeight),
@@ -798,6 +799,29 @@ class ThumbnailGenerationService {
         headerFill,
       );
 
+      // 2. Draw alternating row backgrounds BEFORE grid lines
+      // Using matching colors from the actual sheet viewer:
+      // Dark: even=#141414, odd=#1C1C1C | Light: even=#FFFFFF, odd=#F5F5F5
+      final evenRowBg = brightness == ui.Brightness.dark
+          ? const ui.Color(0xFF141414)
+          : const ui.Color(0xFFFFFFFF);
+      final oddRowBg = brightness == ui.Brightness.dark
+          ? const ui.Color(0xFF1C1C1C)
+          : const ui.Color(0xFFF5F5F5);
+      for (int rowIndex = 0; rowIndex < visibleRows.length; rowIndex++) {
+        final rowBgRect = ui.Rect.fromLTWH(
+          gridLeft,
+          gridTop + ((rowIndex + 1) * rowHeight),
+          gridWidth,
+          rowHeight,
+        );
+        canvas.drawRect(
+          rowBgRect,
+          ui.Paint()..color = rowIndex.isEven ? evenRowBg : oddRowBg,
+        );
+      }
+
+      // 3. Draw grid lines ON TOP of row backgrounds
       for (int rowIndex = 0; rowIndex <= totalRows; rowIndex++) {
         final y = gridTop + (rowIndex * rowHeight);
         canvas.drawLine(
@@ -822,6 +846,7 @@ class ThumbnailGenerationService {
         );
       }
 
+      // 4. Draw column headers
       for (int colIndex = 0; colIndex < visibleColCount; colIndex++) {
         _paintCenteredText(
           canvas,
@@ -838,7 +863,9 @@ class ThumbnailGenerationService {
         );
       }
 
+      // 5. Draw row data with text
       for (int rowIndex = 0; rowIndex < visibleRows.length; rowIndex++) {
+
         final top = gridTop + ((rowIndex + 1) * rowHeight) + 7;
 
         _paintCenteredText(

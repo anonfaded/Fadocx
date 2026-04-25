@@ -314,8 +314,8 @@ class SettingsScreen extends ConsumerWidget {
           decoration: _bottomSheetDecoration(context),
           child: Consumer(
             builder: (context, ref, _) {
-              final storageStatsAsync = ref.watch(storageStatsProvider);
-              return storageStatsAsync.when(
+              final recentFilesAsync = ref.watch(recentFilesProvider);
+              return recentFilesAsync.when(
                 loading: () => ListView(
                   controller: scrollController,
                   children: [
@@ -363,101 +363,99 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                data: (data) => ListView(
-                  controller: scrollController,
-                  children: [
-                    Center(child: _handle(context)),
-                    const SizedBox(height: 8),
-                    Center(
-                      child: Text('Storage',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold)),
-                    ),
-                    const SizedBox(height: 20),
-                    // build slices (label -> bytes)
-                    Builder(
-                      builder: (context) {
-                        final slices = <String, int>{};
-                        for (final entry in data.entries) {
-                          final label = _labelForFolder(entry.key);
-                          slices[label] = entry.value['bytes'] ?? 0;
-                        }
-                        return Column(
+                data: (files) {
+                  final stats = _computeCategoryStats(files);
+                  return ListView(
+                    controller: scrollController,
+                    children: [
+                      Center(child: _handle(context)),
+                      const SizedBox(height: 8),
+                      Center(
+                        child: Text('Storage',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 20),
+                      Builder(
+                        builder: (context) {
+                          final slices = <String, int>{};
+                          for (final entry in stats.entries) {
+                            slices[_labelForFolder(entry.key)] = entry.value['bytes'] ?? 0;
+                          }
+                          return Column(
+                            children: [
+                              SizedBox(height: 140, child: _storageChartFromMap(context, slices)),
+                              const SizedBox(height: 12),
+                              Row(children: [
+                                Expanded(child: _storageChip(Icons.picture_as_pdf, 'PDFs', '${StorageService.formatBytes(stats['PDFs']?['bytes'] ?? 0)} • ${stats['PDFs']?['count'] ?? 0} files', Colors.red)),
+                                const SizedBox(width: 8),
+                                Expanded(child: _storageChip(Icons.table_chart, 'Sheets', '${StorageService.formatBytes(stats['Spreadsheets']?['bytes'] ?? 0)} • ${stats['Spreadsheets']?['count'] ?? 0} files', Colors.green)),
+                                const SizedBox(width: 8),
+                                Expanded(child: _storageChip(Icons.description, 'Docs', '${StorageService.formatBytes(stats['Documents']?['bytes'] ?? 0)} • ${stats['Documents']?['count'] ?? 0} files', Colors.blue)),
+                              ]),
+                              const SizedBox(height: 12),
+                              Row(children: [
+                                Expanded(child: _storageChip(Icons.slideshow, 'Presentations', '${StorageService.formatBytes(stats['Presentations']?['bytes'] ?? 0)} • ${stats['Presentations']?['count'] ?? 0} files', Colors.orange)),
+                                const SizedBox(width: 8),
+                                Expanded(child: _storageChip(Icons.code, 'Code', '${StorageService.formatBytes(stats['Code']?['bytes'] ?? 0)} • ${stats['Code']?['count'] ?? 0} files', Colors.purple)),
+                                const SizedBox(width: 8),
+                                Expanded(child: _storageChip(Icons.insert_drive_file, 'Other', '${StorageService.formatBytes(stats['Other']?['bytes'] ?? 0)} • ${stats['Other']?['count'] ?? 0} files', Colors.teal)),
+                              ]),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer
+                              .withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(height: 140, child: _storageChartFromMap(context, slices)),
+                            Icon(Icons.lock_outline,
+                                color: Theme.of(context).colorScheme.primary),
                             const SizedBox(height: 12),
-                            // Render chips from the same data to ensure colors/values match
-                            Row(children: [
-                              Expanded(child: _storageChip(Icons.picture_as_pdf, 'PDFs', '${StorageService.formatBytes(data[StorageService.pdfsFolder]?['bytes'] ?? 0)} • ${data[StorageService.pdfsFolder]?['count'] ?? 0} files', Colors.red)),
-                              const SizedBox(width: 8),
-                              Expanded(child: _storageChip(Icons.table_chart, 'Sheets', '${StorageService.formatBytes(data[StorageService.spreadsheetsFolder]?['bytes'] ?? 0)} • ${data[StorageService.spreadsheetsFolder]?['count'] ?? 0} files', Colors.green)),
-                              const SizedBox(width: 8),
-                              Expanded(child: _storageChip(Icons.description, 'Docs', '${StorageService.formatBytes(data[StorageService.documentsFolder]?['bytes'] ?? 0)} • ${data[StorageService.documentsFolder]?['count'] ?? 0} files', Colors.blue)),
-                            ]),
-                            const SizedBox(height: 12),
-                            Row(children: [
-                              Expanded(child: _storageChip(Icons.slideshow, 'Presentations', '${StorageService.formatBytes(data[StorageService.presentationsFolder]?['bytes'] ?? 0)} • ${data[StorageService.presentationsFolder]?['count'] ?? 0} files', Colors.orange)),
-                              const SizedBox(width: 8),
-                              Expanded(child: _storageChip(Icons.image, 'Images', '${StorageService.formatBytes(data[StorageService.imagesFolder]?['bytes'] ?? 0)} • ${data[StorageService.imagesFolder]?['count'] ?? 0} files', Colors.purple)),
-                              const SizedBox(width: 8),
-                              Expanded(child: _storageChip(Icons.camera, 'Scans', '${StorageService.formatBytes(data[StorageService.scansFolder]?['bytes'] ?? 0)} • ${data[StorageService.scansFolder]?['count'] ?? 0} files', Colors.teal)),
-                            ]),
-                            const SizedBox(height: 12),
-                            _storageChip(Icons.delete_outline, 'Trash', '${StorageService.formatBytes(data[StorageService.trashFolder]?['bytes'] ?? 0)} • ${data[StorageService.trashFolder]?['count'] ?? 0} files', Colors.red),
+                            Expanded(
+                              child: Text(
+                                'Documents are stored in a private folder, hidden from other apps and file managers. Only Fadocx can access them.',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
                           ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primaryContainer
-                            .withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.lock_outline,
-                              color: Theme.of(context).colorScheme.primary),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Documents are stored in a private folder, hidden from other apps and file managers. Only Fadocx can access them.',
-                              style: Theme.of(context).textTheme.bodyMedium,
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline,
+                                size: 20, color: Theme.of(context).colorScheme.primary),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Delete documents from Danger Zone in Settings',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.info_outline,
-                              size: 20, color: Theme.of(context).colorScheme.primary),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Delete documents from Danger Zone in Settings',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                    ],
+                  );
+                },
               );
             },
           ),
@@ -506,6 +504,63 @@ class SettingsScreen extends ConsumerWidget {
   Color _colorForIndex(int idx) {
     const palette = [Colors.red, Colors.green, Colors.blue, Colors.orange, Colors.purple, Colors.teal, Colors.grey];
     return palette[idx % palette.length];
+  }
+
+  /// Compute category stats from recent files list (Hive data)
+  /// Groups files by type and returns {category: {'bytes': X, 'count': Y}}
+  Map<String, Map<String, int>> _computeCategoryStats(List<dynamic> files) {
+    final stats = <String, Map<String, int>>{
+      'PDFs': {'bytes': 0, 'count': 0},
+      'Spreadsheets': {'bytes': 0, 'count': 0},
+      'Documents': {'bytes': 0, 'count': 0},
+      'Presentations': {'bytes': 0, 'count': 0},
+      'Code': {'bytes': 0, 'count': 0},
+      'Other': {'bytes': 0, 'count': 0},
+    };
+
+    for (final file in files) {
+      if (file.isDeleted) continue;
+      final category = _categoryForFileType(file.fileType);
+      stats[category]?['bytes'] = ((stats[category]?['bytes'] ?? 0) + file.fileSizeBytes).toInt();
+      stats[category]?['count'] = ((stats[category]?['count'] ?? 0) + 1).toInt();
+    }
+
+    return stats;
+  }
+
+  String _categoryForFileType(String fileType) {
+    switch (fileType.toLowerCase()) {
+      case 'pdf':
+        return 'PDFs';
+      case 'xlsx':
+      case 'xls':
+      case 'ods':
+      case 'csv':
+        return 'Spreadsheets';
+      case 'docx':
+      case 'doc':
+      case 'odt':
+      case 'rtf':
+      case 'txt':
+      case 'ott':
+      case 'epub':
+        return 'Documents';
+      case 'ppt':
+      case 'pptx':
+      case 'odp':
+        return 'Presentations';
+      case 'java':
+      case 'py':
+      case 'sh':
+      case 'html':
+      case 'md':
+      case 'log':
+      case 'json':
+      case 'xml':
+        return 'Code';
+      default:
+        return 'Other';
+    }
   }
 
   String _labelForFolder(String folder) {

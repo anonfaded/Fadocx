@@ -1028,6 +1028,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       parsedAt: DateTime.now(),
     );
 
+    // Capture brightness before async gap
+    final brightnessName = Theme.of(context).brightness == Brightness.dark ? 'dark' : 'light';
     try {
       final repository = ref.read(documentParsingRepositoryProvider);
       await repository.cacheParsing(widget.filePath, cachedDocument);
@@ -1043,7 +1045,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         final recentFiles = await hiveDatasource.getRecentFiles();
         for (final file in recentFiles) {
           if (file.filePath == widget.filePath) {
-            await hiveDatasource.saveThumbnail(file.id, thumbnailBytes);
+            await hiveDatasource.saveThumbnail(file.id, thumbnailBytes, brightness: brightnessName);
             ref.invalidate(thumbnailProvider(file.id));
             break;
           }

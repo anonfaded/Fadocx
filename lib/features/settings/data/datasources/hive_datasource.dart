@@ -239,17 +239,18 @@ class HiveDatasource {
     }
   }
 
-  /// Save thumbnail for a file
-  Future<void> saveThumbnail(String fileId, List<int> pngBytes) async {
+  /// Save thumbnail for a file with brightness tag
+  Future<void> saveThumbnail(String fileId, List<int> pngBytes, {String brightness = 'light'}) async {
     try {
       final box = await getThumbnailCacheBox();
       final thumbnail = HiveThumbnail(
         fileId: fileId,
         pngBytes: pngBytes,
         generatedAt: DateTime.now(),
+        brightness: brightness,
       );
       await box.put(fileId, thumbnail);
-      log.d('Thumbnail saved for file: $fileId');
+      log.d('Thumbnail saved for file: $fileId (brightness: $brightness)');
     } catch (e, st) {
       log.e('Error saving thumbnail', error: e, stackTrace: st);
       rethrow;

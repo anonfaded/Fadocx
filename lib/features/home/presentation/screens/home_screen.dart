@@ -1455,6 +1455,7 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
         filePath: widget.file.filePath,
         fileName: widget.file.fileName,
         fileType: widget.file.fileType,
+        brightness: Theme.of(context).brightness,
       ),
     ));
 

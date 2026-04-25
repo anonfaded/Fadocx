@@ -245,21 +245,28 @@ class HiveThumbnail {
   @HiveField(2)
   final DateTime generatedAt;
 
+  /// The brightness used when generating this thumbnail ('light' or 'dark')
+  @HiveField(3)
+  final String brightness;
+
   HiveThumbnail({
     required this.fileId,
     required this.pngBytes,
     required this.generatedAt,
+    this.brightness = 'light',
   });
 
   HiveThumbnail copyWith({
     String? fileId,
     List<int>? pngBytes,
     DateTime? generatedAt,
+    String? brightness,
   }) {
     return HiveThumbnail(
       fileId: fileId ?? this.fileId,
       pngBytes: pngBytes ?? this.pngBytes,
       generatedAt: generatedAt ?? this.generatedAt,
+      brightness: brightness ?? this.brightness,
     );
   }
 }

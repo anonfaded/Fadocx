@@ -28,29 +28,38 @@ final thumbnailProvider = FutureProvider.family<Uint8List?, String>(
   },
 );
 
-/// Generate and cache thumbnail - with proper MethodChannel support
+/// Generate and cache thumbnail - uses passed brightness for theme-aware rendering
 final generateAndCacheThumbnailProvider = FutureProvider.family<Uint8List?,
-    ({String fileId, String filePath, String fileName, String fileType})>(
+    ({String fileId, String filePath, String fileName, String fileType, ui.Brightness brightness})>(
   (ref, params) async {
     try {
       final hiveDatasource = ref.watch(hiveDatasourceProvider);
       final documentRepository = ref.watch(documentParsingRepositoryProvider);
+
+      // Check if cached thumbnail matches current brightness
+      final brightnessName = params.brightness == ui.Brightness.dark ? 'dark' : 'light';
+      final cached = await hiveDatasource.getThumbnail(params.fileId);
+      if (cached != null && cached.brightness == brightnessName) {
+        // Cache hit with matching brightness - no need to regenerate
+        ref.invalidate(thumbnailProvider(params.fileId));
+        return Uint8List.fromList(cached.pngBytes);
+      }
+
       final cachedDocument =
           await documentRepository.getCachedParsing(params.filePath);
 
-      final brightness = ui.PlatformDispatcher.instance.platformBrightness;
       final thumbnailBytes = await ThumbnailGenerationService.generateThumbnail(
         params.filePath,
         params.fileName,
         params.fileType,
         cachedDocument: cachedDocument,
-        brightness: brightness,
+        brightness: params.brightness,
       );
 
       if (thumbnailBytes != null) {
         try {
           await hiveDatasource.saveThumbnail(
-              params.fileId, thumbnailBytes.toList());
+              params.fileId, thumbnailBytes.toList(), brightness: brightnessName);
           ref.invalidate(thumbnailProvider(params.fileId));
         } catch (e, st) {
           log.e('Thumbnail cache save failed for ${params.fileName}',
@@ -70,10 +79,10 @@ final generateAndCacheThumbnailProvider = FutureProvider.family<Uint8List?,
 /// Clear all cached thumbnails (call when upgrading thumbnail system)
 Future<void> clearThumbnailCache() async {
   try {
-    log.d('🖼️  [Cache] Clearing all cached thumbnails...');
+    log.d('Clearing all cached thumbnails...');
     // Note: This would require adding a clearThumbnails method to HiveDatasource
-    log.d('🖼️  [Cache] Thumbnails cleared');
+    log.d('Thumbnails cleared');
   } catch (e) {
-    log.e('🖼️  [Cache] ERROR clearing: $e');
+    log.e('ERROR clearing thumbnails: $e');
   }
 }

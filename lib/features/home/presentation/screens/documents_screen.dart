@@ -876,6 +876,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                           filePath: file.filePath,
                           fileName: file.fileName,
                           fileType: file.fileType,
+                          brightness: Theme.of(context).brightness,
                         ),
                       ));
 
@@ -1758,12 +1759,14 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final brightness = Theme.of(context).brightness;
       ref.read(generateAndCacheThumbnailProvider(
         (
           fileId: widget.file.id,
           filePath: widget.file.filePath,
           fileName: widget.file.fileName,
           fileType: widget.file.fileType,
+          brightness: brightness,
         ),
       ));
     });
