@@ -30,6 +30,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   bool _sidebarOpen = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late AnimationController _sidebarController;
+  late AnimationController _skeletonShimmerController;
+  late Animation<double> _skeletonShimmer;
   
   double _sidebarDragOffset = 0.0; // Track horizontal drag position
   
@@ -45,6 +47,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       duration: const Duration(milliseconds: 250),
       vsync: this,
     );
+    _skeletonShimmerController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+    _skeletonShimmer = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _skeletonShimmerController, curve: Curves.easeInOut),
+    );
     // OPTIMIZATION: Defer recent files loading to after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => _dataLoaded = true);
@@ -55,6 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   @override
   void dispose() {
     _sidebarController.dispose();
+    _skeletonShimmerController.dispose();
     super.dispose();
   }
   
@@ -195,19 +205,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
+  Widget _buildSkeletonLoading() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(12, 88, 12, 16),
+      children: [
+        _buildSkeletonStats(),
+        const SizedBox(height: 12),
+        _buildSkeletonActionCards(),
+        const SizedBox(height: 14),
+        _buildSkeletonRecentHeader(),
+        const SizedBox(height: 8),
+        ...List.generate(4, (index) => _buildSkeletonRecentItem(index)),
+      ],
+    );
+  }
+
   Widget _buildBody() {
     if (!_dataLoaded) {
-      // Show skeleton loader
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
-        children: List.generate(
-          5,
-          (index) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _buildSkeletonItem(),
-          ),
-        ),
-      );
+      return _buildSkeletonLoading();
     }
 
     return Consumer(
@@ -218,16 +233,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         return recentFiles.when(
           data: (files) => _buildHomeContent(context, files, showRecentFiles, appSettings.value),
           error: (error, st) => _buildErrorState(context, error),
-          loading: () => ListView(
-            padding: const EdgeInsets.fromLTRB(16, 88, 16, 24),
-            children: List.generate(
-              5,
-              (index) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildSkeletonItem(),
-              ),
-            ),
-          ),
+          loading: () => _buildSkeletonLoading(),
         );
       },
     );
@@ -1043,16 +1049,224 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildSkeletonItem() {
+  Widget _buildSkeletonStats() {
+    final shimmer = _skeletonShimmer.value;
+    final theme = Theme.of(context);
+    final baseColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);
+    final highlightColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7);
+    
     return Container(
-      height: 60,
       decoration: BoxDecoration(
-        color: Theme.of(context)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.12),
+          width: 1,
+        ),
+        color: theme.colorScheme.surfaceContainerLow,
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildSkeletonStat(baseColor, highlightColor, shimmer),
+          _buildSkeletonStat(baseColor, highlightColor, shimmer),
+          _buildSkeletonStat(baseColor, highlightColor, shimmer),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonActionCards() {
+    // Slate colors for dark theme action cards
+    final slateDark = const Color(0xFF2C3E50);
+    final slateLight = const Color(0xFF34495E);
+    final emerald = const Color(0xFF16A085);
+    final emeraldLight = const Color(0xFF27AE60);
+    
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 96,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [emerald, emeraldLight],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Container(
+            height: 96,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [slateDark, slateLight],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSkeletonRecentHeader() {
+    final theme = Theme.of(context);
+    final baseColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);
+    final highlightColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7);
+    final shimmer = _skeletonShimmer.value;
+    
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Container(
+          width: 80,
+          height: 16,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            gradient: LinearGradient(
+              begin: Alignment(shimmer - 1, 0),
+              end: Alignment(shimmer, 0),
+              colors: [baseColor, highlightColor, baseColor],
+            ),
+          ),
+        ),
+        Container(
+          width: 50,
+          height: 12,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            gradient: LinearGradient(
+              begin: Alignment(shimmer - 1, 0),
+              end: Alignment(shimmer, 0),
+              colors: [baseColor, highlightColor, baseColor],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSkeletonRecentItem(int index) {
+    final theme = Theme.of(context);
+    final baseColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);
+    final highlightColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7);
+    final shimmer = _skeletonShimmer.value;
+    
+    return Padding(
+      padding: EdgeInsets.only(bottom: index < 3 ? 8 : 0),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.08),
+            width: 1,
+          ),
+          color: theme.colorScheme.surfaceContainerLow,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment(shimmer - 1, 0),
+                  end: Alignment(shimmer, 0),
+                  colors: [baseColor, highlightColor, baseColor],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: LinearGradient(
+                        begin: Alignment(shimmer - 1, 0),
+                        end: Alignment(shimmer, 0),
+                        colors: [baseColor, highlightColor, baseColor],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 80,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: LinearGradient(
+                        begin: Alignment(shimmer - 1, 0),
+                        end: Alignment(shimmer, 0),
+                        colors: [baseColor, highlightColor, baseColor],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonStat(Color baseColor, Color highlightColor, double shimmer) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              begin: Alignment(shimmer - 1, 0),
+              end: Alignment(shimmer, 0),
+              colors: [baseColor, highlightColor, baseColor],
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: 28,
+          height: 14,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            gradient: LinearGradient(
+              begin: Alignment(shimmer - 1, 0),
+              end: Alignment(shimmer, 0),
+              colors: [baseColor, highlightColor, baseColor],
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Container(
+          width: 36,
+          height: 10,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            gradient: LinearGradient(
+              begin: Alignment(shimmer - 1, 0),
+              end: Alignment(shimmer, 0),
+              colors: [baseColor, highlightColor, baseColor],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
