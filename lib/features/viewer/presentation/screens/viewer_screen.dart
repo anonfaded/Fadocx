@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/features/viewer/data/providers/repository_providers.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
@@ -56,6 +56,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   bool _textWordWrap = true;
   bool _textFontIsMonoFont = false;
   bool _syntaxHighlightEnabled = true;
+  bool _sessionStarted = false; // Prevent double session start
+  RecentFilesMutator? _savedMutator; // Saved before dispose for safe access
+  String? _sessionFilePath; // Saved before dispose for safe access
   late AnimationController _menuController;
   late AnimationController _sidebarController;
   late AnimationController _topBarController;
@@ -342,19 +345,38 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     _sidebarController.value = 0.0;
 
     // Load document if not already loaded
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final docState = ref.read(documentViewerProvider);
+      _log.d('initState: loading=, hasDoc=, hasError=');
+
+      // Always update date opened first (awaited to prevent race with session)
+      await ref.read(recentFilesMutatorProvider).updateDateOpened(widget.filePath);
+
       if (!docState.isLoading &&
           docState.document == null &&
           !docState.hasError) {
+        _log.d('Loading document: ');
         ref
             .read(documentViewerProvider.notifier)
             .initializeAndLoad(widget.filePath, widget.fileName)
             .then((_) {
-          // Update date opened after document loads successfully
-          // Use path from widget since ParsedDocumentEntity doesn't have id
-          ref.read(recentFilesMutatorProvider).updateDateOpened(widget.filePath);
+          _log.d('Document loaded, starting time tracking...');
+          if (!_sessionStarted) {
+            _sessionStarted = true;
+            _savedMutator = ref.read(recentFilesMutatorProvider);
+            _sessionFilePath = widget.filePath;
+            _savedMutator!.startViewingSession(widget.filePath);
+            _log.d('Time tracking started: ');
+          }
         });
+      } else {
+        _log.d('Document already loaded, starting session...');
+        if (!_sessionStarted) {
+          _sessionStarted = true;
+          _savedMutator = ref.read(recentFilesMutatorProvider);
+          _sessionFilePath = widget.filePath;
+          _savedMutator!.startViewingSession(widget.filePath);
+        }
       }
     });
   }
@@ -379,6 +401,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   @override
   void dispose() {
+    _log.d('dispose: ending session for ');
+    // End viewing session using saved reference (ref is unsafe in dispose)
+    if (_savedMutator != null && _sessionFilePath != null) {
+      _savedMutator!.endViewingSession(_sessionFilePath!);
+      _log.d('Session end triggered via saved ref');
+    } else {
+      _log.w('No saved mutator - session time NOT saved');
+    }
     _menuController.dispose();
     _sidebarController.dispose();
     _topBarController.dispose();

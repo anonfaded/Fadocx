@@ -17,6 +17,8 @@ class SettingsMapper {
       syncedAt: hive.syncedAt,
       syncStatus: hive.syncStatus,
       isRead: hive.isRead,
+      totalTimeSpentMs: hive.totalTimeSpentMs,
+      sessionStartTime: hive.sessionStartTime,
     );
   }
 
@@ -34,6 +36,8 @@ class SettingsMapper {
       syncedAt: domain.syncedAt,
       syncStatus: domain.syncStatus,
       isRead: domain.isRead,
+      totalTimeSpentMs: domain.totalTimeSpentMs,
+      sessionStartTime: domain.sessionStartTime,
     );
   }
 

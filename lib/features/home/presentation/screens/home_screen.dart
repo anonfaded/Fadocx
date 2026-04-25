@@ -205,24 +205,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildSkeletonLoading() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(12, 88, 12, 16),
-      children: [
-        _buildSkeletonStats(),
-        const SizedBox(height: 12),
-        _buildSkeletonActionCards(),
-        const SizedBox(height: 14),
-        _buildSkeletonRecentHeader(),
-        const SizedBox(height: 8),
-        ...List.generate(4, (index) => _buildSkeletonRecentItem(index)),
-      ],
+  Widget _buildSkeletonLoading(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top + 56;
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(12, topPadding + 8, 12, bottomPadding),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      child: Column(
+        children: [
+          _buildSkeletonStats(),
+          const SizedBox(height: 12),
+          _buildSkeletonActionCards(),
+          const SizedBox(height: 14),
+          _buildSkeletonRecentHeader(),
+          const SizedBox(height: 8),
+          ...List.generate(4, (index) => _buildSkeletonRecentItem(index)),
+        ],
+      ),
     );
   }
 
   Widget _buildBody() {
     if (!_dataLoaded) {
-      return _buildSkeletonLoading();
+      return _buildSkeletonLoading(context);
     }
 
     return Consumer(
@@ -233,128 +240,135 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         return recentFiles.when(
           data: (files) => _buildHomeContent(context, files, showRecentFiles, appSettings.value),
           error: (error, st) => _buildErrorState(context, error),
-          loading: () => _buildSkeletonLoading(),
+          loading: () => _buildSkeletonLoading(context),
         );
       },
     );
   }
 
   Widget _buildHomeContent(BuildContext context, List<RecentFile> files, bool showRecentFiles, AppSettings? appSettings) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(12, 88, 12, 16),
-      children: [
-        // Stats Card Section
-        _buildStatsCard(context, files, appSettings),
-        const SizedBox(height: 12),
+    final topPadding = MediaQuery.of(context).padding.top + 56;
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
 
-        // Action Cards Section - 2 cards in one row
-        Row(
-          children: [
-            // Scan to Extract Text card
-            Expanded(
-              child: _buildActionCard(
-                context,
-                title: 'Scan to Extract Text',
-                description: 'Extract text from documents using OCR',
-                icon: Icons.document_scanner,
-                cardType: 'scan',
-                onTap: () {
-                  log.i('Navigating to scanner');
-                  context.push(RouteNames.scanner);
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-            // Import a Document card
-            Expanded(
-              child: _buildActionCard(
-                context,
-                title: 'Import a Document',
-                description: 'Browse and import files from your device',
-                icon: Icons.folder_open,
-                cardType: 'import',
-                onTap: () {
-                  log.i('Navigating to browse');
-                  context.push(RouteNames.browse);
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(12, topPadding + 8, 12, bottomPadding),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Stats Card
+          _buildStatsCard(context, files, appSettings),
+          const SizedBox(height: 12),
 
-        // Recent Files Section - show header only when not onboarding
-        if (showRecentFiles && (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles))) ...[
+          // Action Cards Section
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Recent Files',
-                style: Theme.of(context).textTheme.titleSmall,
+              Expanded(
+                child: _buildActionCard(
+                  context,
+                  title: 'Scan to Extract Text',
+                  description: 'Extract text from documents using OCR',
+                  icon: Icons.document_scanner,
+                  cardType: 'scan',
+                  onTap: () {
+                    log.i('Navigating to scanner');
+                    context.push(RouteNames.scanner);
+                  },
+                ),
               ),
-              TextButton(
-                onPressed: () {
-                  context.push(RouteNames.documents);
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('See All'),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 18,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildActionCard(
+                  context,
+                  title: 'Import a Document',
+                  description: 'Browse and import files from your device',
+                  icon: Icons.folder_open,
+                  cardType: 'import',
+                  onTap: () {
+                    log.i('Navigating to browse');
+                    context.push(RouteNames.browse);
+                  },
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          if (files.isNotEmpty) ...[
-            ...files.take(4).toList().asMap().entries.map(
-              (entry) {
-                final index = entry.key;
-                final file = entry.value;
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: index < (files.take(4).toList().length - 1) ? 8 : 0,
+          const SizedBox(height: 14),
+
+          // Recent Files Section
+          if (showRecentFiles && (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles))) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Files',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                TextButton(
+                  onPressed: () {
+                    context.push(RouteNames.documents);
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('See All'),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ],
                   ),
-                  child: _buildRecentFileItem(context, file),
-                );
-              },
+                ),
+              ],
             ),
-          ] else
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.folder_open_outlined,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'No recent files',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+            const SizedBox(height: 8),
+            if (files.isNotEmpty) ...[
+              ...files.take(4).toList().asMap().entries.map(
+                (entry) {
+                  final index = entry.key;
+                  final file = entry.value;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index < (files.take(4).toList().length - 1) ? 8 : 0,
                     ),
-                  ),
-                ],
+                    child: _buildRecentFileItem(context, file),
+                  );
+                },
               ),
-            ),
-        ] else if (appSettings == null || !appSettings.hasImportedSampleFiles)
-          _buildEmptyRecentState(context)
+            ] else
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.folder_open_outlined,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'No recent files',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ] else if (appSettings == null || !appSettings.hasImportedSampleFiles)
+            _buildEmptyRecentState(context)
         // Don't show any onboarding after samples are imported
         // Just show the action cards above
       ],
+      ),
     );
   }
 
@@ -378,97 +392,146 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   Widget _buildStatsCard(BuildContext context, List<RecentFile> files, AppSettings? appSettings) {
     final filesCount = files.length;
     final totalSizeBytes = files.fold<int>(0, (sum, f) => sum + f.fileSizeBytes);
-    final totalSizeGB = (totalSizeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1);
     
-    final today = DateTime.now();
-    final openedToday = files.where((f) {
-      final isToday = f.dateOpened.year == today.year &&
-          f.dateOpened.month == today.month &&
-          f.dateOpened.day == today.day;
-      return isToday;
-    }).length;
+    // Format storage properly - show in MB if < 1GB, else GB
+    String formattedStorage;
+    const kb = 1024.0;
+    const mb = kb * 1024;
+    const gb = mb * 1024;
+    if (totalSizeBytes >= gb) {
+      formattedStorage = '${(totalSizeBytes / gb).toStringAsFixed(1)} GB';
+    } else if (totalSizeBytes >= mb) {
+      formattedStorage = '${(totalSizeBytes / mb).toStringAsFixed(1)} MB';
+    } else if (totalSizeBytes >= kb) {
+      formattedStorage = '${(totalSizeBytes / kb).toStringAsFixed(1)} KB';
+    } else {
+      formattedStorage = '$totalSizeBytes B';
+    }
+    
+    // Calculate total time spent across all files
+    final totalTimeMs = files.fold<int>(0, (sum, f) => sum + f.totalTimeSpentMs);
+    String formattedTime;
+    final totalSeconds = totalTimeMs ~/ 1000;
+    final totalMinutes = totalSeconds ~/ 60;
+    final totalHours = totalMinutes ~/ 60;
+    if (totalHours > 0) {
+      final remainingMinutes = totalMinutes % 60;
+      formattedTime = '${totalHours}h ${remainingMinutes}m';
+    } else if (totalMinutes > 0) {
+      formattedTime = '${totalMinutes}m';
+    } else if (totalSeconds > 0) {
+      formattedTime = '${totalSeconds}s';
+    } else {
+      formattedTime = '0s';
+    }
     
     final lastFile = files.isNotEmpty ? files.first : null;
+    log.d('[STATS] files count=${files.length}, lastFile=${lastFile?.fileName ?? "null"}, dates: ${files.map((f) => "${f.fileName}=${f.dateOpened.toIso8601String()}").join(" | ")}');
+    final theme = Theme.of(context);
     
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        color: theme.colorScheme.surfaceContainerLow,
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.12),
+          color: theme.colorScheme.outline.withValues(alpha: 0.08),
           width: 1,
         ),
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.all(14),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem(
-                context,
-                icon: Icons.insert_drive_file,
-                value: filesCount.toString(),
-                label: 'Files',
-              ),
-              _buildStatItem(
-                context,
-                icon: Icons.storage,
-                value: '${totalSizeGB}GB',
-                label: 'Used',
-              ),
-              _buildStatItem(
-                context,
-                icon: Icons.today,
-                value: openedToday.toString(),
-                label: 'Today',
-              ),
-            ],
+          // Stat row with dividers between items
+          IntrinsicHeight(
+            child: Row(
+              children: [
+                // Documents
+                Expanded(
+                  child: _buildStatPill(
+                    context,
+                    icon: Icons.description_outlined,
+                    value: filesCount.toString(),
+                    label: 'Documents',
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                VerticalDivider(width: 1, indent: 8, endIndent: 8, color: theme.colorScheme.outline.withValues(alpha: 0.12)),
+                // Storage
+                Expanded(
+                  child: _buildStatPill(
+                    context,
+                    icon: Icons.pie_chart_outline,
+                    value: formattedStorage,
+                    label: 'Storage Used',
+                    color: theme.colorScheme.tertiary,
+                  ),
+                ),
+                VerticalDivider(width: 1, indent: 8, endIndent: 8, color: theme.colorScheme.outline.withValues(alpha: 0.12)),
+                // Reading Time
+                Expanded(
+                  child: _buildStatPill(
+                    context,
+                    icon: Icons.menu_book_outlined,
+                    value: formattedTime,
+                    label: 'Time Read',
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+              ],
+            ),
           ),
           if (lastFile != null) ...[
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    log.i('Opening last file: ${lastFile.fileName}');
-                    if (!lastFile.isRead) {
-                      ref.read(recentFilesMutatorProvider).markAsRead(lastFile.id);
-                    }
-                    context.push(
-                        '${RouteNames.viewer}?path=${Uri.encodeComponent(lastFile.filePath)}&name=${Uri.encodeComponent(lastFile.fileName)}');
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.history,
-                          size: 14,
-                          color: Theme.of(context).colorScheme.primary,
+            const SizedBox(height: 12),
+            Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.08)),
+            const SizedBox(height: 8),
+            // Last opened row button
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  log.i('Opening last file: ${lastFile.fileName}');
+                  if (!lastFile.isRead) {
+                    ref.read(recentFilesMutatorProvider).markAsRead(lastFile.id);
+                  }
+                  context.push(
+                      '${RouteNames.viewer}?path=${Uri.encodeComponent(lastFile.filePath)}&name=${Uri.encodeComponent(lastFile.fileName)}');
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.history,
+                        size: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Last Opened: ',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            'Last: ${lastFile.fileName}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          lastFile.fileName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
-                        Icon(
-                          Icons.chevron_right,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -479,33 +542,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildStatItem(BuildContext context, {required IconData icon, required String value, required String label}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w700,
+  Widget _buildStatPill(
+    BuildContext context, {
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color color,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontSize: 10,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 10,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+
 
   Widget _buildEmptyRecentState(BuildContext context) {
     return SingleChildScrollView(
