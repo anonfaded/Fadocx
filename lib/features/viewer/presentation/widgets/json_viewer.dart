@@ -25,6 +25,7 @@ class _JSONViewerState extends State<JSONViewer> {
   String _searchQuery = '';
   bool _showStats = true;
   final Map<String, bool> _expandedNodes = {};
+  List<String> _rawLines = [];
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _JSONViewerState extends State<JSONViewer> {
     } catch (e) {
       _parsedJson = {'error': 'Invalid JSON: $e'};
     }
+    _computeRawLines();
   }
 
   @override
@@ -466,28 +468,36 @@ class _JSONViewerState extends State<JSONViewer> {
     return false;
   }
 
-  /// Raw JSON view
-  Widget _buildRawView() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SelectableText(
-          _formatJson(_parsedJson),
-          style: const TextStyle(
-            fontFamily: 'Courier',
-            fontSize: 12,
-          ),
-        ),
-      ),
-    );
+  void _computeRawLines() {
+    try {
+      final formatted = const JsonEncoder.withIndent('  ').convert(_parsedJson);
+      _rawLines = formatted.split('\n');
+    } catch (e) {
+      _rawLines = [_parsedJson.toString()];
+    }
   }
 
-  /// Pretty-print JSON
-  String _formatJson(dynamic json) {
-    try {
-      return const JsonEncoder.withIndent('  ').convert(json);
-    } catch (e) {
-      return json.toString();
+  /// Raw JSON view — virtualized with ListView.builder for large files
+  Widget _buildRawView() {
+    if (_rawLines.isEmpty) {
+      return const Center(child: Text('No content'));
     }
+    return SelectionArea(
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: _rawLines.length,
+        cacheExtent: 600,
+        itemBuilder: (context, index) {
+          return Text(
+            _rawLines[index],
+            style: const TextStyle(
+              fontFamily: 'Courier',
+              fontSize: 12,
+              height: 1.4,
+            ),
+          );
+        },
+      ),
+    );
   }
 }
