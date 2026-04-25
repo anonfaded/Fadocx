@@ -433,7 +433,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
-                    // Navigate to last opened file
+                    log.i('Opening last file: ${lastFile.fileName}');
+                    if (!lastFile.isRead) {
+                      ref.read(recentFilesMutatorProvider).markAsRead(lastFile.id);
+                    }
+                    context.push(
+                        '${RouteNames.viewer}?path=${Uri.encodeComponent(lastFile.filePath)}&name=${Uri.encodeComponent(lastFile.fileName)}');
                   },
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
@@ -456,6 +461,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ],
                     ),

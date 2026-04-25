@@ -272,6 +272,25 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   }
 
   @override
+  Future<Result<void>> updateDateOpened(String filePath) async {
+    try {
+      // Get file by path from recent files
+      final recentFiles = await _datasource.getRecentFiles();
+      final existing = recentFiles.where((f) => f.filePath == filePath).firstOrNull;
+      if (existing != null) {
+        final updated = existing.copyWith(dateOpened: DateTime.now());
+        await _datasource.updateRecentFile(updated);
+        log.i('Updated date opened for $filePath');
+      }
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to update date opened', error: e, stackTrace: st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update date opened'));
+    }
+  }
+
+  @override
   Future<Result<void>> removeRecentFile(String fileId) async {
     try {
       await _datasource.deleteRecentFile(fileId);
