@@ -16,8 +16,8 @@ import 'package:fadocx/features/viewer/data/services/lokit_service.dart';
 import 'package:fadocx/features/viewer/presentation/providers/document_viewer_notifier.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
-import 'package:fadocx/core/services/thumbnail_generation_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
+import 'package:fadocx/core/services/thumbnail_generation_service.dart';
 
 class ViewerScreen extends ConsumerStatefulWidget {
   final String filePath;
@@ -349,7 +349,12 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           !docState.hasError) {
         ref
             .read(documentViewerProvider.notifier)
-            .initializeAndLoad(widget.filePath, widget.fileName);
+            .initializeAndLoad(widget.filePath, widget.fileName)
+            .then((_) {
+          // Update date opened after document loads successfully
+          // Use path from widget since ParsedDocumentEntity doesn't have id
+          ref.read(recentFilesMutatorProvider).updateDateOpened(widget.filePath);
+        });
       }
     });
   }

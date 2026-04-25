@@ -43,6 +43,9 @@ abstract class RecentFilesRepository {
   /// Update page position for resume functionality
   Future<Result<void>> updatePagePosition(String fileId, int pagePosition);
 
+  /// Update date opened to now
+  Future<Result<void>> updateDateOpened(String filePath);
+
   /// Remove file from recent files
   Future<Result<void>> removeRecentFile(String fileId);
 

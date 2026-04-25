@@ -202,6 +202,18 @@ class RecentFilesMutator {
     );
   }
 
+  Future<void> updateDateOpened(String filePath) async {
+    log.i('Updating date opened for: $filePath');
+    final result = await _repository.updateDateOpened(filePath);
+    result.fold(
+      (failure) => log.e('Failed to update date opened: ${failure.message}'),
+      (success) {
+        log.i('Date opened updated');
+        _ref.invalidate(recentFilesProvider);
+      },
+    );
+  }
+
   Future<void> removeRecentFile(String fileId) async {
     log.i('Removing recent file: $fileId');
     final result = await _repository.removeRecentFile(fileId);
