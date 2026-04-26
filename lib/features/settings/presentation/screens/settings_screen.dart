@@ -401,6 +401,10 @@ class SettingsScreen extends ConsumerWidget {
                                 const SizedBox(width: 8),
                                 Expanded(child: _storageChip(Icons.code, 'Code', '${StorageService.formatBytes(stats['Code']?['bytes'] ?? 0)} • ${stats['Code']?['count'] ?? 0} files', Colors.purple)),
                                 const SizedBox(width: 8),
+                                Expanded(child: _storageChip(Icons.document_scanner, 'Scans', '${StorageService.formatBytes(stats['Scans']?['bytes'] ?? 0)} • ${stats['Scans']?['count'] ?? 0} files', Colors.cyan)),
+                              ]),
+                              const SizedBox(height: 12),
+                              Row(children: [
                                 Expanded(child: _storageChip(Icons.insert_drive_file, 'Other', '${StorageService.formatBytes(stats['Other']?['bytes'] ?? 0)} • ${stats['Other']?['count'] ?? 0} files', Colors.teal)),
                               ]),
                             ],

@@ -428,6 +428,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                     _buildCategoryChip(context, 'spreadsheets', 'Sheets'),
                     _buildCategoryChip(context, 'presentations', 'Slides'),
                     _buildCategoryChip(context, 'code', 'Code'),
+                    _buildCategoryChip(context, 'scans', 'Scans'),
                     _buildCategoryChip(context, 'other', 'Other'),
                   ],
                 ),
@@ -538,6 +539,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         return Icons.slideshow;
       case 'code':
         return Icons.code;
+      case 'scans':
+        return Icons.document_scanner;
       default:
         return Icons.insert_drive_file;
     }
@@ -1011,6 +1014,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       case 'xml':
       case 'log':
         return 'code';
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+        return 'scans';
       default:
         return 'other';
     }
@@ -1057,6 +1066,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       case 'log':
         iconData = Icons.code;
         color = theme.colorScheme.primary;
+        break;
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+        iconData = Icons.document_scanner;
+        color = theme.colorScheme.secondary;
         break;
       default:
         iconData = Icons.insert_drive_file;
@@ -1718,6 +1735,14 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
       case 'log':
         iconData = Icons.code;
         color = theme.colorScheme.primary;
+        break;
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+        iconData = Icons.document_scanner;
+        color = theme.colorScheme.secondary;
         break;
       default:
         iconData = Icons.insert_drive_file;
