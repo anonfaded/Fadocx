@@ -164,6 +164,23 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
             );
           }
 
+        // Image formats — display with built-in image viewer
+        case 'png':
+        case 'jpg':
+        case 'jpeg':
+        case 'gif':
+        case 'webp':
+        case 'bmp':
+        case 'svg':
+          log.d('Image format detected: $extension — using image viewer');
+          document = ParsedDocumentEntity(
+            format: extension.toUpperCase(),
+            sheets: const [],
+            sheetCount: 0,
+            parsedAt: DateTime.now(),
+            sourceFilePath: _filePath,
+          );
+
         default:
           log.e(
               'Unsupported file format received: "$extension" (path: $_filePath)');

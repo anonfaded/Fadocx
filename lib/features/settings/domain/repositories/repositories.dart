@@ -80,6 +80,9 @@ abstract class RecentFilesRepository {
 
   /// Get sync status for a file
   Future<Result<String>> getSyncStatus(String fileId);
+
+  /// Update extracted text for a scanned document
+  Future<Result<void>> updateExtractedText(String filePath, String extractedText);
 }
 
 /// Abstract repository for document operations

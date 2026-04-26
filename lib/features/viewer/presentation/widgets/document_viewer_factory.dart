@@ -4,6 +4,7 @@ import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
 import 'professional_sheet_viewer.dart';
 import 'modern_pdf_viewer.dart';
 import 'text_document_viewer.dart';
+import 'image_viewer.dart';
 
 /// Returns embedded viewer content only.
 /// The owning screen provides the outer Scaffold/AppBar.
@@ -26,6 +27,8 @@ class DocumentViewerFactory {
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document, onSheetSelectionChanged, sheetViewerKey, zoom: sheetZoom),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
+      'PNG' || 'JPG' || 'JPEG' || 'GIF' || 'WEBP' || 'BMP' || 'SVG' =>
+        _buildImageViewer(filePath, onTap),
       'TXT' => _buildTextViewer(document, onTap: onTap),
       _ => _buildUnsupportedViewer(document.format),
     };
@@ -110,6 +113,13 @@ class DocumentViewerFactory {
         textContent: textContent,
         onTap: onTap,
       ),
+    );
+  }
+
+  static Widget _buildImageViewer(String filePath, VoidCallback? onTap) {
+    return ImageViewer(
+      filePath: filePath,
+      onTap: onTap,
     );
   }
 

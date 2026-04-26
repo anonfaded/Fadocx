@@ -10,6 +10,7 @@ class FileActionCallbacks {
   final VoidCallback? onUpload;
   final VoidCallback? onFileInfo;
   final VoidCallback? onDelete;
+  final VoidCallback? onCopyText;
 
   const FileActionCallbacks({
     this.onRename,
@@ -19,6 +20,7 @@ class FileActionCallbacks {
     this.onUpload,
     this.onFileInfo,
     this.onDelete,
+    this.onCopyText,
   });
 }
 
@@ -103,6 +105,15 @@ void showFileActionBottomSheet({
                 subtitle: 'Save a copy to Downloads',
                 showChevron: true,
                 onTap: callbacks.onExport!,
+              ),
+            if (callbacks.onCopyText != null)
+              _buildActionRow(
+                context: ctx,
+                icon: Icons.content_paste,
+                title: 'Copy Text',
+                iconColor: Colors.teal,
+                subtitle: 'Copy extracted text to clipboard',
+                onTap: callbacks.onCopyText!,
               ),
             if (callbacks.onConvert != null)
               _buildActionRow(

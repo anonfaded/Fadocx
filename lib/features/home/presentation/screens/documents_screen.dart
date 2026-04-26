@@ -1102,6 +1102,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         onRename: () => _renameFile(file),
         onDuplicate: () => _duplicateFile(file),
         onExport: () => _exportFile(file),
+        onCopyText: file.extractedText != null && file.extractedText!.isNotEmpty
+            ? () => _copyExtractedText(file)
+            : null,
         onConvert: () {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Convert feature coming soon!')),
@@ -1383,6 +1386,19 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     }
   }
 
+
+  void _copyExtractedText(RecentFile file) {
+    final text = file.extractedText;
+    if (text == null || text.isEmpty) return;
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Copied ${text.length} characters to clipboard'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   void _softDeleteFile(RecentFile file) {
     showDialog(

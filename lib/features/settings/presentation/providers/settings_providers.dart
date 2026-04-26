@@ -313,6 +313,15 @@ class RecentFilesMutator {
       },
     );
   }
+
+  Future<void> updateExtractedText(String filePath, String extractedText) async {
+    log.i('Updating extracted text for: $filePath');
+    final result = await _repository.updateExtractedText(filePath, extractedText);
+    result.fold(
+      (failure) => log.e('Failed to update extracted text: ${failure.message}'),
+      (success) => log.i('Extracted text updated'),
+    );
+  }
 }
 
 // ============================================================================

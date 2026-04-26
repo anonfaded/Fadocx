@@ -19,6 +19,7 @@ class SettingsMapper {
       isRead: hive.isRead,
       totalTimeSpentMs: hive.totalTimeSpentMs,
       sessionStartTime: hive.sessionStartTime,
+      extractedText: hive.extractedText,
     );
   }
 
@@ -38,6 +39,7 @@ class SettingsMapper {
       isRead: domain.isRead,
       totalTimeSpentMs: domain.totalTimeSpentMs,
       sessionStartTime: domain.sessionStartTime,
+      extractedText: domain.extractedText,
     );
   }
 
