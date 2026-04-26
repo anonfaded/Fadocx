@@ -7,7 +7,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import 'package:fadocx/core/services/camera_service.dart';
-import 'package:fadocx/core/services/scan_processor.dart';
 import 'package:fadocx/core/services/isolate_processor.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/core/services/tesseract_service.dart';
@@ -222,6 +221,18 @@ class ScannerNotifier extends Notifier<ScannerState> {
     }
   }
 
+  /// Update a recent file with extracted OCR text (single source of truth in Hive).
+  Future<void> _updateRecentFileWithText(String filePath, String extractedText) async {
+    try {
+      final mutator = ref.read(recentFilesMutatorProvider);
+      await mutator.updateExtractedText(filePath, extractedText);
+      log.i('Updated extracted text for: $filePath');
+    } catch (e) {
+      log.w('Failed to update extracted text: $e');
+      // Non-critical - OCR text is still in state for this session
+    }
+  }
+
   /// Capture and process image, emitting per-step state updates.
   Future<void> captureAndProcess() async {
     if (state.isProcessing) return;
@@ -274,17 +285,8 @@ class ScannerNotifier extends Notifier<ScannerState> {
       log.i(
           'Processing done: ${extractedText.length} chars, confidence: ${confidence.toStringAsFixed(2)}');
 
-      final scanResult = ScanResult(
-        imagePath: capturedImage.path,
-        extractedText: extractedText,
-        timestamp: DateTime.now(),
-        processedImagePath: processedPath,
-        ocrConfidence: confidence,
-        textBlocks: textBlocks,
-        ocrImageWidth: ocrResult?.imageWidth,
-        ocrImageHeight: ocrResult?.imageHeight,
-      );
-      await ScanProcessor.saveScanMetadata(scanResult);
+      // Note: Scan metadata is now stored in Hive via _updateRecentFileWithText
+      // (single source of truth — no separate JSON file needed)
       state = state.copyWith(
         hasScannedImage: true,
         extractedText: extractedText,
@@ -296,6 +298,9 @@ class ScannerNotifier extends Notifier<ScannerState> {
         processingStep: ProcessingStep.done,
         isProcessing: false,
       );
+
+      // Update recent file with extracted text (single source of truth in Hive)
+      await _updateRecentFileWithText(savedPath ?? capturedImage.path, extractedText);
     } catch (e, st) {
       log.e('captureAndProcess error', error: e, stackTrace: st);
       state = state.copyWith(
@@ -358,17 +363,7 @@ class ScannerNotifier extends Notifier<ScannerState> {
       final confidence = ocrResult?.averageConfidence ?? 0.0;
       final textBlocks = ocrResult?.lines ?? const <TextBlock>[];
 
-      final scanResult = ScanResult(
-        imagePath: imagePath,
-        extractedText: extractedText,
-        timestamp: DateTime.now(),
-        processedImagePath: processedPath,
-        ocrConfidence: confidence,
-        textBlocks: textBlocks,
-        ocrImageWidth: ocrResult?.imageWidth,
-        ocrImageHeight: ocrResult?.imageHeight,
-      );
-      await ScanProcessor.saveScanMetadata(scanResult);
+      // Note: Scan metadata is now stored in Hive via _updateRecentFileWithText
 
       state = state.copyWith(
         hasScannedImage: true,
@@ -381,6 +376,9 @@ class ScannerNotifier extends Notifier<ScannerState> {
         processingStep: ProcessingStep.done,
         isProcessing: false,
       );
+
+      // Update recent file with extracted text (single source of truth in Hive)
+      await _updateRecentFileWithText(savedPath ?? imagePath, extractedText);
     } catch (e, st) {
       log.e('_processExistingImage error', error: e, stackTrace: st);
       state = state.copyWith(

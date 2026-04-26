@@ -6,7 +6,7 @@ class RecentFile {
   final String id;
   final String filePath;
   final String fileName;
-  final String fileType; // pdf, docx, xlsx, csv
+  final String fileType; // pdf, docx, xlsx, csv, png, etc.
   final int fileSizeBytes;
   final DateTime dateOpened;
   final DateTime dateModified;
@@ -18,6 +18,7 @@ class RecentFile {
   final bool isRead;
   final int totalTimeSpentMs;
   final DateTime? sessionStartTime;
+  final String? extractedText; // OCR text for scanned documents
 
   RecentFile({
     required this.id,
@@ -35,6 +36,7 @@ class RecentFile {
     this.isRead = false,
     this.totalTimeSpentMs = 0,
     this.sessionStartTime,
+    this.extractedText,
   });
 
   /// Format total time spent to human-readable string

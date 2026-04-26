@@ -545,6 +545,26 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
           UnknownFailure(message: 'Failed to get sync status'));
     }
   }
+
+  @override
+  Future<Result<void>> updateExtractedText(
+      String filePath, String extractedText) async {
+    try {
+      final recentFiles = await _datasource.getRecentFiles();
+      final existing =
+          recentFiles.where((f) => f.filePath == filePath).firstOrNull;
+      if (existing != null) {
+        final updated = existing.copyWith(extractedText: extractedText);
+        await _datasource.updateRecentFile(updated);
+        log.i('Updated extracted text for $filePath');
+      }
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to update extracted text', error: e, stackTrace: st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update extracted text'));
+    }
+  }
 }
 
 /// TOP LEVEL FUNCTION for compute()

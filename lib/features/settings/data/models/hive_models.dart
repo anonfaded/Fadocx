@@ -52,6 +52,9 @@ class HiveRecentFile {
   @HiveField(14)
   final DateTime? sessionStartTime; // When current viewing session started
 
+  @HiveField(15)
+  final String? extractedText; // OCR text for scanned documents
+
   HiveRecentFile({
     String? id,
     required this.filePath,
@@ -68,6 +71,7 @@ class HiveRecentFile {
     this.isRead = false,
     this.totalTimeSpentMs = 0,
     this.sessionStartTime,
+    this.extractedText,
   }) : id = id ?? const Uuid().v4(),
        isDeleted = isDeleted ?? false;
 
@@ -88,6 +92,7 @@ class HiveRecentFile {
     bool? isRead,
     int? totalTimeSpentMs,
     DateTime? sessionStartTime,
+    String? extractedText,
   }) {
     return HiveRecentFile(
       id: id ?? this.id,
@@ -105,6 +110,7 @@ class HiveRecentFile {
       isRead: isRead ?? this.isRead,
       totalTimeSpentMs: totalTimeSpentMs ?? this.totalTimeSpentMs,
       sessionStartTime: sessionStartTime ?? this.sessionStartTime,
+      extractedText: extractedText ?? this.extractedText,
     );
   }
 
