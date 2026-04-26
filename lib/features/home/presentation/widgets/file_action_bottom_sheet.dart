@@ -34,13 +34,20 @@ void showFileActionBottomSheet({
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
-    builder: (ctx) => Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
+    isScrollControlled: true,
+    enableDrag: true,
+    builder: (ctx) => DraggableScrollableSheet(
+      initialChildSize: 0.5,
+      minChildSize: 0.3,
+      maxChildSize: 0.85,
+      builder: (_, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Handle bar
@@ -161,6 +168,7 @@ void showFileActionBottomSheet({
             const SizedBox(height: 16),
           ],
         ),
+      ),
       ),
     ),
   );
