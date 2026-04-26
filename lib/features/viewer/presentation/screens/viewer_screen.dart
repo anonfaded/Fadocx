@@ -37,7 +37,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     with TickerProviderStateMixin {
   static final _log = Logger();
   static const int _readingWordsPerMinute = 200;
-  static const double _kSidebarTopOffset = 56;
   static const double _kSidebarBottomOffset = 88;
   static const double _kSidebarRadius = 24.0;
 
@@ -63,6 +62,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   late AnimationController _sidebarController;
   // Sheet selection state for bottom panel display
   double _sheetZoom = 1.0;
+  String? _sheetCellRef;
+  String _sheetCellValue = '';
 
   late AnimationController _topBarController;
   late AnimationController _bottomPanelController;
@@ -553,7 +554,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                         ? Padding(
                             padding: EdgeInsets.only(
                               top: _controlsVisible ? MediaQuery.of(context).padding.top + 48.0 : 0.0,
-                              bottom: _bottomPanelController.value > 0.3 ? 56.0 : 0.0,
+                              bottom: _bottomPanelController.value > 0.3
+                                  ? (_isSpreadsheet() ? 76.0 : 56.0)
+                                  : 0.0,
                             ),
                             child: _buildContentViewer(
                               document: docState.document!,
@@ -589,7 +592,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             animation: _sidebarController,
             builder: (context, child) {
               return Positioned(
-                top: _kSidebarTopOffset - _kSidebarRadius,
+                top: MediaQuery.of(context).padding.top + 40,
                 bottom: _kSidebarBottomOffset - _kSidebarRadius,
                 left: 0,
                 child: SlideTransition(
@@ -800,7 +803,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         setState(() => _textMode = !_textMode);
       },
       onSheetSelectionChanged: (cellRef, value) {
-        // Selection handled by sheet viewer's internal status bar
+        setState(() {
+          _sheetCellRef = cellRef;
+          _sheetCellValue = value;
+        });
       },
       sheetViewerKey: _sheetViewerKey,
       sheetZoom: _sheetZoom,
@@ -1615,6 +1621,68 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                         ),
                       ),
                     ),
+                    // Sheet selection info row (spreadsheets only)
+                    if (_isSpreadsheet())
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+                              width: 0.5,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            if (_sheetCellRef != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  _sheetCellRef!,
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _sheetCellValue.isEmpty ? 'Tap a cell to see value' : _sheetCellValue,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: _sheetCellValue.isEmpty
+                                      ? Theme.of(context).colorScheme.outline
+                                      : null,
+                                ),
+                              ),
+                            ),
+                            if (_sheetCellValue.isNotEmpty)
+                              IconButton(
+                                icon: Icon(Icons.copy, size: 14, color: Theme.of(context).colorScheme.primary),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(text: _sheetCellValue));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Copied'),
+                                      duration: Duration(milliseconds: 800),
+                                    ),
+                                  );
+                                },
+                                tooltip: 'Copy value',
+                              ),
+                          ],
+                        ),
+                      ),
                     // Expandable menu
                     SizeTransition(
                       sizeFactor: CurvedAnimation(

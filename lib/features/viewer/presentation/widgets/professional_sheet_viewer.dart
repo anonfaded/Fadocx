@@ -63,6 +63,14 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
     _prepareData();
   }
 
+  @override
+  void didUpdateWidget(covariant ProfessionalSheetViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialZoom != widget.initialZoom) {
+      setState(() => _zoom = widget.initialZoom);
+    }
+  }
+
   void _prepareData() {
     _headers = _colLabels(widget.sheet.colCount);
     _colWidths = List.filled(widget.sheet.colCount, _baseCellW);
@@ -113,58 +121,70 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
       List.generate(_headers.length, _colW).fold(0.0, (a, b) => a + b);
 
   // ── Selection ──────────────────────────────────────────
-  void _toggleRow(int r) => setState(() {
-        _selectAll = false;
-        if (_selRow == r) {
-          _selRow = null;
-        } else {
-          _selRow = r;
-          _selCol = null;
-          _selCellRow = null;
-          _selCellCol = null;
-        }
-      });
+  void _toggleRow(int r) {
+    setState(() {
+      _selectAll = false;
+      if (_selRow == r) {
+        _selRow = null;
+      } else {
+        _selRow = r;
+        _selCol = null;
+        _selCellRow = null;
+        _selCellCol = null;
+      }
+    });
+    _notifySelection();
+  }
 
-  void _toggleCol(int c) => setState(() {
-        _selectAll = false;
-        if (_selCol == c) {
-          _selCol = null;
-        } else {
-          _selCol = c;
-          _selRow = null;
-          _selCellRow = null;
-          _selCellCol = null;
-        }
-      });
+  void _toggleCol(int c) {
+    setState(() {
+      _selectAll = false;
+      if (_selCol == c) {
+        _selCol = null;
+      } else {
+        _selCol = c;
+        _selRow = null;
+        _selCellRow = null;
+        _selCellCol = null;
+      }
+    });
+    _notifySelection();
+  }
 
-  void _toggleCell(int r, int c) => setState(() {
-        _selectAll = false;
-        if (_selCellRow == r && _selCellCol == c) {
-          _selCellRow = null;
-          _selCellCol = null;
-        } else {
-          _selCellRow = r;
-          _selCellCol = c;
-          _selRow = null;
-          _selCol = null;
-        }
-      });
+  void _toggleCell(int r, int c) {
+    setState(() {
+      _selectAll = false;
+      if (_selCellRow == r && _selCellCol == c) {
+        _selCellRow = null;
+        _selCellCol = null;
+      } else {
+        _selCellRow = r;
+        _selCellCol = c;
+        _selRow = null;
+        _selCol = null;
+      }
+    });
+    _notifySelection();
+  }
 
-  void _toggleSelectAll() => setState(() {
-        if (_selectAll) {
-          _selectAll = false;
-          _selRow = null;
-          _selCol = null;
-          _selCellRow = null;
-          _selCellCol = null;
-        } else {
-          _selectAll = true;
-          _selRow = null;
-          _selCol = null;
-          _selCellRow = null;
-          _selCellCol = null;
-        }
-      });
+  void _toggleSelectAll() {
+    setState(() {
+      if (_selectAll) {
+        _selectAll = false;
+        _selRow = null;
+        _selCol = null;
+        _selCellRow = null;
+        _selCellCol = null;
+      } else {
+        _selectAll = true;
+        _selRow = null;
+        _selCol = null;
+        _selCellRow = null;
+        _selCellCol = null;
+      }
+    });
+    _notifySelection();
+  }
 
   void _clearSelection() => setState(() {
         _selectAll = false;
@@ -192,16 +212,17 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
   void _notifySelection() {
     if (widget.onSelectionChanged == null) return;
     if (_selectAll) {
-      widget.onSelectionChanged!('All', '${_rows.length}x${_headers.length}');
+      final allData = _rows.map((r) => r.join(',')).join('\n');
+      widget.onSelectionChanged!('All (${_rows.length}×${_headers.length})', allData);
     } else if (_selCellRow != null && _selCellCol != null) {
       final cellRef = '${_headers[_selCellCol!]}${_selCellRow! + 1}';
       final value = _rows[_selCellRow!][_selCellCol!];
       widget.onSelectionChanged!(cellRef, value);
     } else if (_selRow != null) {
-      widget.onSelectionChanged!('Row ${_selRow! + 1}', '');
+      final rowValues = _rows[_selRow!].join(', ');
+      widget.onSelectionChanged!('Row ${_selRow! + 1}', rowValues);
     } else if (_selCol != null) {
-      // Show full column data - join all values in that column
-      final colValues = _rows.map((r) => r[_selCol!]).join('\n');
+      final colValues = _rows.map((r) => r[_selCol!]).join(', ');
       widget.onSelectionChanged!('Col ${_headers[_selCol!]}', colValues);
     } else {
       widget.onSelectionChanged!(null, '');
