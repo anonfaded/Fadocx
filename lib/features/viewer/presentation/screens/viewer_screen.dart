@@ -640,9 +640,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           AnimatedBuilder(
             animation: _sidebarController,
             builder: (context, child) {
-              return Positioned(
-                top: _topOverlayHeight(context) - _kSidebarRadius,
-                bottom: _kSidebarBottomOffset - _kSidebarRadius,
+               return Positioned(
+                 top: _topOverlayHeight(context),
+                 bottom: _kSidebarBottomOffset - _kSidebarRadius,
                 left: 0,
                 child: SlideTransition(
                   position: Tween<Offset>(
