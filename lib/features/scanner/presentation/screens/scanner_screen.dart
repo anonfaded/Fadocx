@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,10 @@ import 'package:fadocx/features/scanner/presentation/providers/scanner_provider.
 final log = Logger();
 
 /// Document Scanner Screen
+///
+/// Three-step flow: Capture → Processing → Results
+/// Camera is only active during step 0 (Capture).
+/// Tap-to-focus is supported on the camera preview.
 class ScannerScreen extends ConsumerStatefulWidget {
   const ScannerScreen({super.key});
 
@@ -23,9 +28,11 @@ class ScannerScreen extends ConsumerStatefulWidget {
 
 class _ScannerScreenState extends ConsumerState<ScannerScreen>
     with TickerProviderStateMixin {
-  late TabController _tabController;
   late AnimationController _pulseController;
   late AnimationController _processingController;
+
+  // Step tracking (0: Capture, 1: Processing, 2: Results)
+  int _currentStep = 0;
 
   // Live document corner detection (from frame stream, not takePicture)
   DocumentCorners? _liveCorners;
@@ -35,11 +42,13 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   // Throttle: only process one frame at a time
   bool _processingFrame = false;
 
+  // Tap-to-focus animation
+  Offset? _focusPoint;
+  bool _showFocusAnimation = false;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -49,20 +58,24 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat();
+
+    // Start in immersive mode for better camera experience
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _pulseController.dispose();
     _processingController.dispose();
+    // Restore system UI on dispose
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     // Stop frame stream on dispose
     final cameraService = ref.read(scannerProvider.notifier).getCameraService();
     cameraService.stopFrameStream();
     super.dispose();
   }
 
-  // ─── Live corner detection via frame stream ───────────────────────────────
+  // ─── Camera lifecycle ─────────────────────────────────────────────────────
 
   void _startFrameStream() {
     final cameraService = ref.read(scannerProvider.notifier).getCameraService();
@@ -72,7 +85,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       _processingFrame = true;
       Future.microtask(() {
         try {
-          // Build a grayscale Mat from the Y-plane bytes
           final mat = cv.Mat.fromList(h, w, cv.MatType.CV_8UC1, yPlane);
           final corners = ImageProcessingService.detectCornersFromMat(mat);
           mat.dispose();
@@ -99,10 +111,55 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     cameraService.stopFrameStream();
   }
 
+  // ─── Tap-to-focus ──────────────────────────────────────────────────────────
+
+  void _handleTapToFocus(TapDownDetails details, BoxConstraints constraints) {
+    final cameraService = ref.read(scannerProvider.notifier).getCameraService();
+    final controller = cameraService.controller;
+    if (controller == null || !cameraService.isInitialized) return;
+
+    final offset = Offset(
+      details.localPosition.dx / constraints.maxWidth,
+      details.localPosition.dy / constraints.maxHeight,
+    );
+
+    // Show focus animation at tap point
+    setState(() {
+      _focusPoint = details.localPosition;
+      _showFocusAnimation = true;
+    });
+
+    // Set focus and exposure point
+    controller.setFocusPoint(offset);
+    controller.setExposurePoint(offset);
+
+    // Hide focus animation after delay
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) {
+        setState(() => _showFocusAnimation = false);
+      }
+    });
+  }
+
   // ─── Navigation helper ────────────────────────────────────────────────────
 
-  void _goToTab(int index) {
-    if (mounted) _tabController.animateTo(index);
+  void _goToStep(int step) {
+    if (!mounted) return;
+    final prevStep = _currentStep;
+    setState(() => _currentStep = step.clamp(0, 2));
+
+    // Camera lifecycle: stop stream when leaving capture step
+    if (prevStep == 0 && step > 0) {
+      _stopFrameStream();
+      setState(() => _liveCorners = null);
+    }
+    // Restart stream when returning to capture step
+    if (prevStep > 0 && step == 0) {
+      final scannerState = ref.read(scannerProvider);
+      if (scannerState.cameraInitialized && !scannerState.isProcessing) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _startFrameStream());
+      }
+    }
   }
 
   // ─── Build ────────────────────────────────────────────────────────────────
@@ -110,12 +167,14 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   @override
   Widget build(BuildContext context) {
     final scannerState = ref.watch(scannerProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // If camera was already initialized before this widget mounted, start stream
     final cameraService = ref.read(scannerProvider.notifier).getCameraService();
     if (scannerState.cameraInitialized &&
         !cameraService.isStreaming &&
-        !scannerState.isProcessing) {
+        !scannerState.isProcessing &&
+        _currentStep == 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _startFrameStream());
     }
 
@@ -125,44 +184,43 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       if (prev?.cameraInitialized == false && next.cameraInitialized) {
         _startFrameStream();
       }
-      // Stop stream and switch tab when processing begins
+      // Stop stream and switch step when processing begins
       if (prev?.isProcessing == false && next.isProcessing) {
         _stopFrameStream();
         setState(() => _liveCorners = null);
-        _goToTab(1);
+        _goToStep(1);
       }
       // Switch to results when done
       if (prev?.isProcessing == true &&
           !next.isProcessing &&
           next.hasScannedImage) {
-        Future.delayed(const Duration(milliseconds: 400), () => _goToTab(2));
+        Future.delayed(const Duration(milliseconds: 400), () => _goToStep(2));
       }
     });
 
     return Scaffold(
-      appBar: _buildAppBar(context),
-      body: Column(
+      backgroundColor: Colors.black,
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          Container(
-            color: Theme.of(context).colorScheme.surface,
-            child: TabBar(
-              controller: _tabController,
-              tabs: const [
-                Tab(icon: Icon(Icons.camera_alt_outlined), text: 'Capture'),
-                Tab(icon: Icon(Icons.auto_fix_high), text: 'Processing'),
-                Tab(icon: Icon(Icons.description_outlined), text: 'Results'),
-              ],
-            ),
+          // Step content (full bleed)
+          _buildStepContent(context, scannerState, isDark),
+
+          // Floating top bar (back button + title)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildFloatingTopBar(context, isDark),
           ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildCaptureTab(context, scannerState),
-                _buildProcessingTab(context, scannerState),
-                _buildResultsTab(context, scannerState),
-              ],
+
+          // Step indicator (below top bar)
+          Positioned(
+            top: MediaQuery.viewPaddingOf(context).top + 52,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: _buildStepIndicator(context, isDark),
             ),
           ),
         ],
@@ -170,289 +228,559 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(56),
-      child: Material(
-        elevation: 0,
-        color: Colors.transparent,
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  // ─── Floating Top Bar ─────────────────────────────────────────────────────
+
+  Widget _buildFloatingTopBar(BuildContext context, bool isDark) {
+    return GestureDetector(
+      onTap: () {}, // Absorb taps
+      child: Stack(
+        children: [
+          // Shadow below the top bar
+          Positioned(
+            bottom: -8,
+            left: 0,
+            right: 0,
+            height: 8,
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface
-                    .withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.1),
-                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left),
-                    onPressed: () {
-                      try {
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context);
-                        } else {
-                          context.go('/');
-                        }
-                      } catch (e) {
-                        log.e('Error navigating back', error: e);
-                        context.go('/');
-                      }
-                    },
-                    tooltip: 'Back',
-                    iconSize: 20,
+            ),
+          ),
+          // Main top bar with rounded bottom corners
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.75)
+                      : Colors.white.withValues(alpha: 0.85),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
                   ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'Document Scanner',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.white.withValues(alpha: isDark ? 0.1 : 0.2),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: SizedBox(
+                    height: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              icon: Icon(Icons.chevron_left,
+                                  color: isDark ? Colors.white : Colors.black87),
+                              onPressed: () {
+                                try {
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.pop(context);
+                                  } else {
+                                    context.go('/');
+                                  }
+                                } catch (e) {
+                                  log.e('Error navigating back', error: e);
+                                  context.go('/');
+                                }
+                              },
+                              tooltip: 'Back',
+                              iconSize: 20,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              padding: EdgeInsets.zero,
                             ),
+                          ),
+                          Center(
+                            child: Text(
+                              'Document Scanner',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  // ─── Tab 1: Capture ───────────────────────────────────────────────────────
+  // ─── Step Indicator ────────────────────────────────────────────────────────
 
-  Widget _buildCaptureTab(BuildContext context, ScannerState scannerState) {
+  Widget _buildStepIndicator(BuildContext context, bool isDark) {
+    const steps = ['Capture', 'Processing', 'Results'];
+    const icons = [Icons.camera_alt_outlined, Icons.auto_fix_high, Icons.description_outlined];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.12)
+            : Colors.black.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(3, (index) {
+          final isActive = index == _currentStep;
+          final isCompleted = index < _currentStep;
+
+          return Padding(
+            padding: EdgeInsets.only(left: index > 0 ? 4 : 0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Connector line
+                if (index > 0)
+                  Container(
+                    width: 12,
+                    height: 2,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    color: isCompleted
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.3),
+                  ),
+                // Step pill
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isActive ? 12 : 8,
+                    vertical: isActive ? 6 : 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? Colors.white
+                        : isCompleted
+                            ? Colors.white.withValues(alpha: 0.2)
+                            : Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isCompleted ? Icons.check : icons[index],
+                        size: isActive ? 14 : 12,
+                        color: isActive
+                            ? Colors.black
+                            : isCompleted
+                                ? Colors.white
+                                : Colors.white.withValues(alpha: 0.6),
+                      ),
+                      if (isActive) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          '${index + 1}. ${steps[index]}',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  // ─── Step Content Router ──────────────────────────────────────────────────
+
+  Widget _buildStepContent(
+      BuildContext context, ScannerState scannerState, bool isDark) {
+    switch (_currentStep) {
+      case 0:
+        return _buildCaptureStep(context, scannerState);
+      case 1:
+        return _buildProcessingStep(context, scannerState);
+      case 2:
+        return _buildResultsStep(context, scannerState);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  // ─── Step 0: Capture ──────────────────────────────────────────────────────
+
+  Widget _buildCaptureStep(BuildContext context, ScannerState scannerState) {
+    // Show loading state while camera initializes (not the error screen)
+    if (!scannerState.cameraInitialized && scannerState.cameraError == null) {
+      return _buildCameraLoading(context);
+    }
+    // Show error only if camera actually failed
     if (!scannerState.cameraInitialized) {
       return _buildCameraError(context, scannerState);
     }
 
     final cameraService = ref.read(scannerProvider.notifier).getCameraService();
 
-    return Column(
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        Expanded(
-          child: Container(
-            color: Colors.black,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Camera preview (hidden when processing to avoid stale frame)
-                if (!scannerState.isProcessing &&
-                    cameraService.controller != null &&
-                    cameraService.isInitialized)
-                  CameraPreview(cameraService.controller!)
-                else if (scannerState.capturedImagePath != null)
-                  Image.file(
-                    File(scannerState.capturedImagePath!),
-                    fit: BoxFit.cover,
-                  )
-                else
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.camera_alt_outlined,
-                            size: 64,
-                            color: Colors.white.withValues(alpha: 0.5)),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Initializing Camera...',
-                          style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: Colors.white,
-                                  ),
-                        ),
-                      ],
-                    ),
-                  ),
-                // Live document quad overlay
-                if (_liveCorners != null && !scannerState.isProcessing)
-                  CustomPaint(
-                    painter: _DocumentQuadPainter(
-                      corners: _liveCorners!,
-                      color: Theme.of(context).colorScheme.primary,
-                      imageWidth: _frameWidth,
-                      imageHeight: _frameHeight,
-                    ),
-                  ),
-                // Animated capture frame overlay (when no detected quad)
-                if (_liveCorners == null && !scannerState.isProcessing)
-                  AnimatedBuilder(
-                    animation: _pulseController,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        painter: _CaptureFramePainter(
-                          color: Theme.of(context).colorScheme.primary,
-                          pulseValue: _pulseController.value,
-                        ),
-                      );
-                    },
-                  ),
-                // Bottom controls
-                if (!scannerState.isProcessing)
-                  Positioned(
-                    bottom: 24,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Column(
-                        children: [
-                          // Torch toggle
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: scannerState.torchEnabled
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.black.withValues(alpha: 0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                scannerState.torchEnabled
-                                    ? Icons.flash_on
-                                    : Icons.flash_off,
-                                color: Colors.white,
-                              ),
-                              onPressed: () {
-                                final messenger = ScaffoldMessenger.of(context);
-                                ref
-                                    .read(scannerProvider.notifier)
-                                    .toggleTorch()
-                                    .catchError((e) {
-                                  messenger.showSnackBar(
-                                    SnackBar(
-                                        content:
-                                            Text('Failed to toggle torch: $e')),
-                                  );
-                                });
-                              },
-                            ),
-                          ),
-                          // Capture button
-                          FloatingActionButton.extended(
-                            onPressed: () async {
-                              final messenger = ScaffoldMessenger.of(context);
-                              try {
-                                await ref
-                                    .read(scannerProvider.notifier)
-                                    .captureAndProcess();
-                              } catch (e) {
-                                if (mounted) {
-                                  messenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text('Error: $e'),
-                                      duration: const Duration(seconds: 3),
-                                    ),
-                                  );
-                                  _goToTab(0);
-                                }
-                              }
-                            },
-                            elevation: 8,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16)),
-                            icon: const Icon(Icons.camera_alt),
-                            label: const Text('Capture'),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(height: 12),
-                          FilledButton.tonalIcon(
-                            onPressed: () async {
-                              final messenger = ScaffoldMessenger.of(context);
-                              try {
-                                await ref
-                                    .read(scannerProvider.notifier)
-                                    .pickAndProcessImage();
-                              } catch (e) {
-                                if (mounted) {
-                                  messenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text('Failed to open image: $e'),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                            icon: const Icon(Icons.photo_library_outlined),
-                            label: const Text('Upload Image'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
+        // Full-bleed camera preview
         Container(
-          padding: const EdgeInsets.all(12),
-          color: Theme.of(context).colorScheme.surface,
-          child: Text(
-            _liveCorners != null
-                ? 'Document detected — tap Capture to scan'
-                : 'Position document within the frame and tap Capture',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: _liveCorners != null
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+          color: Colors.black,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                onTapDown: (details) =>
+                    _handleTapToFocus(details, constraints),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Camera preview
+                    if (!scannerState.isProcessing &&
+                        cameraService.controller != null &&
+                        cameraService.isInitialized)
+                      CameraPreview(cameraService.controller!)
+                    else if (scannerState.capturedImagePath != null)
+                      Image.file(
+                        File(scannerState.capturedImagePath!),
+                        fit: BoxFit.cover,
+                      )
+                    else
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.camera_alt_outlined,
+                                size: 64,
+                                color: Colors.white.withValues(alpha: 0.5)),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Initializing Camera...',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    // Live document quad overlay
+                    if (_liveCorners != null && !scannerState.isProcessing)
+                      CustomPaint(
+                        painter: _DocumentQuadPainter(
+                          corners: _liveCorners!,
+                          color: Colors.white,
+                          imageWidth: _frameWidth,
+                          imageHeight: _frameHeight,
+                        ),
+                      ),
+                    // Animated capture frame overlay (when no detected quad)
+                    if (_liveCorners == null && !scannerState.isProcessing)
+                      AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            painter: _CaptureFramePainter(
+                              color: Colors.white,
+                              pulseValue: _pulseController.value,
+                            ),
+                          );
+                        },
+                      ),
+                    // Tap-to-focus indicator
+                    if (_showFocusAnimation && _focusPoint != null)
+                      _buildFocusIndicator(),
+                  ],
                 ),
-            textAlign: TextAlign.center,
+              );
+            },
           ),
         ),
+
+        // Bottom panel with controls
+        if (!scannerState.isProcessing)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _buildCapturePanel(context, scannerState),
+          ),
       ],
     );
   }
 
-  Widget _buildCameraError(BuildContext context, ScannerState scannerState) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+  Widget _buildFocusIndicator() {
+    return Positioned(
+      left: _focusPoint!.dx - 30,
+      top: _focusPoint!.dy - 30,
+      child: AnimatedOpacity(
+        opacity: _showFocusAnimation ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 200),
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.yellow.withValues(alpha: 0.9),
+              width: 1.5,
+            ),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCapturePanel(BuildContext context, ScannerState scannerState) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.transparent,
+            Colors.black.withValues(alpha: 0.7),
+            Colors.black.withValues(alpha: 0.95),
+          ],
+          stops: const [0.0, 0.3, 1.0],
+        ),
+      ),
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 32,
+        bottom: MediaQuery.viewPaddingOf(context).bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Status hint
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _liveCorners != null
+                  ? Colors.green.withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: _liveCorners != null
+                    ? Colors.green.withValues(alpha: 0.4)
+                    : Colors.white.withValues(alpha: 0.15),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _liveCorners != null ? Icons.check_circle : Icons.info_outline,
+                  size: 14,
+                  color: _liveCorners != null ? Colors.green : Colors.white70,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _liveCorners != null
+                      ? 'Document detected — hold steady'
+                      : 'Keep document upright & flat for best results',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Main controls row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Upload button
+              _buildCaptureSideButton(
+                context: context,
+                icon: Icons.photo_library_outlined,
+                label: 'Upload',
+                onTap: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  try {
+                    await ref
+                        .read(scannerProvider.notifier)
+                        .pickAndProcessImage();
+                  } catch (e) {
+                    if (mounted) {
+                      messenger.showSnackBar(
+                        SnackBar(content: Text('Failed to open image: $e')),
+                      );
+                    }
+                  }
+                },
+              ),
+              // Capture button (large, center)
+              _buildCaptureButton(context),
+              // Torch button
+              _buildCaptureSideButton(
+                context: context,
+                icon: scannerState.torchEnabled
+                    ? Icons.flash_on
+                    : Icons.flash_off,
+                label: 'Flash',
+                onTap: () {
+                  final messenger = ScaffoldMessenger.of(context);
+                  ref
+                      .read(scannerProvider.notifier)
+                      .toggleTorch()
+                      .catchError((e) {
+                    messenger.showSnackBar(
+                      SnackBar(content: Text('Failed to toggle torch: $e')),
+                    );
+                  });
+                },
+isActive: scannerState.torchEnabled,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCaptureButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final messenger = ScaffoldMessenger.of(context);
+        try {
+          await ref.read(scannerProvider.notifier).captureAndProcess();
+        } catch (e) {
+          if (mounted) {
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('Error: $e'),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+            _goToStep(0);
+          }
+        }
+      },
+      child: Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 4),
+        ),
+        child: Container(
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+          ),
+          child: const Icon(
+            Icons.camera_alt,
+            color: Colors.black,
+            size: 28,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCaptureSideButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isActive = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isActive
+                  ? Colors.white.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.15),
+              border: isActive
+                  ? Border.all(color: Colors.yellow, width: 1.5)
+                  : null,
+            ),
+            child: Icon(
+              icon,
+              color: isActive ? Colors.yellow : Colors.white,
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCameraLoading(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.photo_camera_back_outlined,
-                size: 80, color: Theme.of(context).colorScheme.error),
-            const SizedBox(height: 24),
-            Text('Camera Unavailable',
-                style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 12),
-            Text(
-              scannerState.cameraError ?? 'Unable to initialize camera',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-              textAlign: TextAlign.center,
+            const CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
             ),
             const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => ref
-                  .read(scannerProvider.notifier)
-                  .retryCameraInitialization(),
-              child: const Text('Retry'),
+            Text(
+              'Starting Camera...',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -460,9 +788,69 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     );
   }
 
-  // ─── Tab 2: Processing ────────────────────────────────────────────────────
+  Widget _buildCameraError(BuildContext context, ScannerState scannerState) {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
+                child: Icon(Icons.photo_camera_back_outlined,
+                    size: 40, color: Colors.white.withValues(alpha: 0.6)),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Camera Unavailable',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                scannerState.cameraError ?? 'Unable to initialize camera',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: () => ref
+                    .read(scannerProvider.notifier)
+                    .retryCameraInitialization(),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 14),
+                ),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-  Widget _buildProcessingTab(BuildContext context, ScannerState scannerState) {
+  // ─── Step 1: Processing ────────────────────────────────────────────────────
+
+  Widget _buildProcessingStep(BuildContext context, ScannerState scannerState) {
     final steps = [
       _StepInfo(
         step: ProcessingStep.preparing,
@@ -478,86 +866,81 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       ),
     ];
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Captured image preview
-          if (scannerState.capturedImagePath != null)
-            Container(
-              height: 180,
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+    return Container(
+      color: Colors.black,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: MediaQuery.viewPaddingOf(context).top + 52 + 44 + 8,
+        ),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Captured image preview
+              if (scannerState.capturedImagePath != null)
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 32),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(scannerState.capturedImagePath!),
-                  fit: BoxFit.cover,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.file(
+                      File(scannerState.capturedImagePath!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          // Step indicators
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .outline
-                    .withValues(alpha: 0.2),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  scannerState.processingStep == ProcessingStep.done
-                      ? 'Processing Complete'
-                      : 'Processing Document...',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+              // Processing steps card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      scannerState.processingStep == ProcessingStep.done
+                          ? 'Processing Complete'
+                          : 'Processing Document...',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
                       ),
+                    ),
+                    const SizedBox(height: 20),
+                    for (final info in steps) ...[
+                      _buildProcessingStepRow(context, scannerState, info),
+                      if (info != steps.last) const SizedBox(height: 12),
+                    ],
+                  ],
                 ),
+              ),
+              // Confidence badge (shown when done)
+              if (scannerState.processingStep == ProcessingStep.done) ...[
                 const SizedBox(height: 20),
-                for (final info in steps) ...[
-                  _buildStepRow(context, scannerState, info),
-                  if (info != steps.last) const SizedBox(height: 12),
-                ],
+                _buildConfidenceBadge(context, scannerState.ocrConfidence),
               ],
-            ),
+            ],
           ),
-          // Confidence badge (shown when done)
-          if (scannerState.processingStep == ProcessingStep.done) ...[
-            const SizedBox(height: 20),
-            _buildConfidenceBadge(context, scannerState.ocrConfidence),
-            const SizedBox(height: 12),
-            Text(
-              'Showing the processed OCR image with detected text boxes.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ],
-      ),
+        ),
     );
   }
 
-  Widget _buildStepRow(
+  Widget _buildProcessingStepRow(
     BuildContext context,
     ScannerState state,
     _StepInfo info,
@@ -566,48 +949,22 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     final isActive = state.isStepActive(info.step);
     final isPending = !isCompleted && !isActive;
 
-    Color iconColor;
-    IconData iconData;
-    if (isCompleted) {
-      iconColor = Theme.of(context).colorScheme.primary;
-      iconData = Icons.check_circle;
-    } else if (isActive) {
-      iconColor = Theme.of(context).colorScheme.secondary;
-      iconData = info.icon;
-    } else {
-      iconColor =
-          Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
-      iconData = info.icon;
-    }
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isCompleted
-            ? Theme.of(context)
-                .colorScheme
-                .primaryContainer
-                .withValues(alpha: 0.25)
+            ? Colors.green.withValues(alpha: 0.15)
             : isActive
-                ? Theme.of(context)
-                    .colorScheme
-                    .secondaryContainer
-                    .withValues(alpha: 0.3)
-                : Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(8),
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCompleted
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+              ? Colors.green.withValues(alpha: 0.3)
               : isActive
-                  ? Theme.of(context)
-                      .colorScheme
-                      .secondary
-                      .withValues(alpha: 0.4)
-                  : Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.1),
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : Colors.white.withValues(alpha: 0.05),
         ),
       ),
       child: Row(
@@ -617,13 +974,21 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               animation: _processingController,
               builder: (context, child) {
                 return Transform.rotate(
-                  angle: _processingController.value * 2 * 3.14159,
-                  child: Icon(Icons.sync, size: 24, color: iconColor),
+                  angle: -_processingController.value * 2 * 3.14159,
+                  child: const Icon(Icons.sync, size: 22, color: Colors.white70),
                 );
               },
             )
           else
-            Icon(iconData, size: 24, color: iconColor),
+            Icon(
+              isCompleted ? Icons.check_circle : info.icon,
+              size: 22,
+              color: isCompleted
+                  ? Colors.green
+                  : isPending
+                      ? Colors.white30
+                      : Colors.white70,
+            ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -631,25 +996,19 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               children: [
                 Text(
                   info.title,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isPending
-                            ? Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.4)
-                            : null,
-                      ),
+                  style: TextStyle(
+                    color: isPending ? Colors.white38 : Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   info.description,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurfaceVariant
-                            .withValues(alpha: isPending ? 0.4 : 0.8),
-                      ),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: isPending ? 0.3 : 0.6),
+                    fontSize: 11,
+                  ),
                 ),
               ],
             ),
@@ -669,8 +1028,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -680,44 +1039,52 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
           const SizedBox(width: 8),
           Text(
             'OCR Confidence: $pct%',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: color,
+              fontSize: 13,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ─── Tab 3: Results ───────────────────────────────────────────────────────
+  // ─── Step 2: Results ────────────────────────────────────────────────────────
 
-  Widget _buildResultsTab(BuildContext context, ScannerState scannerState) {
+  Widget _buildResultsStep(BuildContext context, ScannerState scannerState) {
     if (!scannerState.hasScannedImage) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.description_outlined,
-              size: 80,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurfaceVariant
-                  .withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 24),
-            Text('No Scans Yet',
-                style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 12),
-            Text(
-              'Capture a document to see extracted text here',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+      return Container(
+        color: Colors.black,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.description_outlined,
+                size: 80,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'No Scans Yet',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Capture a document to see extracted text here',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -730,171 +1097,223 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
             : Colors.red;
     final imagePath = scannerState.displayedImagePath;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+    return Container(
+      color: Colors.black,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (imagePath != null) ...[
-            Text(
-              'Detected Regions',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            _DetectedTextPreview(
-              imagePath: imagePath,
-              blocks: scannerState.textBlocks,
-              imageWidth: scannerState.ocrImageWidth,
-              imageHeight: scannerState.ocrImageHeight,
-            ),
-            const SizedBox(height: 20),
-          ],
-          // Confidence chip
-          Row(
-            children: [
-              Text(
-                'Extracted Text',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+          // Top padding for floating top bar + step indicator
+          SizedBox(
+            height: MediaQuery.viewPaddingOf(context).top + 52 + 44 + 8,
+          ),
+          // Results content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image preview with detected text
+                  if (imagePath != null) ...[
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: _DetectedTextPreview(
+                          imagePath: imagePath,
+                          blocks: scannerState.textBlocks,
+                          imageWidth: scannerState.ocrImageWidth,
+                          imageHeight: scannerState.ocrImageHeight,
+                        ),
+                      ),
                     ),
-              ),
-              const Spacer(),
-              if (confidence > 0)
-                Chip(
-                  avatar:
-                      Icon(Icons.verified, size: 14, color: confidenceColor),
-                  label: Text(
-                    '${(confidence * 100).toStringAsFixed(0)}% confidence',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: confidenceColor,
+                    const SizedBox(height: 20),
+                  ],
+                  // Extracted text header
+                  Row(
+                    children: [
+                      const Text(
+                        'Extracted Text',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
-                  ),
-                  backgroundColor: confidenceColor.withValues(alpha: 0.1),
-                  side:
-                      BorderSide(color: confidenceColor.withValues(alpha: 0.3)),
-                  padding: EdgeInsets.zero,
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Extracted text box
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .outline
-                    .withValues(alpha: 0.2),
-              ),
-            ),
-            child: SelectableText(
-              scannerState.extractedText.isEmpty
-                  ? '(No text extracted)'
-                  : scannerState.extractedText,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    height: 1.6,
-                    color: scannerState.extractedText.isEmpty
-                        ? Theme.of(context).colorScheme.onSurfaceVariant
-                        : null,
-                  ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.tonal(
-                  onPressed: scannerState.extractedText.isNotEmpty
-                      ? () async {
-                          final messenger = ScaffoldMessenger.of(context);
-                          await Clipboard.setData(
-                            ClipboardData(text: scannerState.extractedText),
-                          );
-                          if (mounted) {
-                            messenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Text copied to clipboard'),
-                                duration: Duration(seconds: 2),
+                      ),
+                      const Spacer(),
+                      if (confidence > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: confidenceColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: confidenceColor.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.verified,
+                                  size: 12, color: confidenceColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${(confidence * 100).toStringAsFixed(0)}%',
+                                style: TextStyle(
+                                  color: confidenceColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11,
+                                ),
                               ),
-                            );
-                          }
-                        }
-                      : null,
-                  child: const Text('Copy All'),
-                ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Extracted text box
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    child: SelectableText(
+                      scannerState.extractedText.isEmpty
+                          ? '(No text extracted)'
+                          : scannerState.extractedText,
+                      style: TextStyle(
+                        color: scannerState.extractedText.isEmpty
+                            ? Colors.white38
+                            : Colors.white,
+                        fontSize: 14,
+                        height: 1.6,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Detected lines
+                  if (scannerState.textBlocks.isNotEmpty) ...[
+                    const Text(
+                      'Detected Lines',
+                      style: TextStyle(
+                        color: Colors.white60,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.04),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
+                      ),
+                      child: Column(
+                        children: scannerState.textBlocks
+                            .map((block) => _DetectedLineTile(block: block))
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.tonal(
-                  onPressed: () {
-                    ref.read(scannerProvider.notifier).resetScanner();
-                    _goToTab(0);
-                    setState(() => _liveCorners = null);
-                    // Restart stream for new scan
-                    _startFrameStream();
-                  },
-                  child: const Text('New Scan'),
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 20),
-          if (scannerState.textBlocks.isNotEmpty) ...[
-            Text(
-              'Detected Lines',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .outline
-                      .withValues(alpha: 0.15),
+          // Bottom action bar
+          _buildResultsActionBar(context, scannerState),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultsActionBar(BuildContext context, ScannerState scannerState) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 16,
+        bottom: MediaQuery.viewPaddingOf(context).bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.95),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        border: Border(
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Copy All button
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: scannerState.extractedText.isNotEmpty
+                  ? () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      await Clipboard.setData(
+                        ClipboardData(text: scannerState.extractedText),
+                      );
+                      if (mounted) {
+                        messenger.showSnackBar(
+                          const SnackBar(
+                            content: Text('Text copied to clipboard'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    }
+                  : null,
+              icon: const Icon(Icons.copy, size: 16),
+              label: const Text('Copy All'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-              child: Column(
-                children: scannerState.textBlocks
-                    .map((block) => _DetectedLineTile(block: block))
-                    .toList(),
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
-            const SizedBox(height: 20),
-          ],
-          if (scannerState.capturedImagePath != null) ...[
-            Text(
-              'Original Capture',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                File(scannerState.capturedImagePath!),
-                width: double.infinity,
-                fit: BoxFit.fitWidth,
+          ),
+          const SizedBox(width: 12),
+          // New Scan button
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: () {
+                ref.read(scannerProvider.notifier).resetScanner();
+                _goToStep(0);
+                setState(() => _liveCorners = null);
+                _startFrameStream();
+              },
+              icon: const Icon(Icons.camera_alt_outlined, size: 16),
+              label: const Text('New Scan'),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -925,43 +1344,44 @@ class _DetectedLineTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = block.confidence >= 0.8
-        ? Theme.of(context).colorScheme.primary
+        ? Colors.green
         : block.confidence >= 0.5
             ? Colors.orange
-            : Theme.of(context).colorScheme.error;
+            : Colors.red;
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.18)),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.only(top: 6),
+            width: 6,
+            height: 6,
+            margin: const EdgeInsets.only(top: 5),
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               block.text,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: const TextStyle(color: Colors.white, fontSize: 13),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Text(
             '${(block.confidence * 100).toStringAsFixed(0)}%',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                ),
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
           ),
         ],
       ),
@@ -984,37 +1404,31 @@ class _DetectedTextPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        color: Colors.black,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              alignment: Alignment.topLeft,
-              children: [
-                Image.file(
-                  File(imagePath),
-                  width: constraints.maxWidth,
-                  fit: BoxFit.fitWidth,
-                ),
-                if (imageWidth != null && imageHeight != null)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: CustomPaint(
-                        painter: _DetectedTextPainter(
-                          blocks: blocks,
-                          imageWidth: imageWidth!,
-                          imageHeight: imageHeight!,
-                        ),
-                      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          alignment: Alignment.topLeft,
+          children: [
+            Image.file(
+              File(imagePath),
+              width: constraints.maxWidth,
+              fit: BoxFit.fitWidth,
+            ),
+            if (imageWidth != null && imageHeight != null)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _DetectedTextPainter(
+                      blocks: blocks,
+                      imageWidth: imageWidth!,
+                      imageHeight: imageHeight!,
                     ),
                   ),
-              ],
-            );
-          },
-        ),
-      ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -1022,12 +1436,6 @@ class _DetectedTextPreview extends StatelessWidget {
 // ─── Painters ─────────────────────────────────────────────────────────────
 
 /// Draws the detected document quad on the camera preview.
-///
-/// The camera stream delivers frames in landscape orientation (sensor space).
-/// The preview widget shows them in portrait (rotated 90° CCW on most phones).
-/// We must map from image-space to screen-space:
-///   screenX = (imgY / imgH) * screenW
-///   screenY = ((imgW - imgX) / imgW) * screenH
 class _DocumentQuadPainter extends CustomPainter {
   final DocumentCorners corners;
   final Color color;
@@ -1042,8 +1450,6 @@ class _DocumentQuadPainter extends CustomPainter {
   });
 
   Offset _toScreen(cv.Point p, Size size) {
-    // Image is landscape (W > H), preview is portrait.
-    // 90° CCW rotation to match CameraPreview display.
     final fx = p.x / imageWidth;
     final fy = p.y / imageHeight;
     return Offset(fy * size.width, (1 - fx) * size.height);
@@ -1100,28 +1506,33 @@ class _CaptureFramePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final mainPaint = Paint()
-      ..color = color.withValues(alpha: 0.4)
-      ..strokeWidth = 2.5
-      ..style = PaintingStyle.stroke;
+    // Gentle guide corners — not a strict frame, just visual hints
+    // Margins are modest so it doesn't feel like a required boundary
+    final hMargin = size.width * 0.08;
+    final vMargin = size.height * 0.12;
+    final rect = Rect.fromLTWH(
+      hMargin,
+      vMargin,
+      size.width - (hMargin * 2),
+      size.height - (vMargin * 2),
+    );
 
+    // Subtle pulse outline (very faint, just a gentle guide)
     final pulseAlpha =
-        0.1 * (1 - (pulseValue - pulseValue.floor()).abs() * 2).clamp(0.0, 1.0);
+        0.06 * (1 - (pulseValue - pulseValue.floor()).abs() * 2).clamp(0.0, 1.0);
     final pulsePaint = Paint()
       ..color = color.withValues(alpha: pulseAlpha)
-      ..strokeWidth = 1.5
+      ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
-
-    final rect = Rect.fromLTWH(40, 20, size.width - 80, size.height - 40);
     final expand =
-        8.0 * (1 - (pulseValue - pulseValue.floor()).abs() * 2).clamp(0.0, 1.0);
+        4.0 * (1 - (pulseValue - pulseValue.floor()).abs() * 2).clamp(0.0, 1.0);
     canvas.drawRect(rect.inflate(expand), pulsePaint);
-    canvas.drawRect(rect, mainPaint);
 
-    final cornerLength = 25.0;
+    // Only draw corner brackets — no full rectangle outline
+    final cornerLength = 30.0;
     final cornerPaint = Paint()
-      ..color = color.withValues(alpha: 0.7)
-      ..strokeWidth = 3
+      ..color = color.withValues(alpha: 0.5)
+      ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
@@ -1130,21 +1541,25 @@ class _CaptureFramePainter extends CustomPainter {
       canvas.drawLine(b, c, cornerPaint);
     }
 
+    // Top-left
     corner(
       Offset(rect.left, rect.top + cornerLength),
       Offset(rect.left, rect.top),
       Offset(rect.left + cornerLength, rect.top),
     );
+    // Top-right
     corner(
       Offset(rect.right - cornerLength, rect.top),
       Offset(rect.right, rect.top),
       Offset(rect.right, rect.top + cornerLength),
     );
+    // Bottom-left
     corner(
       Offset(rect.left, rect.bottom - cornerLength),
       Offset(rect.left, rect.bottom),
       Offset(rect.left + cornerLength, rect.bottom),
     );
+    // Bottom-right
     corner(
       Offset(rect.right - cornerLength, rect.bottom),
       Offset(rect.right, rect.bottom),

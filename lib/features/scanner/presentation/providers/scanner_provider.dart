@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:logger/logger.dart';
 import 'package:fadocx/core/services/camera_service.dart';
 import 'package:fadocx/core/services/scan_processor.dart';
 import 'package:fadocx/core/services/isolate_processor.dart';
+import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/core/services/tesseract_service.dart';
 
 final log = Logger();
@@ -165,6 +167,22 @@ class ScannerNotifier extends Notifier<ScannerState> {
     }
   }
 
+  /// Save captured image to Scans folder with Fadocx_scanned_ prefix + timestamp.
+  Future<String?> _saveCapturedImage(String sourcePath) async {
+    try {
+      final scansDir = await StorageService.getCategoryDir(StorageService.scansFolder);
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'Fadocx_scanned_$timestamp.png';
+      final destination = File('${scansDir.path}/$fileName');
+      await File(sourcePath).copy(destination.path);
+      log.i('Saved scanned image to: ${destination.path}');
+      return destination.path;
+    } catch (e) {
+      log.w('Failed to save scanned image to Scans folder: $e');
+      return null; // Fall back to temp path
+    }
+  }
+
   /// Capture and process image, emitting per-step state updates.
   Future<void> captureAndProcess() async {
     if (state.isProcessing) return;
@@ -183,9 +201,12 @@ class ScannerNotifier extends Notifier<ScannerState> {
 
       await disableTorch();
 
+      // Save captured image to Scans folder with proper naming
+      final savedPath = await _saveCapturedImage(capturedImage.path);
+
       state = state.copyWith(
-        capturedImagePath: capturedImage.path,
-        displayedImagePath: capturedImage.path,
+        capturedImagePath: savedPath ?? capturedImage.path,
+        displayedImagePath: savedPath ?? capturedImage.path,
         processingStep: ProcessingStep.preparing,
       );
 
@@ -265,11 +286,14 @@ class ScannerNotifier extends Notifier<ScannerState> {
   }
 
   Future<void> _processExistingImage(String imagePath) async {
+    // Save uploaded image to Scans folder with proper naming
+    final savedPath = await _saveCapturedImage(imagePath);
+
     state = state.copyWith(
       isProcessing: true,
       processingStep: ProcessingStep.preparing,
-      capturedImagePath: imagePath,
-      displayedImagePath: imagePath,
+      capturedImagePath: savedPath ?? imagePath,
+      displayedImagePath: savedPath ?? imagePath,
       extractedText: '',
       ocrConfidence: 0.0,
       textBlocks: const [],
