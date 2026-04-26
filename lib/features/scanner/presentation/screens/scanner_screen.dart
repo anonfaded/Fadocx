@@ -146,18 +146,25 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   void _goToStep(int step) {
     if (!mounted) return;
     final prevStep = _currentStep;
-    setState(() => _currentStep = step.clamp(0, 2));
+    setState(() {
+      _currentStep = step.clamp(0, 2);
+      // Camera lifecycle: stop stream when leaving capture step
+      if (prevStep == 0 && step > 0) {
+        _liveCorners = null;
+      }
+    });
 
-    // Camera lifecycle: stop stream when leaving capture step
+    // Camera lifecycle: stop/start stream outside setState
     if (prevStep == 0 && step > 0) {
       _stopFrameStream();
-      setState(() => _liveCorners = null);
     }
     // Restart stream when returning to capture step
     if (prevStep > 0 && step == 0) {
       final scannerState = ref.read(scannerProvider);
       if (scannerState.cameraInitialized && !scannerState.isProcessing) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => _startFrameStream());
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _startFrameStream();
+        });
       }
     }
   }
@@ -194,7 +201,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       if (prev?.isProcessing == true &&
           !next.isProcessing &&
           next.hasScannedImage) {
-        Future.delayed(const Duration(milliseconds: 400), () => _goToStep(2));
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (mounted) _goToStep(2);
+        });
       }
     });
 
@@ -467,11 +476,17 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Camera preview
+                    // Camera preview - maintain aspect ratio
                     if (!scannerState.isProcessing &&
                         cameraService.controller != null &&
                         cameraService.isInitialized)
-                      CameraPreview(cameraService.controller!)
+                      Center(
+                        child: AspectRatio(
+                          aspectRatio: 1 /
+                              cameraService.controller!.value.aspectRatio,
+                          child: CameraPreview(cameraService.controller!),
+                        ),
+                      )
                     else if (scannerState.capturedImagePath != null)
                       Image.file(
                         File(scannerState.capturedImagePath!),

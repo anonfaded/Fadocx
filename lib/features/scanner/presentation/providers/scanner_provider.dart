@@ -5,11 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:logger/logger.dart';
+import 'package:uuid/uuid.dart';
 import 'package:fadocx/core/services/camera_service.dart';
 import 'package:fadocx/core/services/scan_processor.dart';
 import 'package:fadocx/core/services/isolate_processor.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/core/services/tesseract_service.dart';
+import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
+import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 
 final log = Logger();
 
@@ -167,19 +170,55 @@ class ScannerNotifier extends Notifier<ScannerState> {
     }
   }
 
-  /// Save captured image to Scans folder with Fadocx_scanned_ prefix + timestamp.
+  /// Save captured image to Scans folder with Fadocx_scanned_ prefix + human-readable timestamp.
   Future<String?> _saveCapturedImage(String sourcePath) async {
     try {
       final scansDir = await StorageService.getCategoryDir(StorageService.scansFolder);
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final now = DateTime.now();
+      final timestamp = '${now.year}'
+          '${now.month.toString().padLeft(2, '0')}'
+          '${now.day.toString().padLeft(2, '0')}'
+          '_${now.hour.toString().padLeft(2, '0')}'
+          '${now.minute.toString().padLeft(2, '0')}'
+          '${now.second.toString().padLeft(2, '0')}';
       final fileName = 'Fadocx_scanned_$timestamp.png';
       final destination = File('${scansDir.path}/$fileName');
       await File(sourcePath).copy(destination.path);
       log.i('Saved scanned image to: ${destination.path}');
+
+      // Register in recent files so it appears in the library
+      await _registerInRecentFiles(destination.path, fileName);
+
       return destination.path;
     } catch (e) {
       log.w('Failed to save scanned image to Scans folder: $e');
       return null; // Fall back to temp path
+    }
+  }
+
+  /// Register a scanned file in the recent files list (Hive database).
+  Future<void> _registerInRecentFiles(String filePath, String fileName) async {
+    try {
+      final file = File(filePath);
+      final fileSize = await file.length();
+      final now = DateTime.now();
+      final recentFile = RecentFile(
+        id: const Uuid().v4(),
+        filePath: filePath,
+        fileName: fileName,
+        fileType: 'png',
+        fileSizeBytes: fileSize,
+        dateOpened: now,
+        dateModified: now,
+        pagePosition: 0,
+        syncStatus: 'local',
+      );
+      final mutator = ref.read(recentFilesMutatorProvider);
+      await mutator.addRecentFile(recentFile);
+      log.i('Registered scanned file in recent files: $fileName');
+    } catch (e) {
+      log.w('Failed to register scanned file in recent files: $e');
+      // Non-critical - file is still saved to disk
     }
   }
 
