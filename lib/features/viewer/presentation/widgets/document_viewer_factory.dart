@@ -18,9 +18,12 @@ class DocumentViewerFactory {
     VoidCallback? onTextModeToggle,
     VoidCallback? onTap,
     Function(int currentPage, int totalPages)? onPageChanged,
+    void Function(String? cellRef, String value)? onSheetSelectionChanged,
+    Key? sheetViewerKey,
+    double sheetZoom = 1.0,
   }) {
     return switch (document.format.toUpperCase()) {
-      'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document),
+      'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document, onSheetSelectionChanged, sheetViewerKey, zoom: sheetZoom),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
       'TXT' => _buildTextViewer(document, onTap: onTap),
@@ -28,7 +31,7 @@ class DocumentViewerFactory {
     };
   }
 
-  static Widget _buildSpreadsheetViewer(ParsedDocumentEntity document) {
+  static Widget _buildSpreadsheetViewer(ParsedDocumentEntity document, void Function(String?, String)? onSelectionChanged, Key? sheetViewerKey, {double zoom = 1.0}) {
     if (document.sheets.isEmpty) {
       return Center(
         child: Text('No sheets found in ${document.format}'),
@@ -36,7 +39,7 @@ class DocumentViewerFactory {
     }
 
     if (document.sheetCount == 1) {
-      return _buildSheetTable(document.sheets.first);
+      return _buildSheetTable(document.sheets.first, onSelectionChanged, sheetViewerKey, zoom: zoom);
     }
 
     return DefaultTabController(
@@ -50,7 +53,7 @@ class DocumentViewerFactory {
           ),
           Expanded(
             child: TabBarView(
-              children: document.sheets.map(_buildSheetTable).toList(),
+              children: document.sheets.map((s) => _buildSheetTable(s, onSelectionChanged, sheetViewerKey, zoom: zoom)).toList(),
             ),
           ),
         ],
@@ -58,14 +61,19 @@ class DocumentViewerFactory {
     );
   }
 
-  static Widget _buildSheetTable(SheetEntity sheet) {
+  static Widget _buildSheetTable(SheetEntity sheet, void Function(String?, String)? onSelectionChanged, Key? sheetViewerKey, {double zoom = 1.0}) {
     if (sheet.rows.isEmpty) {
       return Center(
         child: Text('No data in ${sheet.name}'),
       );
     }
 
-    return ProfessionalSheetViewer(sheet: sheet);
+    return ProfessionalSheetViewer(
+      key: sheetViewerKey,
+      sheet: sheet,
+      onSelectionChanged: onSelectionChanged,
+      initialZoom: zoom,
+    );
   }
 
   static Widget _buildPdfViewer(
