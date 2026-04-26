@@ -1200,6 +1200,12 @@ class _DangerRowState extends State<_DangerRow> {
   }
 
   void _showDangerDialog(BuildContext context) {
+    // If confirmText is empty, just directly navigate (like Trash)
+    if (widget.confirmText.isEmpty) {
+      widget.onConfirm();
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
