@@ -123,6 +123,7 @@ class ThumbnailGenerationService {
   static Future<Uint8List?> generateThumbnail(
       String filePath, String fileName, String fileType,
       {ParsedDocumentEntity? cachedDocument,
+      String? extractedText,
       ui.Brightness brightness = ui.Brightness.light}) async {
     try {
       final file = File(filePath);
@@ -154,6 +155,12 @@ class ThumbnailGenerationService {
         'ppt' || 'pptx' || 'odp' || 'epub' || 'ods' => _generatePresentationThumbnail(
             filePath,
             normalizedType,
+            brightness: brightness,
+          ),
+        'png' || 'jpg' || 'jpeg' || 'gif' || 'webp' || 'bmp' => _generateImageThumbnail(
+            filePath,
+            normalizedType,
+            extractedText: extractedText,
             brightness: brightness,
           ),
         _ => _createPlaceholderThumbnail(
@@ -191,6 +198,119 @@ class ThumbnailGenerationService {
       return _createSlideThumbnailCard(accent: accent, label: formatLabel, meta: metaText, brightness: brightness);
     } catch (e) {
       return _createPlaceholderThumbnail(label: fileType.toUpperCase(), accent: ThumbnailColors.pptOrange, caption: fileType.toUpperCase(), brightness: brightness);
+    }
+  }
+
+  static Future<Uint8List?> _generateImageThumbnail(
+    String filePath,
+    String fileType, {
+    String? extractedText,
+    ui.Brightness brightness = ui.Brightness.light,
+  }) async {
+    try {
+      final imageFile = File(filePath);
+      if (!await imageFile.exists()) {
+        _log.w('Image thumbnail skipped, file missing: $filePath');
+        return _createPlaceholderThumbnail(
+          label: fileType.toUpperCase(),
+          accent: ThumbnailColors.scanCyan,
+          caption: 'File not found',
+          brightness: brightness,
+        );
+      }
+
+      final bytes = await imageFile.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final image = frame.image;
+
+      try {
+        // Calculate word count from extracted text
+        final wordCount = extractedText != null
+            ? extractedText.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length
+            : 0;
+        final metaText = wordCount > 0
+            ? 'SCAN • ${fileType.toUpperCase()} • $wordCount words'
+            : 'SCAN • ${fileType.toUpperCase()}';
+
+        return _renderCanvas((canvas, size) {
+          _paintShadowBackground(canvas, size, ThumbnailColors.scanCyan);
+
+          final cardRect = ui.RRect.fromRectAndRadius(
+            ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
+            const ui.Radius.circular(22),
+          );
+          final cardBg = brightness == ui.Brightness.dark ? _darkCardBg : _lightCardBg;
+          canvas.drawRRect(cardRect, ui.Paint()..color = cardBg);
+
+          final headerHeight = _compactHeaderHeight;
+          
+          // Draw image first (fills entire card area)
+          final imageAreaRect = ui.Rect.fromLTWH(
+            18,
+            18,
+            size.width - 36,
+            size.height - 36,
+          );
+          
+          // Calculate scale to fit image in the card
+          final scale = imageAreaRect.width / image.width;
+          final scaledHeight = image.height * scale;
+          
+          // If image is taller than card, crop from top; otherwise center
+          final sourceHeight = scaledHeight > imageAreaRect.height
+              ? (imageAreaRect.height / scale).clamp(1.0, image.height.toDouble())
+              : image.height.toDouble();
+          
+          final sourceRect = ui.Rect.fromLTWH(
+            0,
+            0,
+            image.width.toDouble(),
+            sourceHeight,
+          );
+          
+          // Draw image with rounded corners clipping
+          canvas.save();
+          canvas.clipRRect(
+            ui.RRect.fromRectAndRadius(
+              imageAreaRect,
+              const ui.Radius.circular(22),
+            ),
+          );
+          
+          canvas.drawImageRect(
+            image,
+            sourceRect,
+            imageAreaRect,
+            ui.Paint()..filterQuality = FilterQuality.high,
+          );
+          
+          canvas.restore();
+
+          // Draw header banner on top of image
+          final headerRect = ui.RRect.fromRectAndRadius(
+            ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight),
+            const ui.Radius.circular(22),
+          );
+          _paintPreviewHeader(
+            canvas,
+            rect: headerRect.outerRect,
+            color: _uiColor(ThumbnailColors.scanCyan),
+            text: metaText,
+          );
+        });
+      } finally {
+        image.dispose();
+      }
+    } catch (e, st) {
+      _log.e('Image thumbnail generation failed for $filePath',
+          error: e, stackTrace: st);
+      return _createPlaceholderThumbnail(
+        label: fileType.toUpperCase(),
+        accent: ThumbnailColors.scanCyan,
+        caption: 'Preview unavailable',
+        brightness: brightness,
+      );
     }
   }
 
@@ -1275,5 +1395,6 @@ class ThumbnailColors {
   static const docBlue = ColorRgb(44, 104, 184);
   static const sheetGreen = ColorRgb(43, 142, 92);
   static const pptOrange = ColorRgb(208, 117, 43);
+  static const scanCyan = ColorRgb(0, 188, 212);
   static const gray = ColorRgb(116, 124, 130);
 }

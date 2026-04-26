@@ -387,6 +387,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         filteredFiles.sort((a, b) => a.fileSizeBytes.compareTo(b.fileSizeBytes));
     }
 
+    // Build category counts for dynamic sorting
+    final categoryCounts = _buildCategoryCounts(allFiles);
+    final sortedCategories = _getSortedCategories(categoryCounts);
+
     return RefreshIndicator(
       onRefresh: () async {
         try {
@@ -422,14 +426,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    _buildCategoryChip(context, 'all', 'All'),
-                    _buildCategoryChip(context, 'pdf', 'PDF'),
-                    _buildCategoryChip(context, 'documents', 'Docs'),
-                    _buildCategoryChip(context, 'spreadsheets', 'Sheets'),
-                    _buildCategoryChip(context, 'presentations', 'Slides'),
-                    _buildCategoryChip(context, 'code', 'Code'),
-                    _buildCategoryChip(context, 'scans', 'Scans'),
-                    _buildCategoryChip(context, 'other', 'Other'),
+                    _buildCategoryChip(context, 'all', 'All', categoryCounts['all'] ?? 0),
+                    ...sortedCategories.map((category) {
+                      final label = _getCategoryLabel(category);
+                      final count = categoryCounts[category] ?? 0;
+                      return _buildCategoryChip(context, category, label, count);
+                    }),
                   ],
                 ),
               ),
@@ -546,8 +548,71 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     }
   }
 
+  String _getCategoryLabel(String category) {
+    switch (category) {
+      case 'pdf':
+        return 'PDF';
+      case 'documents':
+        return 'Docs';
+      case 'spreadsheets':
+        return 'Sheets';
+      case 'presentations':
+        return 'Slides';
+      case 'code':
+        return 'Code';
+      case 'scans':
+        return 'Scans';
+      case 'other':
+        return 'Other';
+      default:
+        return category;
+    }
+  }
+
+  Map<String, int> _buildCategoryCounts(List<RecentFile> files) {
+    final counts = <String, int>{
+      'all': files.length,
+      'pdf': 0,
+      'documents': 0,
+      'spreadsheets': 0,
+      'presentations': 0,
+      'code': 0,
+      'scans': 0,
+      'other': 0,
+    };
+
+    for (final file in files) {
+      final category = _getCategoryFromFileType(file.fileType);
+      counts[category] = (counts[category] ?? 0) + 1;
+    }
+
+    return counts;
+  }
+
+  List<String> _getSortedCategories(Map<String, int> counts) {
+    final categories = [
+      'pdf',
+      'documents',
+      'spreadsheets',
+      'presentations',
+      'code',
+      'scans',
+      'other',
+    ];
+
+    // Sort by count descending, then by category order
+    categories.sort((a, b) {
+      final countDiff = (counts[b] ?? 0).compareTo(counts[a] ?? 0);
+      if (countDiff != 0) return countDiff;
+      return categories.indexOf(a).compareTo(categories.indexOf(b));
+    });
+
+    // Filter out empty categories
+    return categories.where((cat) => (counts[cat] ?? 0) > 0).toList();
+  }
+
   Widget _buildCategoryChip(
-      BuildContext context, String category, String label) {
+      BuildContext context, String category, String label, int count) {
     final isActive = _selectedCategory == category;
     final icon = _getCategoryIcon(category);
     return Padding(
@@ -585,6 +650,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                   color: isActive
                       ? Theme.of(context).colorScheme.onSecondaryContainer
                       : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.7)
+                      : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -880,6 +956,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                           filePath: file.filePath,
                           fileName: file.fileName,
                           fileType: file.fileType,
+                          extractedText: file.extractedText,
                           brightness: Theme.of(context).brightness,
                         ),
                       ));
@@ -1668,6 +1745,7 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
           filePath: widget.file.filePath,
           fileName: widget.file.fileName,
           fileType: widget.file.fileType,
+          extractedText: widget.file.extractedText,
           brightness: brightness,
         ),
       ));
