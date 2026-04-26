@@ -41,6 +41,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   static const double _kSidebarRadius = 24.0;
 
   bool _controlsVisible = true;
+  bool _isFullscreen = false;
   bool _invertColors = false;
   bool _textMode = false;
   bool _bottomMenuExpanded = false;
@@ -81,6 +82,60 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   bool _isSpreadsheet() {
     final format = ref.read(documentViewerProvider).document?.format.toUpperCase();
     return format == 'XLS' || format == 'XLSX' || format == 'CSV' || format == 'ODS';
+  }
+
+  double _topOverlayHeight(BuildContext context) => MediaQuery.viewPaddingOf(context).top + 40.0;
+
+  double _bottomOverlayHeight() {
+    if (!_controlsVisible) return 0.0;
+    if (_isSpreadsheet()) return 76.0;
+    return 56.0;
+  }
+
+  EdgeInsets _contentOverlayPadding(BuildContext context) {
+    if (_isSpreadsheet()) {
+      return EdgeInsets.only(
+        top: _controlsVisible ? _topOverlayHeight(context) : 0.0,
+        bottom: _bottomPanelController.value > 0.3 ? _bottomOverlayHeight() : 0.0,
+      );
+    }
+    return EdgeInsets.zero;
+  }
+
+  Future<void> _setFullscreen(bool enabled) async {
+    _isFullscreen = enabled;
+    if (enabled) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
+  }
+
+  Future<void> _toggleFullscreen() async {
+    // Only for spreadsheets
+    if (!_isSpreadsheet()) return;
+    
+    final willShowControls = !_controlsVisible;
+    setState(() {
+      _controlsVisible = willShowControls;
+      _isFullscreen = !willShowControls;
+      if (!willShowControls) {
+        _sidebarOpen = false;
+        _bottomMenuExpanded = false;
+      }
+    });
+
+    if (willShowControls) {
+      _topBarController.forward();
+      _bottomPanelController.forward();
+      await _setFullscreen(false);
+    } else {
+      _topBarController.reverse();
+      _bottomPanelController.reverse();
+      _sidebarController.reverse();
+      _menuController.reverse();
+      await _setFullscreen(true);
+    }
   }
 
   bool _isLOKitDocument() {
@@ -242,6 +297,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     final willBeVisible = !_controlsVisible;
     setState(() {
       _controlsVisible = willBeVisible;
+      _isFullscreen = false;
       if (!willBeVisible) {
         _sidebarOpen = false;
         _bottomMenuExpanded = false;
@@ -256,12 +312,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       _bottomPanelController.reverse();
       _sidebarController.reverse();
       _menuController.reverse();
-    }
-    // For true fullscreen on sheets, also hide system UI
-    if (!willBeVisible && _isSpreadsheet()) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    } else {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
   }
 
@@ -464,6 +514,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     _bottomPanelController.value = 1.0;
     _sidebarController.value = 0.0;
 
+    // Start in immersive mode by default for better UX
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
     // Load document if not already loaded
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final docState = ref.read(documentViewerProvider);
@@ -522,6 +575,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   @override
   void dispose() {
     _log.d('dispose: ending session for ');
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     // End viewing session using saved reference (ref is unsafe in dispose)
     if (_savedMutator != null && _sessionFilePath != null) {
       _savedMutator!.endViewingSession(_sessionFilePath!);
@@ -552,12 +606,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     ? _buildErrorState(context, ref, docState)
                     : docState.document != null
                         ? Padding(
-                            padding: EdgeInsets.only(
-                              top: _controlsVisible ? MediaQuery.of(context).padding.top + 48.0 : 0.0,
-                              bottom: _bottomPanelController.value > 0.3
-                                  ? (_isSpreadsheet() ? 76.0 : 56.0)
-                                  : 0.0,
-                            ),
+                            padding: _contentOverlayPadding(context),
                             child: _buildContentViewer(
                               document: docState.document!,
                             ),
@@ -592,7 +641,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             animation: _sidebarController,
             builder: (context, child) {
               return Positioned(
-                top: MediaQuery.of(context).padding.top + 40,
+                top: _topOverlayHeight(context) - _kSidebarRadius,
                 bottom: _kSidebarBottomOffset - _kSidebarRadius,
                 left: 0,
                 child: SlideTransition(
@@ -658,8 +707,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             },
           ),
 
-          // Fullscreen exit button - visible when controls are hidden
-          if (!_controlsVisible)
+          // Fullscreen exit button - visible only in true fullscreen
+          if (_isFullscreen)
             Positioned(
               bottom: 16,
               right: 16,
@@ -1745,14 +1794,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             Icons.chevron_right,
             _currentPage < _totalPages ? _goToNextPage : null,
           ),
-          _buildIconButton(
-            context,
-            Icons.last_page,
-            _currentPage < _totalPages ? _goToLastPage : null,
-          ),
-        ],
-      );
-    } else if (_isLOKitDocument()) {
+           _buildIconButton(
+             context,
+             Icons.last_page,
+             _currentPage < _totalPages ? _goToLastPage : null,
+           ),
+         ],
+       );
+     } else if (_isLOKitDocument()) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1772,14 +1821,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             Icons.chevron_right,
             _currentPage < _totalPages ? _goToNextPage : null,
           ),
-          _buildIconButton(
-            context,
-            Icons.last_page,
-            _currentPage < _totalPages ? _goToLastPage : null,
-          ),
-        ],
-      );
-    } else if (const {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML', 'FADREC'}.contains(format)) {
+           _buildIconButton(
+             context,
+             Icons.last_page,
+             _currentPage < _totalPages ? _goToLastPage : null,
+           ),
+         ],
+       );
+     } else if (const {'TXT', 'JAVA', 'PY', 'SH', 'HTML', 'MD', 'LOG', 'JSON', 'XML', 'FADREC'}.contains(format)) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1809,14 +1858,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                 : null,
           ),
           const SizedBox(width: 8),
-          _buildIconButton(
-            context,
-            _textWordWrap ? Icons.wrap_text : Icons.text_fields,
-            () => setState(() => _textWordWrap = !_textWordWrap),
-          ),
-        ],
-      );
-    }
+           _buildIconButton(
+             context,
+             _textWordWrap ? Icons.wrap_text : Icons.text_fields,
+             () => setState(() => _textWordWrap = !_textWordWrap),
+           ),
+         ],
+       );
+     }
 
     if (_isSpreadsheet()) {
       return Row(
@@ -1850,7 +1899,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             icon: const Icon(Icons.fullscreen, size: 14),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-            onPressed: _toggleControls,
+            onPressed: _toggleFullscreen,
             tooltip: 'Toggle fullscreen',
           ),
         ],
