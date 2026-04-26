@@ -1561,10 +1561,135 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
               },
               icon: const Icon(Icons.copy, size: 16),
               label: const Text('Copy'),
+             ),
+           ],
+         ),
+       );
+     }
+   }
+
+  void _copyImageExtractedText() async {
+    // For images, copy extracted text from OCR if available
+    try {
+      final hiveDatasource = ref.read(hiveDatasourceProvider);
+      final recentFiles = await hiveDatasource.getRecentFiles();
+      
+      // Find the file matching current path
+      dynamic file;
+      for (final f in recentFiles) {
+        if (f.filePath == widget.filePath) {
+          file = f;
+          break;
+        }
+      }
+      
+      if (file == null || file.extractedText == null || file.extractedText!.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No extracted text available for this image')),
+          );
+        }
+        return;
+      }
+
+      final text = file.extractedText!;
+      final wordCount = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+      final charCount = text.length;
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.copy_all,
+                    size: 20, color: Theme.of(ctx).colorScheme.primary),
+                const SizedBox(width: 8),
+                const Text('Copy Extracted Text'),
+              ],
             ),
-          ],
-        ),
-      );
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Copy text extracted from this image via OCR.'),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.text_fields,
+                              size: 16, color: Theme.of(ctx).colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            '$wordCount words',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(ctx).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.format_list_numbered,
+                              size: 16, color: Theme.of(ctx).colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            '$charCount characters',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(ctx).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              FilledButton.icon(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await Clipboard.setData(ClipboardData(text: text));
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text('Copied $wordCount words ($charCount characters)'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.copy, size: 16),
+                label: const Text('Copy'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      _log.e('Error copying image extracted text', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error accessing extracted text')),
+        );
+      }
     }
   }
 
@@ -1865,6 +1990,9 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
            ),
          ],
        );
+     } else if (const {'PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'BMP'}.contains(format)) {
+      // Image viewer - no format-specific controls needed
+      return const SizedBox.shrink();
      }
 
     if (_isSpreadsheet()) {
@@ -2054,6 +2182,31 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           const SizedBox(width: 8),
           Expanded(
             child: _buildTile(
+               icon: Theme.of(context).brightness == Brightness.dark
+                   ? Icons.light_mode_outlined
+                   : Icons.dark_mode_outlined,
+               label: 'Theme',
+               onTap: () {
+                 ref.read(themeModeProvider.notifier).toggleThemeMode();
+               },
+             ),
+           ),
+         ],
+       );
+     } else if (const {'PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'BMP'}.contains(format)) {
+      // Image viewer - show copy extracted text and theme
+      return Row(
+        children: [
+          Expanded(
+            child: _buildTile(
+              icon: Icons.copy_all,
+              label: 'Copy',
+              onTap: _copyImageExtractedText,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
               icon: Theme.of(context).brightness == Brightness.dark
                   ? Icons.light_mode_outlined
                   : Icons.dark_mode_outlined,
@@ -2065,7 +2218,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           ),
         ],
       );
-    }
+     }
 
     if (_isSpreadsheet()) {
       return Row(

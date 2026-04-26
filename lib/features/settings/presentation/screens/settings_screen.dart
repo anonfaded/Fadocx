@@ -519,6 +519,7 @@ class SettingsScreen extends ConsumerWidget {
       'Documents': {'bytes': 0, 'count': 0},
       'Presentations': {'bytes': 0, 'count': 0},
       'Code': {'bytes': 0, 'count': 0},
+      'Scans': {'bytes': 0, 'count': 0},
       'Other': {'bytes': 0, 'count': 0},
     };
 
@@ -562,6 +563,13 @@ class SettingsScreen extends ConsumerWidget {
       case 'json':
       case 'xml':
         return 'Code';
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+      case 'bmp':
+        return 'Scans';
       default:
         return 'Other';
     }

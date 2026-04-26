@@ -30,7 +30,7 @@ final thumbnailProvider = FutureProvider.family<Uint8List?, String>(
 
 /// Generate and cache thumbnail - uses passed brightness for theme-aware rendering
 final generateAndCacheThumbnailProvider = FutureProvider.family<Uint8List?,
-    ({String fileId, String filePath, String fileName, String fileType, ui.Brightness brightness})>(
+    ({String fileId, String filePath, String fileName, String fileType, String? extractedText, ui.Brightness brightness})>(
   (ref, params) async {
     try {
       final hiveDatasource = ref.watch(hiveDatasourceProvider);
@@ -53,6 +53,7 @@ final generateAndCacheThumbnailProvider = FutureProvider.family<Uint8List?,
         params.fileName,
         params.fileType,
         cachedDocument: cachedDocument,
+        extractedText: params.extractedText,
         brightness: params.brightness,
       );
 

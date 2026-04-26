@@ -212,7 +212,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     final topPadding = MediaQuery.of(context).padding.top + 56;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(12, topPadding + 8, 12, bottomPadding),
+      padding: EdgeInsets.fromLTRB(12, topPadding - 4, 12, bottomPadding),
       physics: const BouncingScrollPhysics(
         parent: AlwaysScrollableScrollPhysics(),
       ),
@@ -252,125 +252,155 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   Widget _buildHomeContent(BuildContext context, List<RecentFile> files, bool showRecentFiles, AppSettings? appSettings) {
     final topPadding = MediaQuery.of(context).padding.top + 56;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final recentFilesBg = isDark ? const Color(0xFF0F0F11) : const Color(0xFFEFEFF4);
 
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(12, topPadding + 8, 12, bottomPadding),
+      padding: EdgeInsets.zero,
       physics: const BouncingScrollPhysics(
         parent: AlwaysScrollableScrollPhysics(),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Stats Card
-          _buildStatsCard(context, files, appSettings),
-          const SizedBox(height: 12),
-
-          // Action Cards Section
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionCard(
-                  context,
-                  title: 'Scan to Extract Text',
-                  description: 'Extract text from documents using OCR',
-                  icon: Icons.document_scanner,
-                  cardType: 'scan',
-                  onTap: () {
-                    log.i('Navigating to scanner');
-                    context.push(RouteNames.scanner);
-                  },
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildActionCard(
-                  context,
-                  title: 'Import a Document',
-                  description: 'Browse and import files from your device',
-                  icon: Icons.folder_open,
-                  cardType: 'import',
-                  onTap: () {
-                    log.i('Navigating to browse');
-                    context.push(RouteNames.browse);
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          // Recent Files Section
-          if (showRecentFiles && (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles))) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Stats Card + Action Cards in scrollable area with padding
+          Padding(
+            padding: EdgeInsets.fromLTRB(12, topPadding - 4, 12, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Recent Files',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                TextButton(
-                  onPressed: () {
-                    context.push(RouteNames.documents);
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('See All'),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.chevron_right,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (files.isNotEmpty) ...[
-              ...files.take(4).toList().asMap().entries.map(
-                (entry) {
-                  final index = entry.key;
-                  final file = entry.value;
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      bottom: index < (files.take(4).toList().length - 1) ? 8 : 0,
-                    ),
-                    child: _buildRecentFileItem(context, file),
-                  );
-                },
-              ),
-            ] else
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                // Stats Card
+                _buildStatsCard(context, files, appSettings),
+                const SizedBox(height: 12),
+
+                // Action Cards Section
+                Row(
                   children: [
-                    Icon(
-                      Icons.folder_open_outlined,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
+                        title: 'Scan to Extract Text',
+                        description: 'Extract text from documents using OCR',
+                        icon: Icons.document_scanner,
+                        cardType: 'scan',
+                        onTap: () {
+                          log.i('Navigating to scanner');
+                          context.push(RouteNames.scanner);
+                        },
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'No recent files',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
+                        title: 'Import a Document',
+                        description: 'Browse and import files from your device',
+                        icon: Icons.folder_open,
+                        cardType: 'import',
+                        onTap: () {
+                          log.i('Navigating to browse');
+                          context.push(RouteNames.browse);
+                        },
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 14),
+              ],
+            ),
+          ),
+
+          // Recent Files Section - full width with darker background
+          if (showRecentFiles && (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles)))
+            Container(
+              decoration: BoxDecoration(
+                color: recentFilesBg,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
-          ] else if (appSettings == null || !appSettings.hasImportedSampleFiles)
-            _buildEmptyRecentState(context)
-        // Don't show any onboarding after samples are imported
-        // Just show the action cards above
-      ],
+              padding: EdgeInsets.fromLTRB(12, 16, 12, bottomPadding + 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Recent Files',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.push(RouteNames.documents);
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('See All'),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.chevron_right,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (files.isNotEmpty) ...[
+                    ...files.take(4).toList().asMap().entries.map(
+                      (entry) {
+                        final index = entry.key;
+                        final file = entry.value;
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            bottom: index < (files.take(4).toList().length - 1) ? 8 : 0,
+                          ),
+                          child: _buildRecentFileItem(context, file),
+                        );
+                      },
+                    ),
+                  ] else
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.folder_open_outlined,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'No recent files',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            )
+          else if (appSettings == null || !appSettings.hasImportedSampleFiles)
+            Padding(
+              padding: EdgeInsets.only(bottom: bottomPadding),
+              child: _buildEmptyRecentState(context),
+            )
+          // Don't show any onboarding after samples are imported
+          // Just show the action cards above
+        ],
       ),
     );
   }
@@ -431,64 +461,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     final lastFile = files.isNotEmpty ? files.first : null;
     log.d('[STATS] files count=${files.length}, lastFile=${lastFile?.fileName ?? "null"}, dates: ${files.map((f) => "${f.fileName}=${f.dateOpened.toIso8601String()}").join(" | ")}');
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    // iOS-style colors
+    final secondaryLabelColor = isDark ? const Color(0xFF8E8E93) : const Color(0xFF3C3C43).withValues(alpha: 0.6);
+    final tertiaryLabelColor = isDark ? const Color(0xFF5A5A5E) : const Color(0xFF3C3C43).withValues(alpha: 0.3);
+    final cardBg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7);
     
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        color: cardBg,
         border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.08),
-          width: 1,
+          color: secondaryLabelColor.withValues(alpha: 0.1),
+          width: 0.5,
         ),
       ),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Stat row with dividers between items
-          IntrinsicHeight(
-            child: Row(
-              children: [
-                // Documents
-                Expanded(
-                  child: _buildStatPill(
-                    context,
-                    icon: Icons.description_outlined,
-                    value: filesCount.toString(),
-                    label: 'Documents',
-                    color: theme.colorScheme.primary,
-                  ),
+          // Stat pills row - compact horizontal layout
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatPill(
+                  context,
+                  icon: Icons.description_outlined,
+                  value: filesCount.toString(),
+                  label: 'Documents',
+                  secondaryLabelColor: secondaryLabelColor,
+                  tertiaryLabelColor: tertiaryLabelColor,
                 ),
-                VerticalDivider(width: 1, indent: 8, endIndent: 8, color: theme.colorScheme.outline.withValues(alpha: 0.12)),
-                // Storage
-                Expanded(
-                  child: _buildStatPill(
-                    context,
-                    icon: Icons.pie_chart_outline,
-                    value: formattedStorage,
-                    label: 'Storage Used',
-                    color: theme.colorScheme.tertiary,
-                  ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _buildStatPill(
+                  context,
+                  icon: Icons.pie_chart_outline,
+                  value: formattedStorage,
+                  label: 'Storage',
+                  secondaryLabelColor: secondaryLabelColor,
+                  tertiaryLabelColor: tertiaryLabelColor,
                 ),
-                VerticalDivider(width: 1, indent: 8, endIndent: 8, color: theme.colorScheme.outline.withValues(alpha: 0.12)),
-                // Reading Time
-                Expanded(
-                  child: _buildStatPill(
-                    context,
-                    icon: Icons.menu_book_outlined,
-                    value: formattedTime,
-                    label: 'Time Read',
-                    color: theme.colorScheme.secondary,
-                  ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _buildStatPill(
+                  context,
+                  icon: Icons.menu_book_outlined,
+                  value: formattedTime,
+                  label: 'Time Read',
+                  secondaryLabelColor: secondaryLabelColor,
+                  tertiaryLabelColor: tertiaryLabelColor,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           if (lastFile != null) ...[
-            const SizedBox(height: 12),
-            Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.08)),
             const SizedBox(height: 8),
-            // Last opened row button
+            Divider(height: 0.5, color: tertiaryLabelColor),
+            const SizedBox(height: 8),
+            // Last opened row button - compact
             Material(
               color: Colors.transparent,
               child: InkWell(
@@ -502,19 +536,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 },
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   child: Row(
                     children: [
                       Icon(
                         Icons.history,
-                        size: 16,
-                        color: theme.colorScheme.primary,
+                        size: 14,
+                        color: secondaryLabelColor,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Text(
                         'Last Opened: ',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: secondaryLabelColor,
+                          fontSize: 11,
                         ),
                       ),
                       Expanded(
@@ -525,14 +560,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                           style: theme.textTheme.labelSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurface,
+                            fontSize: 11,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 2),
                       Icon(
                         Icons.chevron_right,
-                        size: 16,
-                        color: theme.colorScheme.primary,
+                        size: 14,
+                        color: secondaryLabelColor,
                       ),
                     ],
                   ),
@@ -550,31 +586,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     required IconData icon,
     required String value,
     required String label,
-    required Color color,
+    required Color secondaryLabelColor,
+    required Color tertiaryLabelColor,
   }) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+    final isDark = theme.brightness == Brightness.dark;
+    final pillBg = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFFFFFFF);
+    
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: pillBg,
+        border: Border.all(
+          color: secondaryLabelColor.withValues(alpha: 0.1),
+          width: 0.5,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 20, color: color),
-          const SizedBox(height: 6),
+          Icon(icon, size: 14, color: secondaryLabelColor),
+          const SizedBox(height: 4),
           Text(
             value,
-            style: theme.textTheme.titleSmall?.copyWith(
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: color,
+              color: theme.colorScheme.onSurface,
+              fontSize: 11,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Text(
             label,
             textAlign: TextAlign.center,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 10,
+              color: tertiaryLabelColor,
+              fontSize: 9,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -1671,6 +1726,7 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
         filePath: widget.file.filePath,
         fileName: widget.file.fileName,
         fileType: widget.file.fileType,
+        extractedText: widget.file.extractedText,
         brightness: Theme.of(context).brightness,
       ),
     ));
