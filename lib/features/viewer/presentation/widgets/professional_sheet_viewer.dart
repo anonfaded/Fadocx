@@ -1,21 +1,24 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
 
 /// Professional Spreadsheet Viewer — virtualized for 50k+ rows.
 class ProfessionalSheetViewer extends StatefulWidget {
   final SheetEntity sheet;
+  final void Function(String?, String)? onSelectionChanged;
+  final double initialZoom;
 
-  const ProfessionalSheetViewer({required this.sheet, super.key});
+  const ProfessionalSheetViewer({
+    required this.sheet,
+    this.onSelectionChanged,
+    this.initialZoom = 1.0,
+    super.key,
+  });
 
   @override
-  State<ProfessionalSheetViewer> createState() =>
-      _ProfessionalSheetViewerState();
+  State<ProfessionalSheetViewer> createState() => _ProfessionalSheetViewerState();
 }
 
-class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
-    with TickerProviderStateMixin {
+class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
   late ScrollController _hController;
   late ScrollController _vDataController;
   late ScrollController _vRowController;
@@ -23,9 +26,6 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
   bool _syncingV = false;
 
   double _zoom = 1.0;
-  static const _minZoom = 0.1; // Changed: 10% minimum zoom
-  static const _maxZoom = 3.0;
-  late AnimationController _zoomAnim;
 
   // Selection
   int? _selRow;
@@ -56,10 +56,7 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
     _hController = ScrollController();
     _vDataController = ScrollController();
     _vRowController = ScrollController();
-    _zoomAnim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 180),
-    );
+    _zoom = widget.initialZoom;
 
     _vRowController.addListener(_syncRowToData);
     _vDataController.addListener(_syncDataToRow);
@@ -106,20 +103,6 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
     _syncingV = true;
     _vRowController.jumpTo(_vDataController.offset);
     _syncingV = false;
-  }
-
-  void _zoomIn() => _animateZoom((_zoom * 1.25).clamp(_minZoom, _maxZoom));
-  void _zoomOut() => _animateZoom((_zoom / 1.25).clamp(_minZoom, _maxZoom));
-  void _resetZoom() => _animateZoom(1.0);
-
-  void _animateZoom(double target) {
-    final anim = Tween(begin: _zoom, end: target).animate(
-      CurvedAnimation(parent: _zoomAnim, curve: Curves.easeOutCubic),
-    );
-    anim.addListener(() => setState(() => _zoom = anim.value));
-    _zoomAnim
-      ..reset()
-      ..forward();
   }
 
   double _colW(int ci) => _colWidths[ci] * _zoom;
@@ -191,6 +174,40 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
         _selCellCol = null;
       });
 
+  /// Public method to scroll to cell - called from viewer screen search
+  void scrollToCell(int row, int col) {
+    if (row < 0 || col < 0 || row >= _rows.length || col >= _headers.length) return;
+    final targetY = row * _cellH;
+    if (_vDataController.hasClients) {
+      _vDataController.animateTo(targetY.clamp(0.0, _vDataController.position.maxScrollExtent), duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    }
+    final targetX = col * _colW(col);
+    if (_hController.hasClients) {
+      _hController.animateTo(targetX.clamp(0.0, _hController.position.maxScrollExtent), duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    }
+    setState(() { _selCellRow = row; _selCellCol = col; _selRow = null; _selCol = null; _selectAll = false; });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _notifySelection());
+  }
+
+  void _notifySelection() {
+    if (widget.onSelectionChanged == null) return;
+    if (_selectAll) {
+      widget.onSelectionChanged!('All', '${_rows.length}x${_headers.length}');
+    } else if (_selCellRow != null && _selCellCol != null) {
+      final cellRef = '${_headers[_selCellCol!]}${_selCellRow! + 1}';
+      final value = _rows[_selCellRow!][_selCellCol!];
+      widget.onSelectionChanged!(cellRef, value);
+    } else if (_selRow != null) {
+      widget.onSelectionChanged!('Row ${_selRow! + 1}', '');
+    } else if (_selCol != null) {
+      // Show full column data - join all values in that column
+      final colValues = _rows.map((r) => r[_selCol!]).join('\n');
+      widget.onSelectionChanged!('Col ${_headers[_selCol!]}', colValues);
+    } else {
+      widget.onSelectionChanged!(null, '');
+    }
+  }
+
   bool _isHighlighted(int ri, int ci) {
     if (_selectAll) return true;
     if (_selRow == ri) return true;
@@ -201,48 +218,6 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
 
   bool _isCellSelected(int ri, int ci) =>
       _selCellRow == ri && _selCellCol == ci;
-
-  String? get _selectedText {
-    if (_selectAll) return _rows.map((r) => r.join('\t')).join('\n');
-    if (_selCellRow != null && _selCellCol != null) {
-      return _rows[_selCellRow!][_selCellCol!];
-    }
-    if (_selRow != null) {
-      return _rows[_selRow!].where((c) => c.isNotEmpty).join('\t');
-    }
-    if (_selCol != null) {
-      return _rows
-          .map((r) => r[_selCol!])
-          .where((c) => c.isNotEmpty)
-          .join('\n');
-    }
-    return null;
-  }
-
-  String? get _selectedLabel {
-    if (_selectAll) return 'All ${_rows.length}×${_headers.length}';
-    if (_selCellRow != null && _selCellCol != null) {
-      return '${_headers[_selCellCol!]}${_selCellRow! + 1}';
-    }
-    if (_selRow != null) return 'Row ${_selRow! + 1}';
-    if (_selCol != null) return 'Col ${_headers[_selCol!]}';
-    return null;
-  }
-
-  Future<void> _copySelection() async {
-    final text = _selectedText;
-    if (text == null || text.isEmpty) return;
-    await Clipboard.setData(ClipboardData(text: text));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Copied ${_selectedLabel ?? ""}'),
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 50, left: 16, right: 16),
-      ),
-    );
-  }
 
   // ── Column resize ──────────────────────────────────────
   void _onColResizeStart(int ci, double startX) {
@@ -273,7 +248,6 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
     _hController.dispose();
     _vDataController.dispose();
     _vRowController.dispose();
-    _zoomAnim.dispose();
     super.dispose();
   }
 
@@ -295,7 +269,6 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
 
     return Column(
       children: [
-        _toolbar(colors),
         Expanded(
           child: GestureDetector(
             // Global drag handler when resizing
@@ -321,6 +294,7 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
                           itemExtent: ch,
                           itemCount: _rows.length,
                           cacheExtent: 800,
+                          padding: EdgeInsets.zero,
                           itemBuilder: (ctx, i) => _RowHdrCell(
                             label: '${i + 1}',
                             h: ch,
@@ -335,97 +309,58 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
                   ],
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    controller: _hController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const ClampingScrollPhysics(),
-                    child: SizedBox(
-                      width: totalW,
-                      child: Column(
-                        children: [
-                          _colHeadersRow(colors, chh, hdrFontSize),
-                          Expanded(
-                            child: ListView.builder(
-                              controller: _vDataController,
-                              physics: const ClampingScrollPhysics(),
-                              itemExtent: ch,
-                              itemCount: _rows.length,
-                              cacheExtent: 800,
-                              itemBuilder: (ctx, ri) => _DataRow(
-                                row: _rows[ri],
-                                ri: ri,
-                                colWidths:
-                                    List.generate(_headers.length, _colW),
-                                ch: ch,
-                                colors: colors,
-                                odd: ri.isOdd,
-                                isHighlighted: _isHighlighted,
-                                isCellSelected: _isCellSelected,
-                                onCellTap: _toggleCell,
-                                fontSize: fontSize,
+                  child: LayoutBuilder(
+                    builder: (ctx, constraints) {
+                      final availableHeight = constraints.maxHeight;
+                      final dataHeight = availableHeight - chh;
+                      return SingleChildScrollView(
+                        controller: _hController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const ClampingScrollPhysics(),
+                        child: SizedBox(
+                          width: totalW,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _colHeadersRow(colors, chh, hdrFontSize),
+                              SizedBox(
+                                height: dataHeight,
+                                child: ListView.builder(
+                                  controller: _vDataController,
+                                  physics: const ClampingScrollPhysics(),
+                                  itemExtent: ch,
+                                  itemCount: _rows.length,
+                                  cacheExtent: 800,
+                                  padding: EdgeInsets.zero,
+                                  itemBuilder: (ctx, ri) => _DataRow(
+                                    row: _rows[ri],
+                                    ri: ri,
+                                    colWidths:
+                                        List.generate(_headers.length, _colW),
+                                    ch: ch,
+                                    colors: colors,
+                                    odd: ri.isOdd,
+                                    isHighlighted: _isHighlighted,
+                                    isCellSelected: _isCellSelected,
+                                    onCellTap: _toggleCell,
+                                    fontSize: fontSize,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
             ),
           ),
         ),
-        _statusBar(colors, fontSize),
       ],
     );
   }
-
-  Widget _toolbar(_ThemeColors c) => Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          color: c.toolbar,
-          border: Border(bottom: BorderSide(color: c.border, width: 0.5)),
-        ),
-        child: Row(
-          children: [
-            _zoomBtn(Icons.remove, _zoomOut, c),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                '${(_zoom * 100).round()}%',
-                style: TextStyle(
-                    color: c.toolbarText,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600),
-              ),
-            ),
-            _zoomBtn(Icons.add, _zoomIn, c),
-            const SizedBox(width: 6),
-            _zoomBtn(Icons.restart_alt, _resetZoom, c),
-            const Spacer(),
-            Text(
-              '${widget.sheet.name}  •  ${_rows.length}R × ${_headers.length}C',
-              style: TextStyle(color: c.secondaryText, fontSize: 11),
-            ),
-          ],
-        ),
-      );
-
-  Widget _zoomBtn(IconData icon, VoidCallback cb, _ThemeColors c) => SizedBox(
-        width: 32,
-        height: 32,
-        child: IconButton(
-          onPressed: cb,
-          icon: Icon(icon, size: 18, color: c.toolbarIcon),
-          padding: EdgeInsets.zero,
-          style: IconButton.styleFrom(
-            backgroundColor: c.toolbarBtnBg,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-          ),
-        ),
-      );
 
   Widget _cornerCell(double w, double h, _ThemeColors c, double fontSize) =>
       GestureDetector(
@@ -471,62 +406,6 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer>
         ),
       );
 
-  Widget _statusBar(_ThemeColors c, double fontSize) {
-    final hasSel =
-        _selRow != null || _selCol != null || _selCellRow != null || _selectAll;
-    return Container(
-      height: 34,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: c.statusBar,
-        border: Border(top: BorderSide(color: c.border, width: 0.5)),
-      ),
-      child: Row(
-        children: [
-          if (hasSel) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: c.selCellBg,
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Text(
-                _selectedLabel ?? '',
-                style: TextStyle(
-                  color: c.selCellFg,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _selectedText?.substring(
-                        0, math.min(120, _selectedText?.length ?? 0)) ??
-                    '',
-                style: TextStyle(color: c.secondaryText, fontSize: 11),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-            IconButton(
-              onPressed: _copySelection,
-              icon: Icon(Icons.copy, size: 14, color: c.toolbarIcon),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-              tooltip: 'Copy',
-            ),
-          ] else ...[
-            Expanded(
-              child: Text('Ready',
-                  style: TextStyle(color: c.secondaryText, fontSize: 11)),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 }
 
 // ── Row header cell ──────────────────────────────────────

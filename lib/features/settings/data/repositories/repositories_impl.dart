@@ -498,18 +498,17 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   @override
   Stream<Result<List<RecentFile>>> watchRecentFiles() async* {
     try {
-      // CRITICAL FIX: Yield empty list immediately, then load data in background
-      // This prevents blocking the UI thread on Hive box opening (~1 second)
-      log.d('watchRecentFiles: yielding empty list immediately');
-      yield const ResultSuccess([]);
-
-      // Now open box on background thread - doesn't block UI
+      // Load data on background isolate without yielding empty list first
+      // This prevents the "No Library Items" flicker
+      log.d('watchRecentFiles: loading files...');
+      
+      // Open box and load data on background thread - doesn't block UI
       final box = await _datasource.getRecentFilesBox();
-
-      // Yield initial values (processed in background)
       final hiveFiles = box.values.toList();
       final initialDomainFiles = await compute(_processRecentFiles, hiveFiles);
       log.d('watchRecentFiles: yielding ${initialDomainFiles.length} files');
+      
+      // Yield directly with data - no flicker
       yield ResultSuccess(initialDomainFiles);
 
       final stream = await _datasource.watchRecentFiles();

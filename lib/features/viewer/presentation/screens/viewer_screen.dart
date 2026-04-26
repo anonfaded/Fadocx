@@ -61,11 +61,15 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   String? _sessionFilePath; // Saved before dispose for safe access
   late AnimationController _menuController;
   late AnimationController _sidebarController;
+  // Sheet selection state for bottom panel display
+  double _sheetZoom = 1.0;
+
   late AnimationController _topBarController;
   late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
   late GlobalKey<State<TextDocumentViewer>> _textViewerKey;
   late GlobalKey<State<LOKitDocumentViewer>> _lokitViewerKey;
+  late GlobalKey _sheetViewerKey;
   static const double _kDragCloseThreshold = 100.0;
 
   bool _isPdfDocument() {
@@ -106,10 +110,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     if (_isTextDocument()) {
       return _textViewerKey.currentState != null;
     }
+    // Enable for spreadsheets — they have search in the factory-created viewer
+    if (_isSpreadsheet()) {
+      return true;
+    }
     return false;
   }
 
-  Widget? _resolveSidebarContent(BuildContext context) {
+    Widget? _resolveSidebarContent(BuildContext context) {
     if (_isPdfDocument()) {
       final viewerState = _pdfViewerKey.currentState as dynamic;
       return viewerState?.buildDrawerContent(context) as Widget?;
@@ -122,8 +130,112 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       final viewerState = _textViewerKey.currentState as dynamic;
       return viewerState?.buildDrawerContent(context) as Widget?;
     }
+    // Show simple search placeholder for spreadsheets
+    if (_isSpreadsheet()) {
+      return _buildSpreadsheetSearchPlaceholder(context);
+    }
     return null;
   }
+
+  /// Simple search placeholder for spreadsheet - minimal height for landscape
+  Widget _buildSpreadsheetSearchPlaceholder(BuildContext context) {
+    return Container(
+      width: 300,
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Minimal thin search field
+          TextField(
+            autofocus: false,
+            style: Theme.of(context).textTheme.bodySmall,
+            decoration: InputDecoration(
+              hintText: 'Find...',
+              prefixIcon: const Icon(Icons.search, size: 16),
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+            ),
+            onChanged: (query) {
+              if (query.isNotEmpty) {
+                _performSheetSearch(query);
+              }
+            },
+          ),
+          const SizedBox(height: 4),
+          // Scrollable results
+          Expanded(
+            child: _sheetSearchResults.isEmpty
+                ? Center(child: Text('Type to find', style: Theme.of(context).textTheme.bodySmall))
+                : ListView.builder(
+                    itemCount: _sheetSearchResults.length.clamp(0, 30),
+                    itemBuilder: (ctx, i) {
+                      final r = _sheetSearchResults[i];
+                      return InkWell(
+                        onTap: () {
+                          _jumpToSheetCell(r['row'] as int, r['col'] as int);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('${_colLabel(r['col'] as int)}${(r['row'] as int) + 1}', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                              const SizedBox(width: 4),
+                              Expanded(child: Text(r['value'] as String, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall)),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> _sheetSearchResults = [];
+
+  void _performSheetSearch(String query) async {
+    if (query.isEmpty) {
+      setState(() => _sheetSearchResults.clear());
+      return;
+    }
+    final doc = ref.read(documentViewerProvider).document;
+    if (doc == null) return;
+    
+    final results = <Map<String, dynamic>>[];
+    final q = query.toLowerCase();
+    for (var si = 0; si < doc.sheets.length; si++) {
+      final sheet = doc.sheets[si];
+      for (var ri = 0; ri < sheet.rows.length; ri++) {
+        for (var ci = 0; ci < sheet.rows[ri].length; ci++) {
+          final cell = sheet.rows[ri][ci];
+          if (cell.toLowerCase().contains(q)) {
+            results.add({'row': ri, 'col': ci, 'value': cell});
+            if (results.length >= 30) break;
+          }
+        }
+        if (results.length >= 30) break;
+      }
+      if (results.length >= 30) break;
+    }
+    setState(() => _sheetSearchResults = results);
+  }
+
+  void _jumpToSheetCell(int row, int col) {
+    final viewer = _sheetViewerKey.currentState as dynamic;
+    if (viewer != null && viewer.scrollToCell != null) {
+      viewer.scrollToCell(row, col);
+    }
+    if (_sidebarOpen) _closeSidebar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Cell ${_colLabel(col)}${row + 1}'), duration: const Duration(seconds: 1)),
+    );
+  }
+
+  String _colLabel(int col) => String.fromCharCode(65 + (col % 26));
 
   void _toggleControls() {
     final willBeVisible = !_controlsVisible;
@@ -143,6 +255,12 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       _bottomPanelController.reverse();
       _sidebarController.reverse();
       _menuController.reverse();
+    }
+    // For true fullscreen on sheets, also hide system UI
+    if (!willBeVisible && _isSpreadsheet()) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
   }
 
@@ -321,6 +439,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     _pdfViewerKey = GlobalKey<State<ModernPdfViewer>>();
     _textViewerKey = GlobalKey<State<TextDocumentViewer>>();
     _lokitViewerKey = GlobalKey<State<LOKitDocumentViewer>>();
+    _sheetViewerKey = GlobalKey();
     _menuController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -423,115 +542,130 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: docState.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : docState.hasError
-                      ? _buildErrorState(context, ref, docState)
-                      : docState.document != null
-                          ? _buildContentViewer(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: docState.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : docState.hasError
+                    ? _buildErrorState(context, ref, docState)
+                    : docState.document != null
+                        ? Padding(
+                            padding: EdgeInsets.only(
+                              top: _controlsVisible ? MediaQuery.of(context).padding.top + 48.0 : 0.0,
+                              bottom: _bottomPanelController.value > 0.3 ? 56.0 : 0.0,
+                            ),
+                            child: _buildContentViewer(
                               document: docState.document!,
-                            )
-                          : const Center(child: Text('No content')),
-            ),
+                            ),
+                          )
+                        : const Center(child: Text('No content')),
+          ),
 
-            // Scrim overlay with dimming and tap-to-close - controlled by sidebar state
-            Positioned.fill(
-              child: IgnorePointer(
-                ignoring: !_sidebarOpen || !_controlsVisible,
-                child: AnimatedBuilder(
-                  animation: _sidebarController,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _sidebarController.value,
-                      child: GestureDetector(
-                        onTap: _closeSidebar,
-                        behavior: HitTestBehavior.opaque,
-                        child: Container(
-                          color: Colors.black.withValues(alpha: 0.45),
-                        ),
+          // Scrim overlay with dimming and tap-to-close - controlled by sidebar state
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: !_sidebarOpen || !_controlsVisible,
+              child: AnimatedBuilder(
+                animation: _sidebarController,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _sidebarController.value,
+                    child: GestureDetector(
+                      onTap: _closeSidebar,
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.45),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ),
+          ),
 
-            // Sidebar with slide-in animation and drag support
-            AnimatedBuilder(
-              animation: _sidebarController,
-              builder: (context, child) {
-                return Positioned(
-                  top: _kSidebarTopOffset - _kSidebarRadius,
-                  bottom: _kSidebarBottomOffset - _kSidebarRadius,
-                  left: 0,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(-1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: _sidebarController,
-                      curve: Curves.easeOutCubic,
-                    )),
-                    child: IgnorePointer(
-                      ignoring: !_sidebarOpen,
-                      child: _controlsVisible
-                          ? _buildSidebarDrawer(context, isDark)
-                          : const SizedBox.shrink(),
-                    ),
+          // Sidebar with slide-in animation and drag support
+          AnimatedBuilder(
+            animation: _sidebarController,
+            builder: (context, child) {
+              return Positioned(
+                top: _kSidebarTopOffset - _kSidebarRadius,
+                bottom: _kSidebarBottomOffset - _kSidebarRadius,
+                left: 0,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(-1.0, 0.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _sidebarController,
+                    curve: Curves.easeOutCubic,
+                  )),
+                  child: IgnorePointer(
+                    ignoring: !_sidebarOpen,
+                    child: _controlsVisible
+                        ? _buildSidebarDrawer(context, isDark)
+                        : const SizedBox.shrink(),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
+          ),
 
-            // Always show top/bottom panels - let controller handle visibility
-            AnimatedBuilder(
-              animation: _topBarController,
-              builder: (context, child) {
-                return Positioned(
-                  top: MediaQuery.of(context).padding.top,
-                  left: 0,
-                  right: 0,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, -2.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: _topBarController,
-                      curve: Curves.easeOutCubic,
-                    )),
-                    child: _buildFloatingTopBar(context, isDark),
-                  ),
-                );
-              },
-            ),
+          // Always show top/bottom panels - let controller handle visibility
+          AnimatedBuilder(
+            animation: _topBarController,
+            builder: (context, child) {
+              return Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, -2.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _topBarController,
+                    curve: Curves.easeOutCubic,
+                  )),
+                  child: _buildFloatingTopBar(context, isDark),
+                ),
+              );
+            },
+          ),
 
-            // Bottom panel with slide animation
-            AnimatedBuilder(
-              animation: _bottomPanelController,
-              builder: (context, child) {
-                return Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 1.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: _bottomPanelController,
-                      curve: Curves.easeOutCubic,
-                    )),
-                    child: _buildFloatingBottomPanel(context, isDark),
-                  ),
-                );
-              },
+          // Bottom panel with slide animation
+          AnimatedBuilder(
+            animation: _bottomPanelController,
+            builder: (context, child) {
+              return Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 1.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _bottomPanelController,
+                    curve: Curves.easeOutCubic,
+                  )),
+                  child: _buildFloatingBottomPanel(context, isDark),
+                ),
+              );
+            },
+          ),
+
+          // Fullscreen exit button - visible when controls are hidden
+          if (!_controlsVisible)
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton.small(
+                onPressed: _toggleControls,
+                child: const Icon(Icons.fullscreen_exit, size: 20),
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -665,6 +799,11 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       onTextModeToggle: () {
         setState(() => _textMode = !_textMode);
       },
+      onSheetSelectionChanged: (cellRef, value) {
+        // Selection handled by sheet viewer's internal status bar
+      },
+      sheetViewerKey: _sheetViewerKey,
+      sheetZoom: _sheetZoom,
     );
   }
 
@@ -1402,8 +1541,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         // Bottom panel container
         ClipRRect(
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
           ),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -1419,8 +1558,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                         .surface
                         .withValues(alpha: 0.92),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
                 ),
                 border: Border(
                   top: BorderSide(
@@ -1432,9 +1571,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                   ),
                 ),
               ),
-              child: SafeArea(
-                top: false,
-                child: Column(
+              child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Main control row
@@ -1443,8 +1580,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                       onTap: () {}, // Absorb taps but don't hide controls
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                          horizontal: 12,
+                          vertical: 2,
                         ),
                         child: Row(
                           children: [
@@ -1498,7 +1635,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                                 .withValues(alpha: 0.2),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(6),
                             child: _buildExpandedMenuContent(context),
                           ),
                         ],
@@ -1506,7 +1643,6 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     ),
                   ],
                 ),
-              ),
             ),
           ),
         ),
@@ -1618,13 +1754,36 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.table_chart, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(width: 6),
-          Text(
-            ref.watch(documentViewerProvider).document?.format.toUpperCase() ?? '',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          // Zoom controls like text mode
+          IconButton(
+            icon: const Icon(Icons.remove, size: 14),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            onPressed: _sheetZoom > 0.3 ? () => setState(() => _sheetZoom = (_sheetZoom - 0.1).clamp(0.3, 3.0)) : null,
+          ),
+          SizedBox(
+            width: 36,
+            child: Center(
+              child: Text(
+                '${(_sheetZoom * 100).toStringAsFixed(0)}%',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.add, size: 14),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            onPressed: _sheetZoom < 3.0 ? () => setState(() => _sheetZoom = (_sheetZoom + 0.1).clamp(0.3, 3.0)) : null,
+          ),
+          const SizedBox(width: 8),
+          // Fullscreen
+          IconButton(
+            icon: const Icon(Icons.fullscreen, size: 14),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            onPressed: _toggleControls,
+            tooltip: 'Toggle fullscreen',
           ),
         ],
       );
