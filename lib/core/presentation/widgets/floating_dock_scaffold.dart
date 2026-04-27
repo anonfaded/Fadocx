@@ -82,7 +82,29 @@ class _FloatingDockScaffoldState extends State<FloatingDockScaffold> {
               ),
 
             // Floating bottom dock with blur (overlay on bottom) - FIXED in place, no animation
-            if (widget.showBottomDock)
+            if (widget.showBottomDock) ...[
+              // Dark shadow gradient BELOW the dock (full width)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: dockHeight + bottomSafePadding + 16,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        isDark
+                            ? Colors.black.withValues(alpha: 0.85)
+                            : Colors.black.withValues(alpha: 0.55),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Main dock
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -94,6 +116,7 @@ class _FloatingDockScaffoldState extends State<FloatingDockScaffold> {
                   ),
                 ),
               ),
+            ],
 
             // Floating action button - above the dock
             if (widget.floatingActionButton != null && widget.showBottomDock)
@@ -209,82 +232,78 @@ class _FloatingDock extends StatelessWidget {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-        child: Stack(
-          clipBehavior: Clip.none, // Allow shadows to extend outside
-          children: [
-            // Main dock with blur and buttons (compact)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withValues(alpha: 0.85),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                    child: SizedBox(
-                      height: 48,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                        Expanded(
-                          child: _DockItem(
-                            icon: Icons.home,
-                            label: 'Home',
-                            isActive: currentRoute == RouteNames.home,
-                            onTap: () {
-                              if (currentRoute != RouteNames.home) {
-                                context.go(RouteNames.home);
-                              }
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          child: _DockItem(
-                            icon: Icons.auto_stories,
-                            label: 'Library',
-                            isActive: currentRoute == RouteNames.documents,
-                            onTap: () {
-                              if (currentRoute != RouteNames.documents) {
-                                context.go(RouteNames.documents);
-                              }
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          child: _DockItem(
-                            icon: Icons.settings,
-                            label: 'Settings',
-                            isActive: currentRoute == RouteNames.settings,
-                            onTap: () {
-                              if (currentRoute != RouteNames.settings) {
-                                context.go(RouteNames.settings);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface
+                    .withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.2),
+                  width: 1,
                 ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 6,
+                  horizontal: 12,
+                ),
+                child: SizedBox(
+                  height: 48,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Expanded(
+                        child: _DockItem(
+                          icon: Icons.home,
+                          label: 'Home',
+                          isActive: currentRoute == RouteNames.home,
+                          onTap: () {
+                            if (currentRoute != RouteNames.home) {
+                              context.go(RouteNames.home);
+                            }
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: _DockItem(
+                          icon: Icons.auto_stories,
+                          label: 'Library',
+                          isActive: currentRoute == RouteNames.documents,
+                          onTap: () {
+                            if (currentRoute != RouteNames.documents) {
+                              context.go(RouteNames.documents);
+                            }
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: _DockItem(
+                          icon: Icons.settings,
+                          label: 'Settings',
+                          isActive: currentRoute == RouteNames.settings,
+                          onTap: () {
+                            if (currentRoute != RouteNames.settings) {
+                              context.go(RouteNames.settings);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

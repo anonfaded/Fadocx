@@ -247,14 +247,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 children: [
                   _buildSkeletonRecentHeader(),
                   const SizedBox(height: 8),
-                  // Skeleton fills expanded space
+                  // Skeleton fills expanded space (scrollable like real content)
                   Expanded(
                     child: ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 4,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: 3,
                       itemBuilder: (context, index) {
                         return Padding(
-                          padding: EdgeInsets.only(bottom: index < 3 ? 8 : 0),
+                          padding: EdgeInsets.only(bottom: index < 2 ? 8 : 0),
                           child: _buildSkeletonRecentItem(),
                         );
                       },
