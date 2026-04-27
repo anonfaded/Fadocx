@@ -1192,18 +1192,47 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                  fontWeight: FontWeight.w500,
                                ),
                          ),
-                         const SizedBox(height: 1),
-                         Text(
-                           '${file.fileType.toUpperCase()} • ${file.formattedSize}',
-                           style: Theme.of(context)
-                               .textTheme
-                               .labelSmall
-                               ?.copyWith(
-                                 color: Theme.of(context)
-                                     .colorScheme
-                                     .onSurfaceVariant,
-                                 fontSize: 10,
-                               ),
+                         const SizedBox(height: 2),
+                         Row(
+                           children: [
+                             Icon(
+                               Icons.storage,
+                               size: 10,
+                               color: Theme.of(context).colorScheme.onSurfaceVariant,
+                             ),
+                             const SizedBox(width: 2),
+                             Text(
+                               file.formattedSize,
+                               style: Theme.of(context)
+                                   .textTheme
+                                   .labelSmall
+                                   ?.copyWith(
+                                     color: Theme.of(context)
+                                         .colorScheme
+                                         .onSurfaceVariant,
+                                     fontSize: 10,
+                                   ),
+                             ),
+                             const SizedBox(width: 8),
+                             Icon(
+                               Icons.schedule_outlined,
+                               size: 10,
+                               color: Theme.of(context).colorScheme.onSurfaceVariant,
+                             ),
+                             const SizedBox(width: 2),
+                             Text(
+                               _getTimeAgo(file.dateOpened),
+                               style: Theme.of(context)
+                                   .textTheme
+                                   .labelSmall
+                                   ?.copyWith(
+                                     color: Theme.of(context)
+                                         .colorScheme
+                                         .onSurfaceVariant,
+                                     fontSize: 10,
+                                   ),
+                             ),
+                           ],
                          ),
                        ],
                      ),
