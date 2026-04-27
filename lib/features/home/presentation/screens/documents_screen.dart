@@ -1100,7 +1100,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             ),
             child: Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
                   if (_isSelecting)
@@ -1152,63 +1152,62 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                         ),
                       ));
 
-                      return thumbnail.when(
-                        data: (bytes) {
-                          if (bytes != null) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.memory(
-                                bytes,
-                                width: 50,
-                                height: 70,
-                                fit: BoxFit.cover,
-                                alignment: Alignment.topCenter,
-                                filterQuality: FilterQuality.high,
-                              ),
-                            );
-                          }
-                          return _buildListThumbnailPlaceholder(context, file);
-                        },
-                        loading: () =>
-                            _buildListThumbnailPlaceholder(context, file),
-                        error: (err, st) =>
-                            _buildListThumbnailPlaceholder(context, file),
-                      );
+                       return thumbnail.when(
+                         data: (bytes) {
+                           if (bytes != null) {
+                             return _buildRotatedStackedThumbnail(
+                               Image.memory(
+                                 bytes,
+                                 width: 55,
+                                 height: 76,
+                                 fit: BoxFit.cover,
+                                 alignment: Alignment.topCenter,
+                                 filterQuality: FilterQuality.high,
+                               ),
+                             );
+                           }
+                           return _buildListThumbnailPlaceholder(context, file);
+                         },
+                         loading: () =>
+                             _buildListThumbnailPlaceholder(context, file),
+                         error: (err, st) =>
+                             _buildListThumbnailPlaceholder(context, file),
+                       );
                     },
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          file.fileName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${file.fileType.toUpperCase()} • ${file.formattedSize}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                                fontSize: 11,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
+                   const SizedBox(width: 8),
+                   Expanded(
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       mainAxisSize: MainAxisSize.min,
+                       children: [
+                         Text(
+                           file.fileName,
+                           maxLines: 1,
+                           overflow: TextOverflow.ellipsis,
+                           style: Theme.of(context)
+                               .textTheme
+                               .labelSmall
+                               ?.copyWith(
+                                 fontWeight: FontWeight.w500,
+                               ),
+                         ),
+                         const SizedBox(height: 1),
+                         Text(
+                           '${file.fileType.toUpperCase()} • ${file.formattedSize}',
+                           style: Theme.of(context)
+                               .textTheme
+                               .labelSmall
+                               ?.copyWith(
+                                 color: Theme.of(context)
+                                     .colorScheme
+                                     .onSurfaceVariant,
+                                 fontSize: 10,
+                               ),
+                         ),
+                       ],
+                     ),
+                   ),
                   if (!_isSelecting)
                     IconButton(
                       icon: Icon(Icons.more_vert,
@@ -1250,6 +1249,76 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       ),
       child: Center(
         child: _getFileIcon(file.fileType, size: 24),
+      ),
+    );
+  }
+
+  /// Build rotated stacked thumbnail for library list items
+  Widget _buildRotatedStackedThumbnail(Widget child) {
+    const double rotationAngle = -0.15; // ≈ -8.6 degrees (left tilt)
+    const double layerOffset = 3.0;
+    const double layerScale = 0.96;
+    const double thumbnailWidth = 55.0;
+    const double thumbnailHeight = 76.0;
+
+    return SizedBox(
+      width: thumbnailWidth,
+      height: thumbnailHeight,
+      child: Stack(
+        alignment: Alignment.bottomCenter, // Anchor at BOTTOM
+        clipBehavior: Clip.hardEdge, // Clip bottom overflow
+        children: [
+          // Back layer
+          Transform.translate(
+            offset: const Offset(layerOffset * 2, layerOffset * 2),
+            child: Transform.rotate(
+              angle: rotationAngle * 0.8,
+              child: Container(
+                width: thumbnailWidth * layerScale,
+                height: thumbnailHeight * layerScale,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.black.withValues(alpha: 0.02),
+                ),
+              ),
+            ),
+          ),
+          // Middle layer
+          Transform.translate(
+            offset: const Offset(layerOffset, layerOffset),
+            child: Transform.rotate(
+              angle: rotationAngle * 0.4,
+              child: Container(
+                width: thumbnailWidth * (layerScale + 0.02),
+                height: thumbnailHeight * (layerScale + 0.02),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.black.withValues(alpha: 0.01),
+                ),
+              ),
+            ),
+          ),
+          // Front layer
+          Transform.rotate(
+            angle: rotationAngle,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: child,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

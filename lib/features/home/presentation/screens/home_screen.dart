@@ -868,12 +868,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             color: Theme.of(context).colorScheme.surface,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
             child: Row(
               children: [
                 // Thumbnail
                 _RecentFileThumbnail(file: file),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 // File info
                 Expanded(
                   child: Column(
@@ -889,14 +889,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                             ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        '${file.fileType.toUpperCase()} • ${file.formattedSize}',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                              fontSize: 11,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.storage,
+                            size: 10,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            file.formattedSize,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontSize: 10,
                             ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.schedule_outlined,
+                            size: 10,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            _getTimeAgo(file.dateOpened),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -916,6 +938,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         ),
       ),
     );
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inSeconds < 60) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      final mins = difference.inMinutes;
+      return '$mins ${mins == 1 ? 'minute' : 'minutes'} ago';
+    } else if (difference.inHours < 24) {
+      final hours = difference.inHours;
+      return '$hours ${hours == 1 ? 'hour' : 'hours'} ago';
+    } else if (difference.inDays < 7) {
+      final days = difference.inDays;
+      return '$days ${days == 1 ? 'day' : 'days'} ago';
+    } else if (difference.inDays < 30) {
+      final weeks = (difference.inDays / 7).floor();
+      return '$weeks ${weeks == 1 ? 'week' : 'weeks'} ago';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return '$months ${months == 1 ? 'month' : 'months'} ago';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return '$years ${years == 1 ? 'year' : 'years'} ago';
+    }
   }
 
   void _softDeleteRecentFile(RecentFile file) {
@@ -1706,25 +1755,94 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
     return thumbnail.when(
       data: (bytes) {
         if (bytes != null && !isPresentation) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: Image.memory(
+          return _buildIsometricThumbnail(
+            Image.memory(
               bytes,
-              width: 40,
-              height: 56,
+              width: 70,
+              height: 96,
               fit: BoxFit.cover,
               alignment: Alignment.topCenter,
               filterQuality: FilterQuality.high,
             ),
           );
         }
-        return _buildThumbPlaceholder(isPresentation);
+        return _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation));
       },
-      loading: () => _buildThumbPlaceholder(isPresentation),
+      loading: () => _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation)),
       error: (error, stack) {
         log.e('🖼️  [Thumbnail Widget] Error loading thumbnail: $error');
-        return _buildThumbPlaceholder(isPresentation);
+        return _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation));
       },
+    );
+  }
+
+  Widget _buildIsometricThumbnail(Widget child) {
+    // Flat rotation to LEFT (negative angle)
+    const double rotationAngle = -0.15; // ≈ -8.6 degrees (left tilt)
+    const double layerOffset = 5.0;
+    const double layerScale = 0.96;
+    const double thumbnailWidth = 70.0; // Wider for better visibility
+    const double thumbnailHeight = 96.0; // Taller for readability
+
+    return SizedBox(
+      width: thumbnailWidth,
+      height: thumbnailHeight,
+      child: Stack(
+        alignment: Alignment.bottomCenter, // Anchor at BOTTOM
+        clipBehavior: Clip.hardEdge, // Clip bottom overflow
+        children: [
+          // Back layer
+          Transform.translate(
+            offset: const Offset(layerOffset * 2, layerOffset * 2),
+            child: Transform.rotate(
+              angle: rotationAngle * 0.8,
+              child: Container(
+                width: thumbnailWidth * layerScale,
+                height: thumbnailHeight * layerScale,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.black.withValues(alpha: 0.02),
+                ),
+              ),
+            ),
+          ),
+          // Middle layer
+          Transform.translate(
+            offset: const Offset(layerOffset, layerOffset),
+            child: Transform.rotate(
+              angle: rotationAngle * 0.4,
+              child: Container(
+                width: thumbnailWidth * (layerScale + 0.02),
+                height: thumbnailHeight * (layerScale + 0.02),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.black.withValues(alpha: 0.01),
+                ),
+              ),
+            ),
+          ),
+          // Front layer (main content) - ROTATED LEFT
+          Transform.rotate(
+            angle: rotationAngle, // Flat rotation ≈ -8.6 degrees (LEFT)
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: child,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1732,10 +1850,10 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
     return Stack(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
           child: Container(
-            width: 40,
-            height: 56,
+            width: 70,
+            height: 96,
             color: Theme.of(context)
                 .colorScheme
                 .primaryContainer
