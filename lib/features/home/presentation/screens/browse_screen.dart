@@ -63,6 +63,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
   bool _isSearchExpanded = false;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  String _sortBy = 'latest';
   final Map<String, List<DeviceDocument>> _documentsByCategory = {
     'all': [],
     'pdf': [],
@@ -198,85 +199,6 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                                     context.pop();
                                   },
                                   tooltip: 'Back',
-                                  iconSize: 20,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                ),
-                                const SizedBox(width: 8),
-                                // Animated search bar
-                                Expanded(
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
-                                    transitionBuilder: (child, animation) {
-                                      return SizeTransition(
-                                        sizeFactor: animation,
-                                        axis: Axis.horizontal,
-                                        child: child,
-                                      );
-                                    },
-                                    child: _isSearchExpanded
-                                        ? Container(
-                                            key: const ValueKey('search_input'),
-                                            constraints: const BoxConstraints(maxWidth: double.infinity),
-                                            child: TextField(
-                                              controller: _searchController,
-                                              focusNode: _searchFocusNode,
-                                              decoration: InputDecoration(
-                                                hintText: 'Search documents...',
-                                                border: InputBorder.none,
-                                                contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                                                suffixIcon: IconButton(
-                                                  icon: const Icon(Icons.clear),
-                                                  onPressed: () {
-                                                    _searchController.clear();
-                                                    setState(() => _searchQuery = '');
-                                                  },
-                                                ),
-                                              ),
-                                              onChanged: (value) {
-                                                setState(() => _searchQuery = value.toLowerCase());
-                                              },
-                                            ),
-                                          )
-                                        : const SizedBox.shrink(key: ValueKey('search_placeholder')),
-                                  ),
-                                ),
-                                // Title or search icon
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
-                                  child: _isSearchExpanded
-                                      ? const SizedBox.shrink()
-                                      : Text(
-                                          'Import Documents',
-                                          key: const ValueKey('title'),
-                                          style: Theme.of(context).textTheme.titleMedium,
-                                        ),
-                                ),
-                                // Search toggle button
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 200),
-                                  child: IconButton(
-                                    key: ValueKey(_isSearchExpanded),
-                                    icon: Icon(_isSearchExpanded ? Icons.close : Icons.search),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (_isSearchExpanded) {
-                                          _isSearchExpanded = false;
-                                          _searchController.clear();
-                                          _searchQuery = '';
-                                          _searchFocusNode.unfocus();
-                                        } else {
-                                          _isSearchExpanded = true;
-                                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                                            _searchFocusNode.requestFocus();
-                                          });
-                                        }
-                                      });
-                                    },
-                                    tooltip: _isSearchExpanded ? 'Close search' : 'Search documents',
                                     iconSize: 20,
                                     constraints: const BoxConstraints(
                                       minWidth: 32,
@@ -284,20 +206,110 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                                     ),
                                     padding: EdgeInsets.zero,
                                   ),
-                                ),
-                                // Grid/List toggle
-                                IconButton(
-                                  icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
-                                  onPressed: () {
-                                    setState(() => _isGridView = !_isGridView);
-                                  },
-                                  tooltip: _isGridView ? 'Switch to list view' : 'Switch to grid view',
-                                  iconSize: 20,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
+                                  // Title or search field
+                                  Expanded(
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 200),
+                                      child: _isSearchExpanded
+                                          ? Row(
+                                              key: const ValueKey('search'),
+                                              children: [
+                                                Expanded(
+                                                  child: TextField(
+                                                    controller: _searchController,
+                                                    focusNode: _searchFocusNode,
+                                                    autofocus: true,
+                                                    decoration: const InputDecoration(
+                                                      hintText: 'Search documents...',
+                                                      border: InputBorder.none,
+                                                      isDense: true,
+                                                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+                                                    ),
+                                                    style: Theme.of(context).textTheme.bodyMedium,
+                                                    onChanged: (value) {
+                                                      setState(() => _searchQuery = value.toLowerCase());
+                                                    },
+                                                  ),
+                                                ),
+                                                if (_searchQuery.isNotEmpty)
+                                                  IconButton(
+                                                    icon: const Icon(Icons.clear, size: 18),
+                                                    onPressed: () {
+                                                      _searchController.clear();
+                                                      setState(() => _searchQuery = '');
+                                                    },
+                                                    padding: EdgeInsets.zero,
+                                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                                  ),
+                                              ],
+                                            )
+                                          : Center(
+                                              key: const ValueKey('title'),
+                                              child: Text(
+                                                'Import Documents',
+                                                style: Theme.of(context).textTheme.titleMedium,
+                                              ),
+                                            ),
+                                    ),
                                   ),
-                                  padding: EdgeInsets.zero,
+                                  // Search toggle or cancel
+                                  if (!_isSearchExpanded)
+                                    IconButton(
+                                      icon: const Icon(Icons.search, size: 20),
+                                      onPressed: () {
+                                        setState(() => _isSearchExpanded = true);
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          _searchFocusNode.requestFocus();
+                                        });
+                                      },
+                                      iconSize: 20,
+                                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                      padding: EdgeInsets.zero,
+                                    )
+                                  else
+                                    TextButton(
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        _searchFocusNode.unfocus();
+                                        setState(() {
+                                          _searchQuery = '';
+                                          _isSearchExpanded = false;
+                                        });
+                                      },
+                                      style: TextButton.styleFrom(
+                                        padding: EdgeInsets.zero,
+                                        minimumSize: const Size(40, 32),
+                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      child: Text(
+                                        'Cancel',
+                                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  // Sort/Grid toggle - iOS pill style
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _buildAppBarPillButton(context, Icons.sort, false, () {
+                                        _showSortSheet(context);
+                                      }),
+                                      Container(
+                                        width: 1,
+                                        height: 20,
+                                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                                      ),
+                                      _buildAppBarPillButton(context, _isGridView ? Icons.list : Icons.grid_view, false, () {
+                                        setState(() => _isGridView = !_isGridView);
+                                      }),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -331,7 +343,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
             child: Row(
               children: [
                 _buildSkeletonChip(),
@@ -341,10 +353,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
               ],
             ),
           ),
-          const Divider(height: 1),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 100),
               itemCount: 8,
               itemBuilder: (context, index) {
                 return _buildSkeletonListItem();
@@ -357,35 +368,35 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
 
     if (_error != null) {
       return Center(
-        child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.error_outline,
-                size: 64,
+                size: 48,
                 color: Theme.of(context).colorScheme.error,
               ),
               const SizedBox(height: 16),
               Text(
                 'Scan failed',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  _error ?? 'Unknown error occurred',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 8),
+              Text(
+                _error ?? 'Unknown error occurred',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 24),
               FilledButton.icon(
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh, size: 18),
                 label: const Text('Retry Scan'),
                 onPressed: () {
                   log.i('Retry scan button pressed');
@@ -394,7 +405,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
               ),
               const SizedBox(height: 12),
               TextButton.icon(
-                icon: const Icon(Icons.folder_open),
+                icon: const Icon(Icons.folder_open, size: 18),
                 label: const Text('Import Files Manually'),
                 onPressed: _pickFilesManually,
               ),
@@ -406,33 +417,28 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
 
     return Column(
       children: [
-        // Helper text
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            'Select the document(s) you want to import',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+        // Category chips - iOS-style pill
+        Container(
+          color: Theme.of(context).colorScheme.surface,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: SizedBox(
+              height: 36,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  _buildCategoryChip('all', 'All', Icons.apps),
+                  _buildCategoryChip('pdf', 'PDFs', Icons.picture_as_pdf),
+                  _buildCategoryChip('documents', 'Docs', Icons.description),
+                  _buildCategoryChip('spreadsheets', 'Sheets', Icons.table_chart),
+                  _buildCategoryChip('presentations', 'Slides', Icons.slideshow),
+                  _buildCategoryChip('other', 'Other', Icons.insert_drive_file),
+                ],
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         ),
-        // Category tabs
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              _buildCategoryTab('all', 'All', Icons.folder),
-              _buildCategoryTab('pdf', 'PDFs', Icons.picture_as_pdf),
-              _buildCategoryTab('documents', 'Docs', Icons.description),
-              _buildCategoryTab('spreadsheets', 'Sheets', Icons.table_chart),
-              _buildCategoryTab('presentations', 'Slides', Icons.slideshow),
-              _buildCategoryTab('other', 'Other', Icons.insert_drive_file),
-            ],
-          ),
-        ),
-        const Divider(height: 1),
         // Documents list/grid
         Expanded(
           child: _buildDocumentsView(),
@@ -441,40 +447,122 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
     );
   }
 
-  Widget _buildCategoryTab(
+  Widget _buildAppBarPillButton(BuildContext context, IconData icon, bool isActive, VoidCallback onPressed) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Icon(
+            icon,
+            size: 18,
+            color: isActive
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(
       String categoryKey, String label, IconData icon) {
     final isActive = _selectedCategory == categoryKey;
     final count = _documentsByCategory[categoryKey]?.length ?? 0;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        selected: isActive,
-        onSelected: (selected) {
-          setState(() => _selectedCategory = categoryKey);
-        },
-        avatar: Icon(icon, size: 16),
-        label: Text('$label ($count)'),
-        backgroundColor: Colors.transparent,
-        selectedColor:
-            Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-        side: BorderSide(
-          color: isActive
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => setState(() => _selectedCategory = categoryKey),
+          borderRadius: BorderRadius.circular(20),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: isActive
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(20),
+              border: isActive
+                  ? null
+                  : Border.all(
+                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                      width: 0.5,
+                    ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 14,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                    color: isActive
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.15)
+                        : Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    count.toString(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: isActive
+                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        showCheckmark: false,
       ),
     );
   }
 
   Widget _buildDocumentsView() {
     final documents = _documentsByCategory[_selectedCategory] ?? [];
-    final filteredDocuments = _searchQuery.isEmpty
+    var filteredDocuments = _searchQuery.isEmpty
         ? documents
         : documents.where((doc) =>
             doc.name.toLowerCase().contains(_searchQuery) ||
             doc.extension.toLowerCase().contains(_searchQuery)).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'latest':
+        filteredDocuments.sort((a, b) => b.modified.compareTo(a.modified));
+      case 'oldest':
+        filteredDocuments.sort((a, b) => a.modified.compareTo(b.modified));
+      case 'largest':
+        filteredDocuments.sort((a, b) => b.fileSizeBytes.compareTo(a.fileSizeBytes));
+      case 'smallest':
+        filteredDocuments.sort((a, b) => a.fileSizeBytes.compareTo(b.fileSizeBytes));
+    }
 
     if (filteredDocuments.isEmpty) {
       return Center(
@@ -482,25 +570,30 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.search_off,
-              size: 64,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              Icons.search_off_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               _searchQuery.isEmpty ? 'No documents found' : 'No documents match your search',
-              style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             if (_searchQuery.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                'Try a different search term',
-                style: Theme.of(context).textTheme.bodySmall,
+                'Try adjusting your search or filters',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
               ),
             ],
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             FilledButton.icon(
-              icon: const Icon(Icons.folder_open),
+              icon: const Icon(Icons.folder_open, size: 18),
               label: const Text('Import Files Manually'),
               onPressed: _pickFilesManually,
             ),
@@ -511,12 +604,12 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
 
     if (_isGridView) {
       return GridView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 100),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.714, // Matches 200x280 thumbnail aspect ratio
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: 0.714,
         ),
         itemCount: filteredDocuments.length,
         itemBuilder: (context, index) {
@@ -525,7 +618,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       );
     } else {
       return ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 100),
         itemCount: filteredDocuments.length,
         itemBuilder: (context, index) {
           return _buildDocumentListItem(filteredDocuments[index]);
@@ -556,107 +649,102 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: isSelected
-                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-                  : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.15)
+                  : Theme.of(context).colorScheme.surface,
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                width: 1,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+                width: isSelected ? 2.0 : 1.0,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
             ),
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      _getFileIcon(doc.extension, size: 32),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              child: Row(
+                children: [
+                  // Selection indicator
+                  Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.transparent,
+              border: Border.all(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
+                width: 2.0,
+              ),
+                    ),
+                    child: isSelected
+                        ? Icon(
+                            Icons.check,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  // File icon
+                  _getFileIcon(doc.extension, size: 32),
+                  const SizedBox(width: 12),
+                  // File info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          doc.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
                           children: [
-                            Text(
-                              doc.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.storage,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  doc.displaySize,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Icon(
-                                  Icons.calendar_today,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _formatDate(doc.modified),
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.folder,
-                                  size: 14,
+                            Icon(Icons.storage, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            const SizedBox(width: 4),
+                            Text(doc.displaySize, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            const SizedBox(width: 12),
+                            Icon(Icons.schedule_outlined, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            const SizedBox(width: 4),
+                            Text(_formatDate(doc.modified), style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Icon(Icons.folder, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                _getShortPath(doc.path.substring(0, doc.path.lastIndexOf('/'))),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                   color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                                 ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    _getShortPath(doc.path.substring(0, doc.path.lastIndexOf('/'))),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isSelected)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 16,
-                      ),
+                      ],
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -667,133 +755,108 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
   Widget _buildDocumentGridItem(DeviceDocument doc) {
     final isSelected = _selectedFilePaths.contains(doc.path);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            if (isSelected) {
-              _selectedFilePaths.remove(doc.path);
-            } else {
-              _selectedFilePaths.add(doc.path);
-            }
-          });
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-                : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-              width: 1,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 0),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              if (isSelected) {
+                _selectedFilePaths.remove(doc.path);
+              } else {
+                _selectedFilePaths.add(doc.path);
+              }
+            });
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.15)
+                  : Theme.of(context).colorScheme.surface,
+              border: Border.all(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
+                width: 2.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
             ),
-          ),
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _getFileIcon(doc.extension, size: 32),
-                    const SizedBox(height: 6),
-                    Text(
-                      doc.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _getFileIcon(doc.extension, size: 36),
+                      const SizedBox(height: 8),
+                      Text(
+                        doc.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.storage,
-                          size: 10,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          doc.displaySize,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 10,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          _formatDate(doc.modified),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.folder,
-                          size: 10,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                        ),
-                        const SizedBox(width: 2),
-                        Expanded(
-                          child: Text(
-                            _getShortPath(doc.path.substring(0, doc.path.lastIndexOf('/'))),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                              fontSize: 10,
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.storage, size: 10, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
+                          const SizedBox(width: 2),
+                          Text(doc.displaySize, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 10)),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.folder, size: 10, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                          const SizedBox(width: 2),
+                          Flexible(
+                            child: Text(
+                              _getShortPath(doc.path.substring(0, doc.path.lastIndexOf('/'))),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                fontSize: 9,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              if (isSelected)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 16,
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-            ],
+                // Selection indicator - positioned, doesn't shift content
+                if (isSelected)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.check, color: Theme.of(context).colorScheme.onPrimary, size: 14),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -801,40 +864,65 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
   }
 
   Widget _buildBottomImportBar(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 16,
+        bottom: MediaQuery.viewPaddingOf(context).bottom + 16,
+      ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: isDark
+            ? Colors.black.withValues(alpha: 0.95)
+            : Colors.white.withValues(alpha: 0.97),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
-      ),
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 12,
-        bottom: 12 + MediaQuery.of(context).viewPadding.bottom,
       ),
       child: Row(
         children: [
           Text(
             '${_selectedFilePaths.length} selected',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const Spacer(),
-          TextButton.icon(
-            icon: const Icon(Icons.close),
-            label: const Text('Clear'),
+          // Clear button
+          OutlinedButton.icon(
             onPressed: () {
               setState(() => _selectedFilePaths.clear());
             },
+            icon: Icon(Icons.close, size: 16, color: Theme.of(context).colorScheme.error),
+            label: Text(
+              'Clear',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
+          // Import button
           FilledButton.icon(
-            icon: const Icon(Icons.download),
-            label: const Text('Import'),
             onPressed: _importSelectedFiles,
+            icon: const Icon(Icons.download, size: 16),
+            label: const Text('Import'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            ),
           ),
         ],
       ),
@@ -1313,6 +1401,64 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         );
       }
     }
+  }
+
+  void _showSortSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Sort by',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+              _buildSortOption(context, 'Latest', 'latest'),
+              _buildSortOption(context, 'Oldest', 'oldest'),
+              _buildSortOption(context, 'Largest', 'largest'),
+              _buildSortOption(context, 'Smallest', 'smallest'),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortOption(BuildContext context, String label, String value) {
+    final isSelected = _sortBy == value;
+    return ListTile(
+      title: Text(label),
+      trailing: isSelected
+          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+          : null,
+      onTap: () {
+        setState(() => _sortBy = value);
+        Navigator.pop(context);
+      },
+    );
   }
 
   Future<void> _importSelectedFiles() async {
