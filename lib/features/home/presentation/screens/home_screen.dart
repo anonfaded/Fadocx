@@ -256,152 +256,233 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     final isDark = theme.brightness == Brightness.dark;
     final recentFilesBg = isDark ? const Color(0xFF0F0F11) : const Color(0xFFEFEFF4);
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.zero,
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Stats Card + Action Cards in scrollable area with padding
-          Padding(
-            padding: EdgeInsets.fromLTRB(12, topPadding - 4, 12, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Stats Card
-                _buildStatsCard(context, files, appSettings),
-                const SizedBox(height: 12),
+    return Column(
+      children: [
+        // Top content - natural height (stats + actions only)
+        Padding(
+          padding: EdgeInsets.fromLTRB(12, topPadding - 4, 12, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Stats Card
+              _buildStatsCard(context, files, appSettings),
+              const SizedBox(height: 12),
 
-                // Action Cards Section
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionCard(
-                        context,
-                        title: 'Scan to Extract Text',
-                        description: 'Extract text from documents using OCR',
-                        icon: Icons.document_scanner,
-                        cardType: 'scan',
-                        onTap: () {
-                          log.i('Navigating to scanner');
-                          context.push(RouteNames.scanner);
-                        },
-                      ),
+              // Action Cards Section
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionCard(
+                      context,
+                      title: 'Scan to Extract Text',
+                      description: 'Extract text from documents using OCR',
+                      icon: Icons.document_scanner,
+                      cardType: 'scan',
+                      onTap: () {
+                        log.i('Navigating to scanner');
+                        context.push(RouteNames.scanner);
+                      },
                     ),
-                    const SizedBox(width: 10),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildActionCard(
+                      context,
+                      title: 'Import a Document',
+                      description: 'Browse and import files from your device',
+                      icon: Icons.folder_open,
+                      cardType: 'import',
+                      onTap: () {
+                        log.i('Navigating to browse');
+                        context.push(RouteNames.browse);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        // Recent Files Section - fills remaining space from below action cards
+        if (showRecentFiles)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: recentFilesBg,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                padding: EdgeInsets.fromLTRB(12, 16, 12, bottomPadding + 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Fixed header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          files.isNotEmpty
+                              ? 'Recent Files'
+                              : appSettings != null && appSettings.hasImportedSampleFiles
+                                  ? 'Recent Files'
+                                  : 'Welcome',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        if (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles))
+                          TextButton(
+                            onPressed: () {
+                              context.push(RouteNames.documents);
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('See All'),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.chevron_right,
+                                  size: 18,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Content fills remaining space (3 states)
                     Expanded(
-                      child: _buildActionCard(
-                        context,
-                        title: 'Import a Document',
-                        description: 'Browse and import files from your device',
-                        icon: Icons.folder_open,
-                        cardType: 'import',
-                        onTap: () {
-                          log.i('Navigating to browse');
-                          context.push(RouteNames.browse);
-                        },
-                      ),
+                      child: files.isNotEmpty
+                          // State 1: Has files → show file list
+                          ? ListView.builder(
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: files.length > 4 ? 4 : files.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: index < (files.length > 4 ? 3 : files.length - 1) ? 8 : 0,
+                                  ),
+                                  child: _buildRecentFileItem(context, files[index]),
+                                );
+                              },
+                            )
+                          // State 2 & 3: No files
+                          : appSettings != null && appSettings.hasImportedSampleFiles
+                              // State 2: Has imported samples before but deleted → "No recent files"
+                              ? Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.folder_open_outlined,
+                                        size: 40,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'No recent files',
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              // State 3: Fresh install, no files, no samples → welcome content
+                              : Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                                        ),
+                                        child: Icon(
+                                          Icons.lightbulb_outline,
+                                          size: 32,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'Welcome to Fadocx',
+                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                                        child: Text(
+                                          'Explore sample files or import your own documents to get started',
+                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+                                            height: 1.4,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      // Explore Sample Files button only
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          borderRadius: BorderRadius.circular(10),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            onTap: () => _importSampleFiles(context),
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.auto_stories,
+                                                    size: 18,
+                                                    color: Theme.of(context).colorScheme.onPrimary,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    'Explore Sample Files',
+                                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                                      color: Theme.of(context).colorScheme.onPrimary,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
-              ],
+              ),
             ),
           ),
-
-          // Recent Files Section - full width with darker background
-          if (showRecentFiles && (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles)))
-            Container(
-              decoration: BoxDecoration(
-                color: recentFilesBg,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              padding: EdgeInsets.fromLTRB(12, 16, 12, bottomPadding + 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Recent Files',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          context.push(RouteNames.documents);
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('See All'),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.chevron_right,
-                              size: 18,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (files.isNotEmpty) ...[
-                    ...files.take(4).toList().asMap().entries.map(
-                      (entry) {
-                        final index = entry.key;
-                        final file = entry.value;
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            bottom: index < (files.take(4).toList().length - 1) ? 8 : 0,
-                          ),
-                          child: _buildRecentFileItem(context, file),
-                        );
-                      },
-                    ),
-                  ] else
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.folder_open_outlined,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'No recent files',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            )
-          else if (appSettings == null || !appSettings.hasImportedSampleFiles)
-            Padding(
-              padding: EdgeInsets.only(bottom: bottomPadding),
-              child: _buildEmptyRecentState(context),
-            )
-          // Don't show any onboarding after samples are imported
-          // Just show the action cards above
-        ],
-      ),
+      ],
     );
   }
 
@@ -636,116 +717,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-
-  Widget _buildEmptyRecentState(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height * 0.4,
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
-            width: 1,
-          ),
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-              child: Icon(
-                Icons.lightbulb_outline,
-                size: 28,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Welcome to Fadocx',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                'Explore sample files or import your own documents',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => _importSampleFiles(context),
-                  borderRadius: BorderRadius.circular(10),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.download_for_offline,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Import Sample Files',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _importSampleFiles(BuildContext context) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -872,6 +843,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       log.e('Error importing sample files: $e');
     }
   }
+
 
   Widget _buildRecentFileItem(BuildContext context, RecentFile file) {
     return Material(

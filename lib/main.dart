@@ -34,13 +34,15 @@ void main() async {
   }
 
   // Set system UI overlay style to match saved theme
-  // IMPORTANT: Use statusBarIconBrightness (not deprecated statusBarBrightness)
+  // IMPORTANT: This sets the INITIAL state. FloatingDockScaffold will update it dynamically.
   final isDarkTheme = savedTheme.toLowerCase() == 'dark';
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDarkTheme ? Brightness.dark : Brightness.light, // For iOS
       systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
     ),
   );
   log.d('✅ System UI overlay style set for $savedTheme theme');
