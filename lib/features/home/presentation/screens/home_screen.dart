@@ -211,22 +211,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   Widget _buildSkeletonLoading(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top + 56;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
-    return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(12, topPadding - 4, 12, bottomPadding),
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      child: Column(
-        children: [
-          _buildSkeletonStats(),
-          const SizedBox(height: 12),
-          _buildSkeletonActionCards(),
-          const SizedBox(height: 14),
-          _buildSkeletonRecentHeader(),
-          const SizedBox(height: 8),
-          ...List.generate(4, (index) => _buildSkeletonRecentItem(index)),
-        ],
-      ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final recentFilesBg = isDark ? const Color(0xFF0F0F11) : const Color(0xFFEFEFF4);
+
+    return Column(
+      children: [
+        // Top content - matching real layout
+        Padding(
+          padding: EdgeInsets.fromLTRB(12, topPadding - 4, 12, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildSkeletonStats(),
+              const SizedBox(height: 12),
+              _buildSkeletonActionCards(),
+            ],
+          ),
+        ),
+
+        // Recent Files Section - EXPANDED to fill remaining space
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: recentFilesBg,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              padding: EdgeInsets.fromLTRB(12, 16, 12, bottomPadding + 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSkeletonRecentHeader(),
+                  const SizedBox(height: 8),
+                  // Skeleton fills expanded space
+                  Expanded(
+                    child: ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 4,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: index < 3 ? 8 : 0),
+                          child: _buildSkeletonRecentItem(),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -304,7 +343,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
           ),
         ),
 
-        // Recent Files Section - fills remaining space from below action cards
+        // Recent Files Section - EXPANDED so bg always fills to bottom
         if (showRecentFiles)
           Expanded(
             child: Padding(
@@ -358,7 +397,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                     // Content fills remaining space (3 states)
                     Expanded(
                       child: files.isNotEmpty
-                          // State 1: Has files → show file list
+                          // State 1: Has files → show scrollable file list
                           ? ListView.builder(
                               physics: const BouncingScrollPhysics(),
                               itemCount: files.length > 4 ? 4 : files.length,
@@ -1425,18 +1464,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
   Widget _buildSkeletonStats() {
     final shimmer = _skeletonShimmer.value;
-    final theme = Theme.of(context);
-    final baseColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);
-    final highlightColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7);
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Neutral gray/slate colors - theme independent
+    final Color baseColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final Color highlightColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
+    final Color cardBg = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final Color borderColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.12),
+          color: borderColor.withValues(alpha: 0.5),
           width: 1,
         ),
-        color: theme.colorScheme.surfaceContainerLow,
+        color: cardBg,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
@@ -1451,12 +1493,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   }
 
   Widget _buildSkeletonActionCards() {
-    // Slate colors for dark theme action cards
-    final slateDark = const Color(0xFF2C3E50);
-    final slateLight = const Color(0xFF34495E);
-    final emerald = const Color(0xFF16A085);
-    final emeraldLight = const Color(0xFF27AE60);
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color cardBg = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final Color borderColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
+
     return Row(
       children: [
         Expanded(
@@ -1464,10 +1504,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             height: 96,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [emerald, emeraldLight],
+              color: cardBg,
+              border: Border.all(
+                color: borderColor.withValues(alpha: 0.5),
+                width: 1,
               ),
             ),
           ),
@@ -1478,10 +1518,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             height: 96,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [slateDark, slateLight],
+              color: cardBg,
+              border: Border.all(
+                color: borderColor.withValues(alpha: 0.5),
+                width: 1,
               ),
             ),
           ),
@@ -1491,14 +1531,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   }
 
   Widget _buildSkeletonRecentHeader() {
-    final theme = Theme.of(context);
-    final baseColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);
-    final highlightColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7);
     final shimmer = _skeletonShimmer.value;
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color baseColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final Color highlightColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // "Recent Files" text skeleton
         Container(
           width: 80,
           height: 16,
@@ -1511,47 +1552,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             ),
           ),
         ),
-        Container(
-          width: 50,
-          height: 12,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            gradient: LinearGradient(
-              begin: Alignment(shimmer - 1, 0),
-              end: Alignment(shimmer, 0),
-              colors: [baseColor, highlightColor, baseColor],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSkeletonRecentItem(int index) {
-    final theme = Theme.of(context);
-    final baseColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);
-    final highlightColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7);
-    final shimmer = _skeletonShimmer.value;
-    
-    return Padding(
-      padding: EdgeInsets.only(bottom: index < 3 ? 8 : 0),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: theme.colorScheme.outline.withValues(alpha: 0.08),
-            width: 1,
-          ),
-          color: theme.colorScheme.surfaceContainerLow,
-        ),
-        child: Row(
+        // "See All" button skeleton (Text + chevron_right)
+        Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 36,
-              height: 36,
+              height: 12,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(4),
                 gradient: LinearGradient(
                   begin: Alignment(shimmer - 1, 0),
                   end: Alignment(shimmer, 0),
@@ -1559,41 +1568,160 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      gradient: LinearGradient(
-                        begin: Alignment(shimmer - 1, 0),
-                        end: Alignment(shimmer, 0),
-                        colors: [baseColor, highlightColor, baseColor],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    width: 80,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      gradient: LinearGradient(
-                        begin: Alignment(shimmer - 1, 0),
-                        end: Alignment(shimmer, 0),
-                        colors: [baseColor, highlightColor, baseColor],
-                      ),
-                    ),
-                  ),
-                ],
+            const SizedBox(width: 4),
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(2),
+                gradient: LinearGradient(
+                  begin: Alignment(shimmer - 1, 0),
+                  end: Alignment(shimmer, 0),
+                  colors: [baseColor, highlightColor, baseColor],
+                ),
               ),
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildSkeletonRecentItem() {
+    final shimmer = _skeletonShimmer.value;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color baseColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final Color highlightColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
+    final Color cardBg = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final Color borderColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
+    const double rotationAngle = -0.15;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: borderColor.withValues(alpha: 0.5),
+          width: 1,
+        ),
+        color: cardBg,
+      ),
+      child: Row(
+        children: [
+          // Thumbnail skeleton - single rotated rectangle matching the shape
+          Transform.rotate(
+            angle: rotationAngle,
+            child: Container(
+              width: 70,
+              height: 96,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: LinearGradient(
+                  begin: Alignment(shimmer - 1, 0),
+                  end: Alignment(shimmer, 0),
+                  colors: [baseColor, highlightColor, baseColor],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          // File info skeleton - exact clone of real layout
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Filename text
+                Container(
+                  width: double.infinity,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    gradient: LinearGradient(
+                      begin: Alignment(shimmer - 1, 0),
+                      end: Alignment(shimmer, 0),
+                      colors: [baseColor, highlightColor, baseColor],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                // Metadata row: storage icon + size + clock icon + time-ago
+                Row(
+                  children: [
+                    // Storage icon skeleton
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(2),
+                        gradient: LinearGradient(
+                          begin: Alignment(shimmer - 1, 0),
+                          end: Alignment(shimmer, 0),
+                          colors: [baseColor, highlightColor, baseColor],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    // Size text skeleton
+                    Container(
+                      width: 50,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        gradient: LinearGradient(
+                          begin: Alignment(shimmer - 1, 0),
+                          end: Alignment(shimmer, 0),
+                          colors: [baseColor, highlightColor, baseColor],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Clock icon skeleton
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(2),
+                        gradient: LinearGradient(
+                          begin: Alignment(shimmer - 1, 0),
+                          end: Alignment(shimmer, 0),
+                          colors: [baseColor, highlightColor, baseColor],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    // Time-ago text skeleton
+                    Container(
+                      width: 50,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        gradient: LinearGradient(
+                          begin: Alignment(shimmer - 1, 0),
+                          end: Alignment(shimmer, 0),
+                          colors: [baseColor, highlightColor, baseColor],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Three-dot menu skeleton (more_vert icon)
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              gradient: LinearGradient(
+                begin: Alignment(shimmer - 1, 0),
+                end: Alignment(shimmer, 0),
+                colors: [baseColor, highlightColor, baseColor],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
