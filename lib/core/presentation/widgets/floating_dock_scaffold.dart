@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 
@@ -46,50 +47,63 @@ class _FloatingDockScaffoldState extends State<FloatingDockScaffold> {
         : 0.0; // Reduced from 56 to 40 for compact
     final dockHeight = widget.showBottomDock ? 72.0 : 0.0;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Stack(
-        children: [
-          // Main scrollable content - FULL SCREEN, scrolls behind overlays
-          Positioned.fill(
-            child: widget.body,
-          ),
+    // Determine status bar style based on current theme
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final statusBarStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light, // For iOS
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+    );
 
-          // Floating top bar with blur (overlay on top)
-          if (widget.appBarContent != null)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: appBarHeight + topSafePadding,
-              child: _FloatingAppBar(
-                content: widget.appBarContent!,
-                topPadding: topSafePadding,
-              ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: statusBarStyle,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: Stack(
+          children: [
+            // Main scrollable content - FULL SCREEN, scrolls behind overlays
+            Positioned.fill(
+              child: widget.body,
             ),
 
-          // Floating bottom dock with blur (overlay on bottom) - FIXED in place, no animation
-          if (widget.showBottomDock)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: RepaintBoundary(
-                child: _FloatingDock(
-                  bottomPadding: bottomSafePadding,
-                  currentRoute: widget.currentRoute,
+            // Floating top bar with blur (overlay on top)
+            if (widget.appBarContent != null)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: appBarHeight + topSafePadding,
+                child: _FloatingAppBar(
+                  content: widget.appBarContent!,
+                  topPadding: topSafePadding,
                 ),
               ),
-            ),
 
-          // Floating action button - above the dock
-          if (widget.floatingActionButton != null && widget.showBottomDock)
-            Positioned(
-              right: 16,
-              bottom: dockHeight + bottomSafePadding + 8,
-              child: widget.floatingActionButton!,
-            ),
-        ],
+            // Floating bottom dock with blur (overlay on bottom) - FIXED in place, no animation
+            if (widget.showBottomDock)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: RepaintBoundary(
+                  child: _FloatingDock(
+                    bottomPadding: bottomSafePadding,
+                    currentRoute: widget.currentRoute,
+                  ),
+                ),
+              ),
+
+            // Floating action button - above the dock
+            if (widget.floatingActionButton != null && widget.showBottomDock)
+              Positioned(
+                right: 16,
+                bottom: dockHeight + bottomSafePadding + 8,
+                child: widget.floatingActionButton!,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -191,8 +205,6 @@ class _FloatingDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return SafeArea(
       top: false,
       child: Padding(
@@ -200,19 +212,6 @@ class _FloatingDock extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none, // Allow shadows to extend outside
           children: [
-            // Shadow layer - positioned to extend beyond dock
-            Positioned(
-              bottom: -60, // Extend shadow further down
-              left: -20, // Extend shadow to left
-              right: -20, // Extend shadow to right
-              height: 140, // Taller height to contain shadow blur
-              child: CustomPaint(
-                painter: _DockShadowPainter(
-                  isDark: isDark,
-                  borderRadius: 16,
-                ),
-              ),
-            ),
             // Main dock with blur and buttons (compact)
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
@@ -415,72 +414,5 @@ class _DockItemState extends State<_DockItem>
         ),
       ),
     );
-  }
-}
-
-/// Custom painter for dock shadow - only on bottom and sides, NOT on top
-class _DockShadowPainter extends CustomPainter {
-  final bool isDark;
-  final double borderRadius;
-
-  _DockShadowPainter({
-    required this.isDark,
-    required this.borderRadius,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final shadowColor = isDark
-        ? Colors.black.withValues(alpha: 0.80)
-        : Colors.white.withValues(alpha: 0.89);
-
-    // Draw bottom shadow with rectangle for uniform darkness
-    final shadowPaint = Paint()
-      ..color = shadowColor
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28);
-
-    // Draw shadow twice for darker effect (not 3 times)
-    for (int i = 0; i < 2; i++) {
-      // Draw large bottom shadow as a stretched rectangle for even coverage
-      canvas.drawRect(
-        Rect.fromLTWH(
-          -10, // Extend left beyond bounds
-          50, // Start further down (below dock top, no shadow on top)
-          size.width + 20, // Full width plus overflow for sides
-          80, // Height to cover blur
-        ),
-        shadowPaint,
-      );
-    }
-
-    // Draw left side shadow that extends down - optional, can comment out
-    // to only have bottom shadow
-    shadowPaint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 24);
-    canvas.drawRect(
-      Rect.fromLTWH(
-        -5,
-        50, // Start further down
-        25,
-        size.height - 50,
-      ),
-      shadowPaint,
-    );
-
-    // Draw right side shadow that extends down - optional
-    canvas.drawRect(
-      Rect.fromLTWH(
-        size.width - 20,
-        50, // Start further down
-        25,
-        size.height - 50,
-      ),
-      shadowPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_DockShadowPainter oldDelegate) {
-    return oldDelegate.isDark != isDark ||
-        oldDelegate.borderRadius != borderRadius;
   }
 }
