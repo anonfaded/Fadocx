@@ -286,7 +286,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                           : Colors.black.withValues(alpha: 0.4))
                       : (isDark
                           ? surfaceColor.withValues(alpha: 0.85)
-                          : surfaceColor.withValues(alpha: 0.92)),
+                          : surfaceColor.withValues(alpha: 0.95)),
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(16),
                     bottomRight: Radius.circular(16),
@@ -372,11 +372,18 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       decoration: BoxDecoration(
         color: _currentStep == 0 
             ? Colors.white.withValues(alpha: 0.12)
-            : surfaceVariant.withValues(alpha: 0.6),
+            : surfaceVariant.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(24),
         border: _currentStep == 0 
             ? null 
             : Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+        boxShadow: _currentStep == 0 ? null : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -887,6 +894,7 @@ isActive: scannerState.torchEnabled,
 
   Widget _buildProcessingStep(BuildContext context, ScannerState scannerState) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final surface = Theme.of(context).colorScheme.surface;
     final surfaceContainer = Theme.of(context).colorScheme.surfaceContainer;
     final outline = Theme.of(context).colorScheme.outline;
 
@@ -906,7 +914,7 @@ isActive: scannerState.torchEnabled,
     ];
 
     return Container(
-      color: Theme.of(context).colorScheme.surface,
+      color: surface,
       child: Padding(
         padding: EdgeInsets.only(
           left: 24,
@@ -916,33 +924,41 @@ isActive: scannerState.torchEnabled,
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Captured image preview
+              // Captured image preview with a thematic border
               if (scannerState.capturedImagePath != null)
                 Container(
-                  height: 200,
+                  height: 220,
                   width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 32),
+                  margin: const EdgeInsets.only(bottom: 24),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: outline.withValues(alpha: 0.2),
+                      color: outline.withValues(alpha: 0.15),
+                      width: 1,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                     child: Image.file(
                       File(scannerState.capturedImagePath!),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-              // Processing steps card
+              // Processing steps card with modern surface coloring
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: surfaceContainer,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: outline.withValues(alpha: 0.1),
                   ),
@@ -950,17 +966,33 @@ isActive: scannerState.torchEnabled,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      scannerState.processingStep == ProcessingStep.done
-                          ? 'Processing Complete'
-                          : 'Processing Document...',
-                      style: TextStyle(
-                        color: onSurface,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          scannerState.processingStep == ProcessingStep.done
+                              ? 'Processing Complete'
+                              : 'Processing Document...',
+                          style: TextStyle(
+                            color: onSurface,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        if (scannerState.processingStep != ProcessingStep.done) ...[
+                          const Spacer(),
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     for (final info in steps) ...[
                       _buildProcessingStepRow(context, scannerState, info),
                       if (info != steps.last) const SizedBox(height: 12),
@@ -970,7 +1002,7 @@ isActive: scannerState.torchEnabled,
               ),
               // Confidence badge (shown when done)
               if (scannerState.processingStep == ProcessingStep.done) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 _buildConfidenceBadge(context, scannerState.ocrConfidence),
               ],
             ],
@@ -988,26 +1020,27 @@ isActive: scannerState.torchEnabled,
     final isActive = state.isStepActive(info.step);
     final isPending = !isCompleted && !isActive;
     
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-    final surfaceContainerHigh = Theme.of(context).colorScheme.surfaceContainerHigh;
-    final outline = Theme.of(context).colorScheme.outline;
+    final colorScheme = Theme.of(context).colorScheme;
+    final onSurface = colorScheme.onSurface;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.all(14),
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isCompleted
-            ? Colors.green.withValues(alpha: 0.15)
+            ? Colors.green.withValues(alpha: 0.1)
             : isActive
-                ? surfaceContainerHigh
-                : onSurface.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(12),
+                ? colorScheme.primaryContainer.withValues(alpha: 0.4)
+                : colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isCompleted
-              ? Colors.green.withValues(alpha: 0.3)
+              ? Colors.green.withValues(alpha: 0.25)
               : isActive
-                  ? outline.withValues(alpha: 0.2)
-                  : outline.withValues(alpha: 0.05),
+                  ? colorScheme.primary.withValues(alpha: 0.3)
+                  : colorScheme.outline.withValues(alpha: 0.08),
+          width: isActive ? 1.5 : 1.0,
         ),
       ),
       child: Row(
@@ -1018,21 +1051,21 @@ isActive: scannerState.torchEnabled,
               builder: (context, child) {
                 return Transform.rotate(
                   angle: -_processingController.value * 2 * 3.14159,
-                  child: Icon(Icons.sync, size: 22, color: onSurface.withValues(alpha: 0.7)),
+                  child: Icon(Icons.sync, size: 20, color: colorScheme.primary),
                 );
               },
             )
           else
             Icon(
               isCompleted ? Icons.check_circle : info.icon,
-              size: 22,
+              size: 20,
               color: isCompleted
                   ? Colors.green
                   : isPending
-                      ? onSurface.withValues(alpha: 0.3)
-                      : onSurface.withValues(alpha: 0.7),
+                      ? onSurface.withValues(alpha: 0.25)
+                      : onSurface.withValues(alpha: 0.6),
             ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1040,17 +1073,17 @@ isActive: scannerState.torchEnabled,
                 Text(
                   info.title,
                   style: TextStyle(
-                    color: isPending ? onSurface.withValues(alpha: 0.38) : onSurface,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                    color: isPending ? onSurface.withValues(alpha: 0.35) : onSurface,
+                    fontWeight: isCompleted || isActive ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   info.description,
                   style: TextStyle(
-                    color: onSurface.withValues(alpha: isPending ? 0.3 : 0.6),
-                    fontSize: 11,
+                    color: onSurface.withValues(alpha: isPending ? 0.25 : 0.55),
+                    fontSize: 12,
                   ),
                 ),
               ],
