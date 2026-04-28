@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:camera/camera.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
 import 'package:logger/logger.dart';
+import 'package:fadocx/core/services/camera_service.dart';
 import 'package:fadocx/core/services/image_processing_service.dart';
 import 'package:fadocx/core/services/tesseract_service.dart';
 import 'package:fadocx/features/scanner/presentation/providers/scanner_provider.dart';
@@ -30,6 +31,10 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _processingController;
+  late AnimationController _scanningController;
+
+  // Cached camera service reference to avoid ref usage in dispose
+  CameraService? _cameraService;
 
   // Step tracking (0: Capture, 1: Processing, 2: Results)
   int _currentStep = 0;
@@ -59,19 +64,31 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       vsync: this,
     )..repeat();
 
+    _scanningController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+
     // Start in immersive mode for better camera experience
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Cache camera service reference early to avoid ref issues in dispose
+    _cameraService ??= ref.read(scannerProvider.notifier).getCameraService();
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
     _processingController.dispose();
+    _scanningController.dispose();
     // Restore system UI on dispose
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // Stop frame stream on dispose
-    final cameraService = ref.read(scannerProvider.notifier).getCameraService();
-    cameraService.stopFrameStream();
+    // Stop frame stream using cached reference (avoids ref usage on unmounted widget)
+    _cameraService?.stopFrameStream();
     super.dispose();
   }
 
@@ -154,6 +171,14 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       }
     });
 
+    // Start scanning animation when entering processing or results step
+    if (step == 1 || step == 2) {
+      _scanningController.repeat(reverse: true);
+    } else {
+      _scanningController.stop();
+      _scanningController.reset();
+    }
+
     // Camera lifecycle: stop/start stream outside setState
     if (prevStep == 0 && step > 0) {
       _stopFrameStream();
@@ -166,6 +191,13 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
           if (mounted) _startFrameStream();
         });
       }
+    }
+
+    // Update system UI mode based on step
+    if (step == 0) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
   }
 
@@ -243,118 +275,124 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   // ─── Floating Top Bar ─────────────────────────────────────────────────────
 
   Widget _buildFloatingTopBar(BuildContext context, bool isDark) {
-    final surfaceColor = Theme.of(context).colorScheme.surface;
-    final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
+    final colorScheme = Theme.of(context).colorScheme;
+    final surfaceColor = colorScheme.surface;
+    final onSurfaceColor = colorScheme.onSurface;
 
-    return GestureDetector(
-      onTap: () {}, // Absorb taps
-      child: Stack(
-        children: [
-          // Shadow below the top bar
-          Positioned(
-            bottom: -8,
-            left: 0,
-            right: 0,
-            height: 8,
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: isDark
-                        ? Colors.black.withValues(alpha: 0.3)
-                        : Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Main top bar with rounded bottom corners
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      ),
+      child: GestureDetector(
+        onTap: () {}, // Absorb taps
+        child: Stack(
+          children: [
+            // Shadow below the top bar
+            Positioned(
+              bottom: -8,
+              left: 0,
+              right: 0,
+              height: 8,
               child: Container(
                 decoration: BoxDecoration(
-                  color: _currentStep == 0
-                      ? (isDark
-                          ? Colors.black.withValues(alpha: 0.75)
-                          : Colors.black.withValues(alpha: 0.4))
-                      : (isDark
-                          ? surfaceColor.withValues(alpha: 0.85)
-                          : surfaceColor.withValues(alpha: 0.95)),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: _currentStep == 0
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
-                      width: 1,
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.3)
+                          : Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Main top bar with rounded bottom corners
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.75)
+                        : surfaceColor.withValues(alpha: 0.88),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : colorScheme.outline.withValues(alpha: 0.12),
+                        width: 1,
+                      ),
                     ),
                   ),
-                ),
-                child: SafeArea(
-                  bottom: false,
-                  child: SizedBox(
-                    height: 40,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: IconButton(
-                              icon: Icon(Icons.chevron_left,
-                                  color: _currentStep == 0 || isDark ? Colors.white : onSurfaceColor),
-                              onPressed: () {
-                                try {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context);
-                                  } else {
+                  child: SafeArea(
+                    bottom: false,
+                    child: SizedBox(
+                      height: 40,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.chevron_left,
+                                  color: isDark ? Colors.white : onSurfaceColor,
+                                ),
+                                onPressed: () {
+                                  try {
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    } else {
+                                      context.go('/');
+                                    }
+                                  } catch (e) {
+                                    log.e('Error navigating back', error: e);
                                     context.go('/');
                                   }
-                                } catch (e) {
-                                  log.e('Error navigating back', error: e);
-                                  context.go('/');
-                                }
-                              },
-                              tooltip: 'Back',
-                              iconSize: 20,
-                              constraints: const BoxConstraints(
-                                minWidth: 32,
-                                minHeight: 32,
-                              ),
-                              padding: EdgeInsets.zero,
-                            ),
-                          ),
-                          Center(
-                            child: Text(
-                              'Document Scanner',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: _currentStep == 0 || isDark ? Colors.white : onSurfaceColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                },
+                                tooltip: 'Back',
+                                iconSize: 20,
+                                constraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
+                                padding: EdgeInsets.zero,
                               ),
                             ),
-                          ),
-                        ],
+                            Center(
+                              child: Text(
+                                'Document Scanner',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : onSurfaceColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -363,21 +401,28 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
 
   Widget _buildStepIndicator(BuildContext context, bool isDark) {
     const steps = ['Capture', 'Processing', 'Results'];
-    const icons = [Icons.camera_alt_outlined, Icons.auto_fix_high, Icons.description_outlined];
-    final surfaceVariant = Theme.of(context).colorScheme.surfaceContainerHighest;
+    const icons = [
+      Icons.camera_alt_outlined,
+      Icons.auto_fix_high,
+      Icons.description_outlined
+    ];
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: _currentStep == 0 
-            ? Colors.white.withValues(alpha: 0.12)
-            : surfaceVariant.withValues(alpha: 0.8),
+        color: isDark
+            ? Colors.black.withValues(alpha: 0.6)
+            : Colors.white.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(24),
-        border: _currentStep == 0 
-            ? null 
-            : Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
-        boxShadow: _currentStep == 0 ? null : [
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.05),
+        ),
+        boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
@@ -390,7 +435,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
         children: List.generate(3, (index) {
           final isActive = index == _currentStep;
           final isCompleted = index < _currentStep;
-          final colorForText = _currentStep == 0 ? Colors.white : onSurface;
+          final colorForText = isDark ? Colors.white : onSurface;
 
           return Padding(
             padding: EdgeInsets.only(left: index > 0 ? 4 : 0),
@@ -404,8 +449,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                     height: 2,
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     color: isCompleted
-                        ? colorForText
-                        : colorForText.withValues(alpha: 0.3),
+                        ? (isDark ? Colors.white : primaryColor)
+                        : colorForText.withValues(alpha: 0.2),
                   ),
                 // Step pill
                 AnimatedContainer(
@@ -417,10 +462,10 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                   ),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? (_currentStep == 0 ? Colors.white : Theme.of(context).colorScheme.primary)
+                        ? primaryColor
                         : isCompleted
-                            ? colorForText.withValues(alpha: 0.2)
-                            : colorForText.withValues(alpha: 0.08),
+                            ? primaryColor.withValues(alpha: 0.15)
+                            : colorForText.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -430,19 +475,17 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                         isCompleted ? Icons.check : icons[index],
                         size: isActive ? 14 : 12,
                         color: isActive
-                            ? (_currentStep == 0 ? Colors.black : Theme.of(context).colorScheme.onPrimary)
+                            ? onPrimary
                             : isCompleted
-                                ? colorForText
-                                : colorForText.withValues(alpha: 0.6),
+                                ? primaryColor
+                                : colorForText.withValues(alpha: 0.5),
                       ),
                       if (isActive) ...[
                         const SizedBox(width: 4),
                         Text(
                           '${index + 1}. ${steps[index]}',
                           style: TextStyle(
-                            color: isActive
-                                ? (_currentStep == 0 ? Colors.black : Theme.of(context).colorScheme.onPrimary)
-                                : colorForText,
+                            color: onPrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 11,
                           ),
@@ -498,8 +541,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
           child: LayoutBuilder(
             builder: (context, constraints) {
               return GestureDetector(
-                onTapDown: (details) =>
-                    _handleTapToFocus(details, constraints),
+                onTapDown: (details) => _handleTapToFocus(details, constraints),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -509,8 +551,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                         cameraService.isInitialized)
                       Center(
                         child: AspectRatio(
-                          aspectRatio: 1 /
-                              cameraService.controller!.value.aspectRatio,
+                          aspectRatio:
+                              1 / cameraService.controller!.value.aspectRatio,
                           child: CameraPreview(cameraService.controller!),
                         ),
                       )
@@ -647,7 +689,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  _liveCorners != null ? Icons.check_circle : Icons.info_outline,
+                  _liveCorners != null
+                      ? Icons.check_circle
+                      : Icons.info_outline,
                   size: 14,
                   color: _liveCorners != null ? Colors.green : Colors.white70,
                 ),
@@ -710,7 +754,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                     );
                   });
                 },
-isActive: scannerState.torchEnabled,
+                isActive: scannerState.torchEnabled,
               ),
             ],
           ),
@@ -878,8 +922,8 @@ isActive: scannerState.torchEnabled,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 32, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                 ),
                 child: const Text('Retry'),
               ),
@@ -893,121 +937,151 @@ isActive: scannerState.torchEnabled,
   // ─── Step 1: Processing ────────────────────────────────────────────────────
 
   Widget _buildProcessingStep(BuildContext context, ScannerState scannerState) {
-    final onSurface = Theme.of(context).colorScheme.onSurface;
     final surface = Theme.of(context).colorScheme.surface;
     final surfaceContainer = Theme.of(context).colorScheme.surfaceContainer;
     final outline = Theme.of(context).colorScheme.outline;
 
-    final steps = [
-      _StepInfo(
-        step: ProcessingStep.preparing,
-        icon: Icons.crop,
-        title: 'Prepare Document',
-        description: 'OpenCV page crop + perspective normalization',
-      ),
-      _StepInfo(
-        step: ProcessingStep.ocr,
-        icon: Icons.text_fields,
-        title: 'OCR Extraction',
-        description: 'Tesseract hOCR with line boxes and confidence',
-      ),
-    ];
-
     return Container(
       color: surface,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: MediaQuery.viewPaddingOf(context).top + 52 + 44 + 8,
-        ),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Captured image preview with a thematic border
-              if (scannerState.capturedImagePath != null)
-                Container(
-                  height: 220,
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: outline.withValues(alpha: 0.15),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.file(
-                      File(scannerState.capturedImagePath!),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              // Processing steps card with modern surface coloring
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: surfaceContainer,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: outline.withValues(alpha: 0.1),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 1. Large Document Preview with Scanning Animation
+          if (scannerState.capturedImagePath != null)
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                MediaQuery.viewPaddingOf(context).top + 110,
+                20,
+                160,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Stack(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          scannerState.processingStep == ProcessingStep.done
-                              ? 'Processing Complete'
-                              : 'Processing Document...',
-                          style: TextStyle(
-                            color: onSurface,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.5,
+                    // The captured image
+                    Positioned.fill(
+                      child: Image.file(
+                        File(scannerState.capturedImagePath!),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    // Scanning animation overlay
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: RepaintBoundary(
+                          child: AnimatedBuilder(
+                            animation: _scanningController,
+                            builder: (context, child) {
+                              return CustomPaint(
+                                painter: _ScanningLaserPainter(
+                                  scanValue: _scanningController.value,
+                                  primaryColor:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                              );
+                            },
                           ),
                         ),
-                        if (scannerState.processingStep != ProcessingStep.done) ...[
-                          const Spacer(),
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 24),
-                    for (final info in steps) ...[
-                      _buildProcessingStepRow(context, scannerState, info),
-                      if (info != steps.last) const SizedBox(height: 12),
-                    ],
                   ],
                 ),
               ),
-              // Confidence badge (shown when done)
-              if (scannerState.processingStep == ProcessingStep.done) ...[
-                const SizedBox(height: 24),
-                _buildConfidenceBadge(context, scannerState.ocrConfidence),
-              ],
-            ],
+            ),
+
+          // 2. Bottom Progress Overlay
+          Positioned(
+            bottom: 40,
+            left: 24,
+            right: 24,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: surfaceContainer.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: outline.withValues(alpha: 0.1)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  scannerState.processingStep ==
+                                          ProcessingStep.done
+                                      ? 'Analysis Complete'
+                                      : 'Analyzing Document...',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                                Text(
+                                  scannerState.processingStep ==
+                                          ProcessingStep.preparing
+                                      ? 'Enhancing image quality...'
+                                      : 'Extracting text data...',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
+      ),
     );
   }
 
@@ -1019,7 +1093,7 @@ isActive: scannerState.torchEnabled,
     final isCompleted = state.isStepCompleted(info.step);
     final isActive = state.isStepActive(info.step);
     final isPending = !isCompleted && !isActive;
-    
+
     final colorScheme = Theme.of(context).colorScheme;
     final onSurface = colorScheme.onSurface;
 
@@ -1073,8 +1147,12 @@ isActive: scannerState.torchEnabled,
                 Text(
                   info.title,
                   style: TextStyle(
-                    color: isPending ? onSurface.withValues(alpha: 0.35) : onSurface,
-                    fontWeight: isCompleted || isActive ? FontWeight.w600 : FontWeight.w500,
+                    color: isPending
+                        ? onSurface.withValues(alpha: 0.35)
+                        : onSurface,
+                    fontWeight: isCompleted || isActive
+                        ? FontWeight.w600
+                        : FontWeight.w500,
                     fontSize: 14,
                   ),
                 ),
@@ -1209,6 +1287,9 @@ isActive: scannerState.torchEnabled,
                           blocks: scannerState.textBlocks,
                           imageWidth: scannerState.ocrImageWidth,
                           imageHeight: scannerState.ocrImageHeight,
+                          animation: _scanningController,
+                          showScanEffect: false,
+                          isPunchHole: true,
                         ),
                       ),
                     ),
@@ -1296,7 +1377,9 @@ isActive: scannerState.torchEnabled,
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerLowest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: outline.withValues(alpha: 0.08),
@@ -1321,7 +1404,8 @@ isActive: scannerState.torchEnabled,
     );
   }
 
-  Widget _buildResultsActionBar(BuildContext context, ScannerState scannerState) {
+  Widget _buildResultsActionBar(
+      BuildContext context, ScannerState scannerState) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final surfaceColor = Theme.of(context).colorScheme.surface;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1334,15 +1418,15 @@ isActive: scannerState.torchEnabled,
         bottom: MediaQuery.viewPaddingOf(context).bottom + 16,
       ),
       decoration: BoxDecoration(
-        color: isDark 
-            ? surfaceColor.withValues(alpha: 0.95)
-            : surfaceColor,
+        color: isDark ? surfaceColor.withValues(alpha: 0.95) : surfaceColor,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
         border: Border(
-          top: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1)),
+          top: BorderSide(
+              color:
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.1)),
         ),
         boxShadow: [
           BoxShadow(
@@ -1377,7 +1461,11 @@ isActive: scannerState.torchEnabled,
               label: const Text('Copy All'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: onSurface,
-                side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
+                side: BorderSide(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.3)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1488,12 +1576,18 @@ class _DetectedTextPreview extends StatelessWidget {
   final List<TextBlock> blocks;
   final int? imageWidth;
   final int? imageHeight;
+  final Animation<double> animation;
+  final bool showScanEffect;
+  final bool isPunchHole;
 
   const _DetectedTextPreview({
     required this.imagePath,
     required this.blocks,
     this.imageWidth,
     this.imageHeight,
+    required this.animation,
+    this.showScanEffect = true,
+    this.isPunchHole = false,
   });
 
   @override
@@ -1503,19 +1597,57 @@ class _DetectedTextPreview extends StatelessWidget {
         return Stack(
           alignment: Alignment.topLeft,
           children: [
-            Image.file(
-              File(imagePath),
-              width: constraints.maxWidth,
-              fit: BoxFit.fitWidth,
+            // Image with optional darkening for punch hole effect
+            ColorFiltered(
+              colorFilter: isPunchHole
+                  ? const ColorFilter.matrix(<double>[
+                      0.4,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0.4,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0.4,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                    ])
+                  : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+              child: Image.file(
+                File(imagePath),
+                width: constraints.maxWidth,
+                fit: BoxFit.fitWidth,
+              ),
             ),
             if (imageWidth != null && imageHeight != null)
               Positioned.fill(
                 child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _DetectedTextPainter(
-                      blocks: blocks,
-                      imageWidth: imageWidth!,
-                      imageHeight: imageHeight!,
+                  child: RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: animation,
+                      builder: (context, child) {
+                        return CustomPaint(
+                          painter: _DetectedTextPainter(
+                            blocks: blocks,
+                            imageWidth: imageWidth!,
+                            imageHeight: imageHeight!,
+                            scanValue: animation.value,
+                            primaryColor: Theme.of(context).colorScheme.primary,
+                            showScanEffect: showScanEffect,
+                            isPunchHole: isPunchHole,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -1528,6 +1660,218 @@ class _DetectedTextPreview extends StatelessWidget {
 }
 
 // ─── Painters ─────────────────────────────────────────────────────────────
+
+/// Simple scanning laser painter used during the Processing step.
+/// Does NOT require OCR data (no blocks, no image dimensions needed).
+/// Draws a glowing laser line that sweeps top-to-bottom.
+class _ScanningLaserPainter extends CustomPainter {
+  final double scanValue;
+  final Color primaryColor;
+
+  _ScanningLaserPainter({
+    required this.scanValue,
+    required this.primaryColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final currentY = size.height * scanValue;
+
+    // Glowing line
+    final glowPaint = Paint()
+      ..color = primaryColor.withValues(alpha: 0.3)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+    canvas.drawRect(
+      Rect.fromLTWH(0, currentY - 3, size.width, 6),
+      glowPaint,
+    );
+
+    // Bright core line
+    final corePaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          primaryColor.withValues(alpha: 0),
+          primaryColor,
+          primaryColor.withValues(alpha: 0),
+        ],
+      ).createShader(Rect.fromLTWH(0, currentY - 12, size.width, 24))
+      ..strokeWidth = 2;
+
+    canvas.drawLine(
+      Offset(0, currentY),
+      Offset(size.width, currentY),
+      corePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ScanningLaserPainter old) => old.scanValue != scanValue;
+}
+
+class _DetectedTextPainter extends CustomPainter {
+  final List<TextBlock> blocks;
+  final int imageWidth;
+  final int imageHeight;
+  final double scanValue;
+  final Color primaryColor;
+  final bool showScanEffect;
+  final bool isPunchHole;
+
+  _DetectedTextPainter({
+    required this.blocks,
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.scanValue,
+    required this.primaryColor,
+    this.showScanEffect = true,
+    this.isPunchHole = false,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (imageWidth <= 0 || imageHeight <= 0) return;
+
+    final scale = size.width / imageWidth;
+    final renderedHeight = imageHeight * scale;
+
+    // 1. Draw "Laser" scanning line (only when showScanEffect is true)
+    if (showScanEffect) {
+      final currentScanY = renderedHeight * scanValue;
+      final laserPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            primaryColor.withValues(alpha: 0),
+            primaryColor,
+            primaryColor.withValues(alpha: 0),
+          ],
+        ).createShader(Rect.fromLTWH(0, currentScanY - 20, size.width, 40))
+        ..strokeWidth = 2;
+
+      canvas.drawLine(
+        Offset(0, currentScanY),
+        Offset(size.width, currentScanY),
+        laserPaint,
+      );
+
+      // Subtle glow behind the laser
+      final laserGlowPaint = Paint()
+        ..color = primaryColor.withValues(alpha: 0.15)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+      canvas.drawRect(
+          Rect.fromLTWH(0, currentScanY - 2, size.width, 4), laserGlowPaint);
+    }
+
+    // 2. Draw Text Blocks with proximity-based highlight
+    for (final block in blocks) {
+      if (block.x == null ||
+          block.y == null ||
+          block.width == null ||
+          block.height == null) {
+        continue;
+      }
+
+      final rect = Rect.fromLTWH(
+        block.x! * scale,
+        block.y! * scale,
+        block.width! * scale,
+        block.height! * scale,
+      );
+
+      if (showScanEffect) {
+        // Distance from laser line (normalized 0 to 1)
+        final currentScanY = renderedHeight * scanValue;
+        final distance = (rect.center.dy - currentScanY).abs();
+        final proximity = (1.0 - (distance / 100)).clamp(0.0, 1.0);
+
+        if (proximity > 0) {
+          final blockPaint = Paint()
+            ..color = primaryColor.withValues(alpha: 0.1 * proximity)
+            ..style = PaintingStyle.fill;
+
+          final borderPaint = Paint()
+            ..color = primaryColor.withValues(alpha: 0.4 * proximity)
+            ..strokeWidth = 1.0
+            ..style = PaintingStyle.stroke;
+
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(
+                rect.inflate(2 * proximity), const Radius.circular(4)),
+            blockPaint,
+          );
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(
+                rect.inflate(2 * proximity), const Radius.circular(4)),
+            borderPaint,
+          );
+
+          // Add a "digitizing" effect (tiny dots at corners)
+          if (proximity > 0.7) {
+            final dotPaint = Paint()
+              ..color = primaryColor.withValues(alpha: proximity);
+            canvas.drawCircle(rect.topLeft, 1.5, dotPaint);
+            canvas.drawCircle(rect.topRight, 1.5, dotPaint);
+            canvas.drawCircle(rect.bottomLeft, 1.5, dotPaint);
+            canvas.drawCircle(rect.bottomRight, 1.5, dotPaint);
+          }
+        }
+      } else if (isPunchHole) {
+        // Punch hole effect: dark background, bright rectangles
+        final borderPaint = Paint()
+          ..color = Colors.white.withValues(alpha: 0.9)
+          ..strokeWidth = 2.0
+          ..style = PaintingStyle.stroke;
+
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect.inflate(2), const Radius.circular(4)),
+          borderPaint,
+        );
+      } else {
+        // Static rectangles without scanning effect
+        final blockPaint = Paint()
+          ..color = primaryColor.withValues(alpha: 0.1)
+          ..style = PaintingStyle.fill;
+
+        final borderPaint = Paint()
+          ..color = primaryColor.withValues(alpha: 0.4)
+          ..strokeWidth = 1.0
+          ..style = PaintingStyle.stroke;
+
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect.inflate(2), const Radius.circular(4)),
+          blockPaint,
+        );
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect.inflate(2), const Radius.circular(4)),
+          borderPaint,
+        );
+      }
+    }
+
+    // 3. Mask the unrendered area (if image is shorter than canvas)
+    if (renderedHeight < size.height) {
+      final maskPaint = Paint()
+        ..color = Colors.black.withValues(alpha: 0.18)
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(
+        Rect.fromLTWH(
+            0, renderedHeight, size.width, size.height - renderedHeight),
+        maskPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DetectedTextPainter old) =>
+      old.blocks != blocks ||
+      old.scanValue != scanValue ||
+      old.imageWidth != imageWidth ||
+      old.imageHeight != imageHeight ||
+      old.showScanEffect != showScanEffect;
+}
 
 /// Draws the detected document quad on the camera preview.
 class _DocumentQuadPainter extends CustomPainter {
@@ -1601,7 +1945,6 @@ class _CaptureFramePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Gentle guide corners — not a strict frame, just visual hints
-    // Margins are modest so it doesn't feel like a required boundary
     final hMargin = size.width * 0.08;
     final vMargin = size.height * 0.12;
     final rect = Rect.fromLTWH(
@@ -1611,9 +1954,9 @@ class _CaptureFramePainter extends CustomPainter {
       size.height - (vMargin * 2),
     );
 
-    // Subtle pulse outline (very faint, just a gentle guide)
-    final pulseAlpha =
-        0.06 * (1 - (pulseValue - pulseValue.floor()).abs() * 2).clamp(0.0, 1.0);
+    // Subtle pulse outline
+    final pulseAlpha = 0.06 *
+        (1 - (pulseValue - pulseValue.floor()).abs() * 2).clamp(0.0, 1.0);
     final pulsePaint = Paint()
       ..color = color.withValues(alpha: pulseAlpha)
       ..strokeWidth = 1
@@ -1622,7 +1965,7 @@ class _CaptureFramePainter extends CustomPainter {
         4.0 * (1 - (pulseValue - pulseValue.floor()).abs() * 2).clamp(0.0, 1.0);
     canvas.drawRect(rect.inflate(expand), pulsePaint);
 
-    // Only draw corner brackets — no full rectangle outline
+    // Only draw corner brackets
     final cornerLength = 30.0;
     final cornerPaint = Paint()
       ..color = color.withValues(alpha: 0.5)
@@ -1664,73 +2007,4 @@ class _CaptureFramePainter extends CustomPainter {
   @override
   bool shouldRepaint(_CaptureFramePainter old) =>
       old.pulseValue != pulseValue || old.color != color;
-}
-
-class _DetectedTextPainter extends CustomPainter {
-  final List<TextBlock> blocks;
-  final int imageWidth;
-  final int imageHeight;
-
-  _DetectedTextPainter({
-    required this.blocks,
-    required this.imageWidth,
-    required this.imageHeight,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (imageWidth <= 0 || imageHeight <= 0) return;
-
-    final scale = size.width / imageWidth;
-    final renderedHeight = imageHeight * scale;
-
-    final fillPaint = Paint()
-      ..color = const Color(0xFF2D6A4F).withValues(alpha: 0.16)
-      ..style = PaintingStyle.fill;
-    final strokePaint = Paint()
-      ..color = const Color(0xFF95D5B2)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    for (final block in blocks) {
-      if (block.x == null ||
-          block.y == null ||
-          block.width == null ||
-          block.height == null) {
-        continue;
-      }
-
-      final rect = Rect.fromLTWH(
-        block.x! * scale,
-        block.y! * scale,
-        block.width! * scale,
-        block.height! * scale,
-      );
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, const Radius.circular(6)),
-        fillPaint,
-      );
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, const Radius.circular(6)),
-        strokePaint,
-      );
-    }
-
-    if (renderedHeight < size.height) {
-      final maskPaint = Paint()
-        ..color = Colors.black.withValues(alpha: 0.18)
-        ..style = PaintingStyle.fill;
-      canvas.drawRect(
-        Rect.fromLTWH(
-            0, renderedHeight, size.width, size.height - renderedHeight),
-        maskPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DetectedTextPainter old) =>
-      old.blocks != blocks ||
-      old.imageWidth != imageWidth ||
-      old.imageHeight != imageHeight;
 }
