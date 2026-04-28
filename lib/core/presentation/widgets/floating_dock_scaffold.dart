@@ -7,10 +7,10 @@ import 'package:fadocx/config/routing/app_router.dart';
 /// Floating overlay scaffold that places app bar and bottom dock as transparent
 /// overlays, allowing content to scroll behind them like iOS/macOS style.
 class FloatingDockScaffold extends StatefulWidget {
-  final Widget body; // Should be a scrollable widget (ListView, Column, etc)
+  final Widget body;
   final String currentRoute;
   final bool showBottomDock;
-  final Widget? appBarContent; // Just the content, not PreferredSize
+  final Widget? appBarContent;
   final Widget? floatingActionButton;
 
   const FloatingDockScaffold({
@@ -28,31 +28,18 @@ class FloatingDockScaffold extends StatefulWidget {
 
 class _FloatingDockScaffoldState extends State<FloatingDockScaffold> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final topSafePadding = mediaQuery.padding.top;
     final bottomSafePadding = mediaQuery.padding.bottom;
-    final appBarHeight = widget.appBarContent != null
-        ? 40.0
-        : 0.0; // Reduced from 56 to 40 for compact
+    final appBarHeight = widget.appBarContent != null ? 40.0 : 0.0;
     final dockHeight = widget.showBottomDock ? 72.0 : 0.0;
 
-    // Determine status bar style based on current theme
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusBarStyle = SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      statusBarBrightness: isDark ? Brightness.dark : Brightness.light, // For iOS
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
     );
@@ -81,30 +68,41 @@ class _FloatingDockScaffoldState extends State<FloatingDockScaffold> {
                 ),
               ),
 
-            // Floating bottom dock with blur (overlay on bottom) - FIXED in place, no animation
-            if (widget.showBottomDock) ...[
-              // Dark shadow gradient BELOW the dock (full width)
+            // Fading gradient at the bottom to obscure content scrolling under the dock
+            // This creates the "white type shadow" in light mode and "dark shadow" in dark mode
+            if (widget.showBottomDock)
               Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: dockHeight + bottomSafePadding + 16,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        isDark
-                            ? Colors.black.withValues(alpha: 0.85)
-                            : Colors.black.withValues(alpha: 0.55),
-                      ],
+                height: 60, // Height covers dock area and provides a smooth fade
+                child: IgnorePointer(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).colorScheme.surface.withValues(alpha: 0),
+                          Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .withValues(alpha: 0.7),
+                          Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .withValues(alpha: 0.95),
+                          Theme.of(context).colorScheme.surface,
+                        ],
+                        stops: const [0.0, 0.4, 0.8, 1.0],
+                      ),
                     ),
                   ),
                 ),
               ),
-              // Main dock
+
+            // Floating bottom dock — shadow on outer container, content clipped inside
+            if (widget.showBottomDock)
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -116,7 +114,6 @@ class _FloatingDockScaffoldState extends State<FloatingDockScaffold> {
                   ),
                 ),
               ),
-            ],
 
             // Floating action button - above the dock
             if (widget.floatingActionButton != null && widget.showBottomDock)
@@ -204,7 +201,7 @@ class _FloatingAppBar extends StatelessWidget {
               child: SafeArea(
                 bottom: false,
                 child: SizedBox(
-                  height: 40, // Compact height for content area
+                  height: 40,
                   child: Center(child: content),
                 ),
               ),
@@ -216,7 +213,7 @@ class _FloatingAppBar extends StatelessWidget {
   }
 }
 
-/// Floating bottom dock with blur background
+/// Floating bottom dock with blur background and simple bottom shadow
 class _FloatingDock extends StatelessWidget {
   final double bottomPadding;
   final String currentRoute;
@@ -228,77 +225,91 @@ class _FloatingDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SafeArea(
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface
-                    .withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.45)
+                    : Colors.black.withValues(alpha: 0.12),
+                blurRadius: 24,
+                spreadRadius: -2,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                decoration: BoxDecoration(
                   color: Theme.of(context)
                       .colorScheme
-                      .outline
-                      .withValues(alpha: 0.2),
-                  width: 1,
+                      .surface
+                      .withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                    width: 1,
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 6,
-                  horizontal: 12,
-                ),
-                child: SizedBox(
-                  height: 48,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: _DockItem(
-                          icon: Icons.home,
-                          label: 'Home',
-                          isActive: currentRoute == RouteNames.home,
-                          onTap: () {
-                            if (currentRoute != RouteNames.home) {
-                              context.go(RouteNames.home);
-                            }
-                          },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  child: SizedBox(
+                    height: 48,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: _DockItem(
+                            icon: Icons.home,
+                            label: 'Home',
+                            isActive: currentRoute == RouteNames.home,
+                            onTap: () {
+                              if (currentRoute != RouteNames.home) {
+                                context.go(RouteNames.home);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: _DockItem(
-                          icon: Icons.auto_stories,
-                          label: 'Library',
-                          isActive: currentRoute == RouteNames.documents,
-                          onTap: () {
-                            if (currentRoute != RouteNames.documents) {
-                              context.go(RouteNames.documents);
-                            }
-                          },
+                        Expanded(
+                          child: _DockItem(
+                            icon: Icons.auto_stories,
+                            label: 'Library',
+                            isActive: currentRoute == RouteNames.documents,
+                            onTap: () {
+                              if (currentRoute != RouteNames.documents) {
+                                context.go(RouteNames.documents);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: _DockItem(
-                          icon: Icons.settings,
-                          label: 'Settings',
-                          isActive: currentRoute == RouteNames.settings,
-                          onTap: () {
-                            if (currentRoute != RouteNames.settings) {
-                              context.go(RouteNames.settings);
-                            }
-                          },
+                        Expanded(
+                          child: _DockItem(
+                            icon: Icons.settings,
+                            label: 'Settings',
+                            isActive: currentRoute == RouteNames.settings,
+                            onTap: () {
+                              if (currentRoute != RouteNames.settings) {
+                                context.go(RouteNames.settings);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -428,7 +439,6 @@ class _DockItemState extends State<_DockItem>
                 ],
               ],
             ),
-
           ),
         ),
       ),
