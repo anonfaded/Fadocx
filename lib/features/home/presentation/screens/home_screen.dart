@@ -241,7 +241,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   topRight: Radius.circular(20),
                 ),
               ),
-              padding: EdgeInsets.fromLTRB(12, 16, 12, bottomPadding + 16),
+              padding: EdgeInsets.fromLTRB(12, 16, 12, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -251,6 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   Expanded(
                     child: ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(bottom: bottomPadding),
                       itemCount: 3,
                       itemBuilder: (context, index) {
                         return Padding(
@@ -356,7 +357,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                     topRight: Radius.circular(20),
                   ),
                 ),
-                padding: EdgeInsets.fromLTRB(12, 16, 12, bottomPadding + 16),
+                padding: EdgeInsets.fromLTRB(12, 16, 12, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -400,6 +401,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                           // State 1: Has files → show scrollable file list
                           ? ListView.builder(
                               physics: const BouncingScrollPhysics(),
+                              padding: EdgeInsets.only(bottom: bottomPadding),
                               itemCount: files.length > 4 ? 4 : files.length,
                               itemBuilder: (context, index) {
                                 return Padding(
@@ -1905,71 +1907,20 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
   }
 
   Widget _buildIsometricThumbnail(Widget child) {
-    // Flat rotation to LEFT (negative angle)
+    // Flat rotation to LEFT (negative angle) — no 3D layers, no shadows
     const double rotationAngle = -0.15; // ≈ -8.6 degrees (left tilt)
-    const double layerOffset = 5.0;
-    const double layerScale = 0.96;
-    const double thumbnailWidth = 70.0; // Wider for better visibility
-    const double thumbnailHeight = 96.0; // Taller for readability
+    const double thumbnailWidth = 70.0;
+    const double thumbnailHeight = 96.0;
 
     return SizedBox(
       width: thumbnailWidth,
       height: thumbnailHeight,
-      child: Stack(
-        alignment: Alignment.bottomCenter, // Anchor at BOTTOM
-        clipBehavior: Clip.hardEdge, // Clip bottom overflow
-        children: [
-          // Back layer
-          Transform.translate(
-            offset: const Offset(layerOffset * 2, layerOffset * 2),
-            child: Transform.rotate(
-              angle: rotationAngle * 0.8,
-              child: Container(
-                width: thumbnailWidth * layerScale,
-                height: thumbnailHeight * layerScale,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.black.withValues(alpha: 0.02),
-                ),
-              ),
-            ),
-          ),
-          // Middle layer
-          Transform.translate(
-            offset: const Offset(layerOffset, layerOffset),
-            child: Transform.rotate(
-              angle: rotationAngle * 0.4,
-              child: Container(
-                width: thumbnailWidth * (layerScale + 0.02),
-                height: thumbnailHeight * (layerScale + 0.02),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.black.withValues(alpha: 0.01),
-                ),
-              ),
-            ),
-          ),
-          // Front layer (main content) - ROTATED LEFT
-          Transform.rotate(
-            angle: rotationAngle, // Flat rotation ≈ -8.6 degrees (LEFT)
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: child,
-              ),
-            ),
-          ),
-        ],
+      child: Transform.rotate(
+        angle: rotationAngle,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: child,
+        ),
       ),
     );
   }
