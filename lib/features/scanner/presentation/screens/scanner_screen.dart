@@ -207,8 +207,11 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
       }
     });
 
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: _currentStep == 0 ? Colors.black : surfaceColor,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -240,6 +243,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   // ─── Floating Top Bar ─────────────────────────────────────────────────────
 
   Widget _buildFloatingTopBar(BuildContext context, bool isDark) {
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
+
     return GestureDetector(
       onTap: () {}, // Absorb taps
       child: Stack(
@@ -274,16 +280,22 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.black.withValues(alpha: 0.75)
-                      : Colors.white.withValues(alpha: 0.85),
+                  color: _currentStep == 0
+                      ? (isDark
+                          ? Colors.black.withValues(alpha: 0.75)
+                          : Colors.black.withValues(alpha: 0.4))
+                      : (isDark
+                          ? surfaceColor.withValues(alpha: 0.85)
+                          : surfaceColor.withValues(alpha: 0.92)),
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(16),
                     bottomRight: Radius.circular(16),
                   ),
                   border: Border(
                     bottom: BorderSide(
-                      color: Colors.white.withValues(alpha: isDark ? 0.1 : 0.2),
+                      color: _currentStep == 0
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
                       width: 1,
                     ),
                   ),
@@ -300,7 +312,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                             alignment: Alignment.centerLeft,
                             child: IconButton(
                               icon: Icon(Icons.chevron_left,
-                                  color: isDark ? Colors.white : Colors.black87),
+                                  color: _currentStep == 0 || isDark ? Colors.white : onSurfaceColor),
                               onPressed: () {
                                 try {
                                   if (Navigator.canPop(context)) {
@@ -328,7 +340,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: isDark ? Colors.white : Colors.black87,
+                                color: _currentStep == 0 || isDark ? Colors.white : onSurfaceColor,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -352,20 +364,26 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   Widget _buildStepIndicator(BuildContext context, bool isDark) {
     const steps = ['Capture', 'Processing', 'Results'];
     const icons = [Icons.camera_alt_outlined, Icons.auto_fix_high, Icons.description_outlined];
+    final surfaceVariant = Theme.of(context).colorScheme.surfaceContainerHighest;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark
+        color: _currentStep == 0 
             ? Colors.white.withValues(alpha: 0.12)
-            : Colors.black.withValues(alpha: 0.6),
+            : surfaceVariant.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(24),
+        border: _currentStep == 0 
+            ? null 
+            : Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: List.generate(3, (index) {
           final isActive = index == _currentStep;
           final isCompleted = index < _currentStep;
+          final colorForText = _currentStep == 0 ? Colors.white : onSurface;
 
           return Padding(
             padding: EdgeInsets.only(left: index > 0 ? 4 : 0),
@@ -379,8 +397,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                     height: 2,
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     color: isCompleted
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.3),
+                        ? colorForText
+                        : colorForText.withValues(alpha: 0.3),
                   ),
                 // Step pill
                 AnimatedContainer(
@@ -392,10 +410,10 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                   ),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? Colors.white
+                        ? (_currentStep == 0 ? Colors.white : Theme.of(context).colorScheme.primary)
                         : isCompleted
-                            ? Colors.white.withValues(alpha: 0.2)
-                            : Colors.white.withValues(alpha: 0.08),
+                            ? colorForText.withValues(alpha: 0.2)
+                            : colorForText.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -405,17 +423,19 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                         isCompleted ? Icons.check : icons[index],
                         size: isActive ? 14 : 12,
                         color: isActive
-                            ? Colors.black
+                            ? (_currentStep == 0 ? Colors.black : Theme.of(context).colorScheme.onPrimary)
                             : isCompleted
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: 0.6),
+                                ? colorForText
+                                : colorForText.withValues(alpha: 0.6),
                       ),
                       if (isActive) ...[
                         const SizedBox(width: 4),
                         Text(
                           '${index + 1}. ${steps[index]}',
-                          style: const TextStyle(
-                            color: Colors.black,
+                          style: TextStyle(
+                            color: isActive
+                                ? (_currentStep == 0 ? Colors.black : Theme.of(context).colorScheme.onPrimary)
+                                : colorForText,
                             fontWeight: FontWeight.w600,
                             fontSize: 11,
                           ),
@@ -866,6 +886,10 @@ isActive: scannerState.torchEnabled,
   // ─── Step 1: Processing ────────────────────────────────────────────────────
 
   Widget _buildProcessingStep(BuildContext context, ScannerState scannerState) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final surfaceContainer = Theme.of(context).colorScheme.surfaceContainer;
+    final outline = Theme.of(context).colorScheme.outline;
+
     final steps = [
       _StepInfo(
         step: ProcessingStep.preparing,
@@ -882,7 +906,7 @@ isActive: scannerState.torchEnabled,
     ];
 
     return Container(
-      color: Colors.black,
+      color: Theme.of(context).colorScheme.surface,
       child: Padding(
         padding: EdgeInsets.only(
           left: 24,
@@ -901,7 +925,7 @@ isActive: scannerState.torchEnabled,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: outline.withValues(alpha: 0.2),
                     ),
                   ),
                   child: ClipRRect(
@@ -917,10 +941,10 @@ isActive: scannerState.torchEnabled,
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: surfaceContainer,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: outline.withValues(alpha: 0.1),
                   ),
                 ),
                 child: Column(
@@ -930,8 +954,8 @@ isActive: scannerState.torchEnabled,
                       scannerState.processingStep == ProcessingStep.done
                           ? 'Processing Complete'
                           : 'Processing Document...',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: onSurface,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -963,6 +987,10 @@ isActive: scannerState.torchEnabled,
     final isCompleted = state.isStepCompleted(info.step);
     final isActive = state.isStepActive(info.step);
     final isPending = !isCompleted && !isActive;
+    
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final surfaceContainerHigh = Theme.of(context).colorScheme.surfaceContainerHigh;
+    final outline = Theme.of(context).colorScheme.outline;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -971,15 +999,15 @@ isActive: scannerState.torchEnabled,
         color: isCompleted
             ? Colors.green.withValues(alpha: 0.15)
             : isActive
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.white.withValues(alpha: 0.03),
+                ? surfaceContainerHigh
+                : onSurface.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCompleted
               ? Colors.green.withValues(alpha: 0.3)
               : isActive
-                  ? Colors.white.withValues(alpha: 0.15)
-                  : Colors.white.withValues(alpha: 0.05),
+                  ? outline.withValues(alpha: 0.2)
+                  : outline.withValues(alpha: 0.05),
         ),
       ),
       child: Row(
@@ -990,7 +1018,7 @@ isActive: scannerState.torchEnabled,
               builder: (context, child) {
                 return Transform.rotate(
                   angle: -_processingController.value * 2 * 3.14159,
-                  child: const Icon(Icons.sync, size: 22, color: Colors.white70),
+                  child: Icon(Icons.sync, size: 22, color: onSurface.withValues(alpha: 0.7)),
                 );
               },
             )
@@ -1001,8 +1029,8 @@ isActive: scannerState.torchEnabled,
               color: isCompleted
                   ? Colors.green
                   : isPending
-                      ? Colors.white30
-                      : Colors.white70,
+                      ? onSurface.withValues(alpha: 0.3)
+                      : onSurface.withValues(alpha: 0.7),
             ),
           const SizedBox(width: 12),
           Expanded(
@@ -1012,7 +1040,7 @@ isActive: scannerState.torchEnabled,
                 Text(
                   info.title,
                   style: TextStyle(
-                    color: isPending ? Colors.white38 : Colors.white,
+                    color: isPending ? onSurface.withValues(alpha: 0.38) : onSurface,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -1021,7 +1049,7 @@ isActive: scannerState.torchEnabled,
                 Text(
                   info.description,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: isPending ? 0.3 : 0.6),
+                    color: onSurface.withValues(alpha: isPending ? 0.3 : 0.6),
                     fontSize: 11,
                   ),
                 ),
@@ -1068,9 +1096,13 @@ isActive: scannerState.torchEnabled,
   // ─── Step 2: Results ────────────────────────────────────────────────────────
 
   Widget _buildResultsStep(BuildContext context, ScannerState scannerState) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final surfaceContainer = Theme.of(context).colorScheme.surfaceContainer;
+    final outline = Theme.of(context).colorScheme.outline;
+
     if (!scannerState.hasScannedImage) {
       return Container(
-        color: Colors.black,
+        color: Theme.of(context).colorScheme.surface,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1078,13 +1110,13 @@ isActive: scannerState.torchEnabled,
               Icon(
                 Icons.description_outlined,
                 size: 80,
-                color: Colors.white.withValues(alpha: 0.3),
+                color: onSurface.withValues(alpha: 0.3),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'No Scans Yet',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: onSurface,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1093,7 +1125,7 @@ isActive: scannerState.torchEnabled,
               Text(
                 'Capture a document to see extracted text here',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: onSurface.withValues(alpha: 0.5),
                   fontSize: 14,
                 ),
                 textAlign: TextAlign.center,
@@ -1113,7 +1145,7 @@ isActive: scannerState.torchEnabled,
     final imagePath = scannerState.displayedImagePath;
 
     return Container(
-      color: Colors.black,
+      color: Theme.of(context).colorScheme.surface,
       child: Column(
         children: [
           // Top padding for floating top bar + step indicator
@@ -1134,7 +1166,7 @@ isActive: scannerState.torchEnabled,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: outline.withValues(alpha: 0.1),
                         ),
                       ),
                       child: ClipRRect(
@@ -1152,10 +1184,10 @@ isActive: scannerState.torchEnabled,
                   // Extracted text header
                   Row(
                     children: [
-                      const Text(
+                      Text(
                         'Extracted Text',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: onSurface,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1196,10 +1228,10 @@ isActive: scannerState.torchEnabled,
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.06),
+                      color: Theme.of(context).colorScheme.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: outline.withValues(alpha: 0.1),
                       ),
                     ),
                     child: SelectableText(
@@ -1208,8 +1240,8 @@ isActive: scannerState.torchEnabled,
                           : scannerState.extractedText,
                       style: TextStyle(
                         color: scannerState.extractedText.isEmpty
-                            ? Colors.white38
-                            : Colors.white,
+                            ? onSurface.withValues(alpha: 0.38)
+                            : onSurface,
                         fontSize: 14,
                         height: 1.6,
                       ),
@@ -1218,10 +1250,10 @@ isActive: scannerState.torchEnabled,
                   const SizedBox(height: 16),
                   // Detected lines
                   if (scannerState.textBlocks.isNotEmpty) ...[
-                    const Text(
+                    Text(
                       'Detected Lines',
                       style: TextStyle(
-                        color: Colors.white60,
+                        color: onSurface.withValues(alpha: 0.6),
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1231,10 +1263,10 @@ isActive: scannerState.torchEnabled,
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
+                        color: Theme.of(context).colorScheme.surfaceContainerLowest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.08),
+                          color: outline.withValues(alpha: 0.08),
                         ),
                       ),
                       child: Column(
@@ -1257,6 +1289,10 @@ isActive: scannerState.torchEnabled,
   }
 
   Widget _buildResultsActionBar(BuildContext context, ScannerState scannerState) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.only(
         left: 20,
@@ -1265,14 +1301,23 @@ isActive: scannerState.torchEnabled,
         bottom: MediaQuery.viewPaddingOf(context).bottom + 16,
       ),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.95),
+        color: isDark 
+            ? surfaceColor.withValues(alpha: 0.95)
+            : surfaceColor,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
         border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          top: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1)),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -1298,8 +1343,8 @@ isActive: scannerState.torchEnabled,
               icon: const Icon(Icons.copy, size: 16),
               label: const Text('Copy All'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                foregroundColor: onSurface,
+                side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1320,8 +1365,8 @@ isActive: scannerState.torchEnabled,
               icon: const Icon(Icons.camera_alt_outlined, size: 16),
               label: const Text('New Scan'),
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1358,6 +1403,7 @@ class _DetectedLineTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     final color = block.confidence >= 0.8
         ? Colors.green
         : block.confidence >= 0.5
@@ -1386,7 +1432,7 @@ class _DetectedLineTile extends StatelessWidget {
           Expanded(
             child: Text(
               block.text,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+              style: TextStyle(color: onSurface, fontSize: 13),
             ),
           ),
           const SizedBox(width: 8),
