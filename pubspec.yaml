@@ -141,6 +141,7 @@ flutter:
     - assets/fadocx_beta.png
     - assets/fadocx_header_landscape_png.png
     - assets/samples/
+    - assets/other_apps/
   
   fonts:
     - family: Ubuntu
