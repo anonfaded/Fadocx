@@ -593,20 +593,24 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.search_off_rounded,
+                          _searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.inbox_outlined,
                           size: 48,
                           color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'No ${_selectedCategory == 'all' ? 'items' : _selectedCategory} found',
+                          _searchQuery.isNotEmpty
+                              ? 'No ${_selectedCategory == 'all' ? 'items' : _selectedCategory} found'
+                              : 'No documents yet',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Try adjusting your search or filters',
+                          _searchQuery.isNotEmpty
+                              ? 'Try adjusting your search or filters'
+                              : 'Your documents will appear here',
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                               ),
