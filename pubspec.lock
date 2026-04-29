@@ -1133,6 +1133,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  simple_icons:
+    dependency: "direct main"
+    description:
+      name: simple_icons
+      sha256: "2ca3cd79c9f12e97a8588cae0f342609f19fd2e82315356cb09b5c4987ad0808"
+      url: "https://pub.dev"
+    source: hosted
+    version: "14.6.1"
   sky_engine:
     dependency: transitive
     description: flutter

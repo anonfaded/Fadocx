@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:simple_icons/simple_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
@@ -186,11 +188,19 @@ class SettingsScreen extends ConsumerWidget {
                   value: 'contact@fadseclab.com',
                 ),
                 _divider(context),
+                LinkTile.url(
+                  icon: SimpleIcons.discord,
+                  title: 'Join Community',
+                  value: 'https://discord.gg/kvAZvdkuuN',
+                ),
+                _divider(context),
                 _SettingsRow(
                   icon: Icons.shield_outlined,
                   title: 'Privacy Policy',
                   onTap: () => _showPrivacyPolicy(context),
                 ),
+                _divider(context),
+                _patreonRow(context),
               ]),
               const SizedBox(height: 24),
               _buildSectionHeader(context, 'Danger Zone', color: Colors.red),
@@ -1171,13 +1181,7 @@ class SettingsScreen extends ConsumerWidget {
                 context,
                 Icons.block,
                 'No Ads',
-                'No advertisements. No tracking. No analytics.',
-              ),
-              _policyItem(
-                context,
-                Icons.lock,
-                'Your Data, Your Rules',
-                'You own your documents. Delete anytime.',
+                'No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.',
               ),
               const SizedBox(height: 24),
               Center(
@@ -1197,16 +1201,256 @@ class SettingsScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => _copyToClipboard(
-                      context, 'https://github.com/anonfaded/Fadocx'),
-                  icon: const Icon(Icons.open_in_new),
-                  label: const Text('View Source Code'),
-                ),
+              _buildPolicyLink(context,
+                icon: SimpleIcons.github,
+                label: 'View Source Code',
+                url: 'https://github.com/anonfaded/Fadocx',
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPolicyLink(BuildContext context, {required IconData icon, required String label, required String url}) {
+    final theme = Theme.of(context);
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (ctx) => _LinkSheet(
+              title: label,
+              value: url,
+              onOpen: () {
+                Navigator.pop(ctx);
+                _openUrl(url);
+              },
+              onCopy: () {
+                _copyToClipboard(context, url);
+                Navigator.pop(ctx);
+              },
+            ),
+          );
+        },
+        style: OutlinedButton.styleFrom(
+          foregroundColor: theme.colorScheme.primary,
+          side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        icon: Icon(icon, size: 20),
+        label: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  void _openUrl(String url) async {
+    try {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (_) {}
+  }
+
+  Widget _patreonRow(BuildContext context) {
+    const goldColor = Color(0xFFD4A017);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showPatreonSheet(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: goldColor.withValues(alpha: isDark ? 0.12 : 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: goldColor.withValues(alpha: isDark ? 0.3 : 0.25),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: goldColor.withValues(alpha: isDark ? 0.2 : 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  SimpleIcons.patreon,
+                  size: 20,
+                  color: goldColor,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Support Development',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: goldColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    Text(
+                      'Unlock exclusive benefits',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: goldColor.withValues(alpha: 0.7),
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: goldColor.withValues(alpha: 0.6),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPatreonSheet(BuildContext context) {
+    const patreonUrl = 'https://patreon.com/c/fadedx';
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: brightness == Brightness.dark
+              ? const Color(0xFF1C1C1E)
+              : const Color(0xFFF2F2F7),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+        ),
+        padding: EdgeInsets.only(
+          top: 6,
+          bottom: MediaQuery.of(context).padding.bottom + 6,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Container(
+              width: 36,
+              height: 5,
+              margin: const EdgeInsets.only(top: 4, bottom: 12),
+              decoration: BoxDecoration(
+                color: brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            // Patreon icon + title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+              child: Column(
+                children: [
+                  Icon(SimpleIcons.patreon, size: 40, color: const Color(0xFFD4A017)),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Support Development',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Explanation
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                'Your support keeps Fadocx and FadCam growing. '
+                'Patreon subscribers unlock exclusive benefits including '
+                'premium features and early access across all FadSec Lab apps.',
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Visit Patreon
+            _sheetAction(context,
+              icon: SimpleIcons.patreon,
+              label: 'Visit Patreon',
+              onTap: () {
+                Navigator.pop(ctx);
+                _openUrl(patreonUrl);
+              },
+            ),
+            const SizedBox(height: 8),
+            // Copy link
+            _sheetAction(context,
+              icon: Icons.content_copy,
+              label: 'Copy Link',
+              onTap: () {
+                _copyToClipboard(context, patreonUrl);
+                Navigator.pop(ctx);
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper for sheet action buttons (shared between sheets)
+  Widget _sheetAction(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final brightness = Theme.of(context).brightness;
+    final bgColor = brightness == Brightness.dark
+        ? const Color(0xFF2C2C2E)
+        : Colors.white;
+    final textColor = Theme.of(context).colorScheme.primary;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          color: bgColor,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 20, color: textColor),
+                    const SizedBox(width: 10),
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -1320,9 +1564,23 @@ class _SettingsRow extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    if (value != null && !isComingSoon) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        value!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               if (isComingSoon)
@@ -1334,19 +1592,12 @@ class _SettingsRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    value ?? 'Coming Soon',
+                    'Coming Soon',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color:
                               Theme.of(context).colorScheme.onTertiaryContainer,
                         ),
                   ),
-                )
-              else if (value != null)
-                Text(
-                  value!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
                 ),
               if (true && onTap != null && !isComingSoon)
                 Padding(
@@ -1552,6 +1803,141 @@ class _LanguageOption extends StatelessWidget {
           : Icon(Icons.circle_outlined,
               color: Theme.of(context).colorScheme.outline),
       onTap: onTap,
+    );
+  }
+}
+
+/// Reusable bottom sheet for a link with Copy and Open actions.
+class _LinkSheet extends StatelessWidget {
+  final String title;
+  final String value;
+  final VoidCallback onCopy;
+  final VoidCallback onOpen;
+
+  const _LinkSheet({
+    required this.title,
+    required this.value,
+    required this.onCopy,
+    required this.onOpen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: brightness == Brightness.dark
+            ? const Color(0xFF1C1C1E)
+            : const Color(0xFFF2F2F7),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+      ),
+      padding: EdgeInsets.only(
+        top: 6,
+        bottom: MediaQuery.of(context).padding.bottom + 6,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 5,
+            margin: const EdgeInsets.only(top: 4, bottom: 12),
+            decoration: BoxDecoration(
+              color: brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : Colors.black.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              value,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _SheetAction(
+            icon: Icons.content_copy,
+            label: 'Copy',
+            onTap: onCopy,
+          ),
+          const SizedBox(height: 8),
+          _SheetAction(
+            icon: Icons.open_in_browser,
+            label: 'Open in Browser',
+            onTap: onOpen,
+          ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+}
+
+class _SheetAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SheetAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final bgColor = brightness == Brightness.dark
+        ? const Color(0xFF2C2C2E)
+        : Colors.white;
+    final textColor = Theme.of(context).colorScheme.primary;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          color: bgColor,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 20, color: textColor),
+                    const SizedBox(width: 10),
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: textColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
