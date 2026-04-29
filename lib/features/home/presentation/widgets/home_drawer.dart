@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/core/presentation/widgets/drawer_update_banner.dart';
+import 'package:fadocx/core/presentation/constants.dart';
 
 /// Custom animated hamburger icon with bottom line that grows when sidebar opens
 class AnimatedHamburgerIcon extends StatefulWidget {
@@ -520,9 +521,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'Your support keeps Fadocx and FadCam growing. '
-                'Patreon subscribers unlock exclusive benefits including '
-                'premium features and early access across all FadSeclab apps.',
+                patreonDescription,
                 textAlign: TextAlign.center,
               ),
             ),
