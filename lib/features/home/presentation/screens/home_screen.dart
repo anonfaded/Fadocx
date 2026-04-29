@@ -613,7 +613,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                               ? 'Recent Files'
                               : appSettings != null && appSettings.hasImportedSampleFiles
                                   ? 'Recent Files'
-                                  : 'Welcome',
+                                  : '',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         if (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles))
@@ -678,7 +678,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                                   ),
                                 )
                               // State 3: Fresh install, no files, no samples → welcome content
-                              : Center(
+                              : Align(
+                                  alignment: Alignment.topCenter,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
