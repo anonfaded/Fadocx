@@ -10,6 +10,7 @@ import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/core/presentation/widgets/update_available_sheet.dart';
 import 'package:fadocx/core/presentation/widgets/link_tile.dart';
+import 'package:fadocx/core/presentation/constants.dart';
 import 'package:fadocx/core/services/update_check_service.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
@@ -1637,9 +1638,7 @@ class SettingsScreen extends ConsumerWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'Your support keeps Fadocx and FadCam growing. '
-                'Patreon subscribers unlock exclusive benefits including '
-                'premium features and early access across all FadSec Lab apps.',
+                patreonDescription,
                 textAlign: TextAlign.center,
               ),
             ),

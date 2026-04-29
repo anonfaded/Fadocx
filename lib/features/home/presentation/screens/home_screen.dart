@@ -19,6 +19,9 @@ import 'package:fadocx/features/home/presentation/providers/update_check_provide
 import 'package:fadocx/core/presentation/widgets/update_available_sheet.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:simple_icons/simple_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:fadocx/core/presentation/constants.dart';
 
 final log = Logger();
 
@@ -38,6 +41,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   late AnimationController _sidebarController;
   late AnimationController _skeletonShimmerController;
   late Animation<double> _skeletonShimmer;
+  late AnimationController _patreonShimmerController;
   
   double _sidebarDragOffset = 0.0; // Track horizontal drag position
   
@@ -60,6 +64,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     _skeletonShimmer = Tween<double>(begin: -1.0, end: 2.0).animate(
       CurvedAnimation(parent: _skeletonShimmerController, curve: Curves.easeInOut),
     );
+    _patreonShimmerController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat();
     // OPTIMIZATION: Defer recent files loading to after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => _dataLoaded = true);
@@ -77,6 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   void dispose() {
     _sidebarController.dispose();
     _skeletonShimmerController.dispose();
+    _patreonShimmerController.dispose();
     super.dispose();
   }
   
@@ -176,7 +185,179 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                     fontWeight: FontWeight.w600,
                   ),
             ),
+            const Spacer(),
+            // Patreon golden shimmer icon
+            AnimatedBuilder(
+              animation: _patreonShimmerController,
+              builder: (context, child) {
+                return GestureDetector(
+                  onTap: () => _showPatreonSheet(context),
+                  child: ShaderMask(
+                    shaderCallback: (bounds) {
+                      const cycle = 56.0; // 2× icon width for smoother sweep
+                      final offset = (_patreonShimmerController.value * cycle) % cycle;
+                      return LinearGradient(
+                        tileMode: TileMode.repeated,
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: const [
+                          Color(0xFFC9A214),
+                          Color(0xFFDAB125),
+                          Color(0xFFF5D547),
+                          Color(0xFFFFE873),
+                          Color(0xFFF5D547),
+                          Color(0xFFDAB125),
+                          Color(0xFFC9A214),
+                        ],
+                        stops: const [0.00, 0.18, 0.36, 0.50, 0.64, 0.82, 1.00],
+                      ).createShader(Rect.fromLTWH(
+                        bounds.left - offset,
+                        bounds.top,
+                        cycle,
+                        bounds.height,
+                      ));
+                    },
+                    blendMode: BlendMode.srcIn,
+                    child: const Icon(
+                      SimpleIcons.patreon,
+                      size: 24,
+                      color: Colors.white,
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showPatreonSheet(BuildContext context) {
+    const patreonUrl = 'https://patreon.com/c/fadedx';
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: brightness == Brightness.dark
+              ? const Color(0xFF1C1C1E)
+              : const Color(0xFFF2F2F7),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+        ),
+        padding: EdgeInsets.only(
+          top: 6,
+          bottom: MediaQuery.of(context).padding.bottom + 6,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36, height: 5,
+              margin: const EdgeInsets.only(top: 4, bottom: 12),
+              decoration: BoxDecoration(
+                color: brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+              child: Column(
+                children: [
+                  const Icon(SimpleIcons.patreon, size: 40, color: Color(0xFFD4A017)),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Support Development',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                patreonDescription,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _sheetActionButton(
+              context, icon: SimpleIcons.patreon,
+              label: 'Visit Patreon',
+              onTap: () { Navigator.pop(ctx); _openUrl(patreonUrl); },
+            ),
+            const SizedBox(height: 8),
+            _sheetActionButton(
+              context, icon: Icons.content_copy,
+              label: 'Copy Link',
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: patreonUrl));
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Copied to clipboard')),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openUrl(String url) async {
+    try {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (_) {}
+  }
+
+  Widget _sheetActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final brightness = Theme.of(context).brightness;
+    final bgColor = brightness == Brightness.dark
+        ? const Color(0xFF2C2C2E)
+        : Colors.white;
+    final textColor = Theme.of(context).colorScheme.primary;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          color: bgColor,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 20, color: textColor),
+                    const SizedBox(width: 10),
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
