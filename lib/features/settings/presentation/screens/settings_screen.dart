@@ -7,6 +7,7 @@ import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/core/presentation/widgets/update_available_sheet.dart';
+import 'package:fadocx/core/presentation/widgets/link_tile.dart';
 import 'package:fadocx/core/services/update_check_service.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
@@ -173,19 +174,16 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
                 _divider(context),
-                _SettingsRow(
+                LinkTile.url(
                   icon: Icons.code,
                   title: 'Source Code',
-                  onTap: () => _copyToClipboard(
-                      context, 'https://github.com/anonfaded/Fadocx'),
+                  value: 'https://github.com/anonfaded/Fadocx',
                 ),
                 _divider(context),
-                _SettingsRow(
+                LinkTile.email(
                   icon: Icons.email_outlined,
                   title: 'Contact',
                   value: 'contact@fadseclab.com',
-                  onTap: () =>
-                      _copyToClipboard(context, 'contact@fadseclab.com'),
                 ),
                 _divider(context),
                 _SettingsRow(

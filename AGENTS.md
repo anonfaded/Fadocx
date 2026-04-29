@@ -305,3 +305,31 @@ Widget _buildContentViewer() {
 - **Find Root Cause**: Diagnose and document the root cause before attempting fixes—avoid patching symptoms without understanding why they occur.
 - **Run Analysis**: Run `flutter analyze` (or the appropriate static analysis for the project) after making changes and address reported issues before finalizing.
 - **Document Decisions**: Record investigative steps, rationale, and the root-cause analysis back in the todo or the issue tracker so future reviewers see context.
+
+## Reusable UI Widgets
+
+### LinkTile (`lib/core/presentation/widgets/link_tile.dart`)
+Settings tile for displaying a URL or email. Shows the value and a chevron that opens a bottom sheet with **Copy** and **Open** actions.
+
+**Usage:**
+```dart
+// URL (opens in browser)
+LinkTile.url(
+  icon: Icons.code,
+  title: 'Source Code',
+  value: 'https://github.com/anonfaded/Fadocx',
+)
+
+// Email (opens mailto)
+LinkTile.email(
+  icon: Icons.email_outlined,
+  title: 'Contact',
+  value: 'contact@fadseclab.com',
+)
+```
+
+The bottom sheet shows an action list with:
+- **Copy** — copies the value to clipboard, shows a SnackBar
+- **Open in Browser / Send Email** — launches the browser or mail app
+
+Use `LinkTile` for ALL external links (URLs, emails, etc.) in settings or anywhere in the app to provide a consistent UX.

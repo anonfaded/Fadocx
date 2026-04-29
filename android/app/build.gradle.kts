@@ -6,8 +6,8 @@ plugins {
 }
 
 // ── Versioning (manual control) ──
-val appVersionCode = 2
-val appVersionName = "0.0.0"
+val appVersionCode = 1
+val appVersionName = "1.0.0"
 
 android {
     namespace = "com.fadseclab.fadocx"
