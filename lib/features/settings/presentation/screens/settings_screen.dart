@@ -203,6 +203,59 @@ class SettingsScreen extends ConsumerWidget {
                 _patreonRow(context),
               ]),
               const SizedBox(height: 24),
+              _buildSectionHeader(context, 'More from FadSec Lab'),
+              _buildSettingsGroup(context, [
+                _otherAppCard(
+                  context,
+                  imageAsset: 'assets/other_apps/fadcam.png',
+                  name: 'FadCam',
+                  description:
+                      'Privacy-focused Android multimedia suite: background video recording, '
+                      'dashcam, screen recorder, live streaming & remote control — '
+                      'ad-free & open-source.',
+                  platformIcons: [SimpleIcons.android],
+                  url: 'https://github.com/anonfaded/FadCam',
+                ),
+                _divider(context),
+                _otherAppCard(
+                  context,
+                  imageAsset: 'assets/other_apps/qurancli.png',
+                  name: 'QuranCLI',
+                  description:
+                      'Your Terminal Companion for the Holy Quran: Read, Listen & Generate '
+                      'Subtitles for Video Editing!',
+                  platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
+                  url: 'https://github.com/anonfaded/QuranCLI',
+                  platformNote: 'macOS coming soon',
+                ),
+                _divider(context),
+                _otherAppCard(
+                  context,
+                  imageAsset: 'assets/other_apps/fadcrypt.png',
+                  name: 'FadCrypt',
+                  description:
+                      'Advanced and elegant cross-platform app locker — files, folders, '
+                      'and applications all protected with military-grade AES-256-GCM encryption. '
+                      'Open-source, completely free, no telemetry!',
+                  platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
+                  url: 'https://github.com/anonfaded/FadCrypt',
+                  platformNote: 'macOS coming soon',
+                ),
+                _divider(context),
+                _otherAppCard(
+                  context,
+                  imageAsset: 'assets/other_apps/fadcat.png',
+                  name: 'FadCat',
+                  description:
+                      'Lightweight, feature-rich, cross-platform Android logcat replacement — '
+                      'no Android Studio bloat. Bundles ADB for supported architectures, runs '
+                      'in GUI, CLI, or MCP server mode.',
+                  platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
+                  url: 'https://github.com/anonfaded/FadCat',
+                  iconBgColor: Colors.black.withValues(alpha: 0.2),
+                ),
+              ]),
+              const SizedBox(height: 24),
               _buildSectionHeader(context, 'Danger Zone', color: Colors.red),
               _buildDangerGroup(context, [
                 _DangerRow(
@@ -1318,6 +1371,127 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _otherAppCard(
+    BuildContext context, {
+    required String imageAsset,
+    required String name,
+    required String description,
+    required List<IconData> platformIcons,
+    required String url,
+    Color? iconBgColor,
+    String? platformNote,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: iconBgColor ?? (isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.04)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                imageAsset,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    ...platformIcons.map((icon) => Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+                    )),
+                    if (platformNote != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 2),
+                        child: Text(
+                          platformNote,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      builder: (ctx) => _LinkSheet(
+                        title: name,
+                        value: url,
+                        onOpen: () {
+                          Navigator.pop(ctx);
+                          _openUrl(url);
+                        },
+                        onCopy: () {
+                          _copyToClipboard(context, url);
+                          Navigator.pop(ctx);
+                        },
+                      ),
+                    );
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Visit GitHub',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.open_in_new,
+                        size: 14,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
