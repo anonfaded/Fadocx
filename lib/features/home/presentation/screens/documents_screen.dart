@@ -998,40 +998,25 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                       fontSize: 9,
                                     ),
                               ),
-                              const SizedBox(width: 6),
-                              Container(
-                                width: 3,
-                                height: 3,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                                  shape: BoxShape.circle,
-                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(Icons.schedule_outlined, size: 9, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
+                              const SizedBox(width: 2),
+                              Text(
+                                _getTimeAgo(file.dateOpened),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                      fontSize: 9,
+                                    ),
                               ),
-                               const SizedBox(width: 6),
-                               Flexible(
-                                 child: Row(
-                                   mainAxisSize: MainAxisSize.min,
-                                   children: [
-                                     Icon(Icons.schedule_outlined, size: 9, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
-                                     const SizedBox(width: 2),
-                                     Flexible(
-                                       child: Text(
-                                         _getTimeAgo(file.dateOpened),
-                                         style: Theme.of(context)
-                                             .textTheme
-                                             .labelSmall
-                                             ?.copyWith(
-                                               color: Theme.of(context)
-                                                   .colorScheme
-                                                   .onSurfaceVariant,
-                                               fontSize: 9,
-                                             ),
-                                         overflow: TextOverflow.ellipsis,
-                                       ),
-                                     ),
-                                   ],
-                                 ),
-                               ),
                             ],
                           ),
                         ],
@@ -1200,7 +1185,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                          Row(
                            children: [
                              Icon(
-                               Icons.storage,
+                               Icons.sd_card_outlined,
                                size: 10,
                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                              ),
@@ -1238,9 +1223,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                              ),
                            ],
                          ),
-                       ],
-                     ),
-                   ),
+                      ],
+                    ),
+                  ),
                   if (!_isSelecting)
                     IconButton(
                       icon: Icon(Icons.more_vert,

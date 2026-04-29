@@ -271,7 +271,9 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   void didUpdateWidget(TextDocumentViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.textContent != widget.textContent || oldWidget.language != widget.language) {
-      _initializeContent();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _initializeContent();
+      });
     }
   }
 
