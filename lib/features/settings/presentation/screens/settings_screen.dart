@@ -177,7 +177,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _divider(context),
                 LinkTile.url(
-                  icon: Icons.code,
+                  icon: SimpleIcons.github,
                   title: 'Source Code',
                   value: 'https://github.com/anonfaded/Fadocx',
                 ),
@@ -283,6 +283,9 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
               ]),
+              const SizedBox(height: 32),
+              _buildFooter(context),
+              const SizedBox(height: 48),
             ],
           );
         },
@@ -1372,6 +1375,89 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFooter(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Made with', style: TextStyle(color: muted, fontSize: 13)),
+              const SizedBox(width: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: Image.asset(
+                  'assets/other_apps/palestine.png',
+                  width: 18, height: 18,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text('at', style: TextStyle(color: muted, fontSize: 13)),
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 40, height: 18,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: Image.asset(
+                    'assets/other_apps/fadseclab.png',
+                    width: 40, height: 18,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text('in', style: TextStyle(color: muted, fontSize: 13)),
+              const SizedBox(width: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: Image.asset(
+                  'assets/other_apps/pakistan.png',
+                  width: 18, height: 18,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              builder: (ctx) => _LinkSheet(
+                title: 'FadSec Lab',
+                value: 'https://fadseclab.com',
+                onOpen: () {
+                  Navigator.pop(ctx);
+                  _openUrl('https://fadseclab.com');
+                },
+                onCopy: () {
+                  _copyToClipboard(context, 'https://fadseclab.com');
+                  Navigator.pop(ctx);
+                },
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: Text(
+              '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: muted.withValues(alpha: 0.6),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
