@@ -658,7 +658,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                           // State 2 & 3: No files
                           : appSettings != null && appSettings.hasImportedSampleFiles
                               // State 2: Has imported samples before but deleted → "No recent files"
-                              ? Center(
+                              ? Align(
+                                  alignment: Alignment.topCenter,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
