@@ -119,6 +119,15 @@ class SettingsMutator {
     );
   }
 
+  Future<void> updateAutoUpdateCheck(bool enabled) async {
+    log.i('Updating autoUpdateCheck to: $enabled');
+    final result = await _repository.updateAutoUpdateCheck(enabled);
+    result.fold(
+      (failure) => log.e('Failed to update autoUpdateCheck: ${failure.message}'),
+      (success) => log.i('autoUpdateCheck updated successfully'),
+    );
+  }
+
   Future<void> clearSettings() async {
     log.i('Clearing settings');
     final result = await _repository.clearSettings();

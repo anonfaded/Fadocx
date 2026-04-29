@@ -149,6 +149,28 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
   }
 
   @override
+  Future<Result<void>> updateAutoUpdateCheck(bool enabled) async {
+    try {
+      var settings = await _datasource.getSettings();
+      settings ??= HiveAppSettings();
+
+      final updated = settings.copyWith(
+        autoUpdateCheck: enabled,
+        syncStatus: 'pending',
+        updatedAt: DateTime.now(),
+      );
+
+      await _datasource.saveSettings(updated);
+      log.i('Updated autoUpdateCheck to: $enabled');
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to update autoUpdateCheck', error: e, stackTrace: st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update autoUpdateCheck'));
+    }
+  }
+
+  @override
   Stream<Result<AppSettings>> watchSettings() async* {
     try {
       // Try to load from Hive, but yield default first if slow
@@ -167,6 +189,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
           enableNotifications: true,
           hasImportedSampleFiles: false,
           hasDismissedWelcome: false,
+          autoUpdateCheck: true,
           createdAt: now,
           updatedAt: now,
           syncStatus: 'local',
@@ -190,6 +213,7 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
         enableNotifications: true,
         hasImportedSampleFiles: false,
         hasDismissedWelcome: false,
+        autoUpdateCheck: true,
         createdAt: now,
         updatedAt: now,
         syncStatus: 'local',

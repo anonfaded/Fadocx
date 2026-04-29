@@ -153,6 +153,9 @@ class HiveAppSettings {
   @HiveField(7)
   final DateTime? syncedAt;
 
+  @HiveField(10)
+  final bool? autoUpdateCheck;
+
   HiveAppSettings({
     String? id,
     this.theme = 'dark',
@@ -164,6 +167,7 @@ class HiveAppSettings {
     DateTime? updatedAt,
     this.syncStatus = 'pending',
     this.syncedAt,
+    this.autoUpdateCheck,
   })  : hasDismissedWelcome = hasDismissedWelcome ?? false,
         id = id ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now(),
@@ -180,6 +184,7 @@ class HiveAppSettings {
     DateTime? updatedAt,
     String? syncStatus,
     DateTime? syncedAt,
+    bool? autoUpdateCheck,
   }) {
     return HiveAppSettings(
       id: id ?? this.id,
@@ -192,6 +197,7 @@ class HiveAppSettings {
       updatedAt: updatedAt ?? this.updatedAt,
       syncStatus: syncStatus ?? this.syncStatus,
       syncedAt: syncedAt ?? this.syncedAt,
+      autoUpdateCheck: autoUpdateCheck ?? this.autoUpdateCheck,
     );
   }
 

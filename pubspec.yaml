@@ -94,6 +94,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   package_info_plus: ^9.0.1
   highlight: ^0.7.0
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

@@ -22,6 +22,9 @@ abstract class AppSettingsRepository {
   /// Update has dismissed welcome setting
   Future<Result<void>> updateHasDismissedWelcome(bool hasDismissed);
 
+  /// Update auto update check setting
+  Future<Result<void>> updateAutoUpdateCheck(bool enabled);
+
   /// Get settings as stream for reactive updates
   Stream<Result<AppSettings>> watchSettings();
 

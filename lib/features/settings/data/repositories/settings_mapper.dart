@@ -56,6 +56,7 @@ class SettingsMapper {
       updatedAt: hive.updatedAt,
       syncStatus: hive.syncStatus,
       syncedAt: hive.syncedAt,
+      autoUpdateCheck: hive.autoUpdateCheck ?? true,
     );
   }
 
@@ -72,6 +73,7 @@ class SettingsMapper {
       updatedAt: domain.updatedAt,
       syncStatus: domain.syncStatus,
       syncedAt: domain.syncedAt,
+      autoUpdateCheck: domain.autoUpdateCheck,
     );
   }
 }
