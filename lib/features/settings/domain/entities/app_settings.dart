@@ -108,6 +108,7 @@ class AppSettings {
   final DateTime updatedAt;
   final String syncStatus;
   final DateTime? syncedAt;
+  final bool autoUpdateCheck;
 
   AppSettings({
     required this.id,
@@ -120,6 +121,7 @@ class AppSettings {
     required this.updatedAt,
     required this.syncStatus,
     this.syncedAt,
+    this.autoUpdateCheck = true,
   });
 
   /// Get theme enum for MaterialApp

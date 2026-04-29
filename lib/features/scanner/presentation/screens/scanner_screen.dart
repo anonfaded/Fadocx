@@ -240,7 +240,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     });
 
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
 
     return Scaffold(
       backgroundColor: _currentStep == 0 ? Colors.black : surfaceColor,
@@ -1085,130 +1084,10 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     );
   }
 
-  Widget _buildProcessingStepRow(
-    BuildContext context,
-    ScannerState state,
-    _StepInfo info,
-  ) {
-    final isCompleted = state.isStepCompleted(info.step);
-    final isActive = state.isStepActive(info.step);
-    final isPending = !isCompleted && !isActive;
-
-    final colorScheme = Theme.of(context).colorScheme;
-    final onSurface = colorScheme.onSurface;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeInOut,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isCompleted
-            ? Colors.green.withValues(alpha: 0.1)
-            : isActive
-                ? colorScheme.primaryContainer.withValues(alpha: 0.4)
-                : colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isCompleted
-              ? Colors.green.withValues(alpha: 0.25)
-              : isActive
-                  ? colorScheme.primary.withValues(alpha: 0.3)
-                  : colorScheme.outline.withValues(alpha: 0.08),
-          width: isActive ? 1.5 : 1.0,
-        ),
-      ),
-      child: Row(
-        children: [
-          if (isActive)
-            AnimatedBuilder(
-              animation: _processingController,
-              builder: (context, child) {
-                return Transform.rotate(
-                  angle: -_processingController.value * 2 * 3.14159,
-                  child: Icon(Icons.sync, size: 20, color: colorScheme.primary),
-                );
-              },
-            )
-          else
-            Icon(
-              isCompleted ? Icons.check_circle : info.icon,
-              size: 20,
-              color: isCompleted
-                  ? Colors.green
-                  : isPending
-                      ? onSurface.withValues(alpha: 0.25)
-                      : onSurface.withValues(alpha: 0.6),
-            ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  info.title,
-                  style: TextStyle(
-                    color: isPending
-                        ? onSurface.withValues(alpha: 0.35)
-                        : onSurface,
-                    fontWeight: isCompleted || isActive
-                        ? FontWeight.w600
-                        : FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  info.description,
-                  style: TextStyle(
-                    color: onSurface.withValues(alpha: isPending ? 0.25 : 0.55),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConfidenceBadge(BuildContext context, double confidence) {
-    final pct = (confidence * 100).toStringAsFixed(0);
-    final color = confidence >= 0.8
-        ? Colors.green
-        : confidence >= 0.5
-            ? Colors.orange
-            : Colors.red;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.verified, size: 18, color: color),
-          const SizedBox(width: 8),
-          Text(
-            'OCR Confidence: $pct%',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: color,
-              fontSize: 13,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ─── Step 2: Results ────────────────────────────────────────────────────────
 
   Widget _buildResultsStep(BuildContext context, ScannerState scannerState) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
-    final surfaceContainer = Theme.of(context).colorScheme.surfaceContainer;
     final outline = Theme.of(context).colorScheme.outline;
 
     if (!scannerState.hasScannedImage) {
@@ -1502,20 +1381,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
 }
 
 // ─── Helper data class ─────────────────────────────────────────────────────
-
-class _StepInfo {
-  final ProcessingStep step;
-  final IconData icon;
-  final String title;
-  final String description;
-
-  const _StepInfo({
-    required this.step,
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-}
 
 class _DetectedLineTile extends StatelessWidget {
   final TextBlock block;

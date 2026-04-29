@@ -6,6 +6,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
+import 'package:fadocx/core/presentation/widgets/update_available_sheet.dart';
+import 'package:fadocx/core/services/update_check_service.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
@@ -127,6 +129,24 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ]),
               const SizedBox(height: 24),
+              _buildSectionHeader(context, 'Updates'),
+              _buildSettingsGroup(context, [
+                Consumer(
+                  builder: (context, ref, _) {
+                    final settings = ref.watch(appSettingsProvider);
+                    final enabled = settings.when(
+                      data: (s) => s?.autoUpdateCheck ?? true,
+                      loading: () => true,
+                      error: (_, __) => true,
+                    );
+
+                    return _buildAutoUpdateRow(context, ref, enabled);
+                  },
+                ),
+                _divider(context),
+                _buildCheckUpdatesRow(context, ref),
+              ]),
+              const SizedBox(height: 24),
               _buildSectionHeader(context, 'Security'),
               _buildSettingsGroup(context, [
                 _SettingsRow(
@@ -144,7 +164,7 @@ class SettingsScreen extends ConsumerWidget {
                   icon: Icons.info_outline,
                   title: 'Version',
                   value: packageInfoAsync.when(
-                    data: (info) => '${info.version} (${info.buildNumber})',
+                    data: (info) => 'v${info.version}+${info.buildNumber}',
                     loading: () => '...',
                     error: (_, __) => 'Unknown',
                   ),
@@ -616,8 +636,66 @@ class SettingsScreen extends ConsumerWidget {
         ]),
       );
 
-  void _showThemePicker(
-      BuildContext context, WidgetRef ref, ThemeMode current) {
+  Widget _buildAutoUpdateRow(BuildContext context, WidgetRef ref, bool enabled) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.system_update_outlined,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Auto Update Check',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    Text(
+                      enabled ? 'Enabled' : 'Disabled',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 48,
+                child: Switch(
+                  value: enabled,
+                  onChanged: (value) {
+                    ref.read(settingsMutatorProvider).updateAutoUpdateCheck(value);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showThemePicker(BuildContext context, WidgetRef ref, ThemeMode current) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -725,6 +803,178 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCheckUpdatesRow(BuildContext context, WidgetRef ref) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _manualUpdateCheck(context, ref),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.cloud_download_outlined,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Check for Updates',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _manualUpdateCheck(BuildContext context, WidgetRef ref) async {
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Checking for updates…'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+      final result = await UpdateCheckService.checkForUpdate(
+        currentVersion: currentVersion,
+      );
+
+      if (!context.mounted) return;
+      Navigator.pop(context); // dismiss loading
+
+      if (result.errorOccurred) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No internet connection. Check your network and try again.')),
+        );
+      } else if (result.isUpdateAvailable) {
+        UpdateAvailableSheet.show(
+          context,
+          currentVersion: currentVersion,
+          stableVersion: result.stableVersion,
+          stableUrl: result.stableUrl,
+          betaVersion: result.betaVersion,
+          betaUrl: result.betaUrl,
+          hasStableUpdate: result.hasStableUpdate,
+          hasBetaUpdate: result.hasBetaUpdate,
+        );
+      } else {
+        _showUpToDateDialog(context, currentVersion, result.betaVersion);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pop(context); // dismiss loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No internet connection. Check your network and try again.')),
+      );
+    }
+  }
+
+  void _showUpToDateDialog(BuildContext context, String version, String? betaVersion) {
+    final hasNewerBeta = betaVersion != null && UpdateCheckService.isNewerThan(version, betaVersion);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle, size: 32, color: Colors.green),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'You\'re up to date',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'v$version is the latest version.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            if (hasNewerBeta) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.science_outlined, size: 16, color: Theme.of(context).colorScheme.tertiary),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'Beta v$betaVersion available',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }

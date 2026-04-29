@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
+import 'package:fadocx/core/presentation/widgets/drawer_update_banner.dart';
 
 /// Custom animated hamburger icon with bottom line that grows when sidebar opens
 class AnimatedHamburgerIcon extends StatefulWidget {
@@ -197,6 +198,9 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                   context.push(RouteNames.whatsNew);
                 },
               ),
+
+              // Update available banner (auto-hides when no update)
+              const DrawerUpdateBanner(),
               const SizedBox(height: 12),
 
               // Recent Files visibility toggle

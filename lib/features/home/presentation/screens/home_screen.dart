@@ -15,6 +15,8 @@ import 'package:fadocx/features/settings/presentation/providers/settings_provide
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
 import 'package:fadocx/features/home/presentation/widgets/home_drawer.dart';
 import 'package:fadocx/features/home/presentation/widgets/file_action_bottom_sheet.dart';
+import 'package:fadocx/features/home/presentation/providers/update_check_provider.dart';
+import 'package:fadocx/core/presentation/widgets/update_available_sheet.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -31,6 +33,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStateMixin {
   bool _dataLoaded = false;
   bool _sidebarOpen = false;
+  bool _autoUpdateSheetShown = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late AnimationController _sidebarController;
   late AnimationController _skeletonShimmerController;
@@ -61,6 +64,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => _dataLoaded = true);
       Future.microtask(() => ref.read(recentFilesProvider));
+      
+      // Auto-update check (runs in background, doesn't block UI)
+      final autoUpdateEnabled = ref.read(autoUpdateCheckEnabledProvider);
+      if (autoUpdateEnabled) {
+        ref.read(autoUpdateCheckProvider.notifier).checkForUpdate();
+      }
     });
   }
   
@@ -117,10 +126,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            // Hamburger menu
-            AnimatedHamburgerIcon(
-              onPressed: _toggleSidebar,
-              isOpen: _sidebarOpen,
+            // Hamburger menu with optional update badge
+            Consumer(
+              builder: (context, ref, _) {
+                final updateState = ref.watch(autoUpdateCheckProvider);
+                final hasUpdate = updateState is UpdateCheckAvailable;
+
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    AnimatedHamburgerIcon(
+                      onPressed: _toggleSidebar,
+                      isOpen: _sidebarOpen,
+                    ),
+                    // Badge dot — only when update available
+                    if (hasUpdate)
+                      Positioned(
+                        top: -2,
+                        right: -4,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.surface,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
             const SizedBox(width: 12),
             // Logo icon
@@ -146,7 +185,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
+    // Auto-show update bottom sheet when check completes with available update.
+    // Only fires once per session: prev != null skips the initial listener registration,
+    // and _autoUpdateSheetShown prevents re-triggering on tab switches.
+    ref.listen<UpdateCheckState>(autoUpdateCheckProvider, (prev, next) {
+      if (next is UpdateCheckAvailable && prev != null && !_autoUpdateSheetShown) {
+        _autoUpdateSheetShown = true;
+        // Small delay so the UI settles before showing the sheet
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (!context.mounted) return;
+          UpdateAvailableSheet.show(
+            context,
+            currentVersion: next.currentVersion,
+            stableVersion: next.stableVersion,
+            stableUrl: next.stableUrl,
+            betaVersion: next.betaVersion,
+            betaUrl: next.betaUrl,
+            hasStableUpdate: next.hasStableUpdate,
+            hasBetaUpdate: next.hasBetaUpdate,
+          );
+        });
+      }
+    });
+
     return Scaffold(
       key: _scaffoldKey,
       body: Stack(

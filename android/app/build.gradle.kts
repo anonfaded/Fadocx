@@ -5,12 +5,9 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Aspose repository for Slides, Words, Cells
-repositories {
-    maven {
-        url = uri("https://repository.aspose.com/repo/")
-    }
-}
+// ── Versioning (manual control) ──
+val appVersionCode = 2
+val appVersionName = "0.0.0"
 
 android {
     namespace = "com.fadseclab.fadocx"
@@ -33,14 +30,13 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.fadseclab.fadocx"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 26  // Required for Apache POI and log4j compatibility
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = appVersionCode
+        versionName = appVersionName
         multiDexEnabled = true
     }
 
@@ -62,10 +58,12 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".beta"
             manifestPlaceholders["appName"] = "Fadocx Beta"
+            versionName = "${appVersionName}-beta"
         }
         create("prod") {
             dimension = "environment"
             manifestPlaceholders["appName"] = "Fadocx"
+            versionName = appVersionName
         }
     }
 
