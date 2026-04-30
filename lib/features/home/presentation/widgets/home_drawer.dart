@@ -256,7 +256,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () => _openUrl('https://discord.gg/kvAZvdkuuN'),
+                      onTap: () => _showDiscordSheet(context),
                       borderRadius: BorderRadius.circular(6),
                       child: Padding(
                         padding: const EdgeInsets.all(4),
@@ -598,6 +598,87 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showDiscordSheet(BuildContext context) {
+    const discordUrl = 'https://discord.gg/kvAZvdkuuN';
+    final brightness = Theme.of(context).brightness;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: brightness == Brightness.dark
+              ? const Color(0xFF1C1C1E)
+              : const Color(0xFFF2F2F7),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+        ),
+        padding: EdgeInsets.only(
+          top: 6,
+          bottom: MediaQuery.of(context).padding.bottom + 6,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 5,
+              margin: const EdgeInsets.only(top: 4, bottom: 12),
+              decoration: BoxDecoration(
+                color: brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+              child: Text(
+                'Join our Discord',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                discordUrl,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _sheetActionButton(
+              context,
+              icon: SimpleIcons.discord,
+              label: 'Open in Browser',
+              onTap: () {
+                Navigator.pop(ctx);
+                _openUrl(discordUrl);
+              },
+            ),
+            const SizedBox(height: 8),
+            _sheetActionButton(
+              context,
+              icon: Icons.content_copy,
+              label: 'Copy Link',
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: discordUrl));
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Copied to clipboard')),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
         ),
       ),
     );
