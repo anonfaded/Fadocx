@@ -43,6 +43,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   late Animation<double> _skeletonShimmer;
   late AnimationController _patreonShimmerController;
   
+  DateTime? _lastBackPress;
+  static const Duration _backPressExitDuration = Duration(seconds: 2);
+
   double _sidebarDragOffset = 0.0; // Track horizontal drag position
   
   static const double _kSidebarTopOffset = 87; // Increased to clear app bar
@@ -390,7 +393,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       }
     });
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          if (_lastBackPress == null ||
+              DateTime.now().difference(_lastBackPress!) > _backPressExitDuration) {
+            _lastBackPress = DateTime.now();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Press back again to exit'),
+                duration: _backPressExitDuration,
+              ),
+            );
+          } else {
+            SystemNavigator.pop();
+          }
+        }
+      },
+      child: Scaffold(
       key: _scaffoldKey,
       body: Stack(
         children: [
@@ -447,6 +468,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             },
           ),
         ],
+      ),
       ),
     );
   }
