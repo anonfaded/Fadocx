@@ -68,11 +68,45 @@
 </details>
 
 <details>
+<summary><strong>📊 Reading Stats Dashboard</strong></summary>
+
+- Home screen stats card tracks **total documents**, **storage used**, and **reading time** across all files
+- Reading time is measured automatically: when you open a document, a session timer starts. When you leave the viewer, the elapsed time is calculated and added to the file's total
+- Each file tracks its own cumulative reading time, shown in the stats card as hours/minutes
+- Also displays the most recently opened file for quick access
+</details>
+
+<details>
+<summary><strong>📚 Library with Category Folders</strong></summary>
+
+- All imported files are organized into category folders automatically: **PDF**, **Docs**, **Sheets**, **Slides**, **Code**, **Scans**, and **Other**
+- Files are stored in Fadocx's private app storage — no reliance on public folders
+- Browse by category with dedicated chip filters
+- Search by file name or type
+- Sort by latest, oldest, largest, or smallest
+- Switch between grid and list views
+</details>
+
+<details>
+<summary><strong>📁 File Management</strong></summary>
+
+- **Import**: Browse your device or use the file picker to import documents into Fadocx's private storage. Files are automatically sorted into the correct category folder
+- **Rename**: Change file names directly in-app with extension preservation
+- **Duplicate**: Create copies with auto‑numbered names ("copy", "copy 2", etc.)
+- **Export**: Save files to Downloads or choose a custom location
+- **Delete**: Soft‑delete with trash bin and restore option
+- **Multi‑select**: Long‑press to enter selection mode for batch operations
+- **File info**: View detailed metadata including size, type, dates, and extracted text
+</details>
+
+<details>
 <summary><strong>🔍 Search & Navigation</strong></summary>
 
 - Full-text search within documents with result navigation
-- Intuitive document browsing with thumbnails
-- Recent files and bookmark support
+- Category chips for quick filtering
+- Sort by date, size
+- Recent files list on home screen
+- Thumbnail previews with file metadata for quick visual identification
 </details>
 
 <details>
