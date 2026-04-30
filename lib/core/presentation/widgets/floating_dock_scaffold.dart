@@ -291,7 +291,7 @@ class _FloatingDock extends StatelessWidget {
                             isActive: currentRoute == RouteNames.documents,
                             onTap: () {
                               if (currentRoute != RouteNames.documents) {
-                                context.go(RouteNames.documents);
+                                context.push(RouteNames.documents);
                               }
                             },
                           ),
@@ -303,7 +303,7 @@ class _FloatingDock extends StatelessWidget {
                             isActive: currentRoute == RouteNames.settings,
                             onTap: () {
                               if (currentRoute != RouteNames.settings) {
-                                context.go(RouteNames.settings);
+                                context.push(RouteNames.settings);
                               }
                             },
                           ),

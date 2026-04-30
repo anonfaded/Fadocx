@@ -50,7 +50,7 @@ class BottomNavDock extends StatelessWidget {
               isActive: currentRoute == RouteNames.settings,
               onTap: () {
                 if (currentRoute != RouteNames.settings) {
-                  context.go(RouteNames.settings);
+                  context.push(RouteNames.settings);
                 }
               },
             ),
