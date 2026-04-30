@@ -595,7 +595,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     final docState = ref.watch(documentViewerProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          context.pop();
+        }
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Stack(
         children: [
@@ -719,7 +726,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             ),
         ],
       ),
-    );
+    ),
+  );
   }
 
 
