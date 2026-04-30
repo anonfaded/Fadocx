@@ -172,6 +172,40 @@ class WhatsNewScreen extends StatelessWidget {
           const Divider(height: 32),
           _buildSection(
             context,
+            icon: Icons.timer,
+            title: 'Reading Stats Dashboard',
+            body:
+                'The home screen stats card tracks total documents, storage used, and cumulative '
+                'reading time across all your files. When you open a document, a session timer '
+                'starts automatically. When you leave the viewer, the elapsed time is calculated '
+                'and added to that file\'s total — so you can see how much time you\'ve spent reading.',
+          ),
+          const Divider(height: 32),
+          _buildSection(
+            context,
+            icon: Icons.folder,
+            title: 'Library with Category Folders',
+            body:
+                'Imported files are automatically organized into category folders — PDF, Docs, '
+                'Sheets, Slides, Code, Scans, and Other. Browse by category with chip filters, '
+                'search by name or type, and sort by date or size. All files live in Fadocx\'s '
+                'private storage, keeping your documents organized and separate from public folders.',
+          ),
+          const Divider(height: 32),
+          _buildSection(
+            context,
+            icon: Icons.drive_file_move,
+            title: 'File Management',
+            body:
+                'Import documents from your device into Fadocx\'s private storage with automatic '
+                'category sorting. Rename files with extension preservation, create duplicates '
+                'with auto-numbered names, or export copies to Downloads or a custom location. '
+                'Long-press for multi-select mode and batch operations. A context menu on each '
+                'file gives quick access to all actions.',
+          ),
+          const Divider(height: 32),
+          _buildSection(
+            context,
             icon: Icons.palette,
             title: 'Light & Dark Themes',
             body:
