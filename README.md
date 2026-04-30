@@ -127,8 +127,29 @@ We welcome contributions! Before starting any work:
 
 ## `>_` Build
 
+### Clone & Setup (first-time contributors)
+
 ```bash
-# Run beta flavor
+# Clone repository
+git clone https://github.com/anonfaded/Fadocx.git
+cd Fadocx
+
+# Install and enable Git LFS (required once per machine)
+git lfs install
+
+# Download LFS objects (ensures large native libraries are populated)
+git lfs pull --all
+
+# Install Dart/Flutter dependencies
+flutter pub get
+```
+
+> Note: This repository stores a large native library via Git LFS. If you do not run `git lfs install` and `git lfs pull --all` after cloning, the large files will appear as small pointer files instead of the expected binaries.
+
+### Local development
+
+```bash
+# Run the beta flavor on a connected device or emulator
 flutter run --flavor beta
 ```
 
