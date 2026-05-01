@@ -130,10 +130,25 @@ class CameraService extends ChangeNotifier {
     }
   }
 
+  /// Release the camera hardware so it can be re-acquired later.
+  void releaseCamera() {
+    if (_controller == null) return;
+    try {
+      if (_controller!.value.isStreamingImages) {
+        _controller!.stopImageStream();
+      }
+    } catch (_) {}
+    try {
+      _controller!.dispose();
+    } catch (_) {}
+    _isStreaming = false;
+    _isInitialized = false;
+    _controller = null;
+  }
+
   @override
   Future<void> dispose() async {
-    if (_isStreaming) await stopFrameStream();
-    await _controller?.dispose();
+    releaseCamera();
     super.dispose();
   }
 }

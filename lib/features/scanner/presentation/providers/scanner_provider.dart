@@ -132,6 +132,10 @@ class ScannerNotifier extends Notifier<ScannerState> {
 
   CameraService getCameraService() => _cameraService;
 
+  void markCameraUninitialized() {
+    state = state.copyWith(cameraInitialized: false);
+  }
+
   Future<void> retryCameraInitialization() async {
     state = state.copyWith(cameraError: null);
     await _cameraService.initialize();
@@ -239,18 +243,20 @@ class ScannerNotifier extends Notifier<ScannerState> {
     if (state.isProcessing) return;
 
     try {
-      // Step: capturing
-      state = state.copyWith(
-        isProcessing: true,
-        processingStep: ProcessingStep.capturing,
-      );
-
+      // Capture the image BEFORE setting isProcessing so the screen
+      // doesn't release the camera before capture completes.
       final capturedImage = await _cameraService.capturePhoto();
       if (capturedImage == null) {
         throw Exception('Failed to capture image');
       }
 
       await disableTorch();
+
+      // Step: capturing
+      state = state.copyWith(
+        isProcessing: true,
+        processingStep: ProcessingStep.capturing,
+      );
 
       // Save captured image to Scans folder with proper naming
       final savedPath = await _saveCapturedImage(capturedImage.path);
