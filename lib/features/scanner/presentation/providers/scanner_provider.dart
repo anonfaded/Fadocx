@@ -113,6 +113,7 @@ class ScannerNotifier extends Notifier<ScannerState> {
   @override
   ScannerState build() {
     _cameraService = CameraService();
+    ref.onDispose(() => _cameraService.dispose());
     _initializeCameraAsync();
     return const ScannerState();
   }
@@ -391,10 +392,6 @@ class ScannerNotifier extends Notifier<ScannerState> {
 
   void resetScanner() {
     state = ScannerState(cameraInitialized: state.cameraInitialized);
-  }
-
-  void dispose() {
-    _cameraService.dispose();
   }
 }
 
