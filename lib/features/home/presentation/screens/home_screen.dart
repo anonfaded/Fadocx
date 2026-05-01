@@ -421,7 +421,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             body: _buildBody(),
           ),
           
-          // Scrim overlay with dimming and tap-to-close - controlled by sidebar state
+          // Scrim overlay with dimming and tap/swipe-to-close
           Positioned.fill(
             child: IgnorePointer(
               ignoring: !_sidebarOpen,
@@ -432,6 +432,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                     opacity: _sidebarController.value,
                     child: GestureDetector(
                       onTap: _closeSidebar,
+                      onHorizontalDragUpdate: _handleSidebarDragUpdate,
+                      onHorizontalDragEnd: _handleSidebarDragEnd,
                       behavior: HitTestBehavior.opaque,
                       child: Container(
                         color: Colors.black.withValues(alpha: 0.45),
