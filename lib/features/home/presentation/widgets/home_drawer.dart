@@ -396,74 +396,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
   }
 
   Widget _buildDonateCard(BuildContext context) {
-    const goldColor = Color(0xFFD4A017);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: ShimmerWidget(
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _showPatreonSheet(context),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: goldColor.withValues(alpha: isDark ? 0.1 : 0.07),
-                border: Border.all(
-                  color: goldColor.withValues(alpha: isDark ? 0.25 : 0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: goldColor.withValues(alpha: isDark ? 0.18 : 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      SimpleIcons.patreon,
-                      size: 16,
-                      color: goldColor,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Support Development',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: goldColor,
-                              ),
-                        ),
-                        Text(
-                          'Unlock exclusive benefits',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: goldColor.withValues(alpha: 0.7),
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 18,
-                    color: goldColor.withValues(alpha: 0.6),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    return _GoldDonateCard(onTap: () => _showPatreonSheet(context));
   }
 
   void _showPatreonSheet(BuildContext context) {
@@ -691,19 +624,20 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
   }
 }
 
-/// Gold shimmer animation for the donation card
-class ShimmerWidget extends StatefulWidget {
-  final Widget child;
-  const ShimmerWidget({super.key, required this.child});
+/// Gold shimmer animation for the donation card — matches
+/// the golden Patreon shimmer in the home screen app bar.
+class _GoldDonateCard extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _GoldDonateCard({required this.onTap});
 
   @override
-  State<ShimmerWidget> createState() => _ShimmerWidgetState();
+  State<_GoldDonateCard> createState() => _GoldDonateCardState();
 }
 
-class _ShimmerWidgetState extends State<ShimmerWidget>
+class _GoldDonateCardState extends State<_GoldDonateCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -712,9 +646,6 @@ class _ShimmerWidgetState extends State<ShimmerWidget>
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
-    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
-    );
   }
 
   @override
@@ -725,29 +656,100 @@ class _ShimmerWidgetState extends State<ShimmerWidget>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(
-            colors: const [
-              Colors.transparent,
-              Color(0x55FFD700),
-              Colors.transparent,
-            ],
-            stops: [
-              (_animation.value - 0.3).clamp(0.0, 1.0),
-              _animation.value.clamp(0.0, 1.0),
-              (_animation.value + 0.3).clamp(0.0, 1.0),
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ).createShader(bounds),
-          blendMode: BlendMode.srcATop,
-          child: child,
-        );
-      },
-      child: widget.child,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const goldColor = Color(0xFFD4A017);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return GestureDetector(
+            onTap: () => widget.onTap(),
+            child: ShaderMask(
+              shaderCallback: (bounds) {
+                const cycle = 300.0;
+                final offset = (_controller.value * cycle) % cycle;
+                return const LinearGradient(
+                  tileMode: TileMode.repeated,
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFFC9A214),
+                    Color(0xFFDAB125),
+                    Color(0xFFF5D547),
+                    Color(0xFFFFE873),
+                    Color(0xFFF5D547),
+                    Color(0xFFDAB125),
+                    Color(0xFFC9A214),
+                  ],
+                  stops: [0.00, 0.18, 0.36, 0.50, 0.64, 0.82, 1.00],
+                ).createShader(Rect.fromLTWH(
+                  bounds.left - offset,
+                  bounds.top,
+                  cycle,
+                  bounds.height,
+                ));
+              },
+              blendMode: BlendMode.srcIn,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: goldColor.withValues(alpha: isDark ? 0.1 : 0.07),
+                  border: Border.all(
+                    color: goldColor.withValues(alpha: isDark ? 0.25 : 0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: goldColor.withValues(alpha: isDark ? 0.18 : 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        SimpleIcons.patreon,
+                        size: 16,
+                        color: Color(0xFFD4A017),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Support Development',
+                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: goldColor,
+                                ),
+                          ),
+                          Text(
+                            'Unlock exclusive benefits',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: goldColor.withValues(alpha: 0.7),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: goldColor.withValues(alpha: 0.38),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
