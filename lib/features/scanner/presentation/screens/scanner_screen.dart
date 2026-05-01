@@ -51,6 +51,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   Offset? _focusPoint;
   bool _showFocusAnimation = false;
 
+  // Selected text block index for tap-to-select
+  int? _selectedBlockIndex;
+
   @override
   void initState() {
     super.initState();
@@ -1169,6 +1172,13 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                           animation: _scanningController,
                           showScanEffect: false,
                           isPunchHole: true,
+                          selectedBlockIndex: _selectedBlockIndex,
+                          onBlockTapped: (index) {
+                            setState(() {
+                              _selectedBlockIndex =
+                                  index < 0 ? null : (_selectedBlockIndex == index ? null : index);
+                            });
+                          },
                         ),
                       ),
                     ),
@@ -1444,6 +1454,8 @@ class _DetectedTextPreview extends StatelessWidget {
   final Animation<double> animation;
   final bool showScanEffect;
   final bool isPunchHole;
+  final int? selectedBlockIndex;
+  final void Function(int)? onBlockTapped;
 
   const _DetectedTextPreview({
     required this.imagePath,
@@ -1453,6 +1465,8 @@ class _DetectedTextPreview extends StatelessWidget {
     required this.animation,
     this.showScanEffect = true,
     this.isPunchHole = false,
+    this.selectedBlockIndex,
+    this.onBlockTapped,
   });
 
   @override
@@ -1462,32 +1476,9 @@ class _DetectedTextPreview extends StatelessWidget {
         return Stack(
           alignment: Alignment.topLeft,
           children: [
-            // Image with optional darkening for punch hole effect
+            // Image: normal brightness — punch-hole darkening is done by the painter
             ColorFiltered(
-              colorFilter: isPunchHole
-                  ? const ColorFilter.matrix(<double>[
-                      0.4,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0.4,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0.4,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      1,
-                      0,
-                    ])
-                  : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+              colorFilter: const ColorFilter.mode(Colors.transparent, BlendMode.dst),
               child: Image.file(
                 File(imagePath),
                 width: constraints.maxWidth,
@@ -1496,7 +1487,37 @@ class _DetectedTextPreview extends StatelessWidget {
             ),
             if (imageWidth != null && imageHeight != null)
               Positioned.fill(
-                child: IgnorePointer(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapDown: onBlockTapped != null && imageWidth != null && imageHeight != null
+                      ? (details) {
+                          final scale = constraints.maxWidth / imageWidth!;
+                          final tapX = details.localPosition.dx / scale;
+                          final tapY = details.localPosition.dy / scale;
+                          bool found = false;
+                          for (int i = 0; i < blocks.length; i++) {
+                            final b = blocks[i];
+                            if (b.x != null && b.y != null &&
+                                b.width != null && b.height != null) {
+                              final r = Rect.fromLTWH(
+                                b.x!.toDouble(),
+                                b.y!.toDouble(),
+                                b.width!.toDouble(),
+                                b.height!.toDouble(),
+                              );
+                              if (r.contains(Offset(tapX, tapY))) {
+                                onBlockTapped!(i);
+                                found = true;
+                                return;
+                              }
+                            }
+                          }
+                          // Tapped outside any block — dismiss selection
+                          if (!found && selectedBlockIndex != null) {
+                            onBlockTapped!(-1);
+                          }
+                        }
+                      : null,
                   child: RepaintBoundary(
                     child: AnimatedBuilder(
                       animation: animation,
@@ -1510,6 +1531,7 @@ class _DetectedTextPreview extends StatelessWidget {
                             primaryColor: Theme.of(context).colorScheme.primary,
                             showScanEffect: showScanEffect,
                             isPunchHole: isPunchHole,
+                            selectedBlockIndex: selectedBlockIndex,
                           ),
                         );
                       },
@@ -1517,9 +1539,156 @@ class _DetectedTextPreview extends StatelessWidget {
                   ),
                 ),
               ),
+            // Floating selected-text tooltip near the tapped rectangle
+            if (selectedBlockIndex != null &&
+                selectedBlockIndex! < blocks.length &&
+                imageWidth != null &&
+                imageHeight != null)
+              _buildFloatingSelectedTooltip(
+                context,
+                block: blocks[selectedBlockIndex!],
+                scale: constraints.maxWidth / imageWidth!,
+                imageHeight: imageHeight!,
+                containerWidth: constraints.maxWidth,
+                onDismiss: () => onBlockTapped?.call(-1),
+              ),
           ],
         );
       },
+      );
+  }
+
+  Widget _buildFloatingSelectedTooltip(
+    BuildContext context, {
+    required TextBlock block,
+    required double scale,
+    required int imageHeight,
+    required double containerWidth,
+    required VoidCallback onDismiss,
+  }) {
+    final theme = Theme.of(context);
+    if (block.x == null || block.y == null ||
+        block.width == null || block.height == null) {
+      return const SizedBox.shrink();
+    }
+
+    final rectLeft = block.x! * scale;
+    final rectTop = block.y! * scale;
+    final rectRight = (block.x! + block.width!) * scale;
+    final rectBottom = (block.y! + block.height!) * scale;
+    final rectCenterX = (rectLeft + rectRight) / 2;
+    final renderedImageHeight = imageHeight * scale;
+
+    const tooltipWidth = 260.0;
+    final tooltipLeft = (rectCenterX - tooltipWidth / 2)
+        .clamp(8.0, containerWidth - tooltipWidth - 8);
+
+    // Place above the rectangle with a gap
+    const gap = 6.0;
+    const tooltipHeight = 110.0;
+    final tooltipTop = (rectTop - gap - tooltipHeight).clamp(4.0, renderedImageHeight - tooltipHeight - 4);
+
+    return Positioned(
+      left: tooltipLeft,
+      top: tooltipTop,
+      width: tooltipWidth,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.35),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Text display area
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 6),
+                child: Text(
+                  block.text,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              // Divider
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(horizontal: 14),
+                color: theme.colorScheme.outline.withValues(alpha: 0.1),
+              ),
+              // Action row
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 6, 8),
+                child: Row(
+                  children: [
+                    Text(
+                      '${(block.confidence * 100).toStringAsFixed(0)}%',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 10,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Copy button
+                    SizedBox(
+                      height: 32,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: block.text));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Copied to clipboard'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.content_copy, size: 14),
+                        label: const Text('Copy', style: TextStyle(fontSize: 12)),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          minimumSize: const Size(0, 32),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    // Close button
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: IconButton(
+                        icon: const Icon(Icons.close, size: 16),
+                        onPressed: onDismiss,
+                        padding: EdgeInsets.zero,
+                        style: IconButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1592,7 +1761,10 @@ class _DetectedTextPainter extends CustomPainter {
     required this.primaryColor,
     this.showScanEffect = true,
     this.isPunchHole = false,
+    this.selectedBlockIndex,
   });
+
+  final int? selectedBlockIndex;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1630,23 +1802,88 @@ class _DetectedTextPainter extends CustomPainter {
           Rect.fromLTWH(0, currentScanY - 2, size.width, 4), laserGlowPaint);
     }
 
-    // 2. Draw Text Blocks with proximity-based highlight
-    for (final block in blocks) {
-      if (block.x == null ||
-          block.y == null ||
-          block.width == null ||
-          block.height == null) {
-        continue;
-      }
-
-      final rect = Rect.fromLTWH(
-        block.x! * scale,
-        block.y! * scale,
-        block.width! * scale,
-        block.height! * scale,
+    // 2. Draw Text Blocks with proximity-based highlight or punch-hole overlay
+    if (!showScanEffect && isPunchHole) {
+      // Punch-hole effect: dark overlay everywhere except inside detected text rectangles.
+      // Uses canvas.saveLayer with BlendMode.clear to cut holes through the dark layer.
+      canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, renderedHeight), Paint());
+      canvas.drawRect(
+        Rect.fromLTWH(0, 0, size.width, renderedHeight),
+        Paint()..color = Colors.black.withValues(alpha: 0.55),
       );
+      for (final block in blocks) {
+        if (block.x == null || block.y == null ||
+            block.width == null || block.height == null) continue;
+        final rect = Rect.fromLTWH(
+          block.x! * scale,
+          block.y! * scale,
+          block.width! * scale,
+          block.height! * scale,
+        );
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect.inflate(4), const Radius.circular(6)),
+          Paint()..blendMode = BlendMode.clear,
+        );
+      }
+      canvas.restore();
+      // Draw white borders on top of the punch holes
+      for (final block in blocks) {
+        if (block.x == null || block.y == null ||
+            block.width == null || block.height == null) continue;
+        final rect = Rect.fromLTWH(
+          block.x! * scale,
+          block.y! * scale,
+          block.width! * scale,
+          block.height! * scale,
+        );
+        final borderPaint = Paint()
+          ..color = Colors.white.withValues(alpha: 0.85)
+          ..strokeWidth = 2.0
+          ..style = PaintingStyle.stroke;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect.inflate(3), const Radius.circular(5)),
+          borderPaint,
+        );
+      }
+      // Highlight selected block with a brighter fill + thicker border
+      if (selectedBlockIndex != null && selectedBlockIndex! < blocks.length) {
+        final sel = blocks[selectedBlockIndex!];
+        if (sel.x != null && sel.y != null &&
+            sel.width != null && sel.height != null) {
+          final selRect = Rect.fromLTWH(
+            sel.x! * scale,
+            sel.y! * scale,
+            sel.width! * scale,
+            sel.height! * scale,
+          );
+          final selFill = Paint()
+            ..color = Colors.white.withValues(alpha: 0.15)
+            ..style = PaintingStyle.fill;
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(selRect.inflate(4), const Radius.circular(6)),
+            selFill,
+          );
+          final selBorder = Paint()
+            ..color = primaryColor.withValues(alpha: 0.9)
+            ..strokeWidth = 2.5
+            ..style = PaintingStyle.stroke;
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(selRect.inflate(4), const Radius.circular(6)),
+            selBorder,
+          );
+        }
+      }
+    } else if (showScanEffect) {
+      for (final block in blocks) {
+        if (block.x == null || block.y == null ||
+            block.width == null || block.height == null) continue;
+        final rect = Rect.fromLTWH(
+          block.x! * scale,
+          block.y! * scale,
+          block.width! * scale,
+          block.height! * scale,
+        );
 
-      if (showScanEffect) {
         // Distance from laser line (normalized 0 to 1)
         final currentScanY = renderedHeight * scanValue;
         final distance = (rect.center.dy - currentScanY).abs();
@@ -1683,36 +1920,6 @@ class _DetectedTextPainter extends CustomPainter {
             canvas.drawCircle(rect.bottomRight, 1.5, dotPaint);
           }
         }
-      } else if (isPunchHole) {
-        // Punch hole effect: dark background, bright rectangles
-        final borderPaint = Paint()
-          ..color = Colors.white.withValues(alpha: 0.9)
-          ..strokeWidth = 2.0
-          ..style = PaintingStyle.stroke;
-
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(rect.inflate(2), const Radius.circular(4)),
-          borderPaint,
-        );
-      } else {
-        // Static rectangles without scanning effect
-        final blockPaint = Paint()
-          ..color = primaryColor.withValues(alpha: 0.1)
-          ..style = PaintingStyle.fill;
-
-        final borderPaint = Paint()
-          ..color = primaryColor.withValues(alpha: 0.4)
-          ..strokeWidth = 1.0
-          ..style = PaintingStyle.stroke;
-
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(rect.inflate(2), const Radius.circular(4)),
-          blockPaint,
-        );
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(rect.inflate(2), const Radius.circular(4)),
-          borderPaint,
-        );
       }
     }
 
