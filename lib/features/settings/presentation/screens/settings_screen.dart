@@ -46,7 +46,7 @@ class SettingsScreen extends ConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           }
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 88, 16, 100),
+            padding: const EdgeInsets.fromLTRB(16, 100, 16, 100),
             children: [
               _buildSectionHeader(context, 'Appearance'),
               _buildSettingsGroup(context, [
@@ -1404,12 +1404,24 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(width: 6),
               SizedBox(
                 width: 40, height: 18,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: Image.asset(
-                    'assets/other_apps/fadseclab.png',
-                    width: 40, height: 18,
-                    fit: BoxFit.contain,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: Image.asset(
+                      'assets/other_apps/fadseclab.png',
+                      width: 40, height: 18,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
