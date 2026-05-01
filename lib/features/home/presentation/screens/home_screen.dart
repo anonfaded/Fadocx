@@ -21,7 +21,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:simple_icons/simple_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:fadocx/core/presentation/constants.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 final log = Logger();
 
@@ -33,7 +33,8 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with TickerProviderStateMixin {
   bool _dataLoaded = false;
   bool _sidebarOpen = false;
   bool _autoUpdateSheetShown = false;
@@ -42,12 +43,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   late AnimationController _skeletonShimmerController;
   late Animation<double> _skeletonShimmer;
   late AnimationController _patreonShimmerController;
-  
+
   DateTime? _lastBackPress;
   static const Duration _backPressExitDuration = Duration(seconds: 2);
 
   double _sidebarDragOffset = 0.0; // Track horizontal drag position
-  
+
   static const double _kSidebarTopOffset = 87; // Increased to clear app bar
   static const double _kSidebarBottomOffset = 88;
   static const double _kSidebarRadius = 24.0;
@@ -65,7 +66,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       vsync: this,
     )..repeat();
     _skeletonShimmer = Tween<double>(begin: -1.0, end: 2.0).animate(
-      CurvedAnimation(parent: _skeletonShimmerController, curve: Curves.easeInOut),
+      CurvedAnimation(
+          parent: _skeletonShimmerController, curve: Curves.easeInOut),
     );
     _patreonShimmerController = AnimationController(
       duration: const Duration(seconds: 3),
@@ -75,7 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => _dataLoaded = true);
       Future.microtask(() => ref.read(recentFilesProvider));
-      
+
       // Auto-update check (runs in background, doesn't block UI)
       final autoUpdateEnabled = ref.read(autoUpdateCheckEnabledProvider);
       if (autoUpdateEnabled) {
@@ -83,7 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       }
     });
   }
-  
+
   @override
   void dispose() {
     _sidebarController.dispose();
@@ -91,7 +93,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     _patreonShimmerController.dispose();
     super.dispose();
   }
-  
+
   void _toggleSidebar() {
     setState(() => _sidebarOpen = !_sidebarOpen);
     if (_sidebarOpen) {
@@ -100,20 +102,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       _sidebarController.reverse();
     }
   }
-  
+
   void _closeSidebar() {
     setState(() => _sidebarOpen = false);
     _sidebarController.reverse();
   }
-  
-  void _handleSidebarDragUpdate(DragUpdateDetails details) {
+
+  void _handleSidebarDragUpdate(
+      DragUpdateDetails details, BuildContext context) {
     setState(() {
+      final isRTL = Directionality.of(context) == TextDirection.rtl;
       _sidebarDragOffset += details.delta.dx;
-      // Clamp offset to not move right past 0
-      _sidebarDragOffset = _sidebarDragOffset.clamp(-500, 0.0);
+      // Clamp offset based on text direction
+      if (isRTL) {
+        // In RTL: clamp to 0 to 500 (dragging left opens from right)
+        _sidebarDragOffset = _sidebarDragOffset.clamp(0.0, 500.0);
+      } else {
+        // In LTR: clamp to -500 to 0 (dragging left opens from left)
+        _sidebarDragOffset = _sidebarDragOffset.clamp(-500.0, 0.0);
+      }
     });
   }
-  
+
   void _handleSidebarDragEnd(DragEndDetails details) {
     // If dragged left more than threshold, close the sidebar
     if (_sidebarDragOffset.abs() > _kDragCloseThreshold) {
@@ -183,7 +193,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             const SizedBox(width: 6),
             // App title
             Text(
-              'Fadocx',
+              AppLocalizations.of(context)!.homeTitle,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -198,7 +208,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   child: ShaderMask(
                     shaderCallback: (bounds) {
                       const cycle = 56.0; // 2× icon width for smoother sweep
-                      final offset = (_patreonShimmerController.value * cycle) % cycle;
+                      final offset =
+                          (_patreonShimmerController.value * cycle) % cycle;
                       return LinearGradient(
                         tileMode: TileMode.repeated,
                         begin: Alignment.centerLeft,
@@ -259,7 +270,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 36, height: 5,
+              width: 36,
+              height: 5,
               margin: const EdgeInsets.only(top: 4, bottom: 12),
               decoration: BoxDecoration(
                 color: brightness == Brightness.dark
@@ -272,38 +284,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
               child: Column(
                 children: [
-                  const Icon(SimpleIcons.patreon, size: 40, color: Color(0xFFD4A017)),
+                  const Icon(SimpleIcons.patreon,
+                      size: 40, color: Color(0xFFD4A017)),
                   const SizedBox(height: 12),
                   Text(
-                    'Support Development',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                    AppLocalizations.of(context)!.supportDevelopment,
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 8),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                patreonDescription,
+                AppLocalizations.of(context)!.patreonDescription,
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 20),
             _sheetActionButton(
-              context, icon: SimpleIcons.patreon,
-              label: 'Visit Patreon',
-              onTap: () { Navigator.pop(ctx); _openUrl(patreonUrl); },
+              context,
+              icon: SimpleIcons.patreon,
+              label: AppLocalizations.of(context)!.visitPatreon,
+              onTap: () {
+                Navigator.pop(ctx);
+                _openUrl(patreonUrl);
+              },
             ),
             const SizedBox(height: 8),
             _sheetActionButton(
-              context, icon: Icons.content_copy,
-              label: 'Copy Link',
+              context,
+              icon: Icons.content_copy,
+              label: AppLocalizations.of(context)!.copyLink,
               onTap: () {
                 Clipboard.setData(ClipboardData(text: patreonUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard')),
+                  SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context)!.copiedToClipboard)),
                 );
               },
             ),
@@ -327,9 +348,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     required VoidCallback onTap,
   }) {
     final brightness = Theme.of(context).brightness;
-    final bgColor = brightness == Brightness.dark
-        ? const Color(0xFF2C2C2E)
-        : Colors.white;
+    final bgColor =
+        brightness == Brightness.dark ? const Color(0xFF2C2C2E) : Colors.white;
     final textColor = Theme.of(context).colorScheme.primary;
 
     return Padding(
@@ -352,9 +372,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                     Text(
                       label,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: textColor,
-                        fontWeight: FontWeight.w500,
-                      ),
+                            color: textColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                   ],
                 ),
@@ -374,7 +394,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     // Only fires once per session: prev != null skips the initial listener registration,
     // and _autoUpdateSheetShown prevents re-triggering on tab switches.
     ref.listen<UpdateCheckState>(autoUpdateCheckProvider, (prev, next) {
-      if (next is UpdateCheckAvailable && prev != null && !_autoUpdateSheetShown) {
+      if (next is UpdateCheckAvailable &&
+          prev != null &&
+          !_autoUpdateSheetShown) {
         _autoUpdateSheetShown = true;
         // Small delay so the UI settles before showing the sheet
         Future.delayed(const Duration(milliseconds: 600), () {
@@ -398,11 +420,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
           if (_lastBackPress == null ||
-              DateTime.now().difference(_lastBackPress!) > _backPressExitDuration) {
+              DateTime.now().difference(_lastBackPress!) >
+                  _backPressExitDuration) {
             _lastBackPress = DateTime.now();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Press back again to exit'),
+                content: Text(AppLocalizations.of(context)!.homePressBackExit),
                 duration: _backPressExitDuration,
               ),
             );
@@ -412,65 +435,70 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         }
       },
       child: Scaffold(
-      key: _scaffoldKey,
-      body: Stack(
-        children: [
-          FloatingDockScaffold(
-            appBarContent: _buildAppBarContent(context),
-            currentRoute: RouteNames.home,
-            body: _buildBody(),
-          ),
-          
-          // Scrim overlay with dimming and tap/swipe-to-close
-          Positioned.fill(
-            child: IgnorePointer(
-              ignoring: !_sidebarOpen,
-              child: AnimatedBuilder(
-                animation: _sidebarController,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _sidebarController.value,
-                    child: GestureDetector(
-                      onTap: _closeSidebar,
-                      onHorizontalDragUpdate: _handleSidebarDragUpdate,
-                      onHorizontalDragEnd: _handleSidebarDragEnd,
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                        color: Colors.black.withValues(alpha: 0.45),
+        key: _scaffoldKey,
+        body: Stack(
+          children: [
+            FloatingDockScaffold(
+              appBarContent: _buildAppBarContent(context),
+              currentRoute: RouteNames.home,
+              body: _buildBody(),
+            ),
+
+            // Scrim overlay with dimming and tap/swipe-to-close
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: !_sidebarOpen,
+                child: AnimatedBuilder(
+                  animation: _sidebarController,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _sidebarController.value,
+                      child: GestureDetector(
+                        onTap: _closeSidebar,
+                        onHorizontalDragUpdate: (details) =>
+                            _handleSidebarDragUpdate(details, context),
+                        onHorizontalDragEnd: _handleSidebarDragEnd,
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          color: Colors.black.withValues(alpha: 0.45),
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          
-          // Sidebar with slide-in animation and drag support
-          AnimatedBuilder(
-            animation: _sidebarController,
-            builder: (context, child) {
-              return Positioned(
-                top: _kSidebarTopOffset - _kSidebarRadius,
-                bottom: _kSidebarBottomOffset - _kSidebarRadius,
-                left: 0,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(-1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: _sidebarController,
-                    curve: Curves.easeOutCubic,
-                  )),
-                  child: IgnorePointer(
-                    ignoring: !_sidebarOpen,
-                    child: _buildSidebarDrawer(context, isDark),
+
+            // Sidebar with slide-in animation and drag support
+            AnimatedBuilder(
+              animation: _sidebarController,
+              builder: (context, child) {
+                final isRTL = Directionality.of(context) == TextDirection.rtl;
+                return Positioned(
+                  top: _kSidebarTopOffset - _kSidebarRadius,
+                  bottom: _kSidebarBottomOffset - _kSidebarRadius,
+                  left: isRTL ? null : 0,
+                  right: isRTL ? 0 : null,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: isRTL
+                          ? const Offset(1.0, 0.0)
+                          : const Offset(-1.0, 0.0),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: _sidebarController,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: IgnorePointer(
+                      ignoring: !_sidebarOpen,
+                      child: _buildSidebarDrawer(context, isDark),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -479,7 +507,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     final topPadding = MediaQuery.of(context).padding.top + 56;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final recentFilesBg = isDark ? const Color(0xFF0F0F11) : const Color(0xFFEFEFF4);
+    final recentFilesBg =
+        isDark ? const Color(0xFF0F0F11) : const Color(0xFFEFEFF4);
 
     return Column(
       children: [
@@ -548,7 +577,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         final showRecentFiles = ref.watch(showRecentFilesProvider);
         final appSettings = ref.watch(appSettingsProvider);
         return recentFiles.when(
-          data: (files) => _buildHomeContent(context, files, showRecentFiles, appSettings.value),
+          data: (files) => _buildHomeContent(
+              context, files, showRecentFiles, appSettings.value),
           error: (error, st) => _buildErrorState(context, error),
           loading: () => _buildSkeletonLoading(context),
         );
@@ -556,12 +586,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildHomeContent(BuildContext context, List<RecentFile> files, bool showRecentFiles, AppSettings? appSettings) {
+  Widget _buildHomeContent(BuildContext context, List<RecentFile> files,
+      bool showRecentFiles, AppSettings? appSettings) {
     final topPadding = MediaQuery.of(context).padding.top + 56;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final recentFilesBg = isDark ? const Color(0xFF0F0F11) : const Color(0xFFEFEFF4);
+    final recentFilesBg =
+        isDark ? const Color(0xFF0F0F11) : const Color(0xFFEFEFF4);
 
     return Column(
       children: [
@@ -581,8 +613,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   Expanded(
                     child: _buildActionCard(
                       context,
-                      title: 'Scan a Document',
-                      description: 'Extract text from documents using OCR',
+                      title: AppLocalizations.of(context)!.homeScanDocument,
+                      description:
+                          AppLocalizations.of(context)!.homeScanDocumentDesc,
                       icon: Icons.document_scanner,
                       cardType: 'scan',
                       onTap: () {
@@ -595,8 +628,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   Expanded(
                     child: _buildActionCard(
                       context,
-                      title: 'Import a Document',
-                      description: 'Browse and import files from your device',
+                      title: AppLocalizations.of(context)!.homeImportDocument,
+                      description:
+                          AppLocalizations.of(context)!.homeImportDocumentDesc,
                       icon: Icons.folder_open,
                       cardType: 'import',
                       onTap: () {
@@ -634,13 +668,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                       children: [
                         Text(
                           files.isNotEmpty
-                              ? 'Recent Files'
-                              : appSettings != null && appSettings.hasImportedSampleFiles
-                                  ? 'Recent Files'
+                              ? AppLocalizations.of(context)!.recentFiles
+                              : appSettings != null &&
+                                      appSettings.hasImportedSampleFiles
+                                  ? AppLocalizations.of(context)!.recentFiles
                                   : '',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
-                        if (files.isNotEmpty || (appSettings != null && appSettings.hasImportedSampleFiles))
+                        if (files.isNotEmpty ||
+                            (appSettings != null &&
+                                appSettings.hasImportedSampleFiles))
                           TextButton(
                             onPressed: () {
                               context.push(RouteNames.documents);
@@ -648,7 +685,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Text('See All'),
+                                Text(AppLocalizations.of(context)!.homeSeeAll),
                                 const SizedBox(width: 4),
                                 Icon(
                                   Icons.chevron_right,
@@ -673,14 +710,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                               itemBuilder: (context, index) {
                                 return Padding(
                                   padding: EdgeInsets.only(
-                                    bottom: index < (files.length > 4 ? 3 : files.length - 1) ? 8 : 0,
+                                    bottom: index <
+                                            (files.length > 4
+                                                ? 3
+                                                : files.length - 1)
+                                        ? 8
+                                        : 0,
                                   ),
-                                  child: _buildRecentFileItem(context, files[index]),
+                                  child: _buildRecentFileItem(
+                                      context, files[index]),
                                 );
                               },
                             )
                           // State 2 & 3: No files
-                          : appSettings != null && appSettings.hasImportedSampleFiles
+                          : appSettings != null &&
+                                  appSettings.hasImportedSampleFiles
                               // State 2: Has imported samples before but deleted → "No recent files"
                               ? Align(
                                   alignment: Alignment.topCenter,
@@ -690,14 +734,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                                       Icon(
                                         Icons.folder_open_outlined,
                                         size: 40,
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant
+                                            .withValues(alpha: 0.4),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        'No recent files',
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                                        ),
+                                        AppLocalizations.of(context)!
+                                            .homeNoRecentFiles,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant
+                                                  .withValues(alpha: 0.8),
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -712,31 +766,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceContainerHighest
+                                              .withValues(alpha: 0.5),
                                         ),
                                         child: Icon(
                                           Icons.lightbulb_outline,
                                           size: 32,
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
                                         ),
                                       ),
                                       const SizedBox(height: 16),
                                       Text(
-                                        'Welcome to Fadocx',
-                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                        AppLocalizations.of(context)!
+                                            .homeWelcomeTitle,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                         textAlign: TextAlign.center,
                                       ),
                                       const SizedBox(height: 8),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 24),
                                         child: Text(
-                                          'Explore sample files or import your own documents to get started',
-                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
-                                            height: 1.4,
-                                          ),
+                                          AppLocalizations.of(context)!
+                                              .homeWelcomeSubtitle,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant
+                                                    .withValues(alpha: 0.75),
+                                                height: 1.4,
+                                              ),
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
@@ -744,11 +815,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                                       // Explore Sample Files button only
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          borderRadius: BorderRadius.circular(10),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withValues(alpha: 0.3),
                                               blurRadius: 12,
                                               offset: const Offset(0, 4),
                                             ),
@@ -757,25 +834,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                                         child: Material(
                                           color: Colors.transparent,
                                           child: InkWell(
-                                            onTap: () => _importSampleFiles(context),
-                                            borderRadius: BorderRadius.circular(10),
+                                            onTap: () =>
+                                                _importSampleFiles(context),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
                                             child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 11),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Icon(
                                                     Icons.auto_stories,
                                                     size: 18,
-                                                    color: Theme.of(context).colorScheme.onPrimary,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary,
                                                   ),
                                                   const SizedBox(width: 8),
                                                   Text(
-                                                    'Explore Sample Files',
-                                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                                      color: Theme.of(context).colorScheme.onPrimary,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
+                                                    AppLocalizations.of(
+                                                            context)!
+                                                        .homeExploreSamples,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .labelLarge
+                                                        ?.copyWith(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onPrimary,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
                                                   ),
                                                 ],
                                               ),
@@ -813,10 +906,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildStatsCard(BuildContext context, List<RecentFile> files, AppSettings? appSettings) {
+  Widget _buildStatsCard(
+      BuildContext context, List<RecentFile> files, AppSettings? appSettings) {
     final filesCount = files.length;
-    final totalSizeBytes = files.fold<int>(0, (sum, f) => sum + f.fileSizeBytes);
-    
+    final totalSizeBytes =
+        files.fold<int>(0, (sum, f) => sum + f.fileSizeBytes);
+
     // Format storage properly - show in MB if < 1GB, else GB
     String formattedStorage;
     const kb = 1024.0;
@@ -831,9 +926,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     } else {
       formattedStorage = '$totalSizeBytes B';
     }
-    
+
     // Calculate total time spent across all files
-    final totalTimeMs = files.fold<int>(0, (sum, f) => sum + f.totalTimeSpentMs);
+    final totalTimeMs =
+        files.fold<int>(0, (sum, f) => sum + f.totalTimeSpentMs);
     String formattedTime;
     final totalSeconds = totalTimeMs ~/ 1000;
     final totalMinutes = totalSeconds ~/ 60;
@@ -848,17 +944,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     } else {
       formattedTime = '0s';
     }
-    
+
     final lastFile = files.isNotEmpty ? files.first : null;
-    log.d('[STATS] files count=${files.length}, lastFile=${lastFile?.fileName ?? "null"}, dates: ${files.map((f) => "${f.fileName}=${f.dateOpened.toIso8601String()}").join(" | ")}');
+    log.d(
+        '[STATS] files count=${files.length}, lastFile=${lastFile?.fileName ?? "null"}, dates: ${files.map((f) => "${f.fileName}=${f.dateOpened.toIso8601String()}").join(" | ")}');
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     // iOS-style colors
-    final secondaryLabelColor = isDark ? const Color(0xFF8E8E93) : const Color(0xFF3C3C43).withValues(alpha: 0.6);
-    final tertiaryLabelColor = isDark ? const Color(0xFF5A5A5E) : const Color(0xFF3C3C43).withValues(alpha: 0.3);
+    final secondaryLabelColor = isDark
+        ? const Color(0xFF8E8E93)
+        : const Color(0xFF3C3C43).withValues(alpha: 0.6);
+    final tertiaryLabelColor = isDark
+        ? const Color(0xFF5A5A5E)
+        : const Color(0xFF3C3C43).withValues(alpha: 0.3);
     final cardBg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7);
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -880,7 +981,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   context,
                   icon: Icons.description_outlined,
                   value: filesCount.toString(),
-                  label: 'Documents',
+                  label: AppLocalizations.of(context)!.homeStatDocuments,
                   secondaryLabelColor: secondaryLabelColor,
                   tertiaryLabelColor: tertiaryLabelColor,
                 ),
@@ -891,7 +992,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   context,
                   icon: Icons.pie_chart_outline,
                   value: formattedStorage,
-                  label: 'Storage',
+                  label: AppLocalizations.of(context)!.homeStatStorage,
                   secondaryLabelColor: secondaryLabelColor,
                   tertiaryLabelColor: tertiaryLabelColor,
                 ),
@@ -902,7 +1003,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   context,
                   icon: Icons.menu_book_outlined,
                   value: formattedTime,
-                  label: 'Time Read',
+                  label: AppLocalizations.of(context)!.homeStatTimeRead,
                   secondaryLabelColor: secondaryLabelColor,
                   tertiaryLabelColor: tertiaryLabelColor,
                 ),
@@ -920,14 +1021,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 onTap: () {
                   log.i('Opening last file: ${lastFile.fileName}');
                   if (!lastFile.isRead) {
-                    ref.read(recentFilesMutatorProvider).markAsRead(lastFile.id);
+                    ref
+                        .read(recentFilesMutatorProvider)
+                        .markAsRead(lastFile.id);
                   }
                   context.push(
                       '${RouteNames.viewer}?path=${Uri.encodeComponent(lastFile.filePath)}&name=${Uri.encodeComponent(lastFile.fileName)}');
                 },
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   child: Row(
                     children: [
                       Icon(
@@ -937,7 +1041,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Last Opened: ',
+                        '${AppLocalizations.of(context)!.homeStatLastOpened} ',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: secondaryLabelColor,
                           fontSize: 11,
@@ -983,7 +1087,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final pillBg = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFFFFFFF);
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
@@ -1028,6 +1132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   }
 
   Future<void> _importSampleFiles(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     final theme = Theme.of(context);
@@ -1037,12 +1142,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const AlertDialog(
+        builder: (context) => AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Importing sample files...'),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text(AppLocalizations.of(context)!.homeImportingSamples),
             ],
           ),
         ),
@@ -1117,9 +1222,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       if (!mounted) return;
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text('$importedCount sample files imported successfully!'),
+          content: Text(l10n.homeSamplesImported(importedCount)),
           action: SnackBarAction(
-            label: 'View Files',
+            label: l10n.homeViewFiles,
             onPressed: () {
               if (mounted) {
                 context.push(RouteNames.documents);
@@ -1135,7 +1240,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       // Mark that user has imported sample files
       final settingsMutator = ref.read(settingsMutatorProvider);
       await settingsMutator.updateHasImportedSampleFiles(true);
-
     } catch (e) {
       // Close loading dialog if open
       if (!mounted) return;
@@ -1145,7 +1249,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       if (!mounted) return;
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text('Failed to import sample files: $e'),
+          content: Text(l10n.homeFailedImportSamples(e.toString())),
           backgroundColor: theme.colorScheme.error,
         ),
       );
@@ -1153,7 +1257,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       log.e('Error importing sample files: $e');
     }
   }
-
 
   Widget _buildRecentFileItem(BuildContext context, RecentFile file) {
     return Material(
@@ -1204,29 +1307,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                           Icon(
                             Icons.storage,
                             size: 10,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 2),
                           Text(
                             file.formattedSize,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontSize: 10,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  fontSize: 10,
+                                ),
                           ),
                           const SizedBox(width: 8),
                           Icon(
                             Icons.schedule_outlined,
                             size: 10,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 2),
                           Text(
-                            _getTimeAgo(file.dateOpened),
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontSize: 10,
-                            ),
+                            _getTimeAgo(context, file.dateOpened),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  fontSize: 10,
+                                ),
                           ),
                         ],
                       ),
@@ -1250,30 +1365,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  String _getTimeAgo(DateTime dateTime) {
+  String _getTimeAgo(BuildContext context, DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inSeconds < 60) {
-      return 'Just now';
+      return l10n.timeAgoJustNow;
     } else if (difference.inMinutes < 60) {
-      final mins = difference.inMinutes;
-      return '$mins ${mins == 1 ? 'minute' : 'minutes'} ago';
+      return l10n.timeAgoMinute(difference.inMinutes);
     } else if (difference.inHours < 24) {
-      final hours = difference.inHours;
-      return '$hours ${hours == 1 ? 'hour' : 'hours'} ago';
+      return l10n.timeAgoHour(difference.inHours);
     } else if (difference.inDays < 7) {
-      final days = difference.inDays;
-      return '$days ${days == 1 ? 'day' : 'days'} ago';
+      return l10n.timeAgoDay(difference.inDays);
     } else if (difference.inDays < 30) {
       final weeks = (difference.inDays / 7).floor();
-      return '$weeks ${weeks == 1 ? 'week' : 'weeks'} ago';
+      return l10n.timeAgoWeek(weeks);
     } else if (difference.inDays < 365) {
       final months = (difference.inDays / 30).floor();
-      return '$months ${months == 1 ? 'month' : 'months'} ago';
+      return l10n.timeAgoMonth(months);
     } else {
       final years = (difference.inDays / 365).floor();
-      return '$years ${years == 1 ? 'year' : 'years'} ago';
+      return l10n.timeAgoYear(years);
     }
   }
 
@@ -1281,7 +1394,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${file.fileName} moved to trash'),
+        content: Text(
+            AppLocalizations.of(context)!.homeFileMovedToTrash(file.fileName)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -1290,51 +1404,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   void _showFileInfoDialog(BuildContext context, RecentFile file) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('File info'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Name: ${file.fileName}'),
-              const SizedBox(height: 8),
-              Text('Type: ${file.fileType.toUpperCase()}'),
-              const SizedBox(height: 8),
-              Text('Size: ${file.formattedSize}'),
-              const SizedBox(height: 8),
-              SelectableText('Location: ${file.filePath}'),
-              const SizedBox(height: 8),
-              Text('Date opened: ${_formatDateTime(file.dateOpened)}'),
-              const SizedBox(height: 8),
-              Text('Last modified: ${_formatDateTime(file.dateModified)}'),
-              if (file.isDeleted) ...[
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l10n.homeFileInfo),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${l10n.homeFileName}: ${file.fileName}'),
                 const SizedBox(height: 8),
-                Text('In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})'),
+                Text('${l10n.homeFileType}: ${file.fileType.toUpperCase()}'),
+                const SizedBox(height: 8),
+                Text('${l10n.homeFileSize}: ${file.formattedSize}'),
+                const SizedBox(height: 8),
+                SelectableText('${l10n.homeFileLocation}: ${file.filePath}'),
+                const SizedBox(height: 8),
+                Text(
+                    '${l10n.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}'),
+                const SizedBox(height: 8),
+                Text(
+                    '${l10n.homeFileLastModified}: ${_formatDateTime(file.dateModified)}'),
+                if (file.isDeleted) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                      '${l10n.homeFileInTrash}: yes (${l10n.homeFileDateOpened}: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})'),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final text = _buildFileInfoText(file);
-              final navigator = Navigator.of(context);
-              final messenger = ScaffoldMessenger.of(context);
-              await Clipboard.setData(ClipboardData(text: text));
-              navigator.pop();
-              messenger.showSnackBar(
-                const SnackBar(content: Text('File info copied')),
-              );
-            },
-            child: const Text('Copy'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                final text = _buildFileInfoText(context, file);
+                final navigator = Navigator.of(context);
+                final messenger = ScaffoldMessenger.of(context);
+                await Clipboard.setData(ClipboardData(text: text));
+                navigator.pop();
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.homeFileInfoCopied)),
+                );
+              },
+              child: Text(l10n.copy),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.close),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1354,21 +1474,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     return '$day$suffix $datePart, $timePart';
   }
 
-  String _buildFileInfoText(RecentFile file) {
+  String _buildFileInfoText(BuildContext context, RecentFile file) {
+    final l10n = AppLocalizations.of(context)!;
     final buffer = StringBuffer();
-    buffer.writeln('Name: ${file.fileName}');
-    buffer.writeln('Type: ${file.fileType.toUpperCase()}');
-    buffer.writeln('Size: ${file.formattedSize}');
-    buffer.writeln('Location: ${file.filePath}');
-    buffer.writeln('Date opened: ${_formatDateTime(file.dateOpened)}');
-    buffer.writeln('Last modified: ${_formatDateTime(file.dateModified)}');
+    buffer.writeln('${l10n.homeFileName}: ${file.fileName}');
+    buffer.writeln('${l10n.homeFileType}: ${file.fileType.toUpperCase()}');
+    buffer.writeln('${l10n.homeFileSize}: ${file.formattedSize}');
+    buffer.writeln('${l10n.homeFileLocation}: ${file.filePath}');
+    buffer.writeln(
+        '${l10n.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}');
+    buffer.writeln(
+        '${l10n.homeFileLastModified}: ${_formatDateTime(file.dateModified)}');
     if (file.isDeleted) {
-      buffer.writeln('In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})');
+      buffer.writeln(
+          '${l10n.homeFileInTrash}: yes (${l10n.homeFileDateOpened}: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})');
     }
     return buffer.toString();
   }
 
   Future<void> _duplicateFile(RecentFile file) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final src = File(file.filePath);
       if (!await src.exists()) {
@@ -1383,11 +1508,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
       String candidateName(String suffixIndex) => '$base$suffixIndex$ext';
 
-      String suffix = ' (copy)';
+      String suffix = l10n.homeCopySuffix;
       String newName = candidateName(suffix);
       int counter = 2;
       while (await File('$dir/$newName').exists()) {
-        newName = candidateName(' (copy $counter)');
+        newName = candidateName(l10n.homeCopySuffixCounter(counter));
         counter++;
       }
 
@@ -1412,19 +1537,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Duplicated as $newName')),
+          SnackBar(content: Text(l10n.homeDuplicatedAs(newName))),
         );
       }
     } catch (e) {
       log.e('Failed to duplicate file', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to duplicate file: $e')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .homeFailedDuplicate(e.toString()))),
         );
       }
     }
   }
-
 
   Future<void> _renameFile(RecentFile file) async {
     final dot = file.fileName.lastIndexOf('.');
@@ -1434,32 +1560,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
     final newName = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Rename file'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: 'File name',
-            suffixText: extension,
-            border: const OutlineInputBorder(),
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          title: Text(l10n.homeRenameFile),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: l10n.homeFileNameLabel,
+              suffixText: extension,
+              border: const OutlineInputBorder(),
+            ),
+            onSubmitted: (v) => Navigator.pop(ctx, v),
           ),
-          onSubmitted: (v) => Navigator.pop(ctx, v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Rename'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, controller.text),
+              child: Text(l10n.rename),
+            ),
+          ],
+        );
+      },
     );
 
-    if (newName == null || newName.trim().isEmpty || newName.trim() == baseName) return;
+    if (newName == null || newName.trim().isEmpty || newName.trim() == baseName)
+      return;
 
     final fullNewName = '${newName.trim()}$extension';
     final sourceFile = File(file.filePath);
@@ -1469,7 +1599,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     if (await File(newPath).exists()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('A file with this name already exists')),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.homeFileAlreadyExists)),
         );
       }
       return;
@@ -1495,20 +1627,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Renamed to $fullNewName')),
+          SnackBar(
+              content: Text(
+                  AppLocalizations.of(context)!.homeRenamedTo(fullNewName))),
         );
       }
     } catch (e) {
       log.e('Failed to rename file', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to rename file')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.homeFailedRename)),
         );
       }
     }
   }
 
   Future<void> _exportFile(RecentFile file) async {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1519,46 +1655,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         ),
         child: SingleChildScrollView(
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('Export', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-            ),
-            _buildExportActionRow(
-              icon: Icons.download,
-              title: 'Save to Downloads',
-              iconColor: Colors.green,
-              subtitle: 'Download/Fadocx/${file.fileName}',
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _saveToDownloads(file);
-              },
-            ),
-            _buildExportActionRow(
-              icon: Icons.folder_open,
-              title: 'Choose location',
-              iconColor: Colors.blue,
-              subtitle: 'Pick a custom save directory',
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _saveToCustomLocation(file);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l10n.homeExport,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+              ),
+              _buildExportActionRow(
+                icon: Icons.download,
+                title: l10n.homeSaveToDownloads,
+                iconColor: Colors.green,
+                subtitle: l10n.homeSaveToDownloadsPath(file.fileName),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await _saveToDownloads(file);
+                },
+              ),
+              _buildExportActionRow(
+                icon: Icons.folder_open,
+                title: l10n.homeChooseLocation,
+                iconColor: Colors.blue,
+                subtitle: l10n.homeChooseLocationDesc,
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await _saveToCustomLocation(file);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -1582,7 +1725,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Theme.of(context).colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerLow
+                  .withValues(alpha: 0.5),
             ),
             child: Row(
               children: [
@@ -1599,13 +1745,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      )),
+                      Text(title,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  )),
                       if (subtitle != null)
-                        Text(subtitle, style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        )),
+                        Text(subtitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                )),
                     ],
                   ),
                 ),
@@ -1645,14 +1799,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       await source.copy(finalDest);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved to Download/Fadocx/${finalDest.split('/').last}')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .homeSavedToDownloads(finalDest.split('/').last))),
         );
       }
     } catch (e) {
       log.e('Failed to export file', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to export file')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.homeFailedExport)),
         );
       }
     }
@@ -1661,7 +1818,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   Future<void> _saveToCustomLocation(RecentFile file) async {
     try {
       final directory = await FilePicker.getDirectoryPath(
-        dialogTitle: 'Choose save location',
+        dialogTitle: AppLocalizations.of(context)!.homeChooseSaveLocation,
       );
       if (directory == null) return;
 
@@ -1678,14 +1835,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       await source.copy(dest);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved to ${dest.split('/').last}')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .homeSavedTo(dest.split('/').last))),
         );
       }
     } catch (e) {
       log.e('Failed to export file to custom location', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to export file')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.homeFailedExport)),
         );
       }
     }
@@ -1701,12 +1861,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         onExport: () => _exportFile(file),
         onConvert: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Convert feature coming soon!')),
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.homeConvertComingSoon)),
           );
         },
         onUpload: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('FadDrive coming soon!')),
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.homeFadDriveComingSoon)),
           );
         },
         onFileInfo: () => _showFileInfoDialog(context, file),
@@ -1725,7 +1889,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $error'),
+              Text(AppLocalizations.of(context)!
+                  .homeErrorPrefix(error.toString())),
             ],
           ),
         ),
@@ -1737,10 +1902,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     final shimmer = _skeletonShimmer.value;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // Neutral gray/slate colors - theme independent
-    final Color baseColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
-    final Color highlightColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
-    final Color cardBg = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
-    final Color borderColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
+    final Color baseColor =
+        isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final Color highlightColor =
+        isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
+    final Color cardBg =
+        isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final Color borderColor =
+        isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
 
     return Container(
       decoration: BoxDecoration(
@@ -1765,8 +1934,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
   Widget _buildSkeletonActionCards() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color cardBg = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
-    final Color borderColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
+    final Color cardBg =
+        isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final Color borderColor =
+        isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
 
     return Row(
       children: [
@@ -1804,8 +1975,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   Widget _buildSkeletonRecentHeader() {
     final shimmer = _skeletonShimmer.value;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color baseColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
-    final Color highlightColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
+    final Color baseColor =
+        isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final Color highlightColor =
+        isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1861,10 +2034,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   Widget _buildSkeletonRecentItem() {
     final shimmer = _skeletonShimmer.value;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color baseColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
-    final Color highlightColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
-    final Color cardBg = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
-    final Color borderColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
+    final Color baseColor =
+        isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final Color highlightColor =
+        isDark ? const Color(0xFF3F3F46) : const Color(0xFFF4F4F5);
+    final Color cardBg =
+        isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final Color borderColor =
+        isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
     const double rotationAngle = -0.15;
 
     return Container(
@@ -1997,7 +2174,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildSkeletonStat(Color baseColor, Color highlightColor, double shimmer) {
+  Widget _buildSkeletonStat(
+      Color baseColor, Color highlightColor, double shimmer) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -2051,14 +2229,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         ? theme.colorScheme.surface.withValues(alpha: 0.95)
         : theme.colorScheme.surface.withValues(alpha: 0.93);
     final borderColor = theme.colorScheme.outline.withValues(alpha: 0.2);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
 
     return GestureDetector(
       onTap: () {}, // Absorb taps to prevent propagation
       behavior: HitTestBehavior.opaque,
-      onHorizontalDragUpdate: _handleSidebarDragUpdate,
+      onHorizontalDragUpdate: (details) =>
+          _handleSidebarDragUpdate(details, context),
       onHorizontalDragEnd: _handleSidebarDragEnd,
       child: Transform.translate(
-        offset: Offset(_sidebarDragOffset, 0),
+        offset: Offset(isRTL ? -_sidebarDragOffset : _sidebarDragOffset, 0),
         child: SizedBox(
           width: width + 20,
           child: ClipPath(
@@ -2167,7 +2347,8 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
         }
         return _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation));
       },
-      loading: () => _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation)),
+      loading: () =>
+          _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation)),
       error: (error, stack) {
         log.e('🖼️  [Thumbnail Widget] Error loading thumbnail: $error');
         return _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation));
@@ -2216,7 +2397,7 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
                 color: Colors.black.withValues(alpha: 0.4),
               ),
               child: Tooltip(
-                message: 'Coming Soon',
+                message: AppLocalizations.of(context)!.comingSoon,
                 child: Center(
                   child: Text(
                     '○',
@@ -2317,16 +2498,17 @@ class _ModernActionCardState extends State<_ModernActionCard>
     // Use theme colors with better contrast and visual appeal
     final gradientColors = isScanning
         ? [
-            const Color(0xFF16A085),  // Emerald
-            const Color(0xFF27AE60),  // Green
+            const Color(0xFF16A085), // Emerald
+            const Color(0xFF27AE60), // Green
           ]
         : [
-            const Color(0xFF2C3E50),  // Deep blue-gray
-            const Color(0xFF34495E),  // Slate
+            const Color(0xFF2C3E50), // Deep blue-gray
+            const Color(0xFF34495E), // Slate
           ];
 
     return AnimatedBuilder(
-      animation: Listenable.merge([_scaleAnimation, _shimmerAnimation, _binaryAnimation]),
+      animation: Listenable.merge(
+          [_scaleAnimation, _shimmerAnimation, _binaryAnimation]),
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
@@ -2368,22 +2550,24 @@ class _ModernActionCardState extends State<_ModernActionCard>
                             child: CustomPaint(
                               painter: _BinaryDigitsPainter(
                                 progress: _binaryAnimation.value,
+                                textDirection: Directionality.of(context),
                               ),
                             ),
                           ),
                         )
                       else
                         Positioned.fill(
-                            child: IgnorePointer(
-                              ignoring: true,
-                              child: CustomPaint(
-                                painter: _IconAnimationPainter(
-                                  progress: _binaryAnimation.value,
-                                  preserveIdentity: true,
-                                ),
+                          child: IgnorePointer(
+                            ignoring: true,
+                            child: CustomPaint(
+                              painter: _IconAnimationPainter(
+                                progress: _binaryAnimation.value,
+                                preserveIdentity: true,
+                                textDirection: Directionality.of(context),
                               ),
                             ),
                           ),
+                        ),
 
                       // Main content (top layer) - left aligned, overlaid on animation
                       LayoutBuilder(builder: (context, constraints) {
@@ -2391,9 +2575,11 @@ class _ModernActionCardState extends State<_ModernActionCard>
                         // Diagonal runs from top(85%) to bottom(65%) — use the midpoint
                         // so text never overflows into the animated area.
                         final diagMidX = constraints.maxWidth * 0.75;
-                        final rightReserve = (constraints.maxWidth - diagMidX).clamp(48.0, constraints.maxWidth * 0.4);
+                        final rightReserve = (constraints.maxWidth - diagMidX)
+                            .clamp(48.0, constraints.maxWidth * 0.4);
                         return Padding(
-                          padding: EdgeInsets.fromLTRB(6, 6, rightReserve + 10, 6),
+                          padding:
+                              EdgeInsets.fromLTRB(6, 6, rightReserve + 10, 6),
                           child: ConstrainedBox(
                             // restore compact card height (previously 120)
                             constraints: BoxConstraints(minHeight: 96),
@@ -2406,7 +2592,8 @@ class _ModernActionCardState extends State<_ModernActionCard>
                                   Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.15),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(
@@ -2445,7 +2632,8 @@ class _ModernActionCardState extends State<_ModernActionCard>
                                         .textTheme
                                         .labelSmall
                                         ?.copyWith(
-                                          color: Colors.white.withValues(alpha: 0.9),
+                                          color: Colors.white
+                                              .withValues(alpha: 0.9),
                                           fontSize: 11,
                                         ),
                                   ),
@@ -2481,9 +2669,11 @@ class _ModernActionCardState extends State<_ModernActionCard>
 // Binary digits painter for extraction card - shows animated 0s and 1s on pitch black background (diagonal right)
 class _BinaryDigitsPainter extends CustomPainter {
   final double progress;
+  final ui.TextDirection textDirection;
 
   _BinaryDigitsPainter({
     required this.progress,
+    this.textDirection = ui.TextDirection.ltr,
   });
 
   @override
@@ -2491,8 +2681,9 @@ class _BinaryDigitsPainter extends CustomPainter {
     // Diagonal cut path - small black area (top-right to bottom-left)
     final diagRect = Path();
     diagRect.moveTo(size.width, 0);
-    diagRect.lineTo(size.width * 0.85, 0);  // Consistent with import card
-    diagRect.lineTo(size.width * 0.65, size.height);  // Consistent with import card
+    diagRect.lineTo(size.width * 0.85, 0); // Consistent with import card
+    diagRect.lineTo(
+        size.width * 0.65, size.height); // Consistent with import card
     diagRect.lineTo(size.width, size.height);
     diagRect.close();
 
@@ -2514,7 +2705,7 @@ class _BinaryDigitsPainter extends CustomPainter {
       letterSpacing: 0.8,
     );
 
-    final textPainter = TextPainter(textDirection: ui.TextDirection.ltr);
+    final textPainter = TextPainter(textDirection: textDirection);
 
     // Seamless binary sequence
     const binarySequence = '0110101001101011010110100110';
@@ -2529,20 +2720,23 @@ class _BinaryDigitsPainter extends CustomPainter {
     for (int col = 0; col < 2; col++) {
       // Offset second column by half spacing for async animation
       final colOffset = col == 0 ? 0 : spacing / 2;
-      
+
       for (int row = 0; row < 20; row++) {
         // Static digit assignment per row/column - remove progress shift to stop swapping
-        final digitIndex = ((row + col * 13) + (progress * binarySequence.length).round()) % binarySequence.length;
+        final digitIndex =
+            ((row + col * 13) + (progress * binarySequence.length).round()) %
+                binarySequence.length;
         final digit = binarySequence[digitIndex];
 
         // Y position moves downward smoothly with wrapping
         double yPos = (row * spacing + colOffset + scrollOffset) % totalHeight;
-        
+
         final xPos = (size.width * 0.82) + (col * colWidth);
 
         // Fade in/out at edges for seamless effect
         final distanceFromCenter = (yPos - size.height / 2).abs();
-        final opacity = (1 - (distanceFromCenter / (size.height / 2))).clamp(0.0, 1.0);
+        final opacity =
+            (1 - (distanceFromCenter / (size.height / 2))).clamp(0.0, 1.0);
 
         textPainter.text = TextSpan(
           text: digit,
@@ -2558,21 +2752,24 @@ class _BinaryDigitsPainter extends CustomPainter {
       }
     }
 
-    canvas.restore();  // Restore clipping
+    canvas.restore(); // Restore clipping
   }
 
   @override
-  bool shouldRepaint(_BinaryDigitsPainter oldDelegate) => oldDelegate.progress != progress;
+  bool shouldRepaint(_BinaryDigitsPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 // Icon animation painter for import card - shows animated Material document icons on black background (diagonal right)
 class _IconAnimationPainter extends CustomPainter {
   final double progress;
   final bool preserveIdentity;
+  final ui.TextDirection textDirection;
 
   _IconAnimationPainter({
     required this.progress,
     this.preserveIdentity = false,
+    this.textDirection = ui.TextDirection.ltr,
   });
 
   @override
@@ -2580,8 +2777,8 @@ class _IconAnimationPainter extends CustomPainter {
     // Diagonal cut path - small black area (top-right to bottom-left)
     final diagRect = Path();
     diagRect.moveTo(size.width, 0);
-    diagRect.lineTo(size.width * 0.85, 0);  // Even smaller
-    diagRect.lineTo(size.width * 0.65, size.height);  // Much smaller
+    diagRect.lineTo(size.width * 0.85, 0); // Even smaller
+    diagRect.lineTo(size.width * 0.65, size.height); // Much smaller
     diagRect.lineTo(size.width, size.height);
     diagRect.close();
 
@@ -2600,14 +2797,14 @@ class _IconAnimationPainter extends CustomPainter {
 
     // Document type icons to use - real Material icons for different file types
     const iconList = [
-      Icons.picture_as_pdf,   // PDF
-      Icons.table_chart,      // Spreadsheet/Sheet
-      Icons.description,      // Word/Document
-      Icons.code,             // Code/Programming
-      Icons.slideshow,        // PowerPoint/Presentation
-      Icons.image,            // Image
-      Icons.text_fields,      // Text
-      Icons.folder,           // Folder
+      Icons.picture_as_pdf, // PDF
+      Icons.table_chart, // Spreadsheet/Sheet
+      Icons.description, // Word/Document
+      Icons.code, // Code/Programming
+      Icons.slideshow, // PowerPoint/Presentation
+      Icons.image, // Image
+      Icons.text_fields, // Text
+      Icons.folder, // Folder
     ];
 
     // Compute rows needed to fill the visible height
@@ -2627,27 +2824,31 @@ class _IconAnimationPainter extends CustomPainter {
         final iconIndex = (i + col * 3) % iconList.length;
 
         // Y position moves downward smoothly with wrapping
-        double yPos = (i * iconSpacing + colOffset + scrollOffset) % totalHeight;
+        double yPos =
+            (i * iconSpacing + colOffset + scrollOffset) % totalHeight;
         if (yPos < -iconSpacing) yPos += totalHeight;
 
         final xPos = (size.width * 0.80) + (col * colWidth);
 
         // Fade in/out at edges for seamless effect
         final distanceFromCenter = (yPos - size.height / 2).abs();
-        final opacity = (1 - (distanceFromCenter / (size.height / 2))).clamp(0.0, 1.0);
+        final opacity =
+            (1 - (distanceFromCenter / (size.height / 2))).clamp(0.0, 1.0);
 
         // Draw icon as a real Material glyph
-        _drawIconGlyph(canvas, Offset(xPos, yPos), iconList[iconIndex], opacity);
+        _drawIconGlyph(canvas, Offset(xPos, yPos), iconList[iconIndex], opacity,
+            textDirection);
       }
     }
 
-    canvas.restore();  // Restore clipping
+    canvas.restore(); // Restore clipping
   }
 
-  void _drawIconGlyph(Canvas canvas, Offset center, IconData icon, double opacity) {
+  void _drawIconGlyph(Canvas canvas, Offset center, IconData icon,
+      double opacity, ui.TextDirection textDirection) {
     // Render actual Material Design icons using TextPainter
     final textPainter = TextPainter(
-      textDirection: ui.TextDirection.ltr,
+      textDirection: textDirection,
     );
 
     // Create Material icon text span with proper styling
@@ -2663,7 +2864,7 @@ class _IconAnimationPainter extends CustomPainter {
     );
 
     textPainter.layout();
-    
+
     // Draw the icon centered at the given position
     textPainter.paint(
       canvas,
@@ -2675,7 +2876,8 @@ class _IconAnimationPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_IconAnimationPainter oldDelegate) => oldDelegate.progress != progress;
+  bool shouldRepaint(_IconAnimationPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 class _HomeDrawerContent extends ConsumerWidget {
@@ -2714,57 +2916,55 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
       ..strokeWidth = 1.2;
 
     final path = Path();
-    
+
     // Top flare flaring UP from sidebar top (0, radius) to screen edge (0, 0)
     path.moveTo(0, 0);
     // Smooth S-curve transition
-    path.cubicTo(
-      0, radius * 0.4, 
-      radius * 0.1, radius, 
-      radius, radius
-    );
-    
+    path.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
+
     // Top edge
     path.lineTo(sidebarWidth - 16, radius);
-    path.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
-    
+    path.arcToPoint(Offset(sidebarWidth, radius + 16),
+        radius: const Radius.circular(16), clockwise: true);
+
     // Right side
     path.lineTo(sidebarWidth, size.height - radius - 16);
-    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
-    
+    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
+        radius: const Radius.circular(16), clockwise: true);
+
     // Bottom edge
     path.lineTo(radius, size.height - radius);
-    
+
     // Bottom flare flaring DOWN from sidebar bottom (0, h-radius) to screen edge (0, h)
-    path.cubicTo(
-      radius * 0.1, size.height - radius,
-      0, size.height - radius * 0.4,
-      0, size.height
-    );
-    
+    path.cubicTo(radius * 0.1, size.height - radius, 0,
+        size.height - radius * 0.4, 0, size.height);
+
     path.lineTo(0, 0);
     path.close();
-    
+
     canvas.drawShadow(path, Colors.black, 10, false);
     canvas.drawPath(path, paint);
-    
+
     // Border for the visible part
     final borderPath = Path();
     borderPath.moveTo(0, 0);
     borderPath.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
     borderPath.lineTo(sidebarWidth - 16, radius);
-    borderPath.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
+    borderPath.arcToPoint(Offset(sidebarWidth, radius + 16),
+        radius: const Radius.circular(16), clockwise: true);
     borderPath.lineTo(sidebarWidth, size.height - radius - 16);
-    borderPath.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
+    borderPath.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
+        radius: const Radius.circular(16), clockwise: true);
     borderPath.lineTo(radius, size.height - radius);
-    borderPath.cubicTo(radius * 0.1, size.height - radius, 0, size.height - radius * 0.4, 0, size.height);
-    
+    borderPath.cubicTo(radius * 0.1, size.height - radius, 0,
+        size.height - radius * 0.4, 0, size.height);
+
     canvas.drawPath(borderPath, borderPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _InvertedCornerSidebarPainter oldDelegate) => 
-    oldDelegate.color != color || oldDelegate.borderColor != borderColor;
+  bool shouldRepaint(covariant _InvertedCornerSidebarPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.borderColor != borderColor;
 }
 
 /// Custom clipper that matches the exact shape of the sidebar with flares
@@ -2780,41 +2980,36 @@ class _SidebarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    
+
     // Top flare flaring UP from sidebar top (0, radius) to screen edge (0, 0)
     path.moveTo(0, 0);
     // Smooth S-curve transition
-    path.cubicTo(
-      0, radius * 0.4, 
-      radius * 0.1, radius, 
-      radius, radius
-    );
-    
+    path.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
+
     // Top edge
     path.lineTo(sidebarWidth - 16, radius);
-    path.arcToPoint(Offset(sidebarWidth, radius + 16), radius: const Radius.circular(16), clockwise: true);
-    
+    path.arcToPoint(Offset(sidebarWidth, radius + 16),
+        radius: const Radius.circular(16), clockwise: true);
+
     // Right side
     path.lineTo(sidebarWidth, size.height - radius - 16);
-    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius), radius: const Radius.circular(16), clockwise: true);
-    
+    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
+        radius: const Radius.circular(16), clockwise: true);
+
     // Bottom edge
     path.lineTo(radius, size.height - radius);
-    
+
     // Bottom flare flaring DOWN from sidebar bottom (0, h-radius) to screen edge (0, h)
-    path.cubicTo(
-      radius * 0.1, size.height - radius,
-      0, size.height - radius * 0.4,
-      0, size.height
-    );
-    
+    path.cubicTo(radius * 0.1, size.height - radius, 0,
+        size.height - radius * 0.4, 0, size.height);
+
     path.lineTo(0, 0);
     path.close();
-    
+
     return path;
   }
 
   @override
   bool shouldReclip(covariant _SidebarClipper oldClipper) =>
-    oldClipper.sidebarWidth != sidebarWidth || oldClipper.radius != radius;
+      oldClipper.sidebarWidth != sidebarWidth || oldClipper.radius != radius;
 }

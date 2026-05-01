@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fadocx/features/home/presentation/providers/update_check_provider.dart';
 import 'package:fadocx/core/presentation/widgets/update_available_sheet.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Animated drawer cards shown when updates are available.
 /// Renders separate cards for stable and/or beta updates.
@@ -24,7 +25,7 @@ class DrawerUpdateBanner extends ConsumerWidget {
         if (hasStable)
           _DrawerCard(
             key: const ValueKey('stable_update'),
-            label: 'Stable Update',
+            label: AppLocalizations.of(context)!.updateBannerStable,
             icon: Icons.verified_rounded,
             accentColor: const Color(0xFF2E7D32),
             version: 'v${updateState.stableVersion}',
@@ -45,7 +46,7 @@ class DrawerUpdateBanner extends ConsumerWidget {
           if (hasStable) const SizedBox(height: 6),
           _DrawerCard(
             key: const ValueKey('beta_update'),
-            label: 'Beta Update',
+            label: AppLocalizations.of(context)!.updateBannerBeta,
             icon: Icons.science_rounded,
             accentColor: const Color(0xFF7C4DFF),
             version: 'v${updateState.betaVersion}',
@@ -176,8 +177,8 @@ class _DrawerCardState extends State<_DrawerCard>
                         color: widget.accentColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
-                        'NEW',
+child: Text(
+                            AppLocalizations.of(context)!.newBadge,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontSize: 9,
                               fontWeight: FontWeight.w800,

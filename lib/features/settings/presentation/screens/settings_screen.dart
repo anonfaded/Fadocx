@@ -10,7 +10,6 @@ import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/core/presentation/widgets/update_available_sheet.dart';
 import 'package:fadocx/core/presentation/widgets/link_tile.dart';
-import 'package:fadocx/core/presentation/constants.dart';
 import 'package:fadocx/core/services/update_check_service.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
@@ -23,6 +22,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(appSettingsProvider);
     final themeMode = ref.watch(themeModeProvider);
     final packageInfoAsync = ref.watch(packageInfoProvider);
@@ -48,27 +48,27 @@ class SettingsScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 100, 16, 100),
             children: [
-              _buildSectionHeader(context, 'Appearance'),
+              _buildSectionHeader(context, l10n.settingsAppearance),
               _buildSettingsGroup(context, [
                 _SettingsRow(
                   icon: Icons.palette_outlined,
-                  title: 'Theme',
+                  title: l10n.theme,
                   value: _getThemeDisplayName(context, themeMode),
                   onTap: () => _showThemePicker(context, ref, themeMode),
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildSectionHeader(context, 'Language'),
+              _buildSectionHeader(context, l10n.language),
               _buildSettingsGroup(context, [
                 _SettingsRow(
                   icon: Icons.language,
-                  title: 'Language',
+                  title: l10n.language,
                   value: _getLanguageDisplayName(context, ref),
                   onTap: () => _showLanguagePicker(context, ref),
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildSectionHeader(context, 'Storage'),
+              _buildSectionHeader(context, l10n.settingsStorage),
               _buildSettingsGroup(context, [
                 Consumer(
                   builder: (context, ref, _) {
@@ -77,15 +77,15 @@ class SettingsScreen extends ConsumerWidget {
                       loading: () => Column(children: [
                         _SettingsRow(
                           icon: Icons.folder_outlined,
-                          title: 'Documents Size',
-                          value: 'Calculating...',
+                          title: l10n.settingsDocumentsSize,
+                          value: l10n.settingsCalculating,
                           onTap: () => _showStorageInfo(context),
                         ),
                         _divider(context),
                         _SettingsRow(
                           icon: Icons.settings_backup_restore,
-                          title: 'Custom Storage',
-                          value: 'Coming Soon',
+                          title: l10n.settingsCustomStorage,
+                          value: l10n.comingSoon,
                           isComingSoon: true,
                           onTap: null,
                         ),
@@ -93,15 +93,15 @@ class SettingsScreen extends ConsumerWidget {
                       error: (error, stack) => Column(children: [
                         _SettingsRow(
                           icon: Icons.folder_outlined,
-                          title: 'Documents Size',
-                          value: 'Unknown',
+                          title: l10n.settingsDocumentsSize,
+                          value: l10n.settingsUnknown,
                           onTap: () => _showStorageInfo(context),
                         ),
                         _divider(context),
                         _SettingsRow(
                           icon: Icons.settings_backup_restore,
-                          title: 'Custom Storage',
-                          value: 'Coming Soon',
+                          title: l10n.settingsCustomStorage,
+                          value: l10n.comingSoon,
                           isComingSoon: true,
                           onTap: null,
                         ),
@@ -110,19 +110,22 @@ class SettingsScreen extends ConsumerWidget {
                         final activeFiles = files.where((f) => !f.isDeleted).toList();
                         final totalBytes = activeFiles.fold<int>(0, (sum, f) => sum + f.fileSizeBytes);
                         final totalCount = activeFiles.length;
-                        final value = '${StorageService.formatBytes(totalBytes)} • $totalCount files';
+                        final value = l10n.settingsStorageFilesSummary(
+                          StorageService.formatBytes(totalBytes),
+                          totalCount,
+                        );
                         return Column(children: [
                           _SettingsRow(
                             icon: Icons.folder_outlined,
-                            title: 'Documents Size',
+                            title: l10n.settingsDocumentsSize,
                             value: value,
                             onTap: () => _showStorageInfo(context),
                           ),
                           _divider(context),
                           _SettingsRow(
                             icon: Icons.settings_backup_restore,
-                            title: 'Custom Storage',
-                            value: 'Coming Soon',
+                            title: l10n.settingsCustomStorage,
+                            value: l10n.comingSoon,
                             isComingSoon: true,
                             onTap: null,
                           ),
@@ -133,7 +136,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildSectionHeader(context, 'Updates'),
+              _buildSectionHeader(context, l10n.settingsUpdates),
               _buildSettingsGroup(context, [
                 Consumer(
                   builder: (context, ref, _) {
@@ -151,26 +154,26 @@ class SettingsScreen extends ConsumerWidget {
                 _buildCheckUpdatesRow(context, ref),
               ]),
               const SizedBox(height: 24),
-              _buildSectionHeader(context, 'Security'),
+              _buildSectionHeader(context, l10n.settingsSecurity),
               _buildSettingsGroup(context, [
                 _SettingsRow(
                   icon: Icons.lock_outline,
-                  title: 'App Lock',
-                  value: 'Coming Soon',
+                  title: l10n.settingsAppLock,
+                  value: l10n.comingSoon,
                   isComingSoon: true,
                   onTap: null,
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildSectionHeader(context, 'About'),
+              _buildSectionHeader(context, l10n.settingsAbout),
               _buildSettingsGroup(context, [
                 _SettingsRow(
                   icon: Icons.info_outline,
-                  title: 'Version',
+                  title: l10n.settingsVersion,
                   value: packageInfoAsync.when(
                     data: (info) => 'v${info.version}+${info.buildNumber}',
                     loading: () => '...',
-                    error: (_, __) => 'Unknown',
+                    error: (_, __) => l10n.settingsUnknown,
                   ),
                   onTap: () => packageInfoAsync.whenData(
                     (info) => _showVersionInfo(context, info),
@@ -179,41 +182,38 @@ class SettingsScreen extends ConsumerWidget {
                 _divider(context),
                 LinkTile.url(
                   icon: SimpleIcons.github,
-                  title: 'Source Code',
+                  title: l10n.settingsSourceCode,
                   value: 'https://github.com/anonfaded/Fadocx',
                 ),
                 _divider(context),
                 LinkTile.email(
                   icon: Icons.email_outlined,
-                  title: 'Contact',
+                  title: l10n.settingsContact,
                   value: 'contact@fadseclab.com',
                 ),
                 _divider(context),
                 LinkTile.url(
                   icon: SimpleIcons.discord,
-                  title: 'Join Community',
+                  title: l10n.settingsJoinCommunity,
                   value: 'https://discord.gg/kvAZvdkuuN',
                 ),
                 _divider(context),
                 _SettingsRow(
                   icon: Icons.shield_outlined,
-                  title: 'Privacy Policy',
+                  title: l10n.settingsPrivacyPolicy,
                   onTap: () => _showPrivacyPolicy(context),
                 ),
                 _divider(context),
                 _patreonRow(context),
               ]),
               const SizedBox(height: 24),
-              _buildSectionHeader(context, 'More from FadSec Lab'),
+              _buildSectionHeader(context, l10n.settingsMoreFromFadsec),
               _buildSettingsGroup(context, [
                 _otherAppCard(
                   context,
                   imageAsset: 'assets/other_apps/fadcam.png',
                   name: 'FadCam',
-                  description:
-                      'Privacy-focused Android multimedia suite: background video recording, '
-                      'dashcam, screen recorder, live streaming & remote control — '
-                      'ad-free & open-source.',
+                  description: l10n.settingsFadcamDesc,
                   platformIcons: [SimpleIcons.android],
                   url: 'https://github.com/anonfaded/FadCam',
                 ),
@@ -222,47 +222,39 @@ class SettingsScreen extends ConsumerWidget {
                   context,
                   imageAsset: 'assets/other_apps/qurancli.png',
                   name: 'QuranCLI',
-                  description:
-                      'Your Terminal Companion for the Holy Quran: Read, Listen & Generate '
-                      'Subtitles for Video Editing!',
+                  description: l10n.settingsQuranCliDesc,
                   platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
                   url: 'https://github.com/anonfaded/QuranCLI',
-                  platformNote: 'macOS coming soon',
+                  platformNote: l10n.settingsMacosComingSoon,
                 ),
                 _divider(context),
                 _otherAppCard(
                   context,
                   imageAsset: 'assets/other_apps/fadcrypt.png',
                   name: 'FadCrypt',
-                  description:
-                      'Advanced and elegant cross-platform app locker — files, folders, '
-                      'and applications all protected with military-grade AES-256-GCM encryption. '
-                      'Open-source, completely free, no telemetry!',
+                  description: l10n.settingsFadcryptDesc,
                   platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
                   url: 'https://github.com/anonfaded/FadCrypt',
-                  platformNote: 'macOS coming soon',
+                  platformNote: l10n.settingsMacosComingSoon,
                 ),
                 _divider(context),
                 _otherAppCard(
                   context,
                   imageAsset: 'assets/other_apps/fadcat.png',
                   name: 'FadCat',
-                  description:
-                      'Lightweight, feature-rich, cross-platform Android logcat replacement — '
-                      'no Android Studio bloat. Bundles ADB for supported architectures, runs '
-                      'in GUI, CLI, or MCP server mode.',
+                  description: l10n.settingsFadcatDesc,
                   platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
                   url: 'https://github.com/anonfaded/FadCat',
                   iconBgColor: Colors.black.withValues(alpha: 0.2),
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildSectionHeader(context, 'Danger Zone', color: Colors.red),
+              _buildSectionHeader(context, l10n.settingsDangerZone, color: Colors.red),
               _buildDangerGroup(context, [
                 _DangerRow(
                   icon: Icons.delete_outline,
-                  title: 'Trash',
-                  subtitle: 'View deleted files',
+                  title: l10n.settingsTrash,
+                  subtitle: l10n.settingsTrashDesc,
                   confirmText: '',
                   onConfirm: () {
                     context.push(RouteNames.trash);
@@ -271,15 +263,14 @@ class SettingsScreen extends ConsumerWidget {
                 _divider(context),
                 _DangerRow(
                   icon: Icons.restore,
-                  title: 'Reset Settings',
-                  subtitle: 'Restore all settings to defaults',
+                  title: l10n.settingsResetSettings,
+                  subtitle: l10n.settingsResetSettingsDesc,
                   confirmText: 'RESET',
                   onConfirm: () {
                     ref.read(settingsMutatorProvider).clearSettings();
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Settings reset to defaults')),
+                      SnackBar(content: Text(l10n.settingsResetDone)),
                     );
                   },
                 ),
@@ -297,11 +288,11 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $e'),
+              Text(l10n.settingsErrorPrefix(e.toString())),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.invalidate(appSettingsProvider),
-                child: const Text('Retry'),
+                child: Text(l10n.settingsRetry),
               ),
             ],
           ),
@@ -378,14 +369,16 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _copyToClipboard(BuildContext context, String text) {
+    final l10n = AppLocalizations.of(context)!;
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text('Copied: $text'), duration: const Duration(seconds: 2)),
+          content: Text(l10n.settingsCopiedText(text)), duration: const Duration(seconds: 2)),
     );
   }
 
   void _showStorageInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -407,7 +400,7 @@ class SettingsScreen extends ConsumerWidget {
                     Center(child: _handle(context)),
                     const SizedBox(height: 8),
                     Center(
-                      child: Text('Storage',
+                      child: Text(l10n.settingsStorageDetails,
                           style: Theme.of(context)
                               .textTheme
                               .titleLarge
@@ -419,11 +412,11 @@ class SettingsScreen extends ConsumerWidget {
                         SizedBox(height: 140, child: Center(child: CircularProgressIndicator())),
                         const SizedBox(height: 12),
                         Row(children: [
-                          Expanded(child: _storageChip(Icons.picture_as_pdf, 'PDFs', 'Calculating...', Colors.red)),
+                          Expanded(child: _storageChip(Icons.picture_as_pdf, l10n.settingsStoragePdfs, l10n.settingsCalculating, Colors.red)),
                           const SizedBox(width: 8),
-                          Expanded(child: _storageChip(Icons.table_chart, 'Sheets', 'Calculating...', Colors.green)),
+                          Expanded(child: _storageChip(Icons.table_chart, l10n.settingsStorageSheets, l10n.settingsCalculating, Colors.green)),
                           const SizedBox(width: 8),
-                          Expanded(child: _storageChip(Icons.description, 'Docs', 'Calculating...', Colors.blue)),
+                          Expanded(child: _storageChip(Icons.description, l10n.settingsStorageDocs, l10n.settingsCalculating, Colors.blue)),
                         ]),
                       ],
                     ),
@@ -435,18 +428,18 @@ class SettingsScreen extends ConsumerWidget {
                     Center(child: _handle(context)),
                     const SizedBox(height: 8),
                     Center(
-                      child: Text('Storage',
+                      child: Text(l10n.settingsStorageDetails,
                           style: Theme.of(context)
                               .textTheme
                               .titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold)),
                     ),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: Text('Failed to load storage data',
-                          style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                  ],
+                     const SizedBox(height: 20),
+                     Center(
+                       child: Text(l10n.settingsStorageFailedLoad,
+                           style: Theme.of(context).textTheme.bodyMedium),
+                     ),
+                   ],
                 ),
                 data: (files) {
                   final stats = _computeCategoryStats(files);
@@ -455,45 +448,45 @@ class SettingsScreen extends ConsumerWidget {
                     children: [
                       Center(child: _handle(context)),
                       const SizedBox(height: 8),
-                      Center(
-                        child: Text('Storage',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
+                       Center(
+                         child: Text(l10n.settingsStorageDetails,
+                             style: Theme.of(context)
+                                 .textTheme
+                                 .titleLarge
                                 ?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(height: 20),
-                      Builder(
-                        builder: (context) {
-                          final slices = <String, int>{};
-                          for (final entry in stats.entries) {
-                            slices[_labelForFolder(entry.key)] = entry.value['bytes'] ?? 0;
-                          }
-                          return Column(
-                            children: [
-                              SizedBox(height: 140, child: _storageChartFromMap(context, slices)),
-                              const SizedBox(height: 12),
-                              Row(children: [
-                                Expanded(child: _storageChip(Icons.picture_as_pdf, 'PDFs', '${StorageService.formatBytes(stats['PDFs']?['bytes'] ?? 0)} • ${stats['PDFs']?['count'] ?? 0} files', Colors.red)),
-                                const SizedBox(width: 8),
-                                Expanded(child: _storageChip(Icons.table_chart, 'Sheets', '${StorageService.formatBytes(stats['Spreadsheets']?['bytes'] ?? 0)} • ${stats['Spreadsheets']?['count'] ?? 0} files', Colors.green)),
-                                const SizedBox(width: 8),
-                                Expanded(child: _storageChip(Icons.description, 'Docs', '${StorageService.formatBytes(stats['Documents']?['bytes'] ?? 0)} • ${stats['Documents']?['count'] ?? 0} files', Colors.blue)),
-                              ]),
-                              const SizedBox(height: 12),
-                              Row(children: [
-                                Expanded(child: _storageChip(Icons.slideshow, 'Presentations', '${StorageService.formatBytes(stats['Presentations']?['bytes'] ?? 0)} • ${stats['Presentations']?['count'] ?? 0} files', Colors.orange)),
-                                const SizedBox(width: 8),
-                                Expanded(child: _storageChip(Icons.code, 'Code', '${StorageService.formatBytes(stats['Code']?['bytes'] ?? 0)} • ${stats['Code']?['count'] ?? 0} files', Colors.purple)),
-                                const SizedBox(width: 8),
-                                Expanded(child: _storageChip(Icons.document_scanner, 'Scans', '${StorageService.formatBytes(stats['Scans']?['bytes'] ?? 0)} • ${stats['Scans']?['count'] ?? 0} files', Colors.cyan)),
-                              ]),
-                              const SizedBox(height: 12),
-                              Row(children: [
-                                Expanded(child: _storageChip(Icons.insert_drive_file, 'Other', '${StorageService.formatBytes(stats['Other']?['bytes'] ?? 0)} • ${stats['Other']?['count'] ?? 0} files', Colors.teal)),
-                              ]),
-                            ],
-                          );
+                       Builder(
+                         builder: (context) {
+                           final slices = <String, int>{};
+                           for (final entry in stats.entries) {
+                             slices[_labelForFolder(context, entry.key)] = entry.value['bytes'] ?? 0;
+                           }
+                           return Column(
+                             children: [
+                               SizedBox(height: 140, child: _storageChartFromMap(context, slices)),
+                               const SizedBox(height: 12),
+                               Row(children: [
+                                 Expanded(child: _storageChip(Icons.picture_as_pdf, l10n.settingsStoragePdfs, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['PDFs']?['bytes'] ?? 0), stats['PDFs']?['count'] ?? 0), Colors.red)),
+                                 const SizedBox(width: 8),
+                                 Expanded(child: _storageChip(Icons.table_chart, l10n.settingsStorageSheets, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Spreadsheets']?['bytes'] ?? 0), stats['Spreadsheets']?['count'] ?? 0), Colors.green)),
+                                 const SizedBox(width: 8),
+                                 Expanded(child: _storageChip(Icons.description, l10n.settingsStorageDocs, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Documents']?['bytes'] ?? 0), stats['Documents']?['count'] ?? 0), Colors.blue)),
+                               ]),
+                               const SizedBox(height: 12),
+                               Row(children: [
+                                 Expanded(child: _storageChip(Icons.slideshow, l10n.settingsStoragePresentations, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Presentations']?['bytes'] ?? 0), stats['Presentations']?['count'] ?? 0), Colors.orange)),
+                                 const SizedBox(width: 8),
+                                 Expanded(child: _storageChip(Icons.code, l10n.settingsStorageCode, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Code']?['bytes'] ?? 0), stats['Code']?['count'] ?? 0), Colors.purple)),
+                                 const SizedBox(width: 8),
+                                 Expanded(child: _storageChip(Icons.document_scanner, l10n.settingsStorageScans, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Scans']?['bytes'] ?? 0), stats['Scans']?['count'] ?? 0), Colors.cyan)),
+                               ]),
+                               const SizedBox(height: 12),
+                               Row(children: [
+                                 Expanded(child: _storageChip(Icons.insert_drive_file, l10n.settingsStorageOther, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Other']?['bytes'] ?? 0), stats['Other']?['count'] ?? 0), Colors.teal)),
+                               ]),
+                             ],
+                           );
                         },
                       ),
                       const SizedBox(height: 20),
@@ -514,7 +507,7 @@ class SettingsScreen extends ConsumerWidget {
                             const SizedBox(height: 12),
                             Expanded(
                               child: Text(
-                                'Documents are stored in a private folder, hidden from other apps and file managers. Only Fadocx can access them.',
+                                l10n.settingsStoragePrivateFolderInfo,
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
@@ -535,7 +528,7 @@ class SettingsScreen extends ConsumerWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Delete documents from Danger Zone in Settings',
+                                l10n.settingsStorageDeleteInfo,
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ),
@@ -554,9 +547,10 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _storageChartFromMap(BuildContext context, Map<String, int> slices) {
+    final l10n = AppLocalizations.of(context)!;
     final total = slices.values.fold<int>(0, (p, e) => p + e);
     if (total == 0) {
-      return Center(child: Text('No documents', style: Theme.of(context).textTheme.bodySmall));
+      return Center(child: Text(l10n.settingsStorageEmpty, style: Theme.of(context).textTheme.bodySmall));
     }
 
     final sections = <PieChartSectionData>[];
@@ -660,24 +654,25 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  String _labelForFolder(String folder) {
+  String _labelForFolder(BuildContext context, String folder) {
+    final l10n = AppLocalizations.of(context)!;
     switch (folder) {
       case StorageService.pdfsFolder:
-        return 'PDFs';
+        return l10n.settingsStoragePdfs;
       case StorageService.spreadsheetsFolder:
-        return 'Sheets';
+        return l10n.settingsStorageSheets;
       case StorageService.documentsFolder:
-        return 'Docs';
+        return l10n.settingsStorageDocs;
       case StorageService.codeFolder:
-        return 'Code';
+        return l10n.settingsStorageCode;
       case StorageService.presentationsFolder:
-        return 'Presentations';
+        return l10n.settingsStoragePresentations;
       case StorageService.imagesFolder:
-        return 'Images';
+        return l10n.settingsStorageImages;
       case StorageService.scansFolder:
-        return 'Scans';
+        return l10n.settingsStorageScans;
       case StorageService.trashFolder:
-        return 'Trash';
+        return l10n.settingsTrash;
       default:
         return folder;
     }
@@ -702,6 +697,7 @@ class SettingsScreen extends ConsumerWidget {
       );
 
   Widget _buildAutoUpdateRow(BuildContext context, WidgetRef ref, bool enabled) {
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -732,11 +728,11 @@ class SettingsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Auto Update Check',
+                      l10n.settingsAutoUpdateCheck,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     Text(
-                      enabled ? 'Enabled' : 'Disabled',
+                      enabled ? l10n.settingsEnabled : l10n.settingsDisabled,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
@@ -761,6 +757,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showThemePicker(BuildContext context, WidgetRef ref, ThemeMode current) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -774,7 +771,7 @@ class SettingsScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Choose Theme',
+                  l10n.settingsChooseTheme,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -825,6 +822,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -838,7 +836,7 @@ class SettingsScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Select Language',
+                  l10n.settingsSelectLanguage,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -873,6 +871,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildCheckUpdatesRow(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -901,7 +900,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  'Check for Updates',
+                  l10n.settingsCheckForUpdates,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
@@ -918,20 +917,21 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _manualUpdateCheck(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     // Show loading
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
+      builder: (_) => Center(
         child: Card(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Checking for updates…'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text(l10n.settingsCheckingUpdates),
               ],
             ),
           ),
@@ -951,7 +951,7 @@ class SettingsScreen extends ConsumerWidget {
 
       if (result.errorOccurred) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No internet connection. Check your network and try again.')),
+          SnackBar(content: Text(l10n.settingsNoInternet)),
         );
       } else if (result.isUpdateAvailable) {
         UpdateAvailableSheet.show(
@@ -971,12 +971,13 @@ class SettingsScreen extends ConsumerWidget {
       if (!context.mounted) return;
       Navigator.pop(context); // dismiss loading
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No internet connection. Check your network and try again.')),
+        SnackBar(content: Text(l10n.settingsNoInternet)),
       );
     }
   }
 
   void _showUpToDateDialog(BuildContext context, String version, String? betaVersion) {
+    final l10n = AppLocalizations.of(context)!;
     final hasNewerBeta = betaVersion != null && UpdateCheckService.isNewerThan(version, betaVersion);
     showDialog(
       context: context,
@@ -995,14 +996,14 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'You\'re up to date',
+              l10n.settingsUpToDate,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              'v$version is the latest version.',
+              l10n.settingsUpToDateDesc(version),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -1022,7 +1023,7 @@ class SettingsScreen extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        'Beta v$betaVersion available',
+                        l10n.settingsBetaAvailable(betaVersion),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w500,
                             ),
@@ -1037,7 +1038,7 @@ class SettingsScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -1071,11 +1072,12 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showVersionInfo(BuildContext context, PackageInfo packageInfo) {
+    final l10n = AppLocalizations.of(context)!;
     final appName = packageInfo.appName;
     final version = packageInfo.version;
     final buildNumber = packageInfo.buildNumber;
     final packageName = packageInfo.packageName;
-    final versionString = 'Version $version (Build $buildNumber)';
+    final versionString = l10n.settingsVersionWithBuild(buildNumber, version);
     final isBeta = packageName.endsWith('.beta');
     final iconAsset = isBeta ? 'assets/fadocx_beta.png' : 'assets/fadocx.png';
 
@@ -1163,11 +1165,11 @@ class SettingsScreen extends ConsumerWidget {
                   ));
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Copied to clipboard')),
+                    SnackBar(content: Text(l10n.settingsCopiedInfo)),
                   );
                 },
                 icon: const Icon(Icons.copy),
-                label: const Text('Copy Info'),
+                label: Text(l10n.settingsCopyInfo),
               ),
             ),
           ],
@@ -1177,6 +1179,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showPrivacyPolicy(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1203,7 +1206,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Center(
                 child: Text(
-                  'Privacy Policy',
+                  l10n.settingsPrivacyPolicy,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -1213,37 +1216,37 @@ class SettingsScreen extends ConsumerWidget {
               _policyItem(
                 context,
                 Icons.wifi_off,
-                '100% Offline',
-                'All processing happens on your device. No internet required.',
+                l10n.settingsPrivacyOffline,
+                l10n.settingsPrivacyOfflineDesc,
               ),
               _policyItem(
                 context,
                 Icons.storage,
-                'Local Storage Only',
-                'Your documents stay on your device. Nothing is uploaded.',
+                l10n.settingsPrivacyLocalStorage,
+                l10n.settingsPrivacyLocalStorageDesc,
               ),
               _policyItem(
                 context,
                 Icons.psychology,
-                'On-Device AI',
-                'Uses OpenCV + Tesseract for OCR. AI runs locally.',
+                l10n.settingsPrivacyOnDevice,
+                l10n.settingsPrivacyOnDeviceDesc,
               ),
               _policyItem(
                 context,
                 Icons.code,
-                'Open Source',
-                'Code is public. Audit it yourself on GitHub.',
+                l10n.settingsPrivacyOpenSource,
+                l10n.settingsPrivacyOpenSourceDesc,
               ),
               _policyItem(
                 context,
                 Icons.block,
-                'No Ads',
-                'No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.',
+                l10n.settingsPrivacyNoAds,
+                l10n.settingsPrivacyNoAdsDesc,
               ),
               const SizedBox(height: 24),
               Center(
                 child: Text(
-                  'We believe in privacy by design.',
+                  l10n.settingsPrivacyByDesign,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -1251,7 +1254,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Fadocx is built with transparency. Your documents are your business - not ours.',
+                l10n.settingsPrivacyTransparency,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -1260,7 +1263,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               _buildPolicyLink(context,
                 icon: SimpleIcons.github,
-                label: 'View Source Code',
+                label: l10n.settingsViewSourceCode,
                 url: 'https://github.com/anonfaded/Fadocx',
               ),
             ],
@@ -1314,6 +1317,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _patreonRow(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const goldColor = Color(0xFFD4A017);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -1352,14 +1356,14 @@ class SettingsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Support Development',
+                      l10n.supportDevelopment,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: goldColor,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
                     Text(
-                      'Unlock exclusive benefits',
+                      l10n.drawerUnlockBenefits,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: goldColor.withValues(alpha: 0.7),
                           ),
@@ -1380,6 +1384,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildFooter(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     return Column(
@@ -1389,7 +1394,7 @@ class SettingsScreen extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Made with', style: TextStyle(color: muted, fontSize: 13)),
+              Text(l10n.settingsMadeWith, style: TextStyle(color: muted, fontSize: 13)),
               const SizedBox(width: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(3),
@@ -1400,7 +1405,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Text('at', style: TextStyle(color: muted, fontSize: 13)),
+              Text(l10n.settingsAt, style: TextStyle(color: muted, fontSize: 13)),
               const SizedBox(width: 6),
               SizedBox(
                 width: 40, height: 18,
@@ -1426,7 +1431,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Text('in', style: TextStyle(color: muted, fontSize: 13)),
+              Text(l10n.settingsIn, style: TextStyle(color: muted, fontSize: 13)),
               const SizedBox(width: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(3),
@@ -1463,7 +1468,7 @@ class SettingsScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: Text(
-              '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com',
+              l10n.settingsCopyright,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: muted.withValues(alpha: 0.6),
               ),
@@ -1484,6 +1489,7 @@ class SettingsScreen extends ConsumerWidget {
     Color? iconBgColor,
     String? platformNote,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return Padding(
@@ -1572,7 +1578,7 @@ class SettingsScreen extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Visit GitHub',
+                        l10n.settingsVisitGithub,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
@@ -1597,6 +1603,7 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showPatreonSheet(BuildContext context) {
     const patreonUrl = 'https://patreon.com/c/fadedx';
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final brightness = theme.brightness;
 
@@ -1637,7 +1644,7 @@ class SettingsScreen extends ConsumerWidget {
                   Icon(SimpleIcons.patreon, size: 40, color: const Color(0xFFD4A017)),
                   const SizedBox(height: 12),
                   Text(
-                    'Support Development',
+                    l10n.supportDevelopment,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -1647,10 +1654,10 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             // Explanation
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                patreonDescription,
+                AppLocalizations.of(context)!.patreonDescription,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -1658,7 +1665,7 @@ class SettingsScreen extends ConsumerWidget {
             // Visit Patreon
             _sheetAction(context,
               icon: SimpleIcons.patreon,
-              label: 'Visit Patreon',
+              label: l10n.visitPatreon,
               onTap: () {
                 Navigator.pop(ctx);
                 _openUrl(patreonUrl);
@@ -1668,7 +1675,7 @@ class SettingsScreen extends ConsumerWidget {
             // Copy link
             _sheetAction(context,
               icon: Icons.content_copy,
-              label: 'Copy Link',
+              label: l10n.copyLink,
               onTap: () {
                 _copyToClipboard(context, patreonUrl);
                 Navigator.pop(ctx);
@@ -1808,6 +1815,7 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1862,11 +1870,11 @@ class _SettingsRow extends StatelessWidget {
                     color: Theme.of(context).colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
-                    'Coming Soon',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onTertiaryContainer,
+                   child: Text(
+                     l10n.comingSoon,
+                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                           color:
+                               Theme.of(context).colorScheme.onTertiaryContainer,
                         ),
                   ),
                 ),
@@ -1970,6 +1978,7 @@ class _DangerRowState extends State<_DangerRow> {
   }
 
   void _showDangerDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // If confirmText is empty, just directly navigate (like Trash)
     if (widget.confirmText.isEmpty) {
       widget.onConfirm();
@@ -1984,7 +1993,7 @@ class _DangerRowState extends State<_DangerRow> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Type "${widget.confirmText}" to confirm:'),
+            Text(l10n.settingsTypeToConfirm(widget.confirmText)),
             const SizedBox(height: 16),
             TextField(
               controller: _controller,
@@ -2001,12 +2010,12 @@ class _DangerRowState extends State<_DangerRow> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: _confirmed ? widget.onConfirm : null,
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Confirm'),
+            child: Text(l10n.confirm),
           ),
         ],
       ),
@@ -2094,6 +2103,7 @@ class _LinkSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final brightness = Theme.of(context).brightness;
 
     return Container(
@@ -2143,13 +2153,13 @@ class _LinkSheet extends StatelessWidget {
           const SizedBox(height: 16),
           _SheetAction(
             icon: Icons.content_copy,
-            label: 'Copy',
+            label: l10n.copy,
             onTap: onCopy,
           ),
           const SizedBox(height: 8),
           _SheetAction(
             icon: Icons.open_in_browser,
-            label: 'Open in Browser',
+            label: l10n.settingsOpenInBrowser,
             onTap: onOpen,
           ),
           const SizedBox(height: 12),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Settings tile for displaying a URL or email.
 /// Shows the value and a chevron, tapping opens a bottom sheet
@@ -141,12 +142,12 @@ class LinkTile extends StatelessWidget {
             _sheetAction(
               context,
               icon: Icons.content_copy,
-              label: 'Copy',
+              label: AppLocalizations.of(context)!.linkTileCopy,
               onTap: () {
                 Clipboard.setData(ClipboardData(text: value));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.linkTileCopiedToClipboard)),
                 );
               },
             ),
@@ -155,7 +156,7 @@ class LinkTile extends StatelessWidget {
             _sheetAction(
               context,
               icon: type == LinkType.email ? Icons.email_outlined : Icons.open_in_browser,
-              label: type == LinkType.email ? 'Send Email' : 'Open in Browser',
+              label: type == LinkType.email ? AppLocalizations.of(context)!.linkTileSendEmail : AppLocalizations.of(context)!.linkTileOpenInBrowser,
               onTap: () {
                 Navigator.pop(ctx);
                 _openLink(context);
@@ -223,7 +224,7 @@ class LinkTile extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open $value')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.linkTileCouldNotOpen(value))),
         );
       }
     }

@@ -12,6 +12,7 @@ import 'package:fadocx/core/services/camera_service.dart';
 import 'package:fadocx/core/services/image_processing_service.dart';
 import 'package:fadocx/core/services/tesseract_service.dart';
 import 'package:fadocx/features/scanner/presentation/providers/scanner_provider.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 final log = Logger();
 
@@ -392,7 +393,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                                     context.go('/');
                                   }
                                 },
-                                tooltip: 'Back',
+                                tooltip: AppLocalizations.of(context)!.back,
                                 iconSize: 20,
                                 constraints: const BoxConstraints(
                                   minWidth: 32,
@@ -403,7 +404,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                             ),
                             Center(
                               child: Text(
-                                'Document Scanner',
+                                AppLocalizations.of(context)!.scannerTitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -430,7 +431,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
   // ─── Step Indicator ────────────────────────────────────────────────────────
 
   Widget _buildStepIndicator(BuildContext context, bool isDark) {
-    const steps = ['Capture', 'Processing', 'Results'];
+    final l10n = AppLocalizations.of(context)!;
+    final steps = [l10n.scannerCapture, l10n.scannerProcessing, l10n.scannerResults];
     const icons = [
       Icons.camera_alt_outlined,
       Icons.auto_fix_high,
@@ -601,7 +603,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                                 color: Colors.white.withValues(alpha: 0.5)),
                             const SizedBox(height: 16),
                             Text(
-                              'Initializing Camera...',
+                              AppLocalizations.of(context)!.scannerInitializingCamera,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyLarge
@@ -728,8 +730,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                 const SizedBox(width: 6),
                 Text(
                   _liveCorners != null
-                      ? 'Document detected — hold steady'
-                      : 'Keep document upright & flat for best results',
+                      ? AppLocalizations.of(context)!.scannerDocumentDetected
+                      : AppLocalizations.of(context)!.scannerKeepDocumentFlat,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -748,9 +750,10 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               _buildCaptureSideButton(
                 context: context,
                 icon: Icons.photo_library_outlined,
-                label: 'Upload',
+                label: AppLocalizations.of(context)!.scannerUpload,
                 onTap: () async {
                   final messenger = ScaffoldMessenger.of(context);
+                  final failedOpenImageText = AppLocalizations.of(context)!;
                   try {
                     await ref
                         .read(scannerProvider.notifier)
@@ -758,7 +761,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                   } catch (e) {
                     if (mounted) {
                       messenger.showSnackBar(
-                        SnackBar(content: Text('Failed to open image: $e')),
+                        SnackBar(content: Text(failedOpenImageText.scannerFailedOpenImage(e.toString()))),
                       );
                     }
                   }
@@ -772,15 +775,16 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                 icon: scannerState.torchEnabled
                     ? Icons.flash_on
                     : Icons.flash_off,
-                label: 'Flash',
+                label: AppLocalizations.of(context)!.scannerFlash,
                 onTap: () {
                   final messenger = ScaffoldMessenger.of(context);
+                  final l10n = AppLocalizations.of(context)!;
                   ref
                       .read(scannerProvider.notifier)
                       .toggleTorch()
                       .catchError((e) {
                     messenger.showSnackBar(
-                      SnackBar(content: Text('Failed to toggle torch: $e')),
+                      SnackBar(content: Text(l10n.scannerFailedTorch(e.toString()))),
                     );
                   });
                 },
@@ -797,13 +801,14 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     return GestureDetector(
       onTap: () async {
         final messenger = ScaffoldMessenger.of(context);
+        final l10n = AppLocalizations.of(context)!;
         try {
           await ref.read(scannerProvider.notifier).captureAndProcess();
         } catch (e) {
           if (mounted) {
             messenger.showSnackBar(
               SnackBar(
-                content: Text('Error: $e'),
+                content: Text(l10n.homeErrorPrefix(e.toString())),
                 duration: const Duration(seconds: 3),
               ),
             );
@@ -891,7 +896,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              'Starting Camera...',
+              AppLocalizations.of(context)!.scannerStartingCamera,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 16,
@@ -924,9 +929,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                     size: 40, color: Colors.white.withValues(alpha: 0.6)),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Camera Unavailable',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.scannerCameraUnavailable,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -934,7 +939,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                scannerState.cameraError ?? 'Unable to initialize camera',
+                scannerState.cameraError ?? AppLocalizations.of(context)!.scannerCameraUnavailableDesc,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 14,
@@ -955,7 +960,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                 ),
-                child: const Text('Retry'),
+                child: Text(AppLocalizations.of(context)!.retry),
               ),
             ],
           ),
@@ -1076,8 +1081,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                                 Text(
                                   scannerState.processingStep ==
                                           ProcessingStep.done
-                                      ? 'Analysis Complete'
-                                      : 'Analyzing Document...',
+                                      ? AppLocalizations.of(context)!.scannerAnalysisComplete
+                                      : AppLocalizations.of(context)!.scannerAnalyzing,
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleSmall
@@ -1088,8 +1093,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                                 Text(
                                   scannerState.processingStep ==
                                           ProcessingStep.preparing
-                                      ? 'Enhancing image quality...'
-                                      : 'Extracting text data...',
+                                      ? AppLocalizations.of(context)!.scannerEnhancing
+                                      : AppLocalizations.of(context)!.scannerExtractingText,
                                   style: Theme.of(context)
                                       .textTheme
                                       .labelSmall
@@ -1135,7 +1140,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'No Scans Yet',
+                AppLocalizations.of(context)!.scannerNoScansYet,
                 style: TextStyle(
                   color: onSurface,
                   fontSize: 20,
@@ -1144,7 +1149,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                'Capture a document to see extracted text here',
+                AppLocalizations.of(context)!.scannerNoScansDesc,
                 style: TextStyle(
                   color: onSurface.withValues(alpha: 0.5),
                   fontSize: 14,
@@ -1216,7 +1221,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                   Row(
                     children: [
                       Text(
-                        'Extracted Text',
+                        AppLocalizations.of(context)!.scannerExtractedText,
                         style: TextStyle(
                           color: onSurface,
                           fontSize: 16,
@@ -1267,7 +1272,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                     ),
                     child: SelectableText(
                       scannerState.extractedText.isEmpty
-                          ? '(No text extracted)'
+                          ? AppLocalizations.of(context)!.scannerNoTextExtracted
                           : scannerState.extractedText,
                       style: TextStyle(
                         color: scannerState.extractedText.isEmpty
@@ -1282,7 +1287,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                   // Detected lines
                   if (scannerState.textBlocks.isNotEmpty) ...[
                     Text(
-                      'Detected Lines',
+                      AppLocalizations.of(context)!.scannerDetectedLines,
                       style: TextStyle(
                         color: onSurface.withValues(alpha: 0.6),
                         fontSize: 12,
@@ -1361,21 +1366,22 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
               onPressed: scannerState.extractedText.isNotEmpty
                   ? () async {
                       final messenger = ScaffoldMessenger.of(context);
+                      final l10n = AppLocalizations.of(context)!;
                       await Clipboard.setData(
                         ClipboardData(text: scannerState.extractedText),
                       );
                       if (mounted) {
                         messenger.showSnackBar(
-                          const SnackBar(
-                            content: Text('Text copied to clipboard'),
-                            duration: Duration(seconds: 2),
+                          SnackBar(
+                            content: Text(l10n.scannerTextCopied),
+                            duration: const Duration(seconds: 2),
                           ),
                         );
                       }
                     }
                   : null,
               icon: const Icon(Icons.copy, size: 16),
-              label: const Text('Copy All'),
+              label: Text(AppLocalizations.of(context)!.scannerCopyAll),
               style: OutlinedButton.styleFrom(
                 foregroundColor: onSurface,
                 side: BorderSide(
@@ -1401,7 +1407,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
                 _startFrameStream();
               },
               icon: const Icon(Icons.camera_alt_outlined, size: 16),
-              label: const Text('New Scan'),
+              label: Text(AppLocalizations.of(context)!.scannerNewScan),
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -1603,7 +1609,6 @@ class _DetectedTextPreview extends StatelessWidget {
     final rectLeft = block.x! * scale;
     final rectTop = block.y! * scale;
     final rectRight = (block.x! + block.width!) * scale;
-    final rectBottom = (block.y! + block.height!) * scale;
     final rectCenterX = (rectLeft + rectRight) / 2;
     final renderedImageHeight = imageHeight * scale;
 
@@ -1679,14 +1684,14 @@ class _DetectedTextPreview extends StatelessWidget {
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: block.text));
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Copied to clipboard'),
-                              duration: Duration(seconds: 1),
+                            SnackBar(
+                              content: Text(AppLocalizations.of(context)!.copiedToClipboard),
+                              duration: const Duration(seconds: 1),
                             ),
                           );
                         },
                         icon: const Icon(Icons.content_copy, size: 14),
-                        label: const Text('Copy', style: TextStyle(fontSize: 12)),
+                        label: Text(AppLocalizations.of(context)!.copy, style: const TextStyle(fontSize: 12)),
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           minimumSize: const Size(0, 32),
@@ -1923,7 +1928,9 @@ class _DetectedTextPainter extends CustomPainter {
       );
       for (final block in blocks) {
         if (block.x == null || block.y == null ||
-            block.width == null || block.height == null) continue;
+            block.width == null || block.height == null) {
+          continue;
+        }
         final rect = Rect.fromLTWH(
           block.x! * scale,
           block.y! * scale,
@@ -1939,7 +1946,9 @@ class _DetectedTextPainter extends CustomPainter {
       // Draw white borders on top of the punch holes
       for (final block in blocks) {
         if (block.x == null || block.y == null ||
-            block.width == null || block.height == null) continue;
+            block.width == null || block.height == null) {
+          continue;
+        }
         final rect = Rect.fromLTWH(
           block.x! * scale,
           block.y! * scale,
@@ -1986,7 +1995,9 @@ class _DetectedTextPainter extends CustomPainter {
     } else if (showScanEffect) {
       for (final block in blocks) {
         if (block.x == null || block.y == null ||
-            block.width == null || block.height == null) continue;
+            block.width == null || block.height == null) {
+          continue;
+        }
         final rect = Rect.fromLTWH(
           block.x! * scale,
           block.y! * scale,

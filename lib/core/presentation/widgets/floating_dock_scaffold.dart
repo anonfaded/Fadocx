@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/routing/app_router.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Floating overlay scaffold that places app bar and bottom dock as transparent
 /// overlays, allowing content to scroll behind them like iOS/macOS style.
@@ -275,7 +276,7 @@ class _FloatingDock extends StatelessWidget {
                         Expanded(
                           child: _DockItem(
                             icon: Icons.home,
-                            label: 'Home',
+                            label: AppLocalizations.of(context)!.navHome,
                             isActive: currentRoute == RouteNames.home,
                             onTap: () {
                               if (currentRoute != RouteNames.home) {
@@ -287,7 +288,7 @@ class _FloatingDock extends StatelessWidget {
                         Expanded(
                           child: _DockItem(
                             icon: Icons.auto_stories,
-                            label: 'Library',
+                            label: AppLocalizations.of(context)!.navLibrary,
                             isActive: currentRoute == RouteNames.documents,
                             onTap: () {
                               if (currentRoute != RouteNames.documents) {
@@ -299,7 +300,7 @@ class _FloatingDock extends StatelessWidget {
                         Expanded(
                           child: _DockItem(
                             icon: Icons.settings,
-                            label: 'Settings',
+                            label: AppLocalizations.of(context)!.navSettings,
                             isActive: currentRoute == RouteNames.settings,
                             onTap: () {
                               if (currentRoute != RouteNames.settings) {

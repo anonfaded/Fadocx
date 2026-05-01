@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:logger/logger.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 import 'package:fadocx/config/theme/app_theme.dart';
 import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
@@ -198,7 +199,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                                     log.i('Back button pressed');
                                     context.pop();
                                   },
-                                  tooltip: 'Back',
+                                  tooltip: AppLocalizations.of(context)!.browseBack,
                                     iconSize: 20,
                                     constraints: const BoxConstraints(
                                       minWidth: 32,
@@ -219,8 +220,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                                                     controller: _searchController,
                                                     focusNode: _searchFocusNode,
                                                     autofocus: true,
-                                                    decoration: const InputDecoration(
-                                                      hintText: 'Search documents...',
+                                                    decoration: InputDecoration(
+                                                      hintText: AppLocalizations.of(context)!.browseSearchHint,
                                                       border: InputBorder.none,
                                                       isDense: true,
                                                       contentPadding: EdgeInsets.symmetric(vertical: 8),
@@ -246,7 +247,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                                           : Center(
                                               key: const ValueKey('title'),
                                               child: Text(
-                                                'Import Documents',
+                                                AppLocalizations.of(context)!.browseTitle,
                                                 style: Theme.of(context).textTheme.titleMedium,
                                               ),
                                             ),
@@ -282,7 +283,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                       ),
                                       child: Text(
-                                        'Cancel',
+                                        AppLocalizations.of(context)!.browseCancel,
                                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                           color: Theme.of(context).colorScheme.primary,
                                         ),
@@ -327,8 +328,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _pickFilesManually,
           icon: const Icon(Icons.manage_search_sharp),
-          label: const Text('Browse'),
-          tooltip: 'Import additional files manually',
+          label: Text(AppLocalizations.of(context)!.browseBrowseFiles),
+          tooltip: AppLocalizations.of(context)!.browseBrowseFilesDesc,
         ),
         bottomNavigationBar: _selectedFilePaths.isNotEmpty
             ? _buildBottomImportBar(context)
@@ -380,7 +381,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
               ),
               const SizedBox(height: 16),
               Text(
-                'Scan failed',
+                AppLocalizations.of(context)!.browseScanFailed,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
@@ -388,7 +389,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                _error ?? 'Unknown error occurred',
+                _error ?? AppLocalizations.of(context)!.browseUnknownError,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -397,7 +398,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
               const SizedBox(height: 24),
               FilledButton.icon(
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Retry Scan'),
+                label: Text(AppLocalizations.of(context)!.browseRetryScan),
                 onPressed: () {
                   log.i('Retry scan button pressed');
                   _checkAndRequestPermissions();
@@ -406,7 +407,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
               const SizedBox(height: 12),
               TextButton.icon(
                 icon: const Icon(Icons.folder_open, size: 18),
-                label: const Text('Import Files Manually'),
+                label: Text(AppLocalizations.of(context)!.browseImportManually),
                 onPressed: _pickFilesManually,
               ),
             ],
@@ -428,12 +429,12 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  _buildCategoryChip('all', 'All', Icons.apps),
-                  _buildCategoryChip('pdf', 'PDFs', Icons.picture_as_pdf),
-                  _buildCategoryChip('documents', 'Docs', Icons.description),
-                  _buildCategoryChip('spreadsheets', 'Sheets', Icons.table_chart),
-                  _buildCategoryChip('presentations', 'Slides', Icons.slideshow),
-                  _buildCategoryChip('other', 'Other', Icons.insert_drive_file),
+_buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps),
+                   _buildCategoryChip('pdf', AppLocalizations.of(context)!.categoryPdfs, Icons.picture_as_pdf),
+                   _buildCategoryChip('documents', AppLocalizations.of(context)!.categoryDocs, Icons.description),
+                   _buildCategoryChip('spreadsheets', AppLocalizations.of(context)!.categorySheets, Icons.table_chart),
+                   _buildCategoryChip('presentations', AppLocalizations.of(context)!.categorySlides, Icons.slideshow),
+                   _buildCategoryChip('other', AppLocalizations.of(context)!.categoryOther, Icons.insert_drive_file),
                 ],
               ),
             ),
@@ -556,12 +557,16 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
     switch (_sortBy) {
       case 'latest':
         filteredDocuments.sort((a, b) => b.modified.compareTo(a.modified));
+        break;
       case 'oldest':
         filteredDocuments.sort((a, b) => a.modified.compareTo(b.modified));
+        break;
       case 'largest':
         filteredDocuments.sort((a, b) => b.fileSizeBytes.compareTo(a.fileSizeBytes));
+        break;
       case 'smallest':
         filteredDocuments.sort((a, b) => a.fileSizeBytes.compareTo(b.fileSizeBytes));
+        break;
     }
 
     if (filteredDocuments.isEmpty) {
@@ -576,7 +581,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              _searchQuery.isEmpty ? 'No documents found' : 'No documents match your search',
+              _searchQuery.isEmpty ? AppLocalizations.of(context)!.browseNoDocumentsFound : AppLocalizations.of(context)!.browseNoDocumentsMatch,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -585,7 +590,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
             if (_searchQuery.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
-                'Try adjusting your search or filters',
+                AppLocalizations.of(context)!.browseAdjustSearch,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
@@ -594,7 +599,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
             const SizedBox(height: 24),
             FilledButton.icon(
               icon: const Icon(Icons.folder_open, size: 18),
-              label: const Text('Import Files Manually'),
+              label: Text(AppLocalizations.of(context)!.browseImportManually),
               onPressed: _pickFilesManually,
             ),
           ],
@@ -889,7 +894,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       child: Row(
         children: [
           Text(
-            '${_selectedFilePaths.length} selected',
+            AppLocalizations.of(context)!.librarySelected(_selectedFilePaths.length),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w500,
             ),
@@ -902,7 +907,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
             },
             icon: Icon(Icons.close, size: 16, color: Theme.of(context).colorScheme.error),
             label: Text(
-              'Clear',
+              AppLocalizations.of(context)!.browseClearSelection,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
             style: OutlinedButton.styleFrom(
@@ -916,7 +921,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
           FilledButton.icon(
             onPressed: _importSelectedFiles,
             icon: const Icon(Icons.download, size: 16),
-            label: const Text('Import'),
+            label: Text(AppLocalizations.of(context)!.browseImport),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -1034,7 +1039,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         log.w('⚠️  MANAGE_ALL_FILES permission rejected/denied');
         
         setState(() {
-          _error = 'All files access permission is required to scan documents.\nPlease enable it in app settings.';
+          _error = AppLocalizations.of(context)!.browseAllFilesAccessDenied;
           _isLoading = false;
         });
         
@@ -1045,7 +1050,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
     } catch (e) {
       log.w('⚠️  Error checking permissions: $e');
       setState(() {
-        _error = 'Error checking permissions: $e';
+        _error = AppLocalizations.of(context)!.browseErrorPrefix(e.toString());
         _isLoading = false;
       });
     }
@@ -1057,15 +1062,14 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Permission Required'),
-        content: const Text(
-          'All files access permission is required to scan all documents on your device. '
-          'Tap "Open Settings" to enable it.',
+        title: Text(AppLocalizations.of(context)!.browsePermissionRequired),
+        content: Text(
+          AppLocalizations.of(context)!.browseAllFilesAccessDenied,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -1082,7 +1086,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                 }
               }
             },
-            child: const Text('Open Settings'),
+            child: Text(AppLocalizations.of(context)!.browseOpenSettings),
           ),
         ],
       ),
@@ -1103,8 +1107,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       log.w('⚠️  Storage permission still not granted after returning from settings');
       if (!mounted) return;
       setState(() {
-        _error = 'All files access is still disabled for this app. '
-            'If the toggle remains grayed out, your device policy/OEM ROM is blocking this permission for the installed build.';
+        _error = AppLocalizations.of(context)!.browseAccessStillDisabled;
         _isLoading = false;
       });
     } catch (e) {
@@ -1161,7 +1164,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       if (pathsToScan.isEmpty) {
         log.w('⚠️  No document directories found');
         setState(() {
-          _error = 'No document directories found on device';
+          _error = AppLocalizations.of(context)!.browseNoDirectories;
           _isLoading = false;
         });
         return;
@@ -1397,7 +1400,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       log.e('❌ Error picking files: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.browseErrorPrefix(e.toString()))),
         );
       }
     }
@@ -1431,14 +1434,14 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Sort by',
+                  AppLocalizations.of(context)!.browseSortBy,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
-              _buildSortOption(context, 'Latest', 'latest'),
-              _buildSortOption(context, 'Oldest', 'oldest'),
-              _buildSortOption(context, 'Largest', 'largest'),
-              _buildSortOption(context, 'Smallest', 'smallest'),
+              _buildSortOption(context, AppLocalizations.of(context)!.librarySortLatest, 'latest'),
+              _buildSortOption(context, AppLocalizations.of(context)!.librarySortOldest, 'oldest'),
+              _buildSortOption(context, AppLocalizations.of(context)!.librarySortLargest, 'largest'),
+              _buildSortOption(context, AppLocalizations.of(context)!.librarySortSmallest, 'smallest'),
               const SizedBox(height: 16),
             ],
           ),
@@ -1511,7 +1514,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       }
 
       if (mounted) {
-        final message = 'Imported $imported file${imported > 1 ? 's' : ''}';
+        final message = AppLocalizations.of(context)!.browseImportedFiles(imported);
         log.i('✅ $message');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
@@ -1522,7 +1525,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       log.e('❌ Error importing files: $e', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error importing files: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.browseErrorPrefix(e.toString()))),
         );
       }
     }

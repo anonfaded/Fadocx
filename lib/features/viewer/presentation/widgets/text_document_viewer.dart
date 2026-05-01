@@ -286,7 +286,7 @@ class _TextDocumentViewerState extends State<TextDocumentViewer>
   }
 
   void toggleFont() {
-    // TODO: Implement font toggle (currently mono only)
+    // Parent widget handles state updates via useMonoFont parameter
   }
 
   void scrollToTop() {

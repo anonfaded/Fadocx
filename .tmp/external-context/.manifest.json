@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-05-01T00:00:00Z",
+  "libraries": {
+    "flutter": {
+      "files": [
+        {
+          "filename": "app-localizations-usage-patterns.md",
+          "topic": "app localizations usage patterns",
+          "tech_stack": "Flutter gen_l10n",
+          "fetched": "2026-05-01T00:00:00Z",
+          "source": "Context7 API + official Flutter docs"
+        },
+        {
+          "filename": "app-localizations-placeholders-and-arb.md",
+          "topic": "app localizations placeholders and arb",
+          "tech_stack": "Flutter gen_l10n",
+          "fetched": "2026-05-01T00:00:00Z",
+          "source": "Context7 API + official Flutter docs"
+        }
+      ]
+    }
+  }
+}

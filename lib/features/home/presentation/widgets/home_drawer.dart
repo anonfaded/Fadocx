@@ -7,7 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:fadocx/config/routing/app_router.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
 import 'package:fadocx/core/presentation/widgets/drawer_update_banner.dart';
-import 'package:fadocx/core/presentation/constants.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Custom animated hamburger icon with bottom line that grows when sidebar opens
 class AnimatedHamburgerIcon extends StatefulWidget {
@@ -167,7 +167,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Fadocx',
+                    AppLocalizations.of(context)!.homeTitle,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -176,7 +176,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Document Management',
+                AppLocalizations.of(context)!.homeDocumentManagement,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -196,7 +196,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               _buildDrawerCard(
                 context,
                 icon: Icons.auto_awesome,
-                title: "What's New",
+                title: AppLocalizations.of(context)!.drawerWhatNew,
                 onTap: () {
                   widget.onClose?.call();
                   context.push(RouteNames.whatsNew);
@@ -365,11 +365,11 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Recent Files',
+                          AppLocalizations.of(context)!.drawerRecentFiles,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         Text(
-                          showRecentFiles ? 'Visible' : 'Hidden',
+                          showRecentFiles ? AppLocalizations.of(context)!.drawerVisible : AppLocalizations.of(context)!.drawerHidden,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
@@ -441,7 +441,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                   const Icon(SimpleIcons.patreon, size: 40, color: Color(0xFFD4A017)),
                   const SizedBox(height: 12),
                   Text(
-                    'Support Development',
+                    AppLocalizations.of(context)!.supportDevelopment,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -451,10 +451,10 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             ),
             const SizedBox(height: 8),
             // Explanation
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                patreonDescription,
+                AppLocalizations.of(context)!.patreonDescription,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -463,7 +463,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             _sheetActionButton(
               context,
               icon: SimpleIcons.patreon,
-              label: 'Visit Patreon',
+              label: AppLocalizations.of(context)!.visitPatreon,
               onTap: () {
                 Navigator.pop(ctx);
                 _openUrl(patreonUrl);
@@ -474,12 +474,12 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             _sheetActionButton(
               context,
               icon: Icons.content_copy,
-              label: 'Copy Link',
+              label: AppLocalizations.of(context)!.copyLink,
               onTap: () {
                 Clipboard.setData(ClipboardData(text: patreonUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
                 );
               },
             ),
@@ -571,7 +571,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
               child: Text(
-                'Join our Discord',
+                AppLocalizations.of(context)!.discordTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -591,7 +591,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             _sheetActionButton(
               context,
               icon: SimpleIcons.discord,
-              label: 'Open in Browser',
+              label: AppLocalizations.of(context)!.openInBrowser,
               onTap: () {
                 Navigator.pop(ctx);
                 _openUrl(discordUrl);
@@ -601,12 +601,12 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
             _sheetActionButton(
               context,
               icon: Icons.content_copy,
-              label: 'Copy Link',
+              label: AppLocalizations.of(context)!.copyLink,
               onTap: () {
                 Clipboard.setData(ClipboardData(text: discordUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
                 );
               },
             ),
@@ -723,14 +723,14 @@ class _GoldDonateCardState extends State<_GoldDonateCard>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Support Development',
+                            AppLocalizations.of(context)!.supportDevelopment,
                             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: goldColor,
                                 ),
                           ),
                           Text(
-                            'Unlock exclusive benefits',
+                            AppLocalizations.of(context)!.drawerUnlockBenefits,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: goldColor.withValues(alpha: 0.7),
                                 ),

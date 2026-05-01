@@ -15,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
 import 'package:fadocx/features/home/presentation/widgets/file_action_bottom_sheet.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 final log = Logger();
 
@@ -141,7 +142,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                           controller: _searchController,
                           autofocus: true,
                           decoration: InputDecoration(
-                            hintText: 'Search library...',
+                            hintText: AppLocalizations.of(context)!.librarySearchHint,
                             border: InputBorder.none,
                             isDense: true,
                             contentPadding:
@@ -173,7 +174,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                 : Center(
                     key: const ValueKey('title'),
                     child: Text(
-                      'Library',
+                      AppLocalizations.of(context)!.libraryTitle,
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium
@@ -205,7 +206,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         ),
         const SizedBox(width: 4),
         Text(
-          '${_selectedFiles.length} selected',
+          AppLocalizations.of(context)!.librarySelected(_selectedFiles.length),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -283,17 +284,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete selected?'),
-        content: Text('Move $count ${count == 1 ? 'file' : 'files'} to trash? You can restore them later.'),
+        title: Text(AppLocalizations.of(context)!.libraryDeleteSelected),
+        content: Text(AppLocalizations.of(context)!.libraryDeleteConfirm(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -307,7 +308,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$count ${count == 1 ? 'item' : 'items'} moved to trash'),
+          content: Text(AppLocalizations.of(context)!.libraryItemsMovedToTrash(count)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -333,32 +334,29 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     );
   }
 
-  // Helper method to get time ago string
-  String _getTimeAgo(DateTime dateTime) {
+  String _getTimeAgo(BuildContext context, DateTime dateTime) {
+    final l = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inSeconds < 60) {
-      return 'Just now';
+      return l.timeAgoJustNow;
     } else if (difference.inMinutes < 60) {
-      final mins = difference.inMinutes;
-      return '$mins ${mins == 1 ? 'minute' : 'minutes'} ago';
+      return l.timeAgoMinute(difference.inMinutes);
     } else if (difference.inHours < 24) {
-      final hours = difference.inHours;
-      return '$hours ${hours == 1 ? 'hour' : 'hours'} ago';
+      return l.timeAgoHour(difference.inHours);
     } else if (difference.inDays < 7) {
-      final days = difference.inDays;
-      return '$days ${days == 1 ? 'day' : 'days'} ago';
+      return l.timeAgoDay(difference.inDays);
     } else if (difference.inDays < 30) {
       final weeks = (difference.inDays / 7).floor();
-      return '$weeks ${weeks == 1 ? 'week' : 'weeks'} ago';
+      return l.timeAgoWeek(weeks);
     } else if (difference.inDays < 365) {
       final months = (difference.inDays / 30).floor();
-      return '$months ${months == 1 ? 'month' : 'months'} ago';
+      return l.timeAgoMonth(months);
     } else {
       final years = (difference.inDays / 365).floor();
-      return '$years ${years == 1 ? 'year' : 'years'} ago';
-}
+      return l.timeAgoYear(years);
+    }
   }
 
   Widget _buildErrorState(BuildContext context, Object error) {
@@ -371,7 +369,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error loading library: $error'),
+              Text(AppLocalizations.of(context)!.libraryErrorLoading(error.toString())),
             ],
           ),
         ),
@@ -440,9 +438,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     children: [
-                      _buildCategoryChip(context, 'all', 'All', categoryCounts['all'] ?? 0),
+                      _buildCategoryChip(context, 'all', AppLocalizations.of(context)!.categoryAll, categoryCounts['all'] ?? 0),
                       ...sortedCategories.map((category) {
-                        final label = _getCategoryLabel(category);
+                        final label = _getCategoryLabel(context, category);
                         final count = categoryCounts[category] ?? 0;
                         return _buildCategoryChip(context, category, label, count);
                       }),
@@ -515,7 +513,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             children: [
               Expanded(
                 child: Text(
-                  '${filteredFiles.length} ${_selectedCategory == 'all' ? 'items' : _selectedCategory}',
+                  AppLocalizations.of(context)!.libraryItemCount(filteredFiles.length),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,
@@ -529,8 +527,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                     padding: const EdgeInsets.only(right: 12),
                     child: Text(
                       _selectedFiles.length == filteredFiles.length
-                          ? 'Deselect all'
-                          : 'Select all',
+                          ? AppLocalizations.of(context)!.libraryDeselectAll
+                          : AppLocalizations.of(context)!.librarySelectAll,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontSize: 12,
@@ -600,8 +598,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                         const SizedBox(height: 12),
                         Text(
                           _searchQuery.isNotEmpty
-                              ? 'No ${_selectedCategory == 'all' ? 'items' : _selectedCategory} found'
-                              : 'No documents yet',
+                              ? AppLocalizations.of(context)!.libraryNoCategoryFound(_selectedCategory == 'all' ? AppLocalizations.of(context)!.categoryAll.toLowerCase() : _getCategoryLabel(context, _selectedCategory))
+                              : AppLocalizations.of(context)!.libraryNoDocuments,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
@@ -609,8 +607,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                         const SizedBox(height: 4),
                         Text(
                           _searchQuery.isNotEmpty
-                              ? 'Try adjusting your search or filters'
-                              : 'Your documents will appear here',
+                              ? AppLocalizations.of(context)!.libraryAdjustSearch
+                              : AppLocalizations.of(context)!.libraryDocumentsAppearHere,
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                               ),
@@ -681,22 +679,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     }
   }
 
-  String _getCategoryLabel(String category) {
+  String _getCategoryLabel(BuildContext context, String category) {
+    final l = AppLocalizations.of(context)!;
     switch (category) {
       case 'pdf':
-        return 'PDF';
+        return l.categoryPdfs;
       case 'documents':
-        return 'Docs';
+        return l.categoryDocs;
       case 'spreadsheets':
-        return 'Sheets';
+        return l.categorySheets;
       case 'presentations':
-        return 'Slides';
+        return l.categorySlides;
       case 'code':
-        return 'Code';
+        return l.categoryCode;
       case 'scans':
-        return 'Scans';
+        return l.categoryScans;
       case 'other':
-        return 'Other';
+        return l.categoryOther;
       default:
         return category;
     }
@@ -946,8 +945,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                             color: Colors.green.shade600,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'NEW',
+                          child: Text(
+                            AppLocalizations.of(context)!.newBadge,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 8,
@@ -1006,7 +1005,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                               Icon(Icons.schedule_outlined, size: 9, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
                               const SizedBox(width: 2),
                               Text(
-                                _getTimeAgo(file.dateOpened),
+                                _getTimeAgo(context, file.dateOpened),
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelSmall
@@ -1210,7 +1209,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                              ),
                              const SizedBox(width: 2),
                              Text(
-                               _getTimeAgo(file.dateOpened),
+                               _getTimeAgo(context, file.dateOpened),
                                style: Theme.of(context)
                                    .textTheme
                                    .labelSmall
@@ -1412,12 +1411,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             : null,
         onConvert: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Convert feature coming soon!')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.homeConvertComingSoon)),
           );
         },
         onUpload: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('FadDrive coming soon!')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.homeFadDriveComingSoon)),
           );
         },
         onFileInfo: () => _showFileInfoDialog(context, file),
@@ -1435,12 +1434,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rename file'),
+        title: Text(AppLocalizations.of(context)!.homeRenameFile),
         content: TextField(
           controller: controller,
           autofocus: true,
           decoration: InputDecoration(
-            labelText: 'File name',
+            labelText: AppLocalizations.of(context)!.homeFileNameLabel,
             suffixText: extension,
             border: const OutlineInputBorder(),
           ),
@@ -1449,11 +1448,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Rename'),
+            child: Text(AppLocalizations.of(context)!.rename),
           ),
         ],
       ),
@@ -1469,7 +1468,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     if (await File(newPath).exists()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('A file with this name already exists')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.homeFileAlreadyExists)),
         );
       }
       return;
@@ -1495,14 +1494,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Renamed to $fullNewName')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.homeRenamedTo(fullNewName))),
         );
       }
     } catch (e) {
       log.e('Failed to rename file', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to rename file')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.homeFailedRename)),
         );
       }
     }
@@ -1534,13 +1533,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             ),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Export', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+              child: Text(AppLocalizations.of(context)!.homeExport, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
             ),
             _buildExportActionRow(
               icon: Icons.download,
-              title: 'Save to Downloads',
+              title: AppLocalizations.of(context)!.homeSaveToDownloads,
               iconColor: Colors.green,
-              subtitle: 'Download/Fadocx/${file.fileName}',
+              subtitle: AppLocalizations.of(context)!.homeSaveToDownloadsPath(file.fileName),
               onTap: () async {
                 Navigator.pop(ctx);
                 await _saveToDownloads(file);
@@ -1548,9 +1547,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             ),
             _buildExportActionRow(
               icon: Icons.folder_open,
-              title: 'Choose location',
+              title: AppLocalizations.of(context)!.homeChooseLocation,
               iconColor: Colors.blue,
-              subtitle: 'Pick a custom save directory',
+              subtitle: AppLocalizations.of(context)!.homeChooseLocationDesc,
               onTap: () async {
                 Navigator.pop(ctx);
                 await _saveToCustomLocation(file);
@@ -1645,14 +1644,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       await source.copy(finalDest);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved to Download/Fadocx/${finalDest.split('/').last}')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.homeSavedToDownloads(finalDest.split('/').last))),
         );
       }
     } catch (e) {
       log.e('Failed to export file', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to export file')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.homeFailedExport)),
         );
       }
     }
@@ -1661,7 +1660,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   Future<void> _saveToCustomLocation(RecentFile file) async {
     try {
       final directory = await FilePicker.getDirectoryPath(
-        dialogTitle: 'Choose save location',
+        dialogTitle: AppLocalizations.of(context)!.homeChooseSaveLocation,
       );
       if (directory == null) return;
 
@@ -1678,14 +1677,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       await source.copy(dest);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved to ${dest.split('/').last}')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.homeSavedTo(dest.split('/').last))),
         );
       }
     } catch (e) {
       log.e('Failed to export file to custom location', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to export file')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.homeFailedExport)),
         );
       }
     }
@@ -1698,7 +1697,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Copied ${text.length} characters to clipboard'),
+        content: Text(AppLocalizations.of(context)!.homeCopiedCharactersToClipboard(text.length)),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -1709,12 +1708,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete file?'),
-        content: Text('Move "${file.fileName}" to trash? You can restore it later.'),
+        title: Text(AppLocalizations.of(context)!.homeDeleteFile),
+        content: Text(AppLocalizations.of(context)!.homeDeleteFileConfirm(file.fileName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -1722,13 +1721,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('${file.fileName} moved to trash'),
+                  content: Text(AppLocalizations.of(context)!.homeFileMovedToTrash(file.fileName)),
                   duration: const Duration(seconds: 2),
                 ),
               );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -1738,52 +1737,55 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   void _showFileInfoDialog(BuildContext context, RecentFile file) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('File info'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Name: ${file.fileName}'),
-              const SizedBox(height: 8),
-              Text('Type: ${file.fileType.toUpperCase()}'),
-              const SizedBox(height: 8),
-              Text('Size: ${file.formattedSize}'),
-              const SizedBox(height: 8),
-              SelectableText('Location: ${file.filePath}'),
-              const SizedBox(height: 8),
-              Text('Date opened: ${_formatDateTime(file.dateOpened)}'),
-              const SizedBox(height: 8),
-              Text('Last modified: ${_formatDateTime(file.dateModified)}'),
-              if (file.isDeleted) ...[
+      builder: (context) {
+        final l = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(l.homeFileInfo),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${l.homeFileName}: ${file.fileName}'),
                 const SizedBox(height: 8),
-                Text(
-                    'In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})'),
+                Text('${l.homeFileType}: ${file.fileType.toUpperCase()}'),
+                const SizedBox(height: 8),
+                Text('${l.homeFileSize}: ${file.formattedSize}'),
+                const SizedBox(height: 8),
+                SelectableText('${l.homeFileLocation}: ${file.filePath}'),
+                const SizedBox(height: 8),
+                Text('${l.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}'),
+                const SizedBox(height: 8),
+                Text('${l.homeFileLastModified}: ${_formatDateTime(file.dateModified)}'),
+                if (file.isDeleted) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                      l.homeFileInTrashDetail(file.deletedAt != null ? _formatDateTime(file.deletedAt!) : l.homeUnknown)),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final text = _buildFileInfoText(file);
-              final navigator = Navigator.of(context);
-              final messenger = ScaffoldMessenger.of(context);
-              await Clipboard.setData(ClipboardData(text: text));
-              navigator.pop();
-              messenger.showSnackBar(
-                const SnackBar(content: Text('File info copied')),
-              );
-            },
-            child: const Text('Copy'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                final text = _buildFileInfoText(context, file);
+                final navigator = Navigator.of(context);
+                final messenger = ScaffoldMessenger.of(context);
+                await Clipboard.setData(ClipboardData(text: text));
+                navigator.pop();
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l.homeFileInfoCopied)),
+                );
+              },
+              child: Text(l.copy),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l.close),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1803,22 +1805,24 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     return '$day$suffix $datePart, $timePart';
   }
 
-  String _buildFileInfoText(RecentFile file) {
+  String _buildFileInfoText(BuildContext context, RecentFile file) {
+    final l = AppLocalizations.of(context)!;
     final buffer = StringBuffer();
-    buffer.writeln('Name: ${file.fileName}');
-    buffer.writeln('Type: ${file.fileType.toUpperCase()}');
-    buffer.writeln('Size: ${file.formattedSize}');
-    buffer.writeln('Location: ${file.filePath}');
-    buffer.writeln('Date opened: ${_formatDateTime(file.dateOpened)}');
-    buffer.writeln('Last modified: ${_formatDateTime(file.dateModified)}');
+    buffer.writeln('${l.homeFileName}: ${file.fileName}');
+    buffer.writeln('${l.homeFileType}: ${file.fileType.toUpperCase()}');
+    buffer.writeln('${l.homeFileSize}: ${file.formattedSize}');
+    buffer.writeln('${l.homeFileLocation}: ${file.filePath}');
+    buffer.writeln('${l.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}');
+    buffer.writeln('${l.homeFileLastModified}: ${_formatDateTime(file.dateModified)}');
     if (file.isDeleted) {
       buffer.writeln(
-          'In trash: yes (deleted at: ${file.deletedAt != null ? _formatDateTime(file.deletedAt!) : 'unknown'})');
+          l.homeFileInTrashDetail(file.deletedAt != null ? _formatDateTime(file.deletedAt!) : l.homeUnknown));
     }
     return buffer.toString();
   }
 
   Future<void> _duplicateFile(RecentFile file) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final src = File(file.filePath);
       if (!await src.exists()) {
@@ -1833,11 +1837,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
       String candidateName(String suffixIndex) => '$base$suffixIndex$ext';
 
-      String suffix = ' (copy)';
+      String suffix = l10n.homeCopySuffix;
       String newName = candidateName(suffix);
       int counter = 2;
       while (await File('$dir/$newName').exists()) {
-        newName = candidateName(' (copy $counter)');
+        newName = candidateName(l10n.homeCopySuffixCounter(counter));
         counter++;
       }
 
@@ -1862,14 +1866,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Duplicated as $newName')),
+          SnackBar(content: Text(l10n.homeDuplicatedAs(newName))),
         );
       }
     } catch (e) {
       log.e('Failed to duplicate file', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to duplicate file: $e')),
+          SnackBar(content: Text(l10n.homeFailedDuplicate(e.toString()))),
         );
       }
     }
@@ -1896,12 +1900,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             ),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Sort by', style: Theme.of(ctx).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+              child: Text(AppLocalizations.of(ctx)!.librarySortBy, style: Theme.of(ctx).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
             ),
-            _buildSortOption(ctx, 'latest', Icons.schedule, 'Latest first'),
-            _buildSortOption(ctx, 'oldest', Icons.history, 'Oldest first'),
-            _buildSortOption(ctx, 'largest', Icons.file_download, 'Largest size'),
-            _buildSortOption(ctx, 'smallest', Icons.file_upload, 'Smallest size'),
+            _buildSortOption(ctx, 'latest', Icons.schedule, AppLocalizations.of(ctx)!.librarySortLatest),
+            _buildSortOption(ctx, 'oldest', Icons.history, AppLocalizations.of(ctx)!.librarySortOldest),
+            _buildSortOption(ctx, 'largest', Icons.file_download, AppLocalizations.of(ctx)!.librarySortLargest),
+            _buildSortOption(ctx, 'smallest', Icons.file_upload, AppLocalizations.of(ctx)!.librarySortSmallest),
             const SizedBox(height: 16),
           ],
         ),
