@@ -621,7 +621,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                         : const Center(child: Text('No content')),
           ),
 
-          // Scrim overlay with dimming and tap-to-close - controlled by sidebar state
+          // Scrim overlay with dimming and tap/swipe-to-close
           Positioned.fill(
             child: IgnorePointer(
               ignoring: !_sidebarOpen || !_controlsVisible,
@@ -632,6 +632,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     opacity: _sidebarController.value,
                     child: GestureDetector(
                       onTap: _closeSidebar,
+                      onHorizontalDragUpdate: _handleSidebarDragUpdate,
+                      onHorizontalDragEnd: _handleSidebarDragEnd,
                       behavior: HitTestBehavior.opaque,
                       child: Container(
                         color: Colors.black.withValues(alpha: 0.45),
