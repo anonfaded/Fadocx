@@ -581,7 +581,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   Expanded(
                     child: _buildActionCard(
                       context,
-                      title: 'Scan to Extract Text',
+                      title: 'Scan a Document',
                       description: 'Extract text from documents using OCR',
                       icon: Icons.document_scanner,
                       cardType: 'scan',
@@ -1016,7 +1016,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             label,
             textAlign: TextAlign.center,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: tertiaryLabelColor,
+              color: secondaryLabelColor,
               fontSize: 9,
             ),
             maxLines: 1,
