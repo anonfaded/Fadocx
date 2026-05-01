@@ -2385,11 +2385,13 @@ class _ModernActionCardState extends State<_ModernActionCard>
 
                       // Main content (top layer) - left aligned, overlaid on animation
                       LayoutBuilder(builder: (context, constraints) {
-                        // Reserve right-side space based on diagonal start so text fits
-                        final diagStartX = constraints.maxWidth * 0.85; // matches painter diagonal
-                        final rightReserve = (constraints.maxWidth - diagStartX).clamp(32.0, constraints.maxWidth * 0.35);
+                        // Reserve right-side space based on diagonal path.
+                        // Diagonal runs from top(85%) to bottom(65%) — use the midpoint
+                        // so text never overflows into the animated area.
+                        final diagMidX = constraints.maxWidth * 0.75;
+                        final rightReserve = (constraints.maxWidth - diagMidX).clamp(48.0, constraints.maxWidth * 0.4);
                         return Padding(
-                          padding: EdgeInsets.fromLTRB(6, 6, rightReserve + 6, 6),
+                          padding: EdgeInsets.fromLTRB(6, 6, rightReserve + 10, 6),
                           child: ConstrainedBox(
                             // restore compact card height (previously 120)
                             constraints: BoxConstraints(minHeight: 96),
