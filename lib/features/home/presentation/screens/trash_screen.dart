@@ -6,6 +6,7 @@ import 'package:fadocx/config/theme/app_theme.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 import 'package:logger/logger.dart';
 
 final log = Logger();
@@ -46,7 +47,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
             // Centered title
             Center(
               child: Text(
-                'Trash',
+                AppLocalizations.of(context)!.trashTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -101,14 +102,14 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Trash is empty',
+              AppLocalizations.of(context)!.trashEmpty,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Deleted files will appear here',
+              AppLocalizations.of(context)!.trashEmptySubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                   ),
@@ -134,7 +135,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Error loading trash',
+              AppLocalizations.of(context)!.trashErrorLoading,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.error,
                   ),
@@ -162,7 +163,9 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${files.length} ${_isSelectionMode ? 'selected' : 'files'}',
+              _isSelectionMode
+                  ? AppLocalizations.of(context)!.trashFilesSelected(files.length)
+                  : '${files.length} ${AppLocalizations.of(context)!.trashFilesLabel}',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             if (_isSelectionMode)
@@ -175,12 +178,12 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
                         _isSelectionMode = false;
                       });
                     },
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 8),
                   FilledButton.tonalIcon(
                     icon: const Icon(Icons.delete_forever),
-                    label: const Text('Delete'),
+                    label: Text(AppLocalizations.of(context)!.trashDeletePermanently),
                     onPressed: _selectedFiles.isEmpty
                         ? null
                         : () => _showPermanentDeleteConfirmation(context),
@@ -378,7 +381,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
     await mutator.restoreFromTrash(fileId);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('File restored successfully')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.trashFileRestored)),
       );
     }
   }
@@ -414,7 +417,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ListTile(
                 leading: const Icon(Icons.restore, size: 20),
-                title: const Text('Restore'),
+                title: Text(AppLocalizations.of(context)!.restore),
                 onTap: () {
                   Navigator.pop(context);
                   _restoreFile(file.id);
@@ -429,8 +432,8 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
               child: ListTile(
                 leading: const Icon(Icons.delete_forever,
                     color: Colors.red, size: 20),
-                title: const Text('Delete Permanently',
-                    style: TextStyle(color: Colors.red)),
+                title: Text(AppLocalizations.of(context)!.trashDeletePermanently,
+                    style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
                   _showPermanentDeleteConfirmation(context, file);
@@ -457,17 +460,17 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Delete Permanently?'),
+            title: Text(AppLocalizations.of(context)!.trashDeletePermanentlyConfirm),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'You are about to permanently delete $filesCount file${filesCount > 1 ? 's' : ''}. This action cannot be undone.',
+                  AppLocalizations.of(context)!.trashDeletePermanentlyMessage(filesCount),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Type DELETE in capital letters to confirm:',
+                  AppLocalizations.of(context)!.trashDeleteTypeConfirm,
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
                 const SizedBox(height: 8),
@@ -478,7 +481,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
                     });
                   },
                   decoration: InputDecoration(
-                    hintText: 'DELETE',
+                    hintText: AppLocalizations.of(context)!.trashDeleteHint,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -493,11 +496,11 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               FilledButton.tonalIcon(
                 icon: const Icon(Icons.delete_forever),
-                label: const Text('Delete Permanently'),
+                label: Text(AppLocalizations.of(context)!.trashDeletePermanently),
                 onPressed: confirmText == 'DELETE'
                     ? () async {
                         Navigator.pop(context);
@@ -529,7 +532,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${fileIds.length} file${fileIds.length > 1 ? 's' : ''} permanently deleted',
+            AppLocalizations.of(context)!.trashFilesPermanentlyDeleted(fileIds.length),
           ),
         ),
       );

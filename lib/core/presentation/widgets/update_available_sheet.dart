@@ -1,3 +1,4 @@
+import 'package:fadocx/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -113,14 +114,14 @@ class UpdateAvailableSheet extends StatelessWidget {
 
           // ── Title ──
           Text(
-            'Update Available',
+            AppLocalizations.of(context)!.updateAvailableTitle,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 4),
           Text(
-            'A new version is ready to download',
+            AppLocalizations.of(context)!.updateAvailableSubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -130,8 +131,8 @@ class UpdateAvailableSheet extends StatelessWidget {
           // ── Stable card ──
           if (hasStableUpdate)
             _UpdateCard(
-              label: 'Stable Release',
-              subtitle: 'Recommended for most users',
+              label: AppLocalizations.of(context)!.updateStableRelease,
+              subtitle: AppLocalizations.of(context)!.updateStableDesc,
               currentVersion: currentVersion,
               newVersion: stableVersion!,
               releaseUrl: stableUrl,
@@ -145,8 +146,8 @@ class UpdateAvailableSheet extends StatelessWidget {
           // ── Beta card ──
           if (hasBetaUpdate)
             _UpdateCard(
-              label: 'Beta Release',
-              subtitle: 'Latest features — may be unstable',
+              label: AppLocalizations.of(context)!.updateBetaRelease,
+              subtitle: AppLocalizations.of(context)!.updateBetaDesc,
               currentVersion: currentVersion,
               newVersion: betaVersion!,
               releaseUrl: betaUrl,
@@ -170,7 +171,7 @@ class UpdateAvailableSheet extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Maybe Later',
+                AppLocalizations.of(context)!.updateMaybeLater,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -272,7 +273,7 @@ class _UpdateCard extends StatelessWidget {
                 // Current
                 _versionChip(
                   context,
-                  label: 'Current',
+                  label: AppLocalizations.of(context)!.updateCurrent,
                   version: currentVersion,
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -287,7 +288,7 @@ class _UpdateCard extends StatelessWidget {
                 // New
                 _versionChip(
                   context,
-                  label: 'New',
+                  label: AppLocalizations.of(context)!.updateNew,
                   version: newVersion,
                   color: accentColor,
                 ),
@@ -323,7 +324,7 @@ class _UpdateCard extends StatelessWidget {
                           Icon(Icons.open_in_new_rounded, size: 16, color: accentColor),
                           const SizedBox(width: 8),
                           Text(
-                            'Visit GitHub',
+                            AppLocalizations.of(context)!.updateVisitGithub,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
@@ -356,7 +357,7 @@ class _UpdateCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'This is a standalone APK that can be installed alongside the stable version. It has isolated storage — your existing data won\'t be affected.',
+                        AppLocalizations.of(context)!.updateBetaInfo,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontSize: 11,

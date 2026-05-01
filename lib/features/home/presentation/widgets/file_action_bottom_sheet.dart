@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
+import 'package:flutter/material.dart';
 
 /// Callbacks for file action bottom sheet. Null callbacks hide their row.
 class FileActionCallbacks {
@@ -75,7 +76,7 @@ void showFileActionBottomSheet({
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'File actions and management',
+                    AppLocalizations.of(context)!.fileActionSubtitle,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -89,27 +90,27 @@ void showFileActionBottomSheet({
               _buildActionRow(
                 context: ctx,
                 icon: Icons.edit_outlined,
-                title: 'Rename',
+                title: AppLocalizations.of(ctx)!.fileActionRename,
                 iconColor: Theme.of(context).colorScheme.primary,
-                subtitle: 'Change file name',
+                subtitle: AppLocalizations.of(ctx)!.fileActionRenameDesc,
                 onTap: callbacks.onRename!,
               ),
             if (callbacks.onDuplicate != null)
               _buildActionRow(
                 context: ctx,
                 icon: Icons.content_copy,
-                title: 'Duplicate',
+                title: AppLocalizations.of(ctx)!.fileActionDuplicate,
                 iconColor: Colors.blue,
-                subtitle: 'Create a copy',
+                subtitle: AppLocalizations.of(ctx)!.fileActionDuplicateDesc,
                 onTap: callbacks.onDuplicate!,
               ),
             if (callbacks.onExport != null)
               _buildActionRow(
                 context: ctx,
                 icon: Icons.save_alt,
-                title: 'Export / Save As',
+                title: AppLocalizations.of(ctx)!.fileActionExport,
                 iconColor: Colors.green,
-                subtitle: 'Save a copy to Downloads',
+                subtitle: AppLocalizations.of(ctx)!.fileActionExportDesc,
                 showChevron: true,
                 onTap: callbacks.onExport!,
               ),
@@ -117,17 +118,17 @@ void showFileActionBottomSheet({
               _buildActionRow(
                 context: ctx,
                 icon: Icons.content_paste,
-                title: 'Copy Text',
+                title: AppLocalizations.of(ctx)!.fileActionCopyText,
                 iconColor: Colors.teal,
-                subtitle: 'Copy extracted text to clipboard',
+                subtitle: AppLocalizations.of(ctx)!.fileActionCopyTextDesc,
                 onTap: callbacks.onCopyText!,
               ),
             if (callbacks.onConvert != null)
               _buildActionRow(
                 context: ctx,
                 icon: Icons.transform,
-                title: 'Convert',
-                subtitle: 'Convert to another format',
+                title: AppLocalizations.of(ctx)!.fileActionConvert,
+                subtitle: AppLocalizations.of(ctx)!.fileActionConvertDesc,
                 iconColor: Colors.purple,
                 showComingSoonBadge: true,
                 onTap: callbacks.onConvert!,
@@ -136,8 +137,8 @@ void showFileActionBottomSheet({
               _buildActionRow(
                 context: ctx,
                 icon: Icons.cloud_upload_outlined,
-                title: 'Upload to FadDrive',
-                subtitle: 'Sync to cloud storage',
+                title: AppLocalizations.of(ctx)!.fileActionUpload,
+                subtitle: AppLocalizations.of(ctx)!.fileActionUploadDesc,
                 iconColor: Colors.blue,
                 showComingSoonBadge: true,
                 onTap: callbacks.onUpload!,
@@ -146,7 +147,7 @@ void showFileActionBottomSheet({
               _buildActionRow(
                 context: ctx,
                 icon: Icons.info_outline,
-                title: 'File info',
+                title: AppLocalizations.of(ctx)!.fileActionFileInfo,
                 iconColor: Colors.grey,
                 onTap: callbacks.onFileInfo!,
               ),
@@ -236,7 +237,7 @@ Widget _buildActionRow({
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'Coming Soon',
+                    AppLocalizations.of(context)!.comingSoon,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Colors.orange.shade700,
                       fontSize: 9,

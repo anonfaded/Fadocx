@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fadocx/config/routing/app_router.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Bottom navigation dock
 class BottomNavDock extends StatelessWidget {
@@ -24,7 +25,7 @@ class BottomNavDock extends StatelessWidget {
             _buildNavItem(
               context,
               icon: Icons.home,
-              label: 'Home',
+              label: AppLocalizations.of(context)!.navHome,
               isActive: currentRoute == RouteNames.home,
               onTap: () {
                 if (currentRoute != RouteNames.home) {
@@ -35,8 +36,8 @@ class BottomNavDock extends StatelessWidget {
             _buildNavItem(
               context,
               icon: Icons.history,
-              label: 'Recents',
-              isActive: false, // Recents is shown on home, not separate route
+              label: AppLocalizations.of(context)!.navRecents,
+              isActive: false,
               onTap: () {
                 if (currentRoute != RouteNames.home) {
                   context.go(RouteNames.home);
@@ -46,7 +47,7 @@ class BottomNavDock extends StatelessWidget {
             _buildNavItem(
               context,
               icon: Icons.settings,
-              label: 'Settings',
+              label: AppLocalizations.of(context)!.navSettings,
               isActive: currentRoute == RouteNames.settings,
               onTap: () {
                 if (currentRoute != RouteNames.settings) {

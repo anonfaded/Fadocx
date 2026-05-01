@@ -4,32 +4,26 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_icons/simple_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:fadocx/core/presentation/constants.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 class WhatsNewScreen extends StatelessWidget {
   const WhatsNewScreen({super.key});
 
   static final releaseDate = DateTime(2026, 4, 30);
 
-  String _timeAgo(DateTime date) {
+  String _timeAgo(BuildContext context, DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date);
+    final l10n = AppLocalizations.of(context)!;
 
     if (diff.inDays == 0) {
-      return 'Released today';
+      return l10n.whatsNewReleasedToday;
     } else if (diff.inDays == 1) {
-      return 'Released yesterday';
-    } else if (diff.inDays < 7) {
-      return 'Released ${diff.inDays} days ago';
-    } else if (diff.inDays < 30) {
-      final weeks = diff.inDays ~/ 7;
-      return 'Released $weeks ${weeks == 1 ? 'week' : 'weeks'} ago';
-    } else if (diff.inDays < 365) {
-      final months = diff.inDays ~/ 30;
-      return 'Released $months ${months == 1 ? 'month' : 'months'} ago';
+      return l10n.whatsNewReleasedYesterday;
     } else {
-      final years = diff.inDays ~/ 365;
-      return 'Released $years ${years == 1 ? 'year' : 'years'} ago';
+      final formattedDate =
+          '${date.day} ${_monthName(context, date.month)} ${date.year}';
+      return l10n.whatsNewReleasedDate(formattedDate);
     }
   }
 
@@ -108,7 +102,7 @@ class WhatsNewScreen extends StatelessWidget {
                               ),
                               Expanded(
                                 child: Text(
-                                  "What's New",
+                                  AppLocalizations.of(context)!.whatsNewTitle,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -132,86 +126,57 @@ class WhatsNewScreen extends StatelessWidget {
           _buildReleaseCard(context),
           const SizedBox(height: 24),
           Text(
-            "What's Included",
+            AppLocalizations.of(context)!.whatsNewWhatsIncluded,
             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           _buildSection(
             context,
             icon: Icons.picture_as_pdf,
-            title: 'Documents & Spreadsheets',
-            body:
-                'PDFs render via the native pdfrx engine. Microsoft Office files (DOCX, DOC, '
-                'XLSX, XLS, PPT, PPTX) and OpenDocument formats (ODT, ODS, ODP) along with '
-                'RTF are powered by the embedded LibreOffice Kit for desktop-class rendering. '
-                'CSV parsing uses native Android performance — all running offline with zero '
-                'data leaving your device.',
+            title: AppLocalizations.of(context)!.whatsNewDocAndSheets,
+            body: AppLocalizations.of(context)!.whatsNewDocAndSheetsDesc,
           ),
           const Divider(height: 32),
           _buildSection(
             context,
             icon: Icons.document_scanner,
-            title: 'Intelligent OCR & On-Device AI',
-            body:
-                'Built on Tesseract OCR with OpenCV preprocessing, the scanner detects and '
-                'extracts English text from images with confidence scoring. Dual PSM modes and '
-                'automatic rotation correction ensure accurate results. All AI processing — '
-                'including OCR, image analysis, and text recognition — runs entirely on your '
-                'device. No cloud, no uploads, complete privacy.',
+            title: AppLocalizations.of(context)!.whatsNewOcrAi,
+            body: AppLocalizations.of(context)!.whatsNewOcrAiDesc,
           ),
           const Divider(height: 32),
           _buildSection(
             context,
             icon: Icons.highlight,
-            title: 'Syntax Highlighting',
-            body:
-                'Code files (Java, Python, Shell, HTML, JSON, XML, Markdown, Log) are rendered '
-                'with color-coded syntax highlighting. Adjustable font size, word wrap, and '
-                'a dedicated reading mode make long files comfortable to browse.',
+            title: AppLocalizations.of(context)!.whatsNewSyntaxHighlighting,
+            body: AppLocalizations.of(context)!.whatsNewSyntaxHighlightingDesc,
           ),
           const Divider(height: 32),
           _buildSection(
             context,
             icon: Icons.timer,
-            title: 'Reading Stats Dashboard',
-            body:
-                'The home screen stats card tracks total documents, storage used, and cumulative '
-                'reading time across all your files. When you open a document, a session timer '
-                'starts automatically. When you leave the viewer, the elapsed time is calculated '
-                'and added to that file\'s total — so you can see how much time you\'ve spent reading.',
+            title: AppLocalizations.of(context)!.whatsNewReadingStats,
+            body: AppLocalizations.of(context)!.whatsNewReadingStatsDesc,
           ),
           const Divider(height: 32),
           _buildSection(
             context,
             icon: Icons.folder,
-            title: 'Library with Category Folders',
-            body:
-                'Imported files are automatically organized into category folders — PDF, Docs, '
-                'Sheets, Slides, Code, Scans, and Other. Browse by category with chip filters, '
-                'search by name or type, and sort by date or size. All files live in Fadocx\'s '
-                'private storage, keeping your documents organized and separate from public folders.',
+            title: AppLocalizations.of(context)!.whatsNewLibraryCategories,
+            body: AppLocalizations.of(context)!.whatsNewLibraryCategoriesDesc,
           ),
           const Divider(height: 32),
           _buildSection(
             context,
             icon: Icons.drive_file_move,
-            title: 'File Management',
-            body:
-                'Import documents from your device into Fadocx\'s private storage with automatic '
-                'category sorting. Rename files with extension preservation, create duplicates '
-                'with auto-numbered names, or export copies to Downloads or a custom location. '
-                'Long-press for multi-select mode and batch operations. A context menu on each '
-                'file gives quick access to all actions.',
+            title: AppLocalizations.of(context)!.whatsNewFileManagement,
+            body: AppLocalizations.of(context)!.whatsNewFileManagementDesc,
           ),
           const Divider(height: 32),
           _buildSection(
             context,
             icon: Icons.palette,
-            title: 'Light & Dark Themes',
-            body:
-                'Fadocx adapts to your preference with fully designed light and dark color '
-                'schemes. The entire UI — including PDF viewer, code renderer, and menus — '
-                'respects your system theme or manual toggle.',
+            title: AppLocalizations.of(context)!.whatsNewThemes,
+            body: AppLocalizations.of(context)!.whatsNewThemesDesc,
           ),
           const SizedBox(height: 24),
           Row(
@@ -228,7 +193,7 @@ class WhatsNewScreen extends StatelessWidget {
                     Icon(Icons.rocket_launch, size: 14, color: theme.colorScheme.primary),
                     const SizedBox(width: 6),
                     Text(
-                      'Planned',
+                      AppLocalizations.of(context)!.whatsNewPlanned,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w600,
@@ -243,43 +208,43 @@ class WhatsNewScreen extends StatelessWidget {
           _buildUpcomingItem(
             context,
             icon: Icons.cloud_upload,
-            title: 'FadDrive',
-            description: 'End-to-end encrypted cloud sync for your documents across all devices.',
+            title: AppLocalizations.of(context)!.whatsNewFadDrive,
+            description: AppLocalizations.of(context)!.whatsNewFadDriveDesc,
           ),
           const SizedBox(height: 10),
           _buildUpcomingItem(
             context,
             icon: Icons.edit,
-            title: 'Document Editing',
-            description: 'Edit documents directly in the app with full formatting support.',
+            title: AppLocalizations.of(context)!.whatsNewEditing,
+            description: AppLocalizations.of(context)!.whatsNewEditingDesc,
           ),
           const SizedBox(height: 10),
           _buildUpcomingItem(
             context,
             icon: Icons.bookmark,
-            title: 'Bookmarks & Annotations',
-            description: 'Mark important pages and add notes for quick reference.',
+            title: AppLocalizations.of(context)!.whatsNewBookmarks,
+            description: AppLocalizations.of(context)!.whatsNewBookmarksDesc,
           ),
           const SizedBox(height: 10),
           _buildUpcomingItem(
             context,
             icon: Icons.swap_horiz,
-            title: 'Document Conversion',
-            description: 'Convert documents between formats (PDF to DOCX, DOCX to PDF, etc.).',
+            title: AppLocalizations.of(context)!.whatsNewConversion,
+            description: AppLocalizations.of(context)!.whatsNewConversionDesc,
           ),
           const SizedBox(height: 10),
           _buildUpcomingItem(
             context,
             icon: Icons.dark_mode,
-            title: 'AMOLED Black Theme',
-            description: 'Pure black theme for AMOLED screens with deeper contrast.',
+            title: AppLocalizations.of(context)!.whatsNewAmoled,
+            description: AppLocalizations.of(context)!.whatsNewAmoledDesc,
           ),
           const SizedBox(height: 10),
           _buildUpcomingItem(
             context,
             icon: Icons.translate,
-            title: 'More OCR Languages',
-            description: 'Multi-language OCR support beyond English.',
+            title: AppLocalizations.of(context)!.whatsNewMoreOcr,
+            description: AppLocalizations.of(context)!.whatsNewMoreOcrDesc,
           ),
           const SizedBox(height: 28),
           _buildSupportCard(context),
@@ -291,7 +256,7 @@ class WhatsNewScreen extends StatelessWidget {
   Widget _buildReleaseCard(BuildContext context) {
     final theme = Theme.of(context);
     final formattedDate =
-        '${releaseDate.day} ${_monthName(releaseDate.month)} ${releaseDate.year}';
+        '${releaseDate.day} ${_monthName(context, releaseDate.month)} ${releaseDate.year}';
 
     return Container(
       width: double.infinity,
@@ -341,7 +306,7 @@ class WhatsNewScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            _timeAgo(releaseDate),
+            _timeAgo(context, releaseDate),
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w600,
@@ -349,8 +314,7 @@ class WhatsNewScreen extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'An offline-first document viewer built for privacy and performance. '
-            'Open, read, and search your files — no internet required, no data ever leaves your device.',
+            AppLocalizations.of(context)!.whatsNewOfflineFirst,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               height: 1.5,
@@ -450,12 +414,23 @@ class WhatsNewScreen extends StatelessWidget {
     );
   }
 
-  String _monthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    return months[month - 1];
+  String _monthName(BuildContext context, int month) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (month) {
+      case 1: return l10n.monthJan;
+      case 2: return l10n.monthFeb;
+      case 3: return l10n.monthMar;
+      case 4: return l10n.monthApr;
+      case 5: return l10n.monthMay;
+      case 6: return l10n.monthJun;
+      case 7: return l10n.monthJul;
+      case 8: return l10n.monthAug;
+      case 9: return l10n.monthSep;
+      case 10: return l10n.monthOct;
+      case 11: return l10n.monthNov;
+      case 12: return l10n.monthDec;
+      default: return '';
+    }
   }
 
   Widget _buildSupportCard(BuildContext context) {
@@ -487,7 +462,7 @@ class WhatsNewScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Thank You for Using Fadocx',
+            AppLocalizations.of(context)!.whatsNewThankYou,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -495,9 +470,7 @@ class WhatsNewScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'If you find value in this app and want to give back, '
-            'consider becoming a patron. You\'ll get premium benefits '
-            'across all FadSec Lab apps.',
+            AppLocalizations.of(context)!.whatsNewThankYouDesc,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               height: 1.5,
@@ -552,7 +525,7 @@ class WhatsNewScreen extends StatelessWidget {
                   const Icon(SimpleIcons.patreon, size: 40, color: Color(0xFFD4A017)),
                   const SizedBox(height: 12),
                   Text(
-                    'Support Development',
+                    AppLocalizations.of(context)!.supportDevelopment,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -561,10 +534,10 @@ class WhatsNewScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                patreonDescription,
+                AppLocalizations.of(context)!.patreonDescription,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -572,7 +545,7 @@ class WhatsNewScreen extends StatelessWidget {
             _sheetActionButton(
               context,
               icon: SimpleIcons.patreon,
-              label: 'Visit Patreon',
+              label: AppLocalizations.of(context)!.visitPatreon,
               onTap: () {
                 Navigator.pop(ctx);
                 _openUrl(patreonUrl);
@@ -582,12 +555,12 @@ class WhatsNewScreen extends StatelessWidget {
             _sheetActionButton(
               context,
               icon: Icons.content_copy,
-              label: 'Copy Link',
+              label: AppLocalizations.of(context)!.copyLink,
               onTap: () {
                 Clipboard.setData(ClipboardData(text: patreonUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
                 );
               },
             ),
@@ -734,7 +707,7 @@ class _GoldPatreonButtonState extends State<_GoldPatreonButton>
                       const Icon(SimpleIcons.patreon, size: 18, color: Colors.white),
                       const SizedBox(width: 8),
                       Text(
-                        'Become a Patron',
+                        AppLocalizations.of(context)!.becomeAPatron,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
