@@ -505,21 +505,8 @@ class WhatsNewScreen extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _showPatreonSheet(context),
-              icon: const Icon(SimpleIcons.patreon, size: 18),
-              label: const Text('Become a Patron'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFD4A017),
-                side: const BorderSide(color: Color(0xFFD4A017)),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
+          _GoldPatreonButton(
+            onTap: () => _showPatreonSheet(context),
           ),
         ],
       ),
@@ -661,5 +648,106 @@ class WhatsNewScreen extends StatelessWidget {
     try {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } catch (_) {}
+  }
+}
+
+/// Patreon button with the same golden shimmer as the app bar icon.
+/// Same 7-stop gold gradient sweep, but on a filled rounded container.
+class _GoldPatreonButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _GoldPatreonButton({required this.onTap});
+
+  @override
+  State<_GoldPatreonButton> createState() => _GoldPatreonButtonState();
+}
+
+class _GoldPatreonButtonState extends State<_GoldPatreonButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return GestureDetector(
+          onTap: widget.onTap,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 48,
+                  color: const Color(0xFFD4A017),
+                ),
+                Positioned.fill(
+                  child: ShaderMask(
+                    shaderCallback: (bounds) {
+                      const cycle = 300.0;
+                      final offset = (_controller.value * cycle) % cycle;
+                      return const LinearGradient(
+                        tileMode: TileMode.repeated,
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Color(0xFFC9A214),
+                          Color(0xFFDAB125),
+                          Color(0xFFF5D547),
+                          Color(0xFFFFE873),
+                          Color(0xFFF5D547),
+                          Color(0xFFDAB125),
+                          Color(0xFFC9A214),
+                        ],
+                        stops: [0.00, 0.18, 0.36, 0.50, 0.64, 0.82, 1.00],
+                      ).createShader(Rect.fromLTWH(
+                        bounds.left - offset,
+                        bounds.top,
+                        cycle,
+                        bounds.height,
+                      ));
+                    },
+                    blendMode: BlendMode.srcIn,
+                    child: Container(color: Colors.white.withValues(alpha: 0.25)),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(SimpleIcons.patreon, size: 18, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Become a Patron',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
