@@ -131,6 +131,20 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     cameraService.stopFrameStream();
   }
 
+  /// Release the camera hardware when leaving the capture step.
+  void _releaseCamera() {
+    final cameraService = ref.read(scannerProvider.notifier).getCameraService();
+    cameraService.stopFrameStream();
+    cameraService.releaseCamera();
+    ref.read(scannerProvider.notifier).markCameraUninitialized();
+  }
+
+  /// Reinitialize the camera when returning to the capture step.
+  Future<void> _reinitializeCamera() async {
+    final notifier = ref.read(scannerProvider.notifier);
+    await notifier.retryCameraInitialization();
+  }
+
   // ─── Tap-to-focus ──────────────────────────────────────────────────────────
 
   void _handleTapToFocus(TapDownDetails details, BoxConstraints constraints) {
@@ -168,10 +182,24 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen>
     final prevStep = _currentStep;
     setState(() {
       _currentStep = step.clamp(0, 2);
-      // Camera lifecycle: stop stream when leaving capture step
-      if (prevStep == 0 && step > 0) {
-        _liveCorners = null;
-      }
+    // Camera lifecycle: stop stream when leaving capture step
+    if (prevStep == 0 && step > 0) {
+      _liveCorners = null;
+      _releaseCamera();
+    }
+    // Restart stream when returning to capture step
+    if (prevStep > 0 && step == 0) {
+      _reinitializeCamera().then((_) {
+        if (mounted) {
+          final scannerState = ref.read(scannerProvider);
+          if (scannerState.cameraInitialized && !scannerState.isProcessing) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _startFrameStream();
+            });
+          }
+        }
+      });
+    }
     });
 
     // Start scanning animation when entering processing or results step
@@ -1695,9 +1723,7 @@ class _DetectedTextPreview extends StatelessWidget {
 
 // ─── Painters ─────────────────────────────────────────────────────────────
 
-/// Simple scanning laser painter used during the Processing step.
-/// Does NOT require OCR data (no blocks, no image dimensions needed).
-/// Draws a glowing laser line that sweeps top-to-bottom.
+/// Enhanced scanning laser with glow layers and floating particles.
 class _ScanningLaserPainter extends CustomPainter {
   final double scanValue;
   final Color primaryColor;
@@ -1711,26 +1737,47 @@ class _ScanningLaserPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final currentY = size.height * scanValue;
 
-    // Glowing line
-    final glowPaint = Paint()
-      ..color = primaryColor.withValues(alpha: 0.3)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+    // ── Outer glow (wide, soft) ──────────────────────────────────────────
+    final outerGlow = Paint()
+      ..color = primaryColor.withValues(alpha: 0.08)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60);
     canvas.drawRect(
-      Rect.fromLTWH(0, currentY - 3, size.width, 6),
-      glowPaint,
+      Rect.fromLTWH(0, currentY - 30, size.width, 60),
+      outerGlow,
     );
 
-    // Bright core line
+    // ── Mid glow ─────────────────────────────────────────────────────────
+    final midGlow = Paint()
+      ..color = primaryColor.withValues(alpha: 0.15)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30);
+    canvas.drawRect(
+      Rect.fromLTWH(0, currentY - 15, size.width, 30),
+      midGlow,
+    );
+
+    // ── Bright core glow ─────────────────────────────────────────────────
+    final coreGlow = Paint()
+      ..color = primaryColor.withValues(alpha: 0.35)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+    canvas.drawRect(
+      Rect.fromLTWH(0, currentY - 4, size.width, 8),
+      coreGlow,
+    );
+
+    // ── Hard core line ───────────────────────────────────────────────────
     final corePaint = Paint()
       ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
         colors: [
-          primaryColor.withValues(alpha: 0),
+          primaryColor.withValues(alpha: 0.2),
           primaryColor,
-          primaryColor.withValues(alpha: 0),
+          Colors.white,
+          primaryColor,
+          primaryColor.withValues(alpha: 0.2),
         ],
-      ).createShader(Rect.fromLTWH(0, currentY - 12, size.width, 24))
+        stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
+      ).createShader(Rect.fromLTWH(0, currentY - 1, size.width, 2))
       ..strokeWidth = 2;
 
     canvas.drawLine(
@@ -1738,10 +1785,37 @@ class _ScanningLaserPainter extends CustomPainter {
       Offset(size.width, currentY),
       corePaint,
     );
+
+    // ── Floating particles near the scan line ────────────────────────────
+    final particleCount = 16;
+    final rng = _SeededRandom((scanValue * 10000).round());
+    for (int i = 0; i < particleCount; i++) {
+      final px = rng.nextDouble() * size.width;
+      final py = currentY + (rng.nextDouble() - 0.5) * 80;
+      final distance = (py - currentY).abs();
+      final alpha = (1.0 - (distance / 50).clamp(0.0, 1.0)) * 0.6;
+      if (alpha <= 0) continue;
+      final radius = 1.0 + rng.nextDouble() * 1.5;
+      final particlePaint = Paint()
+        ..color = Colors.white.withValues(alpha: alpha)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      canvas.drawCircle(Offset(px, py), radius, particlePaint);
+    }
   }
 
   @override
   bool shouldRepaint(_ScanningLaserPainter old) => old.scanValue != scanValue;
+}
+
+/// Simple deterministic random for consistent particle placement per frame.
+class _SeededRandom {
+  int _seed;
+  _SeededRandom(this._seed);
+
+  double nextDouble() {
+    _seed = (_seed * 16807) % 2147483647;
+    return _seed / 2147483647;
+  }
 }
 
 class _DetectedTextPainter extends CustomPainter {
@@ -1773,33 +1847,69 @@ class _DetectedTextPainter extends CustomPainter {
     final scale = size.width / imageWidth;
     final renderedHeight = imageHeight * scale;
 
-    // 1. Draw "Laser" scanning line (only when showScanEffect is true)
+    // 1. Draw "Laser" scanning line with glow and particles
     if (showScanEffect) {
       final currentScanY = renderedHeight * scanValue;
-      final laserPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            primaryColor.withValues(alpha: 0),
-            primaryColor,
-            primaryColor.withValues(alpha: 0),
-          ],
-        ).createShader(Rect.fromLTWH(0, currentScanY - 20, size.width, 40))
-        ..strokeWidth = 2;
 
+      // Outer glow
+      final outerGlow = Paint()
+        ..color = primaryColor.withValues(alpha: 0.08)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 50);
+      canvas.drawRect(
+        Rect.fromLTWH(0, currentScanY - 30, size.width, 60),
+        outerGlow,
+      );
+      // Mid glow
+      final midGlow = Paint()
+        ..color = Colors.white.withValues(alpha: 0.1)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 25);
+      canvas.drawRect(
+        Rect.fromLTWH(0, currentScanY - 15, size.width, 30),
+        midGlow,
+      );
+      // Core glow
+      final coreGlow = Paint()
+        ..color = primaryColor.withValues(alpha: 0.3)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+      canvas.drawRect(
+        Rect.fromLTWH(0, currentScanY - 3, size.width, 6),
+        coreGlow,
+      );
+      // Hard core line
+      final corePaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            primaryColor.withValues(alpha: 0.2),
+            primaryColor,
+            Colors.white,
+            primaryColor,
+            primaryColor.withValues(alpha: 0.2),
+          ],
+          stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
+        ).createShader(Rect.fromLTWH(0, currentScanY - 1, size.width, 2))
+        ..strokeWidth = 2;
       canvas.drawLine(
         Offset(0, currentScanY),
         Offset(size.width, currentScanY),
-        laserPaint,
+        corePaint,
       );
 
-      // Subtle glow behind the laser
-      final laserGlowPaint = Paint()
-        ..color = primaryColor.withValues(alpha: 0.15)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
-      canvas.drawRect(
-          Rect.fromLTWH(0, currentScanY - 2, size.width, 4), laserGlowPaint);
+      // Floating particles
+      final rng = _SeededRandom((scanValue * 10000).round());
+      for (int i = 0; i < 14; i++) {
+        final px = rng.nextDouble() * size.width;
+        final py = currentScanY + (rng.nextDouble() - 0.5) * 70;
+        final dist = (py - currentScanY).abs();
+        final a = (1.0 - (dist / 45).clamp(0.0, 1.0)) * 0.5;
+        if (a <= 0) continue;
+        final r = 1.0 + rng.nextDouble() * 1.5;
+        final p = Paint()
+          ..color = Colors.white.withValues(alpha: a)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+        canvas.drawCircle(Offset(px, py), r, p);
+      }
     }
 
     // 2. Draw Text Blocks with proximity-based highlight or punch-hole overlay
