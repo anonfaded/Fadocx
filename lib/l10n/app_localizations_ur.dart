@@ -1296,6 +1296,27 @@ class AppLocalizationsUr extends AppLocalizations {
   String get viewerTypeToFind => 'تلاش کرنے کے لیے ٹائپ کریں';
 
   @override
+  String get viewerSidebarPages => 'صفحات';
+
+  @override
+  String get viewerSidebarSearch => 'تلاش';
+
+  @override
+  String get viewerSidebarTOC => 'فہرست';
+
+  @override
+  String get viewerSidebarNotes => 'نوٹس';
+
+  @override
+  String get viewerSidebarBookmarks => 'نشانات';
+
+  @override
+  String get viewerSidebarNotesDesc => 'PDF صفحات میں نوٹس اور تشریحات شامل کریں';
+
+  @override
+  String get viewerSidebarBookmarksDesc => 'اہم صفحات کو محفوظ کریں اور منظم کریں';
+
+  @override
   String viewerCellCopied(String value) {
     return 'سیل $value کاپی ہو گیا';
   }
