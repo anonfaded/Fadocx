@@ -114,3 +114,5 @@ coverage/
 # android/app/src/main/jniLibs/
 # android/app/src/main/assets/program/
 # android/app/src/main/assets/share/
+
+.tmp/*
