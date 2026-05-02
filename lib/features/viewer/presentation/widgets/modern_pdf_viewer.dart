@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:logger/logger.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 class _SearchResult {
   final int page;
@@ -214,6 +215,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
 
   /// Build drawer content for display in ViewerScreen's sidebar.
   Widget buildDrawerContent(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ValueListenableBuilder<int>(
       valueListenable: _drawerVersion,
       builder: (context, _, __) {
@@ -230,7 +232,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                         children: [
                           _buildSidebarTab(
                             context,
-                            'Pages',
+                            l10n.viewerSidebarPages,
                             Icons.pages,
                             0,
                             badgeText: '$_currentPage',
@@ -238,7 +240,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                           ),
                           _buildSidebarTab(
                             context,
-                            'Search',
+                            l10n.viewerSidebarSearch,
                             Icons.search,
                             1,
                             badgeText: _searchResults.isNotEmpty
@@ -248,7 +250,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                           ),
                           _buildSidebarTab(
                             context,
-                            'TOC',
+                            l10n.viewerSidebarTOC,
                             Icons.list,
                             2,
                             badgeText: _outlineNodes != null
@@ -259,14 +261,14 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                           ),
                           _buildSidebarTab(
                             context,
-                            'Notes',
+                            l10n.viewerSidebarNotes,
                             Icons.note,
                             3,
                             comingSoon: true,
                           ),
                           _buildSidebarTab(
                             context,
-                            'Bookmarks',
+                            l10n.viewerSidebarBookmarks,
                             Icons.bookmark,
                             4,
                             comingSoon: true,
@@ -287,10 +289,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                       : _sidebarTab == 2
                           ? _buildTocTab()
                           : _sidebarTab == 3
-                              ? _buildComingSoonTab('Notes',
-                                  'Add notes and annotations to PDF pages')
-                              : _buildComingSoonTab('Bookmarks',
-                                  'Save and organize your favorite pages'),
+                              ? _buildComingSoonTab(l10n.viewerSidebarNotes,
+                                  l10n.viewerSidebarNotesDesc)
+                              : _buildComingSoonTab(l10n.viewerSidebarBookmarks,
+                                  l10n.viewerSidebarBookmarksDesc),
             ),
           ],
         );

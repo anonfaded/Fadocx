@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 import '../providers/lokit_viewer_notifier.dart';
 
 class LOKitDocumentViewer extends ConsumerStatefulWidget {
@@ -59,6 +60,7 @@ class LOKitDocumentViewerState extends ConsumerState<LOKitDocumentViewer>
 
   Widget? buildDrawerContent(BuildContext context) {
     final lokitState = ref.read(lokitViewerProvider);
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final pages = lokitState.totalParts;
     if (pages <= 1) return null;
@@ -73,7 +75,7 @@ class LOKitDocumentViewerState extends ConsumerState<LOKitDocumentViewer>
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Text(
-                'Pages',
+                l10n.viewerSidebarPages,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),

@@ -1296,6 +1296,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewerTypeToFind => 'Type to find';
 
   @override
+  String get viewerSidebarPages => 'Pages';
+
+  @override
+  String get viewerSidebarSearch => 'Search';
+
+  @override
+  String get viewerSidebarTOC => 'TOC';
+
+  @override
+  String get viewerSidebarNotes => 'Notes';
+
+  @override
+  String get viewerSidebarBookmarks => 'Bookmarks';
+
+  @override
+  String get viewerSidebarNotesDesc => 'Add notes and annotations to PDF pages';
+
+  @override
+  String get viewerSidebarBookmarksDesc => 'Save and organize your favorite pages';
+
+  @override
   String viewerCellCopied(String value) {
     return 'Cell $value copied';
   }

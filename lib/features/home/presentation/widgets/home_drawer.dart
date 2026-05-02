@@ -66,6 +66,7 @@ class _AnimatedHamburgerIconState extends State<AnimatedHamburgerIcon>
   @override
   Widget build(BuildContext context) {
     final iconColor = widget.color ?? Theme.of(context).colorScheme.onSurface;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     
     return Material(
       color: Colors.transparent,
@@ -85,6 +86,7 @@ class _AnimatedHamburgerIconState extends State<AnimatedHamburgerIcon>
                   painter: HamburgerPainter(
                     color: iconColor,
                     bottomLineFactor: bottomLineFactor,
+                    isRTL: isRTL,
                   ),
                 );
               },
@@ -100,10 +102,12 @@ class _AnimatedHamburgerIconState extends State<AnimatedHamburgerIcon>
 class HamburgerPainter extends CustomPainter {
   final Color color;
   final double bottomLineFactor;
+  final bool isRTL;
 
   HamburgerPainter({
     required this.color,
     this.bottomLineFactor = 0.35,
+    this.isRTL = false,
   });
 
   @override
@@ -116,25 +120,46 @@ class HamburgerPainter extends CustomPainter {
     const lineSpacing = 6.5;
     const yOffset = 2.0;
 
-    // Top line
-    canvas.drawLine(
-      Offset(0, yOffset),
-      Offset(size.width * 0.75, yOffset),
-      paint,
-    );
+    if (isRTL) {
+      // RTL: lines grow/shrink from the left
+      // Top line: full width from right (size.width) to left (25% from left)
+      canvas.drawLine(
+        Offset(size.width, yOffset),
+        Offset(size.width * 0.25, yOffset),
+        paint,
+      );
 
-    // Bottom line
-    canvas.drawLine(
-      Offset(0, lineSpacing + yOffset),
-      Offset(size.width * (bottomLineFactor * 1.07), lineSpacing + yOffset),
-      paint,
-    );
+      // Bottom line: animated from right (size.width) to left (grows/shrinks from left)
+      // bottomLineFactor ranges 0.35 (closed) to 0.70 (open)
+      // In RTL, we want it to grow leftward: right point stays at size.width, left point moves
+      canvas.drawLine(
+        Offset(size.width, lineSpacing + yOffset),
+        Offset(size.width * (1.0 - bottomLineFactor * 1.07), lineSpacing + yOffset),
+        paint,
+      );
+    } else {
+      // LTR: lines grow/shrink from the right (original behavior)
+      // Top line: full width from left (0) to right (75%)
+      canvas.drawLine(
+        Offset(0, yOffset),
+        Offset(size.width * 0.75, yOffset),
+        paint,
+      );
+
+      // Bottom line: animated from left (0) to right (grows/shrinks from right)
+      canvas.drawLine(
+        Offset(0, lineSpacing + yOffset),
+        Offset(size.width * (bottomLineFactor * 1.07), lineSpacing + yOffset),
+        paint,
+      );
+    }
   }
 
   @override
   bool shouldRepaint(HamburgerPainter oldDelegate) =>
       oldDelegate.bottomLineFactor != bottomLineFactor ||
-      oldDelegate.color != color;
+      oldDelegate.color != color ||
+      oldDelegate.isRTL != isRTL;
 }
 
 /// Side drawer widget

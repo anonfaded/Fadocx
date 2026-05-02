@@ -2429,6 +2429,48 @@ abstract class AppLocalizations {
   /// **'Type to find'**
   String get viewerTypeToFind;
 
+  /// No description provided for @viewerSidebarPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get viewerSidebarPages;
+
+  /// No description provided for @viewerSidebarSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get viewerSidebarSearch;
+
+  /// No description provided for @viewerSidebarTOC.
+  ///
+  /// In en, this message translates to:
+  /// **'TOC'**
+  String get viewerSidebarTOC;
+
+  /// No description provided for @viewerSidebarNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get viewerSidebarNotes;
+
+  /// No description provided for @viewerSidebarBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get viewerSidebarBookmarks;
+
+  /// No description provided for @viewerSidebarNotesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add notes and annotations to PDF pages'**
+  String get viewerSidebarNotesDesc;
+
+  /// No description provided for @viewerSidebarBookmarksDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and organize your favorite pages'**
+  String get viewerSidebarBookmarksDesc;
+
   /// No description provided for @viewerCellCopied.
   ///
   /// In en, this message translates to:

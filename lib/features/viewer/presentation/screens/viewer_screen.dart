@@ -461,16 +461,18 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
 
   void _handleSidebarDragUpdate(DragUpdateDetails details) {
     setState(() {
-      _sidebarDragOffset += details.delta.dx;
-      _sidebarDragOffset = _sidebarDragOffset.clamp(-500, 0.0);
+      final isRTL = Directionality.of(context) == TextDirection.rtl;
+      // Normalize: negative offset always means "closing" direction.
+      final delta = isRTL ? -details.delta.dx : details.delta.dx;
+      _sidebarDragOffset += delta;
+      _sidebarDragOffset = _sidebarDragOffset.clamp(-500.0, 0.0);
     });
   }
 
   void _handleSidebarDragEnd(DragEndDetails details) {
-    if (_sidebarDragOffset.abs() > _kDragCloseThreshold) {
+    if (_sidebarDragOffset < -_kDragCloseThreshold) {
       setState(() => _sidebarOpen = false);
       _sidebarController.reverse();
-      // Reset drag offset after animation completes so sidebar animates smoothly from current position
       Future.delayed(const Duration(milliseconds: 260), () {
         if (mounted && !_sidebarOpen) {
           setState(() => _sidebarDragOffset = 0.0);
@@ -1225,25 +1227,25 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                           Align(
                             alignment:
                                 Directionality.of(context) == TextDirection.rtl
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                            child: IconButton(
-                              icon: Icon(
-                                Directionality.of(context) == TextDirection.rtl
-                                    ? Icons.chevron_right
-                                    : Icons.chevron_left,
-                              ),
-                              onPressed: () => context.pop(),
-                              tooltip: _l10n.back,
-                              iconSize: 20,
-                              constraints: const BoxConstraints(
-                                minWidth: 32,
-                                minHeight: 32,
-                              ),
-                              padding: EdgeInsets.zero,
-                            ),
-                          ),
-                          Align(
+                                     ? Alignment.centerRight
+                                     : Alignment.centerLeft,
+                             child: IconButton(
+                               icon: Icon(
+                                 Directionality.of(context) == TextDirection.rtl
+                                     ? Icons.chevron_right
+                                     : Icons.chevron_left,
+                               ),
+                               onPressed: () => context.pop(),
+                               tooltip: _l10n.back,
+                               iconSize: 20,
+                               constraints: const BoxConstraints(
+                                 minWidth: 32,
+                                 minHeight: 32,
+                               ),
+                               padding: EdgeInsets.zero,
+                             ),
+                           ),
+                           Align(
                             alignment: Alignment.centerRight,
                             child: _buildResetZoomButton(),
                           ),
@@ -2499,6 +2501,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         ? theme.colorScheme.surface.withValues(alpha: 0.95)
         : theme.colorScheme.surface.withValues(alpha: 0.93);
     final borderColor = theme.colorScheme.outline.withValues(alpha: 0.2);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
 
     return GestureDetector(
       onTap: () {},
@@ -2506,13 +2509,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       onHorizontalDragUpdate: _handleSidebarDragUpdate,
       onHorizontalDragEnd: _handleSidebarDragEnd,
       child: Transform.translate(
-        offset: Offset(_sidebarDragOffset, 0),
+        offset: Offset(isRTL ? -_sidebarDragOffset : _sidebarDragOffset, 0),
         child: SizedBox(
           width: width + 20,
           child: ClipPath(
             clipper: _SidebarClipper(
               sidebarWidth: width,
               radius: _kSidebarRadius,
+              isRTL: isRTL,
             ),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -2527,20 +2531,27 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                         borderColor: borderColor,
                         radius: _kSidebarRadius,
                         sidebarWidth: width,
+                        isRTL: isRTL,
                       ),
                     ),
                   ),
-                  // 2. Content (Sheet) - Body starts at x=0
+                  // 2. Content (Sheet)
                   Positioned(
-                    left: 0,
+                    left: isRTL ? null : 0,
+                    right: isRTL ? 0 : null,
                     top: _kSidebarRadius,
                     bottom: _kSidebarRadius,
                     width: width,
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(16),
-                        bottomRight: Radius.circular(16),
-                      ),
+                      borderRadius: isRTL
+                          ? const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              bottomLeft: Radius.circular(16),
+                            )
+                          : const BorderRadius.only(
+                              topRight: Radius.circular(16),
+                              bottomRight: Radius.circular(16),
+                            ),
                       child: Material(
                         color: Colors.transparent,
                         child: Container(
@@ -2610,13 +2621,17 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
   final Color borderColor;
   final double radius;
   final double sidebarWidth;
+  final bool isRTL;
 
   _InvertedCornerSidebarPainter({
     required this.color,
     required this.borderColor,
     required this.radius,
     required this.sidebarWidth,
+    this.isRTL = false,
   });
+
+  double _x(double x, Size size) => isRTL ? size.width - x : x;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2629,95 +2644,96 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
 
-    final path = Path();
+    Path buildPath(Size size) {
+      final path = Path();
 
-    // Top flare flaring UP from sidebar top (0, radius) to screen edge (0, 0)
-    path.moveTo(0, 0);
-    // Smooth S-curve transition
-    path.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
+      path.moveTo(_x(0, size), 0);
+      path.cubicTo(
+        _x(0, size), radius * 0.4,
+        _x(radius * 0.1, size), radius,
+        _x(radius, size), radius,
+      );
+      path.lineTo(_x(sidebarWidth - 16, size), radius);
+      path.arcToPoint(
+        Offset(_x(sidebarWidth, size), radius + 16),
+        radius: const Radius.circular(16),
+        clockwise: !isRTL,
+      );
+      path.lineTo(_x(sidebarWidth, size), size.height - radius - 16);
+      path.arcToPoint(
+        Offset(_x(sidebarWidth - 16, size), size.height - radius),
+        radius: const Radius.circular(16),
+        clockwise: !isRTL,
+      );
+      path.lineTo(_x(radius, size), size.height - radius);
+      path.cubicTo(
+        _x(radius * 0.1, size), size.height - radius,
+        _x(0, size), size.height - radius * 0.4,
+        _x(0, size), size.height,
+      );
+      path.lineTo(_x(0, size), 0);
+      path.close();
+      return path;
+    }
 
-    // Top edge
-    path.lineTo(sidebarWidth - 16, radius);
-    path.arcToPoint(Offset(sidebarWidth, radius + 16),
-        radius: const Radius.circular(16), clockwise: true);
-
-    // Right side
-    path.lineTo(sidebarWidth, size.height - radius - 16);
-    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
-        radius: const Radius.circular(16), clockwise: true);
-
-    // Bottom edge
-    path.lineTo(radius, size.height - radius);
-
-    // Bottom flare flaring DOWN from sidebar bottom (0, h-radius) to screen edge (0, h)
-    path.cubicTo(radius * 0.1, size.height - radius, 0,
-        size.height - radius * 0.4, 0, size.height);
-
-    path.lineTo(0, 0);
-    path.close();
-
+    final path = buildPath(size);
     canvas.drawShadow(path, Colors.black, 10, false);
     canvas.drawPath(path, paint);
 
-    // Border for the visible part
-    final borderPath = Path();
-    borderPath.moveTo(0, 0);
-    borderPath.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
-    borderPath.lineTo(sidebarWidth - 16, radius);
-    borderPath.arcToPoint(Offset(sidebarWidth, radius + 16),
-        radius: const Radius.circular(16), clockwise: true);
-    borderPath.lineTo(sidebarWidth, size.height - radius - 16);
-    borderPath.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
-        radius: const Radius.circular(16), clockwise: true);
-    borderPath.lineTo(radius, size.height - radius);
-    borderPath.cubicTo(radius * 0.1, size.height - radius, 0,
-        size.height - radius * 0.4, 0, size.height);
-
+    final borderPath = buildPath(size);
     canvas.drawPath(borderPath, borderPaint);
   }
 
   @override
   bool shouldRepaint(covariant _InvertedCornerSidebarPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.borderColor != borderColor;
+      oldDelegate.color != color ||
+      oldDelegate.borderColor != borderColor ||
+      oldDelegate.isRTL != isRTL;
 }
 
 /// Custom clipper that matches the exact shape of the sidebar with flares
 class _SidebarClipper extends CustomClipper<Path> {
   final double sidebarWidth;
   final double radius;
+  final bool isRTL;
 
   _SidebarClipper({
     required this.sidebarWidth,
     required this.radius,
+    this.isRTL = false,
   });
+
+  double _x(double x, Size size) => isRTL ? size.width - x : x;
 
   @override
   Path getClip(Size size) {
     final path = Path();
 
-    // Top flare flaring UP from sidebar top (0, radius) to screen edge (0, 0)
-    path.moveTo(0, 0);
-    // Smooth S-curve transition
-    path.cubicTo(0, radius * 0.4, radius * 0.1, radius, radius, radius);
-
-    // Top edge
-    path.lineTo(sidebarWidth - 16, radius);
-    path.arcToPoint(Offset(sidebarWidth, radius + 16),
-        radius: const Radius.circular(16), clockwise: true);
-
-    // Right side
-    path.lineTo(sidebarWidth, size.height - radius - 16);
-    path.arcToPoint(Offset(sidebarWidth - 16, size.height - radius),
-        radius: const Radius.circular(16), clockwise: true);
-
-    // Bottom edge
-    path.lineTo(radius, size.height - radius);
-
-    // Bottom flare flaring DOWN from sidebar bottom (0, h-radius) to screen edge (0, h)
-    path.cubicTo(radius * 0.1, size.height - radius, 0,
-        size.height - radius * 0.4, 0, size.height);
-
-    path.lineTo(0, 0);
+    path.moveTo(_x(0, size), 0);
+    path.cubicTo(
+      _x(0, size), radius * 0.4,
+      _x(radius * 0.1, size), radius,
+      _x(radius, size), radius,
+    );
+    path.lineTo(_x(sidebarWidth - 16, size), radius);
+    path.arcToPoint(
+      Offset(_x(sidebarWidth, size), radius + 16),
+      radius: const Radius.circular(16),
+      clockwise: !isRTL,
+    );
+    path.lineTo(_x(sidebarWidth, size), size.height - radius - 16);
+    path.arcToPoint(
+      Offset(_x(sidebarWidth - 16, size), size.height - radius),
+      radius: const Radius.circular(16),
+      clockwise: !isRTL,
+    );
+    path.lineTo(_x(radius, size), size.height - radius);
+    path.cubicTo(
+      _x(radius * 0.1, size), size.height - radius,
+      _x(0, size), size.height - radius * 0.4,
+      _x(0, size), size.height,
+    );
+    path.lineTo(_x(0, size), 0);
     path.close();
 
     return path;
@@ -2725,5 +2741,7 @@ class _SidebarClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(covariant _SidebarClipper oldClipper) =>
-      oldClipper.sidebarWidth != sidebarWidth || oldClipper.radius != radius;
+      oldClipper.sidebarWidth != sidebarWidth ||
+      oldClipper.radius != radius ||
+      oldClipper.isRTL != isRTL;
 }
