@@ -1584,8 +1584,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       },
     );
 
-    if (newName == null || newName.trim().isEmpty || newName.trim() == baseName)
+    if (newName == null || newName.trim().isEmpty || newName.trim() == baseName) {
       return;
+    }
 
     final fullNewName = '${newName.trim()}$extension';
     final sourceFile = File(file.filePath);
