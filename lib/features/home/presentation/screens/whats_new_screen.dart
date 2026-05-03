@@ -11,19 +11,28 @@ class WhatsNewScreen extends StatelessWidget {
 
   static final releaseDate = DateTime(2026, 4, 30);
 
-  String _timeAgo(BuildContext context, DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
+  String _timeAgo(BuildContext context, DateTime dateTime) {
     final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
 
-    if (diff.inDays == 0) {
-      return l10n.whatsNewReleasedToday;
-    } else if (diff.inDays == 1) {
-      return l10n.whatsNewReleasedYesterday;
+    if (difference.inSeconds < 60) {
+      return l10n.timeAgoJustNow;
+    } else if (difference.inMinutes < 60) {
+      return l10n.timeAgoMinute(difference.inMinutes);
+    } else if (difference.inHours < 24) {
+      return l10n.timeAgoHour(difference.inHours);
+    } else if (difference.inDays < 7) {
+      return l10n.timeAgoDay(difference.inDays);
+    } else if (difference.inDays < 30) {
+      final weeks = (difference.inDays / 7).floor();
+      return l10n.timeAgoWeek(weeks);
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return l10n.timeAgoMonth(months);
     } else {
-      final formattedDate =
-          '${date.day} ${_monthName(context, date.month)} ${date.year}';
-      return l10n.whatsNewReleasedDate(formattedDate);
+      final years = (difference.inDays / 365).floor();
+      return l10n.timeAgoYear(years);
     }
   }
 
@@ -297,7 +306,7 @@ class WhatsNewScreen extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                formattedDate,
+                '$formattedDate · ${_timeAgo(context, releaseDate)}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -305,14 +314,6 @@ class WhatsNewScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            _timeAgo(context, releaseDate),
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 6),
           Text(
             AppLocalizations.of(context)!.whatsNewOfflineFirst,
             style: theme.textTheme.bodySmall?.copyWith(
