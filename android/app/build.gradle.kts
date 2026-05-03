@@ -45,9 +45,13 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // R8 minification enabled with selective keep rules for POI/XMLBeans/logging
+            // Critical classes (POI, XMLBeans, logging, JNI) are kept unobfuscated
+            // Everything else (Flutter, app code, unused deps) is aggressively minified
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Use only our custom ProGuard rules (not the default Android ones)
+            proguardFiles("proguard-rules.pro")
         }
     }
 
@@ -79,7 +83,6 @@ android {
                 "META-INF/NOTICE.txt",
                 "META-INF/INDEX.LIST",
                 "META-INF/*.md",
-                "META-INF/services/*",
                 "META-INF/LICENSE-notice.md",
                 "org/bouncycastle/pqc/**"
             )
@@ -100,7 +103,10 @@ android {
 dependencies {
     // Apache POI for native document parsing (XLSX, XLS, CSV, DOC)
     implementation("org.apache.poi:poi:5.2.3")
-    implementation("org.apache.poi:poi-ooxml:5.2.3")
+    implementation("org.apache.poi:poi-ooxml:5.2.3") {
+        exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
+    }
+    implementation("org.apache.poi:poi-ooxml-full:5.2.3")
     implementation("org.apache.poi:poi-scratchpad:5.2.3")
 
     // PDFBox for PDF text extraction

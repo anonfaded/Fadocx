@@ -26,6 +26,30 @@ import java.io.StringWriter
 
 class NativeDocumentParser(private val TAG: String) {
 
+    private fun logStep(step: String) {
+        Log.i(TAG, "POI step: $step")
+    }
+
+    private fun logCauseChain(prefix: String, throwable: Throwable?) {
+        var current = throwable
+        var depth = 0
+        while (current != null && depth < 12) {
+            Log.e(TAG, "$prefix cause[$depth]: ${current::class.java.name}: ${current.message}")
+            current = current.cause
+            depth += 1
+        }
+    }
+
+    private fun probeClass(className: String) {
+        try {
+            val clazz = Class.forName(className)
+            Log.i(TAG, "POI probe OK: $className from ${clazz.protectionDomain?.codeSource?.location}")
+        } catch (t: Throwable) {
+            Log.e(TAG, "POI probe FAILED: $className", t)
+            logCauseChain("POI probe FAILED: $className", t)
+        }
+    }
+
     fun handleParseDocument(
         filePath: String?,
         format: String?,
@@ -42,6 +66,9 @@ class NativeDocumentParser(private val TAG: String) {
             }
 
             Log.i(TAG, "Parsing document: $filePath (format: $format)")
+            probeClass("org.apache.logging.log4j.LogManager")
+            probeClass("org.apache.poi.util.IOUtils")
+            probeClass("org.apache.poi.poifs.filesystem.FileMagic")
             val startTime = System.currentTimeMillis()
 
             val parsedData = when (format.uppercase()) {
@@ -60,6 +87,7 @@ class NativeDocumentParser(private val TAG: String) {
             activity.runOnUiThread { result.success(parsedData) }
         } catch (e: Exception) {
             Log.e(TAG, "Parse error", e)
+            logCauseChain("Parse error", e)
             val sw = StringWriter()
             e.printStackTrace(PrintWriter(sw))
             activity.runOnUiThread { result.error("PARSE_ERROR", "${e.message}\n${sw.toString()}", null) }
@@ -67,8 +95,14 @@ class NativeDocumentParser(private val TAG: String) {
     }
 
     private fun parseXLSX(filePath: String, maxRows: Int?, maxCols: Int?, maxSheets: Int?): Map<String, Any> {
+        logStep("parseXLSX:start")
+        probeClass("org.apache.poi.ss.usermodel.WorkbookFactory")
+        probeClass("org.apache.poi.poifs.filesystem.FileMagic")
+        probeClass("org.apache.poi.util.IOUtils")
         val file = File(filePath)
+        logStep("parseXLSX:before WorkbookFactory.create")
         val workbook = WorkbookFactory.create(file)
+        logStep("parseXLSX:after WorkbookFactory.create")
         val sheets = mutableListOf<Map<String, Any>>()
         val formatter = DataFormatter()
         val evaluator = workbook.creationHelper.createFormulaEvaluator()
@@ -116,9 +150,14 @@ class NativeDocumentParser(private val TAG: String) {
     }
 
     private fun parseXLS(filePath: String, maxRows: Int?, maxCols: Int?, maxSheets: Int?): Map<String, Any> {
+        logStep("parseXLS:start")
+        probeClass("org.apache.poi.hssf.usermodel.HSSFWorkbook")
+        probeClass("org.apache.poi.util.IOUtils")
         val file = File(filePath)
         val fileInputStream = FileInputStream(file)
+        logStep("parseXLS:before HSSFWorkbook")
         val workbook = HSSFWorkbook(fileInputStream)
+        logStep("parseXLS:after HSSFWorkbook")
         val sheets = mutableListOf<Map<String, Any>>()
         val formatter = DataFormatter()
         val evaluator = workbook.creationHelper.createFormulaEvaluator()
@@ -216,9 +255,13 @@ class NativeDocumentParser(private val TAG: String) {
     }
 
     private fun parseDOCX(filePath: String): Map<String, Any> {
+        logStep("parseDOCX:start")
+        probeClass("org.apache.poi.xwpf.usermodel.XWPFDocument")
         val file = File(filePath)
         val fileInputStream = FileInputStream(file)
+        logStep("parseDOCX:before XWPFDocument")
         val document = XWPFDocument(fileInputStream)
+        logStep("parseDOCX:after XWPFDocument")
 
         try {
             val blocks = mutableListOf<Map<String, Any>>()
@@ -263,9 +306,14 @@ class NativeDocumentParser(private val TAG: String) {
     }
 
     private fun parseDOC(filePath: String): Map<String, Any> {
+        logStep("parseDOC:start")
+        probeClass("org.apache.poi.hwpf.HWPFDocument")
+        probeClass("org.apache.poi.util.IOUtils")
         val file = File(filePath)
         val fileInputStream = FileInputStream(file)
+        logStep("parseDOC:before HWPFDocument")
         val document = HWPFDocument(fileInputStream)
+        logStep("parseDOC:after HWPFDocument")
         val extractor = WordExtractor(document)
 
         try {
