@@ -1192,6 +1192,18 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsCopyInfo => 'معلومات کاپی';
 
   @override
+  String get settingsShareApp => 'دوستوں کے ساتھ شیئر کریں';
+
+  @override
+  String get settingsShareVia => 'شیئر کریں...';
+
+  @override
+  String get settingsShareWhatsApp => 'واٹس ایپ';
+
+  @override
+  String get settingsWhatsAppNotInstalled => 'اس ڈیوائس پر واٹس ایپ انسٹال نہیں ہے';
+
+  @override
   String get settingsPrivacyOffline => '100% آف لائن';
 
   @override

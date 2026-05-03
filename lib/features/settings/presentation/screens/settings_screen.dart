@@ -16,6 +16,7 @@ import 'package:fadocx/features/settings/presentation/providers/settings_provide
 import 'package:fadocx/features/settings/presentation/providers/locale_provider.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -178,6 +179,12 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () => packageInfoAsync.whenData(
                     (info) => _showVersionInfo(context, info),
                   ),
+                ),
+                _divider(context),
+                _SettingsRow(
+                  icon: Icons.share,
+                  title: l10n.settingsShareApp,
+                  onTap: () => _showShareOptions(context),
                 ),
                 _divider(context),
                 LinkTile.url(
@@ -1176,6 +1183,131 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  static const String _shareMessage = 'Check out Fadocx!\n\n'
+      'All-in-one document viewer: PDF, Office, spreadsheets, presentations,'
+      ' code files & OCR text extraction — fully offline, zero tracking,'
+      ' open-source.\n\n'
+      'https://github.com/anonfaded/Fadocx';
+
+  void _showShareOptions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) => Container(
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Share icon
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                Icons.share,
+                size: 40,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.settingsShareApp,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Message preview
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                _shareMessage,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Action buttons
+            Row(
+              children: [
+                // Share via... button
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: FilledButton.tonalIcon(
+                      onPressed: () {
+                        Navigator.pop(sheetContext);
+                        Share.share(_shareMessage);
+                      },
+                      icon: const Icon(Icons.share),
+                      label: Text(l10n.settingsShareVia),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // WhatsApp button
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: () => _openWhatsApp(context),
+                      icon: const Icon(Icons.chat),
+                      label: Text(l10n.settingsShareWhatsApp),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openWhatsApp(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final encoded = Uri.encodeComponent(_shareMessage);
+    final uri = Uri.parse('whatsapp://send?text=$encoded');
+
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.settingsWhatsAppNotInstalled)),
+        );
+      }
+    }
   }
 
   void _showPrivacyPolicy(BuildContext context) {

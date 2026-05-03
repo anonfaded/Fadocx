@@ -96,6 +96,7 @@ dependencies:
   package_info_plus: ^9.0.1
   highlight: ^0.7.0
   url_launcher: ^6.3.2
+  share_plus: ^10.1.4
   simple_icons: ^14.6.1
 
 dev_dependencies:

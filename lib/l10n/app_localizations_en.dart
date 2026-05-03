@@ -1192,6 +1192,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCopyInfo => 'Copy Info';
 
   @override
+  String get settingsShareApp => 'Share with Friends';
+
+  @override
+  String get settingsShareVia => 'Share via...';
+
+  @override
+  String get settingsShareWhatsApp => 'WhatsApp';
+
+  @override
+  String get settingsWhatsAppNotInstalled => 'WhatsApp is not installed on this device';
+
+  @override
   String get settingsPrivacyOffline => '100% Offline';
 
   @override

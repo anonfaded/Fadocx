@@ -2237,6 +2237,30 @@ abstract class AppLocalizations {
   /// **'Copy Info'**
   String get settingsCopyInfo;
 
+  /// No description provided for @settingsShareApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with Friends'**
+  String get settingsShareApp;
+
+  /// No description provided for @settingsShareVia.
+  ///
+  /// In en, this message translates to:
+  /// **'Share via...'**
+  String get settingsShareVia;
+
+  /// No description provided for @settingsShareWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get settingsShareWhatsApp;
+
+  /// No description provided for @settingsWhatsAppNotInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp is not installed on this device'**
+  String get settingsWhatsAppNotInstalled;
+
   /// No description provided for @settingsPrivacyOffline.
   ///
   /// In en, this message translates to:
