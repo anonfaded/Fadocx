@@ -1077,7 +1077,7 @@ class SettingsScreen extends ConsumerWidget {
     final version = packageInfo.version;
     final buildNumber = packageInfo.buildNumber;
     final packageName = packageInfo.packageName;
-    final versionString = l10n.settingsVersionWithBuild(buildNumber, version);
+    final versionString = l10n.settingsVersionWithBuild(version, buildNumber);
     final isBeta = packageName.endsWith('.beta');
     final iconAsset = isBeta ? 'assets/fadocx_beta.png' : 'assets/fadocx.png';
 
