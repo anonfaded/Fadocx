@@ -21,6 +21,26 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 class MainActivity : FlutterActivity() {
+    private fun logCauseChain(prefix: String, throwable: Throwable?) {
+        var current = throwable
+        var depth = 0
+        while (current != null && depth < 12) {
+            Log.e(TAG, "$prefix cause[$depth]: ${current::class.java.name}: ${current.message}")
+            current = current.cause
+            depth += 1
+        }
+    }
+
+    private fun logClassProbe(className: String) {
+        try {
+            val clazz = Class.forName(className)
+            Log.i(TAG, "Class probe OK: $className from ${clazz.protectionDomain?.codeSource?.location}")
+        } catch (t: Throwable) {
+            Log.e(TAG, "Class probe FAILED: $className", t)
+            logCauseChain("Class probe FAILED: $className", t)
+        }
+    }
+
     override fun provideFlutterEngine(context: android.content.Context): FlutterEngine? {
         return FlutterEngineCache.getInstance().get("fadocx_engine")
     }
@@ -56,6 +76,15 @@ class MainActivity : FlutterActivity() {
                                 val maxCols = call.argument<Int>("maxCols")
                                 val maxSheets = call.argument<Int>("maxSheets")
 
+                                Log.i(TAG, "parseDocument invoked format=$format path=$filePath")
+                                logClassProbe("com.fadseclab.fadocx.NativeDocumentParser")
+                                logClassProbe("org.apache.logging.log4j.LogManager")
+                                logClassProbe("org.apache.poi.util.IOUtils")
+                                logClassProbe("org.apache.poi.poifs.filesystem.FileMagic")
+                                logClassProbe("org.apache.poi.hssf.usermodel.HSSFWorkbook")
+                                logClassProbe("org.apache.poi.hwpf.HWPFDocument")
+                                logClassProbe("org.apache.poi.xwpf.usermodel.XWPFDocument")
+
                                 val parserClass = Class.forName("com.fadseclab.fadocx.NativeDocumentParser")
                                 val parserInstance = parserClass.getConstructor(String::class.java).newInstance(TAG)
                                 val method = parserClass.getDeclaredMethod("handleParseDocument",
@@ -73,6 +102,7 @@ class MainActivity : FlutterActivity() {
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Reflection load failed", e)
+                        logCauseChain("Reflection load failed", e)
                         runOnUiThread { result.error("REFLECTION_ERROR", e.message, null) }
                     }
                 }.start()

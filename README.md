@@ -161,6 +161,14 @@ We welcome contributions! Before starting any work:
 
 ## `>_` Build
 
+### System Requirements
+
+**Fadocx supports arm64-v8a architecture only** (64-bit ARM). This is due to LibreOffice native code dependencies which are only compiled for arm64-v8a.
+
+- ✅ **arm64-v8a** (64-bit ARM) — Most modern Android devices
+- ❌ **armeabi-v7a** (32-bit ARM) — Not supported (missing LibreOffice native code)
+- ❌ **x86_64** (Intel/AMD) — Not supported (missing LibreOffice native code)
+
 ### Clone & Setup (first-time contributors)
 
 ```bash
@@ -179,6 +187,42 @@ flutter pub get
 ```
 
 > Note: This repository stores a large native library via Git LFS. If you do not run `git lfs install` and `git lfs pull --all` after cloning, the large files will appear as small pointer files instead of the expected binaries.
+
+### Building & Installing
+
+Use the interactive build script for easy building and installation:
+
+```bash
+./build.sh
+```
+
+This opens a menu with options to:
+- **Build & Install** — Build and immediately install on connected device
+- **Build Only** — Build APK for manual installation later
+- **Dev: Run** — Hot reload development mode with live debugging
+- **Uninstall** — Remove app from device
+
+**For detailed build options and commands, see [BUILD_GUIDE.md](BUILD_GUIDE.md).**
+
+### Manual Build Commands
+
+```bash
+# Build release APK (minified, ~346MB)
+flutter build apk --flavor prod --release --split-per-abi --target-platform android-arm64
+
+# Install on device
+adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-prod-release.apk
+
+# Run with hot reload (development)
+flutter run --flavor prod
+```
+
+### Build Sizes
+
+| Build Type | Size | Optimization |
+|-----------|------|--------------|
+| Release | ~346MB | R8 minification |
+| Debug | ~400MB | No minification |
 
 ### Local development
 

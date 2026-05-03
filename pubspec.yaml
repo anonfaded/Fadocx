@@ -83,6 +83,7 @@ dependencies:
   # UI
   # =========================
   google_fonts: ^8.0.2
+  cupertino_icons: ^1.0.8  # Required for CupertinoIcons font
 
   # =========================
   # INTERNATIONALIZATION

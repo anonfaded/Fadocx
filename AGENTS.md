@@ -127,38 +127,95 @@ When updating app branding or icons, follow this workflow:
 - Both commands modify native platform files; regenerate after any asset changes
 - Test on both Android and iOS after regeneration to ensure correct scaling
 
-## Build Flavors
+## Build Flavors & Architecture Support
+
+**Fadocx supports arm64-v8a architecture only** (64-bit ARM). This is due to LibreOffice native code dependencies.
+
+- ✅ **arm64-v8a** (64-bit ARM) — Most modern Android devices
+- ❌ **armeabi-v7a** (32-bit ARM) — Missing LibreOffice native code
+- ❌ **x86_64** (Intel/AMD) — Missing LibreOffice native code
+
+### Using the Build Script
+
+The interactive build script (`./build.sh`) handles all build operations:
+
+```bash
+./build.sh
+```
+
+**Menu Options:**
+
+**PRODUCTION BUILDS**
+- Option 1: Build & Install Prod (Release) — Optimized, minified (~346MB)
+- Option 2: Build Prod (Release Only) — Build without installing
+
+**BETA BUILDS**
+- Option 3: Build & Install Beta (Release) — Optimized, minified (~346MB)
+- Option 4: Build Beta (Release Only) — Build without installing
+
+**DEVELOPMENT**
+- Option 5: Dev: Run Prod (Debug) — Hot reload, live debugging
+- Option 6: Dev: Run Beta (Debug) — Hot reload, live debugging
+- Option 7: Dev: Build Prod (Debug) — Build without installing (~400MB)
+- Option 8: Dev: Build Beta (Debug) — Build without installing (~400MB)
+
+**MANAGEMENT**
+- Option 9: Uninstall Prod
+- Option 0: Uninstall Beta
+- Option q: Exit
+
+### Manual Build Commands
+
+```bash
+# Build arm64 release APK
+flutter build apk --flavor prod --release --split-per-abi --target-platform android-arm64
+
+# Build arm64 debug APK
+flutter build apk --flavor prod --debug --split-per-abi --target-platform android-arm64
+
+# Run with hot reload (development)
+flutter run --flavor prod
+
+# Install manually
+adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-prod-release.apk
+
+# Uninstall
+adb uninstall com.fadseclab.fadocx
+```
+
+### Build Sizes
+
+| Build Type | Size | Optimization |
+|-----------|------|--------------|
+| Release | ~346MB | R8 minification |
+| Debug | ~400MB | No minification |
+
+### Flavors
 
 Fadocx supports two build flavors: **beta** and **prod**.
 
-### Beta Flavor
+#### Beta Flavor
 - **Package Name:** `com.fadseclab.fadocx.beta`
 - **App Name:** Fadocx Beta
 - **Icon:** `assets/fadocx_beta.png`
 - **Run Command:** `flutter run --flavor beta`
-- **Build APK (per-ABI):** `flutter build apk --flavor beta --release --split-per-abi --target-platform android-arm,android-arm64`
-- **Build APK (universal):** `flutter build apk --flavor beta --release`
+- **Build Command:** `flutter build apk --flavor beta --release --split-per-abi --target-platform android-arm64`
 
-### Prod Flavor
+#### Prod Flavor
 - **Package Name:** `com.fadseclab.fadocx`
 - **App Name:** Fadocx
 - **Icon:** `assets/fadocx.png`
 - **Run Command:** `flutter run --flavor prod`
-- **Build APK (per-ABI):** `flutter build apk --flavor prod --release --split-per-abi --target-platform android-arm,android-arm64`
-- **Build APK (universal):** `flutter build apk --flavor prod --release`
-
-### Size Optimization Notes
-- Always use `--split-per-abi --target-platform android-arm,android-arm64` for release builds
-- This generates separate APKs per architecture (arm64 ~68MB, armv7 ~59MB vs universal ~96MB)
-- BouncyCastle post-quantum crypto resources are excluded via `packaging.resources.excludes` in build.gradle.kts
-- `flutter run` automatically picks the correct ABI for the connected device
+- **Build Command:** `flutter build apk --flavor prod --release --split-per-abi --target-platform android-arm64`
 
 ### Setup
+
 - Flavors are configured in `android/app/build.gradle.kts` using `flavorDimensions` and `productFlavors`
 - App name per flavor uses `manifestPlaceholders["appName"]` in build.gradle.kts
 - AndroidManifest.xml references `${appName}` for `android:label`
-- For iOS, create schemes in Xcode with matching bundle identifiers
 - Regenerate icons after changes: `flutter pub run flutter_launcher_icons`
+
+**For detailed build options and troubleshooting, see [BUILD_GUIDE.md](BUILD_GUIDE.md).**
 
 ## Custom UI Design Patterns
 
