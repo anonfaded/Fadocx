@@ -111,19 +111,21 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#0D0D0D"
-  image: "assets/fadocx_header_landscape_png.png"
-  image_dark: "assets/fadocx_header_landscape_png.png"
+  image: "assets/fadocx_splash_square.png"
+  image_dark: "assets/fadocx_splash_square.png"
   android_gravity: center
   android_12:
     color: "#0D0D0D"
-    image: "assets/fadocx_header_landscape_png.png"
-    image_dark: "assets/fadocx_header_landscape_png.png"
+    image: "assets/fadocx_splash_square.png"
+    image_dark: "assets/fadocx_splash_square.png"
   fullscreen: true
 
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: false
   image_path: "assets/fadocx.png"
+  adaptive_icon_background: "#0D0D0D"
+  adaptive_icon_foreground: "assets/fadocx.png"
   # Flavor-specific icons are generated via separate config files:
   # dart run flutter_launcher_icons -f flutter_launcher_icons-beta.yaml
   # dart run flutter_launcher_icons -f flutter_launcher_icons-prod.yaml
