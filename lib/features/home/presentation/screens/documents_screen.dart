@@ -20,7 +20,8 @@ import 'package:fadocx/l10n/app_localizations.dart';
 final log = Logger();
 
 class DocumentsScreen extends ConsumerStatefulWidget {
-  const DocumentsScreen({super.key});
+  final bool tabMode;
+  const DocumentsScreen({super.key, this.tabMode = false});
 
   @override
   ConsumerState<DocumentsScreen> createState() => _DocumentsScreenState();
@@ -93,6 +94,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.tabMode) {
+      return _buildBody();
+    }
     return FloatingDockScaffold(
       appBarContent: _buildAppBarContent(context),
       currentRoute: RouteNames.documents,

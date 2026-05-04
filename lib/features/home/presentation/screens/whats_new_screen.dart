@@ -9,7 +9,7 @@ import 'package:fadocx/l10n/app_localizations.dart';
 class WhatsNewScreen extends StatelessWidget {
   const WhatsNewScreen({super.key});
 
-  static final releaseDate = DateTime(2026, 4, 30);
+  static final releaseDate = DateTime(2026, 5, 4);
 
   String _timeAgo(BuildContext context, DateTime dateTime) {
     final l10n = AppLocalizations.of(context)!;

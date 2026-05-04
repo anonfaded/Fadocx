@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
-import 'package:fadocx/features/home/presentation/screens/home_screen.dart';
+import 'package:fadocx/features/home/presentation/screens/main_shell.dart';
 import 'package:fadocx/features/home/presentation/screens/documents_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/browse_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/trash_screen.dart';
@@ -81,17 +81,17 @@ GoRouter createGoRouter() {
       );
     },
     routes: [
-      // Home screen
+      // Home screen (tab shell with Home, Library, Settings)
       GoRoute(
         path: RouteNames.home,
         name: 'home',
         pageBuilder: (context, state) {
           log.d('Navigating to home');
-          return _fadeTransitionPage(context, state, const HomeScreen());
+          return _fadeTransitionPage(context, state, const MainShell());
         },
       ),
 
-      // Documents screen
+      // Documents screen (standalone, also accessible via tab shell)
       GoRoute(
         path: RouteNames.documents,
         name: 'documents',

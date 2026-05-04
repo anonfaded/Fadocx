@@ -19,7 +19,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key});
+  final bool tabMode;
+  const SettingsScreen({super.key, this.tabMode = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,79 +29,66 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final packageInfoAsync = ref.watch(packageInfoProvider);
 
-    return FloatingDockScaffold(
-      appBarContent: SafeArea(
-        bottom: false,
-        child: Center(
-          child: Text(
-            AppLocalizations.of(context)!.settingsTitle,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-      ),
-      currentRoute: RouteNames.settings,
-      body: settings.when(
-        data: (appSettings) {
-          if (appSettings == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 100, 16, 100),
-            children: [
-              _buildSectionHeader(context, l10n.settingsAppearance),
-              _buildSettingsGroup(context, [
-                _SettingsRow(
-                  icon: Icons.palette_outlined,
-                  title: l10n.theme,
-                  value: _getThemeDisplayName(context, themeMode),
-                  onTap: () => _showThemePicker(context, ref, themeMode),
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, l10n.language),
-              _buildSettingsGroup(context, [
-                _SettingsRow(
-                  icon: Icons.language,
-                  title: l10n.language,
-                  value: _getLanguageDisplayName(context, ref),
-                  onTap: () => _showLanguagePicker(context, ref),
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, l10n.settingsStorage),
-              _buildSettingsGroup(context, [
-                Consumer(
-                  builder: (context, ref, _) {
-                    final recentFilesAsync = ref.watch(recentFilesProvider);
-                    return recentFilesAsync.when(
-                      loading: () => Column(children: [
-                        _SettingsRow(
-                          icon: Icons.folder_outlined,
-                          title: l10n.settingsDocumentsSize,
-                          value: l10n.settingsCalculating,
-                          onTap: () => _showStorageInfo(context),
-                        ),
-                        _divider(context),
-                        _SettingsRow(
-                          icon: Icons.settings_backup_restore,
-                          title: l10n.settingsCustomStorage,
-                          value: l10n.comingSoon,
-                          isComingSoon: true,
-                          onTap: null,
-                        ),
-                      ]),
-                      error: (error, stack) => Column(children: [
-                        _SettingsRow(
-                          icon: Icons.folder_outlined,
-                          title: l10n.settingsDocumentsSize,
-                          value: l10n.settingsUnknown,
-                          onTap: () => _showStorageInfo(context),
-                        ),
-                        _divider(context),
-                        _SettingsRow(
-                          icon: Icons.settings_backup_restore,
+    final settingsBody = settings.when(
+      data: (appSettings) {
+        if (appSettings == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 100, 16, 100),
+          children: [
+            _buildSectionHeader(context, l10n.settingsAppearance),
+            _buildSettingsGroup(context, [
+              _SettingsRow(
+                icon: Icons.palette_outlined,
+                title: l10n.theme,
+                value: _getThemeDisplayName(context, themeMode),
+                onTap: () => _showThemePicker(context, ref, themeMode),
+              ),
+            ]),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, l10n.language),
+            _buildSettingsGroup(context, [
+              _SettingsRow(
+                icon: Icons.language,
+                title: l10n.language,
+                value: _getLanguageDisplayName(context, ref),
+                onTap: () => _showLanguagePicker(context, ref),
+              ),
+            ]),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, l10n.settingsStorage),
+            _buildSettingsGroup(context, [
+              Consumer(
+                builder: (context, ref, _) {
+                  final recentFilesAsync = ref.watch(recentFilesProvider);
+                  return recentFilesAsync.when(
+                    loading: () => Column(children: [
+                      _SettingsRow(
+                        icon: Icons.folder_outlined,
+                        title: l10n.settingsDocumentsSize,
+                        value: l10n.settingsCalculating,
+                        onTap: () => _showStorageInfo(context),
+                      ),
+                      _divider(context),
+                      _SettingsRow(
+                        icon: Icons.settings_backup_restore,
+                        title: l10n.settingsCustomStorage,
+                        value: l10n.comingSoon,
+                        isComingSoon: true,
+                        onTap: null,
+                      ),
+                    ]),
+                    error: (error, stack) => Column(children: [
+                      _SettingsRow(
+                        icon: Icons.folder_outlined,
+                        title: l10n.settingsDocumentsSize,
+                        value: l10n.settingsUnknown,
+                        onTap: () => _showStorageInfo(context),
+                      ),
+                      _divider(context),
+                      _SettingsRow(
+                        icon: Icons.settings_backup_restore,
                           title: l10n.settingsCustomStorage,
                           value: l10n.comingSoon,
                           isComingSoon: true,
@@ -302,9 +290,24 @@ class SettingsScreen extends ConsumerWidget {
                 child: Text(l10n.settingsRetry),
               ),
             ],
+          ),              // Close Column
+        ),                // Close Center
+    );
+    if (tabMode) return settingsBody;
+    return FloatingDockScaffold(
+      appBarContent: SafeArea(
+        bottom: false,
+        child: Center(
+          child: Text(
+            AppLocalizations.of(context)!.settingsTitle,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ),
       ),
+      currentRoute: RouteNames.settings,
+      body: settingsBody,
     );
   }
 
@@ -2117,39 +2120,47 @@ class _DangerRowState extends State<_DangerRow> {
       return;
     }
 
+    _controller.clear();
+    _confirmed = false;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(widget.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.settingsTypeToConfirm(widget.confirmText)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _controller,
-              textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                hintText: widget.confirmText,
-              ),
-              onChanged: (v) =>
-                  setState(() => _confirmed = v == widget.confirmText),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, dialogSetState) {
+          return AlertDialog(
+            title: Text(widget.title),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.subtitle),
+                const SizedBox(height: 16),
+                Text(l10n.settingsTypeToConfirm(widget.confirmText)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: widget.confirmText,
+                  ),
+                  onChanged: (v) => dialogSetState(() =>
+                      _confirmed = v.trim().toUpperCase() == widget.confirmText),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: _confirmed ? widget.onConfirm : null,
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.confirm),
-          ),
-        ],
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: _confirmed ? widget.onConfirm : null,
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                child: Text(l10n.confirm),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
