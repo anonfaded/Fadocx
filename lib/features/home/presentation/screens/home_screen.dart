@@ -27,7 +27,8 @@ final log = Logger();
 
 /// Home screen - displays recent files and quick actions
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  final bool tabMode;
+  const HomeScreen({super.key, this.tabMode = false});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -430,7 +431,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           }
         }
       },
-      child: Scaffold(
+      child: widget.tabMode
+          ? _buildBody()
+          : Scaffold(
         key: _scaffoldKey,
         body: Stack(
           children: [

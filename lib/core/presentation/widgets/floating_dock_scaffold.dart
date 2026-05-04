@@ -14,6 +14,10 @@ class FloatingDockScaffold extends StatefulWidget {
   final Widget? appBarContent;
   final Widget? floatingActionButton;
 
+  /// When set, dock navigates pages instead of GoRouter routes.
+  final int? activeTabIndex;
+  final ValueChanged<int>? onTabChanged;
+
   const FloatingDockScaffold({
     super.key,
     required this.body,
@@ -21,6 +25,8 @@ class FloatingDockScaffold extends StatefulWidget {
     this.showBottomDock = true,
     this.appBarContent,
     this.floatingActionButton,
+    this.activeTabIndex,
+    this.onTabChanged,
   });
 
   @override
@@ -112,6 +118,8 @@ class _FloatingDockScaffoldState extends State<FloatingDockScaffold> {
                   child: _FloatingDock(
                     bottomPadding: bottomSafePadding,
                     currentRoute: widget.currentRoute,
+                    activeTabIndex: widget.activeTabIndex,
+                    onTabChanged: widget.onTabChanged,
                   ),
                 ),
               ),
@@ -218,11 +226,40 @@ class _FloatingAppBar extends StatelessWidget {
 class _FloatingDock extends StatelessWidget {
   final double bottomPadding;
   final String currentRoute;
+  final int? activeTabIndex;
+  final ValueChanged<int>? onTabChanged;
 
   const _FloatingDock({
     required this.bottomPadding,
     required this.currentRoute,
+    this.activeTabIndex,
+    this.onTabChanged,
   });
+
+  bool _isActive(int tabIndex) {
+    if (activeTabIndex != null) return activeTabIndex == tabIndex;
+    switch (tabIndex) {
+      case 0: return currentRoute == RouteNames.home;
+      case 1: return currentRoute == RouteNames.documents;
+      case 2: return currentRoute == RouteNames.settings;
+      default: return false;
+    }
+  }
+
+  void _onTap(int tabIndex, BuildContext context) {
+    if (onTabChanged != null) {
+      if (activeTabIndex != tabIndex) onTabChanged!(tabIndex);
+    } else {
+      switch (tabIndex) {
+        case 0:
+          if (currentRoute != RouteNames.home) context.go(RouteNames.home);
+        case 1:
+          if (currentRoute != RouteNames.documents) context.push(RouteNames.documents);
+        case 2:
+          if (currentRoute != RouteNames.settings) context.push(RouteNames.settings);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -277,36 +314,24 @@ class _FloatingDock extends StatelessWidget {
                           child: _DockItem(
                             icon: Icons.home,
                             label: AppLocalizations.of(context)!.navHome,
-                            isActive: currentRoute == RouteNames.home,
-                            onTap: () {
-                              if (currentRoute != RouteNames.home) {
-                                context.go(RouteNames.home);
-                              }
-                            },
+                            isActive: _isActive(0),
+                            onTap: () => _onTap(0, context),
                           ),
                         ),
                         Expanded(
                           child: _DockItem(
                             icon: Icons.auto_stories,
                             label: AppLocalizations.of(context)!.navLibrary,
-                            isActive: currentRoute == RouteNames.documents,
-                            onTap: () {
-                              if (currentRoute != RouteNames.documents) {
-                                context.push(RouteNames.documents);
-                              }
-                            },
+                            isActive: _isActive(1),
+                            onTap: () => _onTap(1, context),
                           ),
                         ),
                         Expanded(
                           child: _DockItem(
                             icon: Icons.settings,
                             label: AppLocalizations.of(context)!.navSettings,
-                            isActive: currentRoute == RouteNames.settings,
-                            onTap: () {
-                              if (currentRoute != RouteNames.settings) {
-                                context.push(RouteNames.settings);
-                              }
-                            },
+                            isActive: _isActive(2),
+                            onTap: () => _onTap(2, context),
                           ),
                         ),
                       ],
