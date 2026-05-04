@@ -135,30 +135,65 @@ class UpdateCheckService {
     }
   }
 
-  /// Compare two semver strings. Matches FadCam logic:
-  /// - Strips `-beta` from [current] only.
-  /// - If all parts equal and current was beta → update available
-  ///   (beta users should upgrade to the same stable release).
-  /// Public so UI can use it to check if a beta is newer than current.
+  /// Compare two semver strings.
+  /// Handles stable (1.0.0), beta with number (1.0.0-beta2, 1.0.0-beta3),
+  /// and beta without number (1.0.0-beta treated as -beta1).
+  /// - Beta users should upgrade to the same stable release.
+  /// - Stable users should NOT be offered beta upgrades.
   static bool isNewerThan(String current, String latest) {
-    final currentIsBeta = current.toLowerCase().contains('beta');
-    final currentClean = current.replaceAll(RegExp(r'-beta', caseSensitive: false), '');
-    // latest from GitHub tag is already clean
-
-    final currentParts = currentClean.split('.');
-    final latestParts = latest.split('.');
-
-    for (int i = 0; i < currentParts.length && i < latestParts.length; i++) {
-      final currentNum = int.tryParse(currentParts[i]) ?? 0;
-      final latestNum = int.tryParse(latestParts[i]) ?? 0;
-
-      if (latestNum > currentNum) return true;
-      if (latestNum < currentNum) return false;
+    // Parse "major.minor.patch[-betaN]" into components
+    (int major, int minor, int patch, int? betaNum) parse(String v) {
+      final betaNumMatch =
+          RegExp(r'^(\d+)\.(\d+)\.(\d+)-beta(\d+)$').firstMatch(v);
+      if (betaNumMatch != null) {
+        return (
+          int.parse(betaNumMatch.group(1)!),
+          int.parse(betaNumMatch.group(2)!),
+          int.parse(betaNumMatch.group(3)!),
+          int.parse(betaNumMatch.group(4)!),
+        );
+      }
+      // -beta without number (treat as -beta1)
+      final betaPlain =
+          RegExp(r'^(\d+)\.(\d+)\.(\d+)-beta$', caseSensitive: false)
+              .firstMatch(v);
+      if (betaPlain != null) {
+        return (
+          int.parse(betaPlain.group(1)!),
+          int.parse(betaPlain.group(2)!),
+          int.parse(betaPlain.group(3)!),
+          1,
+        );
+      }
+      // Stable (no beta suffix)
+      final stable = RegExp(r'^(\d+)\.(\d+)\.(\d+)').firstMatch(v);
+      if (stable != null) {
+        return (
+          int.parse(stable.group(1)!),
+          int.parse(stable.group(2)!),
+          int.parse(stable.group(3)!),
+          null,
+        );
+      }
+      return (0, 0, 0, null);
     }
 
-    if (latestParts.length > currentParts.length) return true;
-    if (latestParts.length == currentParts.length && currentIsBeta) return true;
+    final (curMajor, curMinor, curPatch, curBeta) = parse(current);
+    final (latMajor, latMinor, latPatch, latBeta) = parse(latest);
 
-    return false;
+    // Compare major.minor.patch
+    if (latMajor != curMajor) return latMajor > curMajor;
+    if (latMinor != curMinor) return latMinor > curMinor;
+    if (latPatch != curPatch) return latPatch > curPatch;
+
+    // Same major.minor.patch — compare beta status
+    final currentIsBeta = curBeta != null;
+    final latestIsBeta = latBeta != null;
+
+    if (currentIsBeta && !latestIsBeta) return true; // beta user → stable upgrade
+    if (!currentIsBeta && latestIsBeta) return false; // stable user → no beta offer
+    if (currentIsBeta && latestIsBeta) return latBeta > curBeta; // newer beta
+
+    return false; // identical stable or same beta version
   }
 }
