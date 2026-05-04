@@ -36,7 +36,7 @@
 
 <img src="graphic_assets/screenshots/pdf_viewer_screen.png" width="200" alt="PDF Viewer"> <img src="graphic_assets/screenshots/document_screen_drawer.png" width="200" alt="PDF Sidebar"> <img src="graphic_assets/screenshots/spotlight_search.png" width="200" alt="Search">
 
-<sub>**PDF Viewer** — Page navigation, copy, invert, text mode & theme toggle</sub> &nbsp;&nbsp; <sub>**Sidebar** — Pages, search, outline & bookmarks (coming)</sub> &nbsp;&nbsp; <sub>**Spotlight Search** — Animated dim+punch-hole find effect</sub>
+<sub>**PDF Viewer** — Header with metadata, page navigation, copy all pdf (for LLMs), invert, text mode & theme toggle</sub> &nbsp;&nbsp; <sub>**Sidebar** — Pages, search, toc. notes & bookmarks (coming soon)</sub> &nbsp;&nbsp; <sub>**Spotlight Search** — Animated dim+punch-hole find effect</sub>
 
 <br>
 
@@ -52,13 +52,13 @@
 
 <img src="graphic_assets/screenshots/sheet.png" width="200" alt="Sheet"> <img src="graphic_assets/screenshots/text_viewer_screen.png" width="200" alt="Text Viewer"> <img src="graphic_assets/screenshots/json_preview.png" width="200" alt="JSON">
 
-<sub>**Sheets** — Sticky headers/rows, zoom, fullscreen, copy cell value</sub> &nbsp;&nbsp; <sub>**Text Viewer** — Font picker (Ubuntu/Mono), copy, theme toggle</sub> &nbsp;&nbsp; <sub>**JSON** — Syntax highlighted with collapsible nodes</sub>
+<sub>**Sheets** — Sticky headers/rows, zoom, fullscreen, copy cell value</sub> &nbsp;&nbsp; <sub>**Text Viewer** — Font picker (Ubuntu/Mono), copy, theme toggle</sub> &nbsp;&nbsp; <sub>**JSON** — Syntax highlighted code</sub>
 
 <br>
 
 <img src="graphic_assets/screenshots/docx_preview.png" width="200" alt="DOCX"> <img src="graphic_assets/screenshots/ppt_preview.png" width="200" alt="PPT">
 
-<sub>**DOCX** — Formatted document rendering via LibreOffice</sub> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <sub>**PPT** — Presentation rendering with slide navigation</sub>
+<sub>**DOCX** — Formatted document rendering via LibreOfficeKit</sub> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <sub>**PPT** — Presentation rendering with slide navigation</sub>
 
 </div>
 
