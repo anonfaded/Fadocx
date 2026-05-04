@@ -40,6 +40,14 @@
 
 <br>
 
+**OCR Text Extraction**
+
+<img src="graphic_assets/screenshots/ocr_step0_camera.png" width="200" alt="OCR Camera"> <img src="graphic_assets/screenshots/ocr_step3_results.png" width="200" alt="OCR Results">
+
+<sub>**OCR Camera** — Capture or upload an image for text extraction</sub> &nbsp;&nbsp;&nbsp;&nbsp; <sub>**OCR Results** — Extracted text with bounding rectangles drawn around found content</sub>
+
+<br>
+
 **File Previews**
 
 <img src="graphic_assets/screenshots/sheet.png" width="200" alt="Sheet"> <img src="graphic_assets/screenshots/text_viewer_screen.png" width="200" alt="Text Viewer"> <img src="graphic_assets/screenshots/json_preview.png" width="200" alt="JSON">
@@ -101,7 +109,7 @@
 <details>
 <summary><strong>📚 Library with Category Folders</strong></summary>
 
-- All imported files are organized into category folders automatically: **PDF**, **Docs**, **Sheets**, **Slides**, **Code**, **Scans**, and **Other**
+- Files are auto-organized into categories (PDF, Docs, Sheets, Slides, Code, Scans, Other) with fast filters and sorting
 - Files are stored in Fadocx's private app storage — no reliance on public folders
 - Browse by category with dedicated chip filters
 - Search by file name or type
