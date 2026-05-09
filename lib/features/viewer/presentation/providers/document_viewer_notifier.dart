@@ -122,6 +122,9 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
         case 'md':
         case 'log':
         case 'fadrec':
+        case 'atom':
+        case 'ico':
+        case 'psd':
           log.d('Routing to parseTXT for: $extension');
           document = await repository.parseTXT(_filePath);
           if (extension != 'txt') {
@@ -163,6 +166,38 @@ class DocumentViewerNotifier extends Notifier<ParsedDocumentState> {
               sourceFilePath: _filePath,
             );
           }
+
+        // Audio formats — playback via MediaViewer
+        case 'aac':
+        case 'mp3':
+        case 'wav':
+        case 'ogg':
+        case 'flac':
+        case 'm4a':
+        case 'wma':
+        case 'opus':
+        case 'aiff':
+        // Video formats — playback via MediaViewer
+        case 'mp4':
+        case 'avi':
+        case 'mkv':
+        case 'mov':
+        case 'wmv':
+        case 'flv':
+        case 'webm':
+        case '3gp':
+        case 'm4v':
+        case 'mpg':
+        case 'mpeg':
+        case 'fmp4':
+          log.d('Media format detected: $extension — using MediaViewer');
+          document = ParsedDocumentEntity(
+            format: extension.toUpperCase(),
+            sheets: const [],
+            sheetCount: 0,
+            parsedAt: DateTime.now(),
+            sourceFilePath: _filePath,
+          );
 
         // Image formats — display with built-in image viewer
         case 'png':

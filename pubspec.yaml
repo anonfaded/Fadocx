@@ -98,6 +98,7 @@ dependencies:
   url_launcher: ^6.3.2
   share_plus: ^10.1.4
   simple_icons: ^14.6.1
+  video_player: ^2.11.1
 
 dev_dependencies:
   flutter_test:

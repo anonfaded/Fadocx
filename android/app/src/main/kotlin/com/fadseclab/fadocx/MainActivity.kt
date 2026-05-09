@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.ParcelFileDescriptor
+import android.provider.OpenableColumns
 import android.provider.Settings
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
@@ -17,6 +18,7 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -51,6 +53,7 @@ class MainActivity : FlutterActivity() {
     private val LOKIT_CHANNEL = "com.fadseclab.fadocx/lokit"
     private val TAG = "Fadocx.DocumentParser"
     private var pendingFileIntent: String? = null
+    private var intentFlutterEngine: FlutterEngine? = null
 
     private val pdfRenderers = mutableMapOf<String, PdfRenderer>()
     private val pdfDescriptors = mutableMapOf<String, ParcelFileDescriptor>()
@@ -59,6 +62,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        intentFlutterEngine = flutterEngine
         setupMethodChannels(flutterEngine)
         handleFileIntent(intent)
     }
@@ -346,13 +350,29 @@ class MainActivity : FlutterActivity() {
         if (intent == null) return
         Thread {
             try {
-                if (intent.action == Intent.ACTION_VIEW) {
-                    val uri = intent.data
-                    if (uri != null) {
-                        val filePath = getFilePathFromUri(uri)
-                        if (filePath != null) {
-                            Log.i(TAG, "File intent detected: $filePath")
-                            pendingFileIntent = filePath
+                when (intent.action) {
+                    Intent.ACTION_VIEW -> {
+                        val uri = intent.data
+                        if (uri != null) {
+                            val filePath = getFilePathFromUri(uri)
+                            if (filePath != null) {
+                                Log.i(TAG, "File intent detected: $filePath")
+                                pendingFileIntent = filePath
+                                pushFileIntentToFlutter(filePath)
+                            } else {
+                                Log.w(TAG, "Could not resolve URI: $uri")
+                            }
+                        }
+                    }
+                    Intent.ACTION_SEND -> {
+                        val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+                        if (uri != null) {
+                            val filePath = getFilePathFromUri(uri)
+                            if (filePath != null) {
+                                Log.i(TAG, "Share intent detected: $filePath")
+                                pendingFileIntent = filePath
+                                pushFileIntentToFlutter(filePath)
+                            }
                         }
                     }
                 }
@@ -362,17 +382,30 @@ class MainActivity : FlutterActivity() {
         }.start()
     }
 
+    private fun pushFileIntentToFlutter(filePath: String) {
+        runOnUiThread {
+            try {
+                val engine = intentFlutterEngine ?: FlutterEngineCache.getInstance().get("fadocx_engine")
+                if (engine != null) {
+                    MethodChannel(engine.dartExecutor.binaryMessenger, FILE_CHANNEL)
+                        .invokeMethod("onFileIntent", filePath)
+                    Log.i(TAG, "Pushed file intent to Flutter: $filePath")
+                } else {
+                    Log.d(TAG, "Flutter engine not ready, intent stored for polling")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to push file intent to Flutter", e)
+            }
+        }
+    }
+
+    /// Resolve a content:// or file:// URI to a local file path.
+    /// For content:// URIs, imports the file into the app's managed storage.
+    /// For file:// URIs, returns the direct path.
     private fun getFilePathFromUri(uri: Uri): String? {
         return when {
             uri.scheme == "file" -> uri.path
-            uri.scheme == "content" -> {
-                try {
-                    getRealPathFromContentUri(uri) ?: uri.toString()
-                } catch (e: Exception) {
-                    Log.w(TAG, "Could not convert content URI to file path", e)
-                    null
-                }
-            }
+            uri.scheme == "content" -> importContentUri(uri)
             else -> {
                 Log.w(TAG, "Unsupported URI scheme: ${uri.scheme}")
                 null
@@ -380,22 +413,134 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun getRealPathFromContentUri(uri: Uri): String? {
+    /// Maps file extension to the app's managed storage category folder name.
+    /// Must match StorageService._getCategoryFromExtension() in Dart.
+    private fun getCategoryFromExtension(ext: String): String {
+        return when (ext.lowercase()) {
+            "pdf" -> "PDFs"
+            "epub", "ott" -> "Documents"
+            "xlsx", "xls", "ods", "csv" -> "Spreadsheets"
+            "ppt", "pptx", "odp" -> "Presentations"
+            "jpg", "jpeg", "png", "gif", "webp", "ico", "psd" -> "Images"
+            // Audio formats
+            "aac", "mp3", "wav", "ogg", "flac", "m4a", "wma", "opus", "aiff" -> "Audio"
+            // Video formats
+            "mp4", "avi", "mkv", "mov", "wmv", "flv", "webm", "3gp", "m4v", "mpg", "mpeg", "fmp4" -> "Video"
+            // Code folder covers: docx, doc, odt, rtf, txt, java, py, sh,
+            // html, md, log, json, xml, fadrec, and any unknown
+            else -> "Code"
+        }
+    }
+
+    /// Import a content:// URI into the app's managed storage.
+    /// This copies the file from the source (Downloads, Drive, etc.) directly
+    /// into the app's scoped external storage at:
+    ///   /storage/emulated/0/Android/data/{package}/files/{category}/{filename}
+    ///
+    /// The filePath returned matches what Flutter's StorageService expects for
+    /// managed files, so cacheDocument() will see it as already-managed and skip.
+    private fun importContentUri(uri: Uri): String? {
         return try {
-            val projection = arrayOf(android.provider.MediaStore.MediaColumns.DATA)
-            val cursor = contentResolver.query(uri, projection, null, null, null)
-            if (cursor != null && cursor.moveToFirst()) {
-                val columnIndex = cursor.getColumnIndexOrThrow(android.provider.MediaStore.MediaColumns.DATA)
-                val result = cursor.getString(columnIndex)
-                cursor.close()
-                result
-            } else {
-                null
+            val inputStream = contentResolver.openInputStream(uri) ?: return null
+
+            val fileName = getFileNameFromUri(uri)
+                ?: "import_${System.currentTimeMillis()}.${getExtensionFromMimeType(uri)}"
+            val ext = fileName.substringAfterLast('.', "").lowercase()
+            val category = getCategoryFromExtension(ext)
+
+            // Write directly to managed storage
+            val baseDir = getExternalFilesDir(null)
+                ?: return null
+            val categoryDir = File(baseDir, category)
+            categoryDir.mkdirs()
+            val destFile = File(categoryDir, fileName)
+
+            // Avoid overwriting existing files (append counter)
+            val finalFile = resolveFileName(destFile)
+            FileOutputStream(finalFile).use { output ->
+                inputStream.copyTo(output)
             }
+            inputStream.close()
+
+            Log.i(TAG, "Imported content URI to managed storage: ${finalFile.absolutePath}")
+            finalFile.absolutePath
         } catch (e: Exception) {
-            Log.w(TAG, "Error getting real path from content URI", e)
+            Log.e(TAG, "Failed to import content URI to managed storage", e)
             null
         }
+    }
+
+    /// If a file with the same name exists, appends a counter before the extension.
+    /// e.g. "doc.pdf" → "doc (1).pdf" → "doc (2).pdf"
+    private fun resolveFileName(file: File): File {
+        if (!file.exists()) return file
+        val name = file.nameWithoutExtension
+        val ext = file.extension
+        var counter = 1
+        while (true) {
+            val candidate = File(file.parent, "$name ($counter).$ext")
+            if (!candidate.exists()) return candidate
+            counter++
+        }
+    }
+
+    /// Extract display name from a content:// URI using OpenableColumns
+    private fun getFileNameFromUri(uri: Uri): String? {
+        var name: String? = null
+        try {
+            val cursor = contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex >= 0) {
+                        name = it.getString(nameIndex)
+                    }
+                }
+            }
+        } catch (_: Exception) { }
+        if (name == null) {
+            name = uri.lastPathSegment
+        }
+        return name
+    }
+
+    /// Guess a file extension from content:// URI mime type
+    private fun getExtensionFromMimeType(uri: Uri): String {
+        return try {
+            val mimeType = contentResolver.getType(uri) ?: return "bin"
+            when {
+                mimeType.contains("pdf") -> "pdf"
+                mimeType.contains("spreadsheet") -> "xlsx"
+                mimeType.contains("excel") -> "xls"
+                mimeType.contains("csv") -> "csv"
+                mimeType.contains("wordprocessing") -> "docx"
+                mimeType.contains("msword") -> "doc"
+                mimeType.contains("presentation") -> "pptx"
+                mimeType.contains("powerpoint") -> "ppt"
+                mimeType.contains("text/plain") -> "txt"
+                mimeType.contains("html") -> "html"
+                mimeType.contains("json") -> "json"
+                mimeType.contains("xml") -> "xml"
+                mimeType.contains("rtf") -> "rtf"
+                mimeType.contains("image") -> "jpg"
+                mimeType.contains("epub") -> "epub"
+                mimeType.contains("atom") || mimeType.contains("rss") -> "atom"
+                mimeType.contains("audio") || mimeType.contains("aac") -> "aac"
+                mimeType.contains("mpeg") -> "mp3"
+                mimeType.contains("mp4") || mimeType.contains("video") -> "mp4"
+                mimeType.contains("ogg") || mimeType.contains("opus") -> "ogg"
+                mimeType.contains("flac") -> "flac"
+                mimeType.contains("wav") || mimeType.contains("wave") -> "wav"
+                mimeType.contains("webm") -> "webm"
+                mimeType.contains("matroska") -> "mkv"
+                mimeType.contains("x-msvideo") || mimeType.contains("avi") -> "avi"
+                mimeType.contains("quicktime") || mimeType.contains("mov") -> "mov"
+                mimeType.contains("x-ms-wmv") || mimeType.contains("wmv") -> "wmv"
+                mimeType.contains("x-flv") || mimeType.contains("flv") -> "flv"
+                mimeType.contains("3gpp") || mimeType.contains("3gp") -> "3gp"
+                else -> "bin"
+            }
+        } catch (_: Exception) { "bin" }
     }
 
     private fun openPdf(filePath: String?, result: MethodChannel.Result) {

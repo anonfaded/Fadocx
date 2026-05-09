@@ -27,7 +27,8 @@ class DocumentViewerFactory {
       'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document, onSheetSelectionChanged, sheetViewerKey, zoom: sheetZoom),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
-      'PNG' || 'JPG' || 'JPEG' || 'GIF' || 'WEBP' || 'BMP' || 'SVG' =>
+      'PNG' || 'JPG' || 'JPEG' || 'GIF' || 'WEBP' || 'BMP' || 'SVG'
+      || 'ICO' || 'PSD' =>
         _buildImageViewer(filePath, onTap),
       'TXT' => _buildTextViewer(document, onTap: onTap),
       _ => _buildUnsupportedViewer(document.format),
