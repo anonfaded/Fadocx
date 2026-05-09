@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +36,12 @@ class _MainShellState extends ConsumerState<MainShell>
   DateTime? _lastBackPress;
   static const Duration _backPressExitDuration = Duration(seconds: 2);
 
+  // Library search state
+  bool _libraryIsSearching = false;
+  final _librarySearchController = TextEditingController();
+  late AnimationController _librarySearchAnimController;
+  Timer? _librarySearchDebounce;
+
   static const double _kSidebarTopOffset = 87;
   static const double _kSidebarBottomOffset = 88;
   static const double _kSidebarRadius = 24.0;
@@ -51,12 +58,19 @@ class _MainShellState extends ConsumerState<MainShell>
       duration: const Duration(milliseconds: 2800),
       vsync: this,
     )..repeat();
+    _librarySearchAnimController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
   }
 
   @override
   void dispose() {
     _sidebarController.dispose();
     _patreonShimmerController.dispose();
+    _librarySearchController.dispose();
+    _librarySearchAnimController.dispose();
+    _librarySearchDebounce?.cancel();
     super.dispose();
   }
 
@@ -257,17 +271,66 @@ class _MainShellState extends ConsumerState<MainShell>
   }
 
   Widget _buildLibraryAppBar(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       bottom: false,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            Text(
-              AppLocalizations.of(context)!.navLibrary,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            if (!_libraryIsSearching)
+              Text(
+                AppLocalizations.of(context)!.navLibrary,
+                style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.arrow_back, size: 20),
+                onPressed: () {
+                  _librarySearchController.clear();
+                  ref.read(librarySearchProvider.notifier).clear();
+                  setState(() => _libraryIsSearching = false);
+                },
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              ),
+            const SizedBox(width: 8),
+            if (_libraryIsSearching)
+              Expanded(
+                child: TextField(
+                  key: const ValueKey('search'),
+                  controller: _librarySearchController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.librarySearchHint,
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
                   ),
+                  onChanged: (v) {
+                    _librarySearchDebounce?.cancel();
+                    _librarySearchDebounce = Timer(
+                        const Duration(milliseconds: 200), () {
+                      ref.read(librarySearchProvider.notifier).update(v);
+                    });
+                  },
+                ),
+              ),
+            if (!_libraryIsSearching) const Spacer(),
+            IconButton(
+              icon: Icon(_libraryIsSearching ? Icons.clear : Icons.search, size: 20),
+              onPressed: () {
+                if (_libraryIsSearching) {
+                  _librarySearchController.clear();
+                  ref.read(librarySearchProvider.notifier).clear();
+                } else {
+                  setState(() => _libraryIsSearching = true);
+                }
+              },
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             ),
           ],
         ),
