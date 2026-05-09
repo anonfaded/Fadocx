@@ -76,7 +76,7 @@
                 <data android:mimeType="application/vnd.oasis.opendocument.presentation"/>
             </intent-filter>
             
-            <!-- Code/text formats -->
+            <!-- Code/text formats (including octet-stream for unrecognized MIME types) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -87,8 +87,78 @@
                 <data android:mimeType="text/x-python"/>
                 <data android:mimeType="text/x-shellscript"/>
                 <data android:mimeType="text/x-script.sh"/>
+                <!-- Catch-all for file managers that return octet-stream for code/text files -->
+                <data android:mimeType="application/octet-stream"/>
             </intent-filter>
             
+            <!-- Image formats (including ico, psd) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="image/png"/>
+                <data android:mimeType="image/jpeg"/>
+                <data android:mimeType="image/gif"/>
+                <data android:mimeType="image/webp"/>
+                <data android:mimeType="image/bmp"/>
+                <data android:mimeType="image/svg+xml"/>
+                <data android:mimeType="image/x-icon"/>
+                <data android:mimeType="image/vnd.microsoft.icon"/>
+                <data android:mimeType="image/vnd.adobe.photoshop"/>
+            </intent-filter>
+
+            <!-- Audio formats (all major types) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="audio/aac"/>
+                <data android:mimeType="audio/mpeg"/>
+                <data android:mimeType="audio/wav"/>
+                <data android:mimeType="audio/x-wav"/>
+                <data android:mimeType="audio/ogg"/>
+                <data android:mimeType="audio/flac"/>
+                <data android:mimeType="audio/x-m4a"/>
+                <data android:mimeType="audio/x-ms-wma"/>
+                <data android:mimeType="audio/opus"/>
+                <data android:mimeType="audio/x-aiff"/>
+            </intent-filter>
+
+            <!-- Video formats (all major types) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="video/mp4"/>
+                <data android:mimeType="video/x-msvideo"/>
+                <data android:mimeType="video/x-matroska"/>
+                <data android:mimeType="video/quicktime"/>
+                <data android:mimeType="video/x-ms-wmv"/>
+                <data android:mimeType="video/x-flv"/>
+                <data android:mimeType="video/webm"/>
+                <data android:mimeType="video/3gpp"/>
+                <data android:mimeType="video/x-m4v"/>
+                <data android:mimeType="video/mpeg"/>
+            </intent-filter>
+
+            <!-- XML-based feed formats -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="application/atom+xml"/>
+                <data android:mimeType="application/rss+xml"/>
+            </intent-filter>
+
+            <!-- Catch-all for content:// URIs with null MIME types (e.g. .psd, .ico, .sh on some file managers).
+                 This filter only matches content scheme. Kotlin code validates supported formats. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="content"/>
+            </intent-filter>
+
             <!-- File extension based handlers (fallback for unrecognized MIME types) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -105,7 +175,58 @@
                 <data android:scheme="file" android:host="*" android:pathPattern=".*\\.fadrec"/>
                 <!-- Documents -->
                 <data android:scheme="file" android:host="*" android:pathPattern=".*\\.docx"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.doc"/>
                 <data android:scheme="file" android:host="*" android:pathPattern=".*\\.pdf"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.rtf"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.txt"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.html"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.md"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.epub"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.ott"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.log"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.java"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.py"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.sh"/>
+                <!-- Presentations -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.ppt"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.pptx"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.odp"/>
+                <!-- Images -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.png"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.jpg"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.jpeg"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.gif"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.webp"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.bmp"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.svg"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.ico"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.psd"/>
+                <!-- Audio -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.aac"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.mp3"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.wav"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.ogg"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.flac"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.m4a"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.wma"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.opus"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.aiff"/>
+                <!-- Video -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.mp4"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.avi"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.mkv"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.mov"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.wmv"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.flv"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.webm"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.3gp"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.m4v"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.mpg"/>
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.mpeg"/>
+                <!-- Fragmented MP4 -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.fmp4"/>
+                <!-- Feeds -->
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.atom"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

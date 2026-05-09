@@ -1276,6 +1276,11 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
         'json',
         'xml',
         'fadrec',
+        'ico',
+        'psd',
+        'atom',
+        'aac', 'mp3', 'wav', 'ogg', 'flac', 'm4a', 'wma', 'opus', 'aiff',
+        'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', '3gp', 'm4v', 'mpg', 'mpeg', 'fmp4',
       };
 
       for (final entity in entities) {
@@ -1379,6 +1384,11 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
           'json',
           'xml',
           'fadrec',
+          'ico',
+          'psd',
+          'atom',
+          'aac', 'mp3', 'wav', 'ogg', 'flac', 'm4a', 'wma', 'opus', 'aiff',
+          'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', '3gp', 'm4v', 'mpg', 'mpeg', 'fmp4',
         ],
         allowMultiple: true,
       );

@@ -86,10 +86,14 @@ class _MyAppState extends ConsumerState<MyApp> {
       _fileIntentSub = FileIntentService.fileIntentStream.listen((filePath) {
         if (!mounted) return;
         final encodedPath = Uri.encodeComponent(filePath);
-        // Use the same router instance
-        _router
-            .push('/viewer?path=$encodedPath&name=${filePath.split('/').last}');
+        final fileName = filePath.split('/').last;
+        log.i('File intent: navigating to viewer: $fileName');
+        _router.push('/viewer?path=$encodedPath&name=$fileName');
       }, onError: (e) => log.e('File intent error: $e'));
+
+      // Initialize file intent service AFTER listener is set up
+      // so cold-start intents are not missed
+      FileIntentService.initialize();
     });
   }
 

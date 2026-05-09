@@ -10,6 +10,8 @@ import 'package:fadocx/features/viewer/data/providers/repository_providers.dart'
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/text_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/modern_pdf_viewer.dart';
+import 'package:fadocx/features/viewer/presentation/widgets/media_viewer.dart';
+import 'package:video_player/video_player.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/document_viewer_factory.dart';
 import 'package:fadocx/features/viewer/presentation/widgets/lokit_document_viewer.dart';
 import 'package:fadocx/features/viewer/presentation/providers/lokit_viewer_notifier.dart';
@@ -68,12 +70,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   double _sheetZoom = 1.0;
   String? _sheetCellRef;
   String _sheetCellValue = '';
+  bool _mediaWasPlaying = false;
 
   late AnimationController _topBarController;
   late AnimationController _bottomPanelController;
   late GlobalKey<State<ModernPdfViewer>> _pdfViewerKey;
   late GlobalKey<State<TextDocumentViewer>> _textViewerKey;
   late GlobalKey<State<LOKitDocumentViewer>> _lokitViewerKey;
+  late GlobalKey<MediaViewerState> _mediaViewerKey;
   late GlobalKey _sheetViewerKey;
   static const double _kDragCloseThreshold = 100.0;
 
@@ -543,6 +547,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     _pdfViewerKey = GlobalKey<State<ModernPdfViewer>>();
     _textViewerKey = GlobalKey<State<TextDocumentViewer>>();
     _lokitViewerKey = GlobalKey<State<LOKitDocumentViewer>>();
+    _mediaViewerKey = GlobalKey<MediaViewerState>();
     _sheetViewerKey = GlobalKey();
     _menuController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -595,6 +600,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             _sessionFilePath = widget.filePath;
             _savedMutator!.startViewingSession(widget.filePath);
             _log.d('Time tracking started: ');
+          }
+          // For media: force rebuild so GlobalKey.currentState is available
+          if (mounted && isMediaFormat(widget.filePath)) {
+            setState(() {});
           }
         });
       } else {
@@ -905,7 +914,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
       'LOG',
       'JSON',
       'XML',
-      'FADREC'
+      'FADREC',
+      'ATOM'
     };
     if (txtFormats.contains(format)) {
       return TextDocumentViewer(
@@ -917,6 +927,16 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         wordWrap: _textWordWrap,
         useMonoFont: _textFontIsMonoFont,
         language: _syntaxHighlightEnabled ? _languageForFormat(format) : null,
+      );
+    }
+
+    // For audio/video media files, use MediaViewer with playback controls
+    if (isMediaFormat(widget.filePath)) {
+      return MediaViewer(
+        key: _mediaViewerKey,
+        filePath: widget.filePath,
+        fileName: widget.fileName,
+        onTap: _toggleControls,
       );
     }
 
@@ -2172,6 +2192,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
         .contains(format)) {
       // Image viewer - no format-specific controls needed
       return const SizedBox.shrink();
+    } else if (isMediaFormat(widget.filePath)) {
+      final media = _mediaViewerKey.currentState;
+      if (media == null) return const SizedBox.shrink();
+      return _buildMediaControls(context, media);
     }
 
     if (_isSpreadsheet()) {
@@ -2220,6 +2244,59 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     }
 
     return const SizedBox.shrink();
+  }
+
+  /// Build reactive media controls using ValueListenableBuilder to track position.
+  Widget _buildMediaControls(BuildContext context, MediaViewerState media) {
+    return ValueListenableBuilder<VideoPlayerValue>(
+      valueListenable: media.controller,
+      builder: (context, value, child) {
+        final theme = Theme.of(context);
+        final pos = value.position;
+        final dur = value.duration;
+        final isPlaying = value.isPlaying;
+        final posMs = dur.inMilliseconds > 0 ? pos.inMilliseconds.clamp(0, dur.inMilliseconds).toDouble() : 0.0;
+        final durMs = dur.inMilliseconds > 0 ? dur.inMilliseconds.toDouble() : 1.0;
+
+        return Row(
+          children: [
+            IconButton(
+              icon: Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 20),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              onPressed: media.togglePlay,
+            ),
+            Text(MediaViewerState.formatDuration(pos), style: theme.textTheme.labelSmall),
+            Expanded(
+              child: Slider(
+                value: posMs,
+                max: durMs,
+                onChangeStart: (_) => _mediaWasPlaying = isPlaying,
+                onChanged: (_) {},
+                onChangeEnd: (v) {
+                  media.seekTo(Duration(milliseconds: v.toInt()));
+                  if (_mediaWasPlaying) media.play();
+                },
+              ),
+            ),
+            Text(MediaViewerState.formatDuration(dur), style: theme.textTheme.labelSmall),
+            const SizedBox(width: 4),
+            ValueListenableBuilder<bool>(
+              valueListenable: media.loopNotifier,
+              builder: (context, isLooping, child) {
+                return IconButton(
+                  icon: Icon(isLooping ? Icons.repeat_one_rounded : Icons.repeat_rounded,
+                      size: 18, color: isLooping ? theme.colorScheme.primary : null),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: media.toggleLoop,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   /// Build the expanded menu content (Copy, Invert, TextMode, Theme buttons)
@@ -2380,6 +2457,30 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                   ),
                 );
               },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildTile(
+              icon: Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+              label: l10n.theme,
+              onTap: () {
+                ref.read(themeModeProvider.notifier).toggleThemeMode();
+              },
+            ),
+          ),
+        ],
+      );
+    } else if (isMediaFormat(widget.filePath)) {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildTile(
+              icon: Icons.speed,
+              label: 'Speed',
+              onTap: () => _showSpeedDialog(context, _mediaViewerKey.currentState),
             ),
           ),
           const SizedBox(width: 8),
@@ -2611,6 +2712,37 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showSpeedDialog(BuildContext context, MediaViewerState? media) {
+    if (media == null) return;
+    final speeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Playback Speed'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: speeds.map((speed) {
+            return ListTile(
+              title: Text('${speed}x'),
+              trailing: const Icon(Icons.check),
+              onTap: () {
+                media.setSpeed(speed);
+                Navigator.pop(ctx);
+              },
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.viewerGoBack),
+          ),
+        ],
       ),
     );
   }

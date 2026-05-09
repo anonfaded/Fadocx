@@ -11,6 +11,8 @@ class StorageService {
   static const String codeFolder = 'Code';
   static const String presentationsFolder = 'Presentations';
   static const String imagesFolder = 'Images';
+  static const String audioFolder = 'Audio';
+  static const String videoFolder = 'Video';
   static const String scansFolder = 'Scans';
   static const String trashFolder =
       'Trash'; // Normal visible folder for deleted files
@@ -82,10 +84,34 @@ class StorageService {
       case 'log':
       case 'json':
       case 'xml':
+      case 'atom':
         return codeFolder;
       case 'epub':
       case 'ott':
         return documentsFolder;
+      case 'aac':
+      case 'mp3':
+      case 'wav':
+      case 'ogg':
+      case 'flac':
+      case 'm4a':
+      case 'wma':
+      case 'opus':
+      case 'aiff':
+        return audioFolder;
+      case 'mp4':
+      case 'avi':
+      case 'mkv':
+      case 'mov':
+      case 'wmv':
+      case 'flv':
+      case 'webm':
+      case '3gp':
+      case 'm4v':
+      case 'mpg':
+      case 'mpeg':
+      case 'fmp4':
+        return videoFolder;
       case 'xlsx':
       case 'xls':
       case 'ods':
@@ -100,6 +126,8 @@ class StorageService {
       case 'png':
       case 'gif':
       case 'webp':
+      case 'ico':
+      case 'psd':
         return imagesFolder;
       default:
         return documentsFolder;
