@@ -19,6 +19,18 @@ import 'package:fadocx/l10n/app_localizations.dart';
 
 final log = Logger();
 
+/// Shared search query for the library tab.
+class LibrarySearchNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void update(String value) => state = value;
+  void clear() => state = '';
+}
+
+final librarySearchProvider =
+    NotifierProvider<LibrarySearchNotifier, String>(() => LibrarySearchNotifier());
+
 class DocumentsScreen extends ConsumerStatefulWidget {
   final bool tabMode;
   const DocumentsScreen({super.key, this.tabMode = false});
@@ -31,7 +43,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     with SingleTickerProviderStateMixin {
   late String _selectedCategory;
   final _searchController = TextEditingController();
-  String _searchQuery = '';
   bool _isSearching = false;
   late AnimationController _searchAnimController;
   Timer? _debounce;
@@ -155,19 +166,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                           style: Theme.of(context).textTheme.bodyMedium,
                           onChanged: (v) {
                             _debounce?.cancel();
-                            _debounce = Timer(
-                                const Duration(milliseconds: 200), () {
-                              setState(() => _searchQuery = v);
+                            _debounce = Timer(const Duration(milliseconds: 200), () {
+                              ref.read(librarySearchProvider.notifier).update(v);
                             });
                           },
                         ),
                       ),
-                      if (_searchQuery.isNotEmpty)
+                      if (_searchController.text.isNotEmpty)
                         IconButton(
                           icon: const Icon(Icons.clear, size: 18),
                           onPressed: () {
                             _searchController.clear();
-                            setState(() => _searchQuery = '');
+                            ref.read(librarySearchProvider.notifier).clear();
                           },
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(
@@ -235,10 +245,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
   void _exitSearchMode() {
     _searchController.clear();
-    setState(() {
-      _searchQuery = '';
-      _isSearching = false;
-    });
+    ref.read(librarySearchProvider.notifier).clear();
+    setState(() => _isSearching = false);
     _searchAnimController.reverse();
     FocusScope.of(context).unfocus();
   }
@@ -382,17 +390,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildDocumentsGrid(
-      BuildContext context, List<RecentFile> allFiles, bool isGridView) {
-    // Filter files based on category and search
-    List<RecentFile> filteredFiles = allFiles;
-    if (_selectedCategory != 'all') {
-      filteredFiles = allFiles
-          .where(
-              (f) => _getCategoryFromFileType(f.fileType) == _selectedCategory)
-          .toList();
-    }
-    if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
+      BuildContext context, List<RecentFile> files, bool isGridView) {
+    final allFiles = files.toList();
+    var filteredFiles = allFiles.toList();
+    final searchQuery = ref.watch(librarySearchProvider);
+    if (searchQuery.isNotEmpty) {
+      final q = searchQuery.toLowerCase();
       filteredFiles = filteredFiles
           .where((f) =>
               f.fileName.toLowerCase().contains(q) ||
@@ -590,18 +593,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               await ref.read(recentFilesProvider.future);
             },
             child: filteredFiles.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.inbox_outlined,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _searchQuery.isNotEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.inbox_outlined,
+                              size: 48,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              searchQuery.isNotEmpty
                               ? AppLocalizations.of(context)!.libraryNoCategoryFound(_selectedCategory == 'all' ? AppLocalizations.of(context)!.categoryAll.toLowerCase() : _getCategoryLabel(context, _selectedCategory))
                               : AppLocalizations.of(context)!.libraryNoDocuments,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -610,7 +613,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _searchQuery.isNotEmpty
+                          searchQuery.isNotEmpty
                               ? AppLocalizations.of(context)!.libraryAdjustSearch
                               : AppLocalizations.of(context)!.libraryDocumentsAppearHere,
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
