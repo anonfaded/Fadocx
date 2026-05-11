@@ -71,6 +71,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   String? _sheetCellRef;
   String _sheetCellValue = '';
   bool _mediaWasPlaying = false;
+  double? _sliderDragValue;
 
   late AnimationController _topBarController;
   late AnimationController _bottomPanelController;
@@ -2247,56 +2248,83 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   /// Build reactive media controls using ValueListenableBuilder to track position.
+  /// Outer VLB listens to currentController so it rebinds automatically when
+  /// MediaViewerState hot-swaps to the pre-warmed controller on replay.
   Widget _buildMediaControls(BuildContext context, MediaViewerState media) {
-    return ValueListenableBuilder<VideoPlayerValue>(
-      valueListenable: media.controller,
-      builder: (context, value, child) {
-        final theme = Theme.of(context);
-        final pos = value.position;
-        final dur = value.duration;
-        final isPlaying = value.isPlaying;
-        final posMs = dur.inMilliseconds > 0 ? pos.inMilliseconds.clamp(0, dur.inMilliseconds).toDouble() : 0.0;
-        final durMs = dur.inMilliseconds > 0 ? dur.inMilliseconds.toDouble() : 1.0;
+    return ValueListenableBuilder<VideoPlayerController?>(
+      valueListenable: media.currentController,
+      builder: (context, controller, _) {
+        if (controller == null) return const SizedBox.shrink();
+        return ValueListenableBuilder<VideoPlayerValue>(
+          valueListenable: controller,
+          builder: (context, value, child) {
+            final theme = Theme.of(context);
+            final pos = value.position;
+            final dur = value.duration;
+            final isPlaying = value.isPlaying;
+            final posMs = dur.inMilliseconds > 0 ? pos.inMilliseconds.clamp(0, dur.inMilliseconds).toDouble() : 0.0;
+            final durMs = dur.inMilliseconds > 0 ? dur.inMilliseconds.toDouble() : 1.0;
 
-        return Row(
-          children: [
-            IconButton(
-              icon: Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 20),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              onPressed: media.togglePlay,
-            ),
-            Text(MediaViewerState.formatDuration(pos), style: theme.textTheme.labelSmall),
-            Expanded(
-              child: Slider(
-                value: posMs,
-                max: durMs,
-                onChangeStart: (_) => _mediaWasPlaying = isPlaying,
-                onChanged: (_) {},
-                onChangeEnd: (v) {
-                  media.seekTo(Duration(milliseconds: v.toInt()));
-                  if (_mediaWasPlaying) media.play();
-                },
-              ),
-            ),
-            Text(MediaViewerState.formatDuration(dur), style: theme.textTheme.labelSmall),
-            const SizedBox(width: 4),
-            ValueListenableBuilder<bool>(
-              valueListenable: media.loopNotifier,
-              builder: (context, isLooping, child) {
-                return IconButton(
-                  icon: Icon(isLooping ? Icons.repeat_one_rounded : Icons.repeat_rounded,
-                      size: 18, color: isLooping ? theme.colorScheme.primary : null),
+            return Row(
+              children: [
+                IconButton(
+                  icon: Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 20),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                  onPressed: media.toggleLoop,
-                );
-              },
-            ),
-          ],
+                  onPressed: media.togglePlay,
+                ),
+                Text(
+                  MediaViewerState.formatDuration(
+                    _sliderDragValue != null ? Duration(milliseconds: _sliderDragValue!.toInt()) : pos,
+                  ),
+                  style: theme.textTheme.labelSmall,
+                ),
+                Expanded(
+                  child: Slider(
+                    value: (_sliderDragValue ?? posMs).clamp(0.0, durMs),
+                    max: durMs,
+                    onChangeStart: (v) {
+                      _mediaWasPlaying = isPlaying;
+                      if (isPlaying) media.pause();
+                      setState(() => _sliderDragValue = v);
+                    },
+                    onChanged: (v) => setState(() => _sliderDragValue = v),
+                    onChangeEnd: (v) {
+                      setState(() => _sliderDragValue = null);
+                      _onMediaSeekEnd(media, Duration(milliseconds: v.toInt()));
+                    },
+                  ),
+                ),
+                Text(MediaViewerState.formatDuration(dur), style: theme.textTheme.labelSmall),
+                const SizedBox(width: 4),
+                ValueListenableBuilder<bool>(
+                  valueListenable: media.loopNotifier,
+                  builder: (context, isLooping, child) {
+                    return IconButton(
+                      icon: Icon(isLooping ? Icons.repeat_one_rounded : Icons.repeat_rounded,
+                          size: 18, color: isLooping ? theme.colorScheme.primary : null),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      onPressed: media.toggleLoop,
+                    );
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
+  }
+
+  /// Await seek completion, then resume playback if video was playing before drag.
+  /// Awaiting is critical: ensures controller.value.position is updated before any
+  /// subsequent play() call, preventing play() from auto-seeking to Duration.zero.
+  Future<void> _onMediaSeekEnd(MediaViewerState media, Duration pos) async {
+    await media.seekTo(pos);
+    if (_mediaWasPlaying) {
+      media.play();
+    }
   }
 
   /// Build the expanded menu content (Copy, Invert, TextMode, Theme buttons)
