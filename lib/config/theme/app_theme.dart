@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  static final _darkColorScheme = ColorScheme.fromSeed(
+    seedColor: const Color(0xFF2D6A4F), // Forest green
+    brightness: Brightness.dark,
+    dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
+    surface: const Color(0xFF242424), // Lighter surface for better contrast with background
+  );
+
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     fontFamily: 'Ubuntu',
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF2D6A4F), // Forest green
-      brightness: Brightness.dark,
-      dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
-      surface: const Color(0xFF242424), // Lighter surface for better contrast with background
-    ),
+    colorScheme: _darkColorScheme,
     scaffoldBackgroundColor: const Color(0xFF141414), // Dark gray background
     appBarTheme: AppBarTheme(
       backgroundColor: const Color(0xFF242424), // Nice medium gray
@@ -88,6 +90,8 @@ class AppTheme {
           color: Color(0xFFA0A0A0)),
     ),
     iconTheme: const IconThemeData(color: Colors.white, size: 24),
+    // ignore: deprecated_member_use — required for M3 expressive slider in Flutter 3.41
+    sliderTheme: const SliderThemeData(year2023: false),
     dividerColor: const Color(0xFF383838), // Lighter gray divider for better contrast
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -107,16 +111,18 @@ class AppTheme {
     ),
   );
 
+  static final _lightColorScheme = ColorScheme.fromSeed(
+    seedColor: const Color(0xFF2D6A4F), // Forest green
+    brightness: Brightness.light,
+    dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
+    surface: const Color(0xFFFAFAFA), // Off-white for better contrast
+  );
+
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     fontFamily: 'Ubuntu',
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF2D6A4F), // Forest green
-      brightness: Brightness.light,
-      dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
-      surface: const Color(0xFFFAFAFA), // Off-white for better contrast
-    ),
+    colorScheme: _lightColorScheme,
     scaffoldBackgroundColor: const Color(0xFFFAFAFA),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.white,
@@ -195,6 +201,8 @@ class AppTheme {
     ),
     dividerColor: const Color(0xFFE8E8E8),
     iconTheme: const IconThemeData(color: Color(0xFF1B1B1B), size: 24),
+    // ignore: deprecated_member_use — required for M3 expressive slider in Flutter 3.41
+    sliderTheme: const SliderThemeData(year2023: false),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFF2D6A4F),
