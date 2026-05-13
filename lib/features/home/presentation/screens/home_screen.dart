@@ -607,7 +607,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               const SizedBox(height: 12),
 
               // Action Cards Section
-              Row(
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
                     child: _buildActionCard(
@@ -639,6 +641,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                   ),
                 ],
+              ),
               ),
             ],
           ),
@@ -2580,79 +2583,64 @@ class _ModernActionCardState extends State<_ModernActionCard>
                         ),
 
                       // Main content (top layer) - left aligned, overlaid on animation
-                      LayoutBuilder(builder: (context, constraints) {
-                        // Reserve right-side space based on diagonal path.
-                        // Diagonal runs from top(85%) to bottom(65%) — use the midpoint
-                        // so text never overflows into the animated area.
-                        final diagMidX = constraints.maxWidth * 0.75;
-                        final rightReserve = (constraints.maxWidth - diagMidX)
-                            .clamp(48.0, constraints.maxWidth * 0.4);
-                        return Padding(
-                          padding:
-                              EdgeInsets.fromLTRB(6, 6, rightReserve + 10, 6),
-                          child: ConstrainedBox(
-                            // restore compact card height (previously 120)
-                            constraints: BoxConstraints(minHeight: 96),
-                            child: SizedBox(
-                              width: constraints.maxWidth - rightReserve - 12,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Icon(
-                                      widget.icon,
-                                      size: 20,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  // Title - keep compact: single line with ellipsis if needed
-                                  Text(
-                                    widget.title,
-                                    textAlign: TextAlign.left,
-                                    softWrap: false,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelLarge
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                          fontSize: 13,
-                                          height: 1.15,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  // Description - keep to 2 lines to avoid tall cards
-                                  Text(
-                                    widget.description,
-                                    textAlign: TextAlign.left,
-                                    softWrap: true,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.9),
-                                          fontSize: 11,
-                                        ),
-                                  ),
-                                ],
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 12, 56, 12),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color:
+                                      Colors.white.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  widget.icon,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: 8),
+                              // Title — allow wrap, 2 lines max
+                              Text(
+                                widget.title,
+                                textAlign: TextAlign.left,
+                                softWrap: true,
+                                maxLines: 2,
+                                overflow: TextOverflow.visible,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      height: 1.2,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              // Description — allow full wrap
+                              Text(
+                                widget.description,
+                                textAlign: TextAlign.left,
+                                softWrap: true,
+                                maxLines: 3,
+                                overflow: TextOverflow.visible,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Colors.white
+                                          .withValues(alpha: 0.85),
+                                      fontSize: 11,
+                                      height: 1.3,
+                                    ),
+                              ),
+                            ],
                           ),
-                        );
-                      }),
+                        ),
 
                       // Chevron arrow (top right)
                       Positioned(
