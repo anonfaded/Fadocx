@@ -1024,7 +1024,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get updateVisitGithub => 'GitHub وزٹ کریں';
 
   @override
-  String get updateBetaInfo => 'یہ ایک اسٹینڈ-alone APK ہے — اسے اسٹیبل ورژن کے ساتھ بغیر تنازع انسٹال کریں۔';
+  String get updateBetaInfo => 'Fadocx بیٹا ایک اسٹینڈ-alone ایپ ہے جسے اسٹیبل ورژن کے ساتھ انسٹال کیا جا سکتا ہے۔ یہ آپ کے اسٹیبل ایپ یا اس کے ڈیٹا میں مداخلت نہیں کرے گا۔\n\nنئی خصوصیات کو اسٹیبل ریلیز سے پہلے ٹیسٹ کرنے کے لیے بیٹا انسٹال کریں۔';
 
   @override
   String get updateBannerStable => 'مستحکم اپ ڈیٹ';
