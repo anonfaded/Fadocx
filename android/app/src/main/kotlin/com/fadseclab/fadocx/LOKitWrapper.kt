@@ -2,7 +2,6 @@ package com.fadseclab.fadocx
 
 import android.app.Activity
 import android.graphics.Bitmap
-import android.net.Uri
 import android.util.Log
 import org.libreoffice.kit.Document
 import org.libreoffice.kit.LibreOfficeKit
@@ -21,6 +20,11 @@ class LOKitWrapper private constructor() {
         @Volatile
         private var instance: LOKitWrapper? = null
         private val instanceLock = Any()
+
+        // Process-lifetime: LibreOfficeKit init() can only be called once.
+        // Calling getLibreOfficeKitHandle() before init() causes a native SIGSEGV.
+        @Volatile
+        private var nativeInitialized = false
 
         fun getInstance(): LOKitWrapper {
             return instance ?: synchronized(instanceLock) {
@@ -67,18 +71,26 @@ UserInstallation=file://$cacheDir/lo_user
 
     fun init(activity: Activity): Boolean {
         synchronized(syncLock) {
+            if (office != null) {
+                Log.i(TAG, "LibreOfficeKit already initialized, skipping re-init")
+                return true
+            }
             try {
-                setupRuntime(activity)
-                LibreOfficeKit.putenv("SAL_LOG=+WARN+INFO")
-                LibreOfficeKit.putenv("SAL_LOK_OPTIONS=compact_fonts")
-                LibreOfficeKit.init(activity)
+                if (!nativeInitialized) {
+                    setupRuntime(activity)
+                    LibreOfficeKit.putenv("SAL_LOG=+WARN+INFO")
+                    LibreOfficeKit.putenv("SAL_LOK_OPTIONS=compact_fonts")
+                    LibreOfficeKit.init(activity)
+                    nativeInitialized = true
+                    Log.i(TAG, "LibreOfficeKit native init completed (first time)")
+                }
                 val handle = LibreOfficeKit.getLibreOfficeKitHandle()
                 if (handle == null) {
                     Log.e(TAG, "getLibreOfficeKitHandle returned null")
                     return false
                 }
                 office = Office(handle)
-                Log.i(TAG, "LibreOfficeKit initialized")
+                Log.i(TAG, "LibreOfficeKit initialized (office created)")
                 return true
             } catch (e: Exception) {
                 Log.e(TAG, "LibreOfficeKit init failed", e)
@@ -90,13 +102,13 @@ UserInstallation=file://$cacheDir/lo_user
     fun loadDocument(path: String): Map<String, Any>? {
         synchronized(syncLock) {
             closeDocumentInternal()
-            val file = File(path)
-            val encodedName = Uri.encode(file.name)
-            val loadPath = File(file.parent, encodedName).path
-            val doc = office?.documentLoad(loadPath)
+            Log.i(TAG, "loadDocument: path=$path")
+            Log.i(TAG, "loadDocument: office=${office != null}, fileExists=${java.io.File(path).exists()}")
+            val doc = office?.documentLoad(path)
             if (doc == null) {
                 val error = office?.error ?: "unknown"
-                Log.e(TAG, "Failed to load document: $error")
+                val officeNull = office == null
+                Log.e(TAG, "Failed to load document: $error (officeNull=$officeNull, path=$path)")
                 return null
             }
             doc.initializeForRendering()

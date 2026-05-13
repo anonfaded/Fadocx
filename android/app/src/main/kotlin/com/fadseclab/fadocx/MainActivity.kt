@@ -286,7 +286,7 @@ class MainActivity : FlutterActivity() {
         pdfDescriptors.values.forEach { it.close() }
         pdfRenderers.clear()
         pdfDescriptors.clear()
-        lokitWrapper.destroy()
+        // LOKit office stays alive for process lifetime — destroyed only in cleanupEngine
     }
 
     override fun onNewIntent(intent: Intent) {
