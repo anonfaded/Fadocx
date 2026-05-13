@@ -107,7 +107,10 @@ app.*.map.json
 # Coverage
 coverage/
 
-# Exceptions to above rules.
+# Signing
+*.jks
+*.keystore
+android/key.properties
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
 # LibreOfficeKit native libraries (~250MB)
