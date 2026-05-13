@@ -1916,7 +1916,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateBetaInfo.
   ///
   /// In en, this message translates to:
-  /// **'This is a standalone APK...'**
+  /// **'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.'**
   String get updateBetaInfo;
 
   /// No description provided for @updateBannerStable.

@@ -6,7 +6,7 @@ plugins {
 }
 
 // ── Versioning (manual control) ──
-val appVersionCode = 1
+val appVersionCode = 2
 val appVersionName = "1.0.0"
 
 android {
@@ -62,7 +62,7 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".beta"
             manifestPlaceholders["appName"] = "Fadocx Beta"
-            versionName = "${appVersionName}-beta"
+            versionName = "${appVersionName}-beta1"
         }
         create("prod") {
             dimension = "environment"

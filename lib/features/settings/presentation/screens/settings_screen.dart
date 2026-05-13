@@ -951,7 +951,7 @@ class SettingsScreen extends ConsumerWidget {
 
     try {
       final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+      final currentVersion = packageInfo.version;
       final result = await UpdateCheckService.checkForUpdate(
         currentVersion: currentVersion,
       );

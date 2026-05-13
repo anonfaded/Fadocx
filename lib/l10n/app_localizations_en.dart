@@ -1024,7 +1024,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateVisitGithub => 'Visit GitHub';
 
   @override
-  String get updateBetaInfo => 'This is a standalone APK...';
+  String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
   String get updateBannerStable => 'Stable Update';
