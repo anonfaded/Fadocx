@@ -5,6 +5,8 @@ class LOKitService {
 
   static bool _initialized = false;
 
+  /// Initializes LibreOfficeKit. Idempotent — safe to call multiple times.
+  /// The native side handles re-init gracefully (reuses office if alive).
   static Future<bool> init() async {
     if (_initialized) return true;
     final result = await _channel.invokeMethod<bool>('init');
@@ -145,7 +147,6 @@ class LOKitService {
   }
 
   static Future<bool> destroy() async {
-    _initialized = false;
     final result = await _channel.invokeMethod<bool>('destroy');
     return result ?? false;
   }

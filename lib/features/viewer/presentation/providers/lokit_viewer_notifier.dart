@@ -83,7 +83,6 @@ class LOKitViewerState {
 
 class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
   static final _log = Logger(printer: PrettyPrinter(methodCount: 0));
-  static bool _globalInitialized = false;
 
   @override
   LOKitViewerState build() {
@@ -94,14 +93,9 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
   }
 
   Future<bool> initialize() async {
-    if (_globalInitialized) {
-      state = state.copyWith(isInitialized: true);
-      return true;
-    }
     try {
       final ok = await LOKitService.init();
       if (ok) {
-        _globalInitialized = true;
         state = state.copyWith(isInitialized: true);
       }
       return ok;
@@ -115,12 +109,10 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
   Future<bool> loadDocument(String filePath, {String? name}) async {
     state = state.copyWith(isLoading: true, clearError: true, fileName: name);
     try {
-      if (!_globalInitialized) {
-        final ok = await initialize();
-        if (!ok) {
-          state = state.copyWith(isLoading: false, error: 'Initialization failed');
-          return false;
-        }
+      final ok = await initialize();
+      if (!ok) {
+        state = state.copyWith(isLoading: false, error: 'Initialization failed');
+        return false;
       }
       final info = await LOKitService.loadDocument(filePath);
       if (info == null) {
@@ -296,16 +288,11 @@ class LOKitViewerNotifier extends Notifier<LOKitViewerState> {
   }
 
   void _closeDocument() {
-    if (_globalInitialized) {
-      LOKitService.closeDocument();
-    }
+    LOKitService.closeDocument();
   }
 
   static void destroyGlobal() {
-    if (_globalInitialized) {
-      LOKitService.destroy();
-      _globalInitialized = false;
-    }
+    LOKitService.destroy();
   }
 }
 
