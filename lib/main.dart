@@ -23,6 +23,7 @@ void main() async {
 
   // Load theme from Hive to set correct system UI overlay style
   String savedTheme = 'dark'; // Default fallback
+  String savedLanguage = 'en'; // Default fallback
   bool onboardingSeen = true;
   bool reShowOnboarding = false;
   try {
@@ -30,6 +31,10 @@ void main() async {
     if (settings?.theme != null) {
       savedTheme = settings!.theme;
       log.i('📱 Theme loaded from Hive: $savedTheme');
+    }
+    if (settings?.language != null) {
+      savedLanguage = settings!.language;
+      log.i('🌐 Language loaded from Hive: $savedLanguage');
     }
     onboardingSeen = settings?.hasDismissedWelcome ?? false;
     reShowOnboarding = settings?.showOnboardingNextLaunch ?? false;
@@ -40,7 +45,8 @@ void main() async {
   // Show onboarding on first launch or if user toggled re-show
   if (!onboardingSeen || reShowOnboarding) {
     setInitialRoute(RouteNames.onboarding);
-    log.i('🚀 Showing onboarding (firstLaunch: ${!onboardingSeen}, reShow: $reShowOnboarding)');
+    log.i(
+        '🚀 Showing onboarding (firstLaunch: ${!onboardingSeen}, reShow: $reShowOnboarding)');
   }
 
   // Set system UI overlay style to match saved theme
@@ -50,9 +56,11 @@ void main() async {
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
-      statusBarBrightness: isDarkTheme ? Brightness.dark : Brightness.light, // For iOS
+      statusBarBrightness:
+          isDarkTheme ? Brightness.dark : Brightness.light, // For iOS
       systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
+      systemNavigationBarIconBrightness:
+          isDarkTheme ? Brightness.light : Brightness.dark,
     ),
   );
   log.d('✅ System UI overlay style set for $savedTheme theme');
@@ -60,7 +68,8 @@ void main() async {
   // Clear old thumbnail cache to regenerate with new system
   try {
     await HiveDatasource().clearThumbnailCache();
-    log.i('✅ Thumbnail cache cleared on startup - will regenerate with new system');
+    log.i(
+        '✅ Thumbnail cache cleared on startup - will regenerate with new system');
   } catch (e) {
     log.e('Error clearing thumbnail cache on startup', error: e);
   }
@@ -69,6 +78,7 @@ void main() async {
     ProviderScope(
       overrides: [
         initialThemeProvider.overrideWithValue(savedTheme),
+        initialLocaleProvider.overrideWithValue(savedLanguage),
       ],
       child: const MyApp(),
     ),

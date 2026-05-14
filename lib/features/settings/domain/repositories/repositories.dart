@@ -25,6 +25,9 @@ abstract class AppSettingsRepository {
   /// Update show onboarding on next launch setting
   Future<Result<void>> updateShowOnboardingNextLaunch(bool show);
 
+  /// Mark onboarding completed and consume any replay request atomically
+  Future<Result<void>> completeOnboarding();
+
   /// Update auto update check setting
   Future<Result<void>> updateAutoUpdateCheck(bool enabled);
 
@@ -88,7 +91,8 @@ abstract class RecentFilesRepository {
   Future<Result<String>> getSyncStatus(String fileId);
 
   /// Update extracted text for a scanned document
-  Future<Result<void>> updateExtractedText(String filePath, String extractedText);
+  Future<Result<void>> updateExtractedText(
+      String filePath, String extractedText);
 }
 
 /// Abstract repository for document operations

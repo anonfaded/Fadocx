@@ -9,7 +9,6 @@ import 'package:fadocx/core/services/storage_service.dart';
 
 final log = Logger();
 
-
 final packageInfoProvider = FutureProvider<PackageInfo>((ref) async {
   return await PackageInfo.fromPlatform();
 });
@@ -105,7 +104,8 @@ class SettingsMutator {
     log.i('Updating hasImportedSampleFiles to: $hasImported');
     final result = await _repository.updateHasImportedSampleFiles(hasImported);
     result.fold(
-      (failure) => log.e('Failed to update hasImportedSampleFiles: ${failure.message}'),
+      (failure) =>
+          log.e('Failed to update hasImportedSampleFiles: ${failure.message}'),
       (success) => log.i('hasImportedSampleFiles updated successfully'),
     );
   }
@@ -114,7 +114,8 @@ class SettingsMutator {
     log.i('Updating hasDismissedWelcome to: $hasDismissed');
     final result = await _repository.updateHasDismissedWelcome(hasDismissed);
     result.fold(
-      (failure) => log.e('Failed to update hasDismissedWelcome: ${failure.message}'),
+      (failure) =>
+          log.e('Failed to update hasDismissedWelcome: ${failure.message}'),
       (success) => log.i('hasDismissedWelcome updated successfully'),
     );
   }
@@ -123,8 +124,18 @@ class SettingsMutator {
     log.i('Updating showOnboardingNextLaunch to: $show');
     final result = await _repository.updateShowOnboardingNextLaunch(show);
     result.fold(
-      (failure) => log.e('Failed to update showOnboardingNextLaunch: ${failure.message}'),
+      (failure) => log
+          .e('Failed to update showOnboardingNextLaunch: ${failure.message}'),
       (success) => log.i('showOnboardingNextLaunch updated successfully'),
+    );
+  }
+
+  Future<void> completeOnboarding() async {
+    log.i('Completing onboarding');
+    final result = await _repository.completeOnboarding();
+    result.fold(
+      (failure) => log.e('Failed to complete onboarding: ${failure.message}'),
+      (success) => log.i('Onboarding completed successfully'),
     );
   }
 
@@ -132,7 +143,8 @@ class SettingsMutator {
     log.i('Updating autoUpdateCheck to: $enabled');
     final result = await _repository.updateAutoUpdateCheck(enabled);
     result.fold(
-      (failure) => log.e('Failed to update autoUpdateCheck: ${failure.message}'),
+      (failure) =>
+          log.e('Failed to update autoUpdateCheck: ${failure.message}'),
       (success) => log.i('autoUpdateCheck updated successfully'),
     );
   }
@@ -332,9 +344,11 @@ class RecentFilesMutator {
     );
   }
 
-  Future<void> updateExtractedText(String filePath, String extractedText) async {
+  Future<void> updateExtractedText(
+      String filePath, String extractedText) async {
     log.i('Updating extracted text for: $filePath');
-    final result = await _repository.updateExtractedText(filePath, extractedText);
+    final result =
+        await _repository.updateExtractedText(filePath, extractedText);
     result.fold(
       (failure) => log.e('Failed to update extracted text: ${failure.message}'),
       (success) => log.i('Extracted text updated'),
@@ -386,7 +400,8 @@ class ShowRecentFilesNotifier extends Notifier<bool> {
 
   void toggle() {
     state = !state;
-    log.i('Toggled recent files visibility to: ${state ? 'visible' : 'hidden'}');
+    log.i(
+        'Toggled recent files visibility to: ${state ? 'visible' : 'hidden'}');
   }
 
   void setShowRecentFiles(bool show) {
