@@ -420,7 +420,17 @@
   "settingsVersionWithBuild": "Version {version} (Build {buildNumber})",
   "settingsCopiedInfo": "Copied to clipboard",
   "settingsCopyInfo": "Copy Info",
+  "settingsVersionClipboardInfo": "{appName} v{version} (Build {buildNumber})\nPackage: {packageName}",
+  "@settingsVersionClipboardInfo": {
+    "placeholders": {
+      "appName": {"type": "String"},
+      "version": {"type": "String"},
+      "buildNumber": {"type": "String"},
+      "packageName": {"type": "String"}
+    }
+  },
   "settingsShareApp": "Share with Friends",
+  "settingsShareMessage": "Check out Fadocx!\n\nAll-in-one document viewer: PDF, Office, spreadsheets, presentations, code files & OCR text extraction — fully offline, zero tracking, open-source.\n\nhttps://github.com/anonfaded/Fadocx",
   "settingsShareVia": "Share via...",
   "settingsShareWhatsApp": "WhatsApp",
   "settingsWhatsAppNotInstalled": "WhatsApp is not installed on this device",

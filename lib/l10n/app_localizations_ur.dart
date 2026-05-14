@@ -1279,7 +1279,15 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsCopyInfo => 'معلومات کاپی';
 
   @override
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
+    return '$appName v$version (بلڈ $buildNumber)\nپیکیج: $packageName';
+  }
+
+  @override
   String get settingsShareApp => 'دوستوں کے ساتھ شیئر کریں';
+
+  @override
+  String get settingsShareMessage => 'Fadocx دیکھیں!\n\nایک آل اِن ون دستاویز ویور: PDF، Office، اسپریڈشیٹس، پریزنٹیشنز، کوڈ فائلیں اور OCR ٹیکسٹ استخراج — مکمل آف لائن، بغیر ٹریکنگ، اوپن سورس۔\n\nhttps://github.com/anonfaded/Fadocx';
 
   @override
   String get settingsShareVia => 'شیئر کریں...';

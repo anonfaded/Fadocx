@@ -2429,11 +2429,23 @@ abstract class AppLocalizations {
   /// **'Copy Info'**
   String get settingsCopyInfo;
 
+  /// No description provided for @settingsVersionClipboardInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} v{version} (Build {buildNumber})\nPackage: {packageName}'**
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName);
+
   /// No description provided for @settingsShareApp.
   ///
   /// In en, this message translates to:
   /// **'Share with Friends'**
   String get settingsShareApp;
+
+  /// No description provided for @settingsShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out Fadocx!\n\nAll-in-one document viewer: PDF, Office, spreadsheets, presentations, code files & OCR text extraction — fully offline, zero tracking, open-source.\n\nhttps://github.com/anonfaded/Fadocx'**
+  String get settingsShareMessage;
 
   /// No description provided for @settingsShareVia.
   ///

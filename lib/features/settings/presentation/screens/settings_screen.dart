@@ -1330,7 +1330,12 @@ class SettingsScreen extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: () {
                   Clipboard.setData(ClipboardData(
-                    text: '$appName v$version (Build $buildNumber)\nPackage: $packageName',
+                    text: l10n.settingsVersionClipboardInfo(
+                      appName,
+                      version,
+                      buildNumber,
+                      packageName,
+                    ),
                   ));
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -1346,12 +1351,6 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  static const String _shareMessage = 'Check out Fadocx!\n\n'
-      'All-in-one document viewer: PDF, Office, spreadsheets, presentations,'
-      ' code files & OCR text extraction — fully offline, zero tracking,'
-      ' open-source.\n\n'
-      'https://github.com/anonfaded/Fadocx';
 
   void _showShareOptions(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1411,7 +1410,7 @@ class SettingsScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                _shareMessage,
+                l10n.settingsShareMessage,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   height: 1.5,
@@ -1429,7 +1428,7 @@ class SettingsScreen extends ConsumerWidget {
                     child: FilledButton.tonalIcon(
                       onPressed: () {
                         Navigator.pop(sheetContext);
-                        Share.share(_shareMessage);
+                        Share.share(l10n.settingsShareMessage);
                       },
                       icon: const Icon(Icons.share),
                       label: Text(l10n.settingsShareVia),
@@ -1458,7 +1457,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _openWhatsApp(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final encoded = Uri.encodeComponent(_shareMessage);
+    final encoded = Uri.encodeComponent(l10n.settingsShareMessage);
     final uri = Uri.parse('whatsapp://send?text=$encoded');
 
     try {
