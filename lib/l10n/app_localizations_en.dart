@@ -498,6 +498,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeImportDocumentDesc => 'Browse and import files from your device';
 
   @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingGetStarted => 'Get Started';
+
+  @override
+  String get onboardingSlide1Title => 'Your Private Document Hub';
+
+  @override
+  String get onboardingSlide1Desc => 'All-in-one offline document viewer for Android with OCR and desktop-class rendering — private, open-source, zero tracking.';
+
+  @override
+  String get onboardingSlide2Title => 'Import & Own Your Documents';
+
+  @override
+  String get onboardingSlide2Desc => 'Import documents into Fadocx\'s private storage — they stay hidden from your phone gallery and file manager. Export anytime, or keep them safely isolated.';
+
+  @override
+  String get onboardingSlide3Title => '100% On-Device. Always.';
+
+  @override
+  String get onboardingSlide3Desc => 'No tracking. No analytics. No crash logs. No telemetry. All OCR and AI runs entirely on your device. What\'s yours stays yours.';
+
+  @override
   String get homeStatDocuments => 'Documents';
 
   @override
@@ -1097,6 +1124,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAutoUpdateCheck => 'Auto Update Check';
+
+  @override
+  String get settingsReplayOnboarding => 'Replay Onboarding';
+
+  @override
+  String get settingsReplayOnboardingDesc => 'Show introduction slides on next launch';
 
   @override
   String get settingsEnabled => 'Enabled';

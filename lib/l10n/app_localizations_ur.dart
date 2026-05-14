@@ -498,6 +498,33 @@ class AppLocalizationsUr extends AppLocalizations {
   String get homeImportDocumentDesc => 'اپنی ڈیوائس سے فائلیں براؤز اور درآمد کریں';
 
   @override
+  String get onboardingSkip => 'چھوڑیں';
+
+  @override
+  String get onboardingNext => 'اگلا';
+
+  @override
+  String get onboardingGetStarted => 'شروع کریں';
+
+  @override
+  String get onboardingSlide1Title => 'آپ کا پرائیویٹ دستاویزی مرکز';
+
+  @override
+  String get onboardingSlide1Desc => 'اینڈرائیڈ کے لیے آف لائن دستاویز ناظر، OCR اور ڈیسک ٹاپ کلاس رینڈرنگ کے ساتھ — پرائیویٹ، اوپن سورس، زیرو ٹریکنگ۔';
+
+  @override
+  String get onboardingSlide2Title => 'دستاویزات درآمد کریں اور ان کے مالک بنیں';
+
+  @override
+  String get onboardingSlide2Desc => 'Fadocx کی پرائیویٹ اسٹوریج میں دستاویزات درآمد کریں — یہ آپ کی فون گیلری اور فائل مینیجر سے پوشیدہ رہتی ہیں۔ کسی بھی وقت ایکسپورٹ کریں، یا محفوظ طریقے سے الگ رکھیں۔';
+
+  @override
+  String get onboardingSlide3Title => '100٪ آن ڈیوائس۔ ہمیشہ۔';
+
+  @override
+  String get onboardingSlide3Desc => 'کوئی ٹریکنگ نہیں۔ کوئی اینالیٹکس نہیں۔ کوئی کریش لاگ نہیں۔ کوئی ٹیلیمیٹری نہیں۔ تمام OCR اور AI مکمل طور پر آپ کی ڈیوائس پر چلتے ہیں۔ جو آپ کا ہے وہ آپ کا رہتا ہے۔';
+
+  @override
   String get homeStatDocuments => 'دستاویزات';
 
   @override
@@ -1097,6 +1124,12 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get settingsAutoUpdateCheck => 'خودکار اپ ڈیٹ چیک';
+
+  @override
+  String get settingsReplayOnboarding => 'آن بورڈنگ دوبارہ دکھائیں';
+
+  @override
+  String get settingsReplayOnboardingDesc => 'اگلی لانچ پر تعارفی سلائیڈز دکھائیں';
 
   @override
   String get settingsEnabled => 'فعال';

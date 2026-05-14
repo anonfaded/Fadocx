@@ -109,6 +109,7 @@ class AppSettings {
   final String syncStatus;
   final DateTime? syncedAt;
   final bool autoUpdateCheck;
+  final bool showOnboardingNextLaunch; // Re-show onboarding on next app launch
 
   AppSettings({
     required this.id,
@@ -122,6 +123,7 @@ class AppSettings {
     required this.syncStatus,
     this.syncedAt,
     this.autoUpdateCheck = true,
+    this.showOnboardingNextLaunch = false,
   });
 
   /// Get theme enum for MaterialApp

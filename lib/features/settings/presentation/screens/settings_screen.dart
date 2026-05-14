@@ -140,6 +140,18 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
                 _divider(context),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final settings = ref.watch(appSettingsProvider);
+                    final show = settings.when(
+                      data: (s) => s?.showOnboardingNextLaunch ?? false,
+                      loading: () => false,
+                      error: (_, __) => false,
+                    );
+                    return _buildOnboardingReplayRow(context, ref, show);
+                  },
+                ),
+                _divider(context),
                 _buildCheckUpdatesRow(context, ref),
               ]),
               const SizedBox(height: 24),
@@ -756,6 +768,66 @@ class SettingsScreen extends ConsumerWidget {
                   value: enabled,
                   onChanged: (value) {
                     ref.read(settingsMutatorProvider).updateAutoUpdateCheck(value);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOnboardingReplayRow(BuildContext context, WidgetRef ref, bool show) {
+    final l10n = AppLocalizations.of(context)!;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .tertiaryContainer
+                      .withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.auto_stories,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.tertiary,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.settingsReplayOnboarding,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    Text(
+                      show ? l10n.settingsEnabled : l10n.settingsDisabled,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 48,
+                child: Switch(
+                  value: show,
+                  onChanged: (value) {
+                    ref.read(settingsMutatorProvider).updateShowOnboardingNextLaunch(value);
                   },
                 ),
               ),

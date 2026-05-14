@@ -23,14 +23,24 @@ void main() async {
 
   // Load theme from Hive to set correct system UI overlay style
   String savedTheme = 'dark'; // Default fallback
+  bool onboardingSeen = true;
+  bool reShowOnboarding = false;
   try {
     final settings = await HiveDatasource().getSettings();
     if (settings?.theme != null) {
       savedTheme = settings!.theme;
       log.i('📱 Theme loaded from Hive: $savedTheme');
     }
+    onboardingSeen = settings?.hasDismissedWelcome ?? false;
+    reShowOnboarding = settings?.showOnboardingNextLaunch ?? false;
   } catch (e) {
     log.w('⚠️ Could not load theme from Hive, using default: $e');
+  }
+
+  // Show onboarding on first launch or if user toggled re-show
+  if (!onboardingSeen || reShowOnboarding) {
+    setInitialRoute(RouteNames.onboarding);
+    log.i('🚀 Showing onboarding (firstLaunch: ${!onboardingSeen}, reShow: $reShowOnboarding)');
   }
 
   // Set system UI overlay style to match saved theme

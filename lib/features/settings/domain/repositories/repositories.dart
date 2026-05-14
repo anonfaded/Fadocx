@@ -22,6 +22,9 @@ abstract class AppSettingsRepository {
   /// Update has dismissed welcome setting
   Future<Result<void>> updateHasDismissedWelcome(bool hasDismissed);
 
+  /// Update show onboarding on next launch setting
+  Future<Result<void>> updateShowOnboardingNextLaunch(bool show);
+
   /// Update auto update check setting
   Future<Result<void>> updateAutoUpdateCheck(bool enabled);
 
