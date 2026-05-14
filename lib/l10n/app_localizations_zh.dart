@@ -4,9 +4,9 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for English (`en`).
-class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([String locale = 'en']) : super(locale);
+/// The translations for Chinese (`zh`).
+class AppLocalizationsZh extends AppLocalizations {
+  AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
   String get appName => 'Fadocx';
@@ -18,10 +18,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTitle => 'Fadocx';
 
   @override
-  String get recentFiles => 'Recent Files';
+  String get recentFiles => '最近文件';
 
   @override
-  String get noRecentFiles => 'No recent files. Open a document to get started.';
+  String get noRecentFiles => '暂无最近文件。打开一个文档开始使用。';
 
   @override
   String get openFile => 'Open File';
@@ -57,130 +57,130 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sheet => 'Sheet';
 
   @override
-  String get ok => 'OK';
+  String get ok => '确认';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => '取消';
 
   @override
-  String get delete => 'Delete';
+  String get delete => '删除';
 
   @override
-  String get clear => 'Clear';
+  String get clear => '清除';
 
   @override
-  String get close => 'Close';
+  String get close => '关闭';
 
   @override
-  String get copy => 'Copy';
+  String get copy => '复制';
 
   @override
-  String get retry => 'Retry';
+  String get retry => '重试';
 
   @override
-  String get rename => 'Rename';
+  String get rename => '重命名';
 
   @override
-  String get restore => 'Restore';
+  String get restore => '恢复';
 
   @override
-  String get export => 'Export';
+  String get export => '导出';
 
   @override
-  String get duplicate => 'Duplicate';
+  String get duplicate => '复制';
 
   @override
-  String get imports => 'Import';
+  String get imports => '导入';
 
   @override
-  String get next => 'Next';
+  String get next => '下一步';
 
   @override
-  String get previous => 'Previous';
+  String get previous => '上一步';
 
   @override
-  String get back => 'Back';
+  String get back => '返回';
 
   @override
-  String get settings => 'Settings';
+  String get settings => '设置';
 
   @override
-  String get about => 'About';
+  String get about => '关于';
 
   @override
-  String get error => 'Error';
+  String get error => '错误';
 
   @override
-  String get warning => 'Warning';
+  String get warning => '警告';
 
   @override
-  String get success => 'Success';
+  String get success => '成功';
 
   @override
-  String get unsupportedFileType => 'File type not supported';
+  String get unsupportedFileType => '不支持的文件格式';
 
   @override
-  String get fileNotFound => 'File not found';
+  String get fileNotFound => '未找到文件';
 
   @override
-  String get permissionDenied => 'Permission denied';
+  String get permissionDenied => '权限被拒绝';
 
   @override
   String get corruptedFile => 'File appears to be corrupted';
 
   @override
-  String get loadingDocument => 'Loading document...';
+  String get loadingDocument => '加载文档中...';
 
   @override
-  String get settingsTitle => 'Settings';
+  String get settingsTitle => '设置';
 
   @override
-  String get theme => 'Theme';
+  String get theme => '主题';
 
   @override
-  String get themeDark => 'Dark';
+  String get themeDark => '深色';
 
   @override
-  String get themeLight => 'Light';
+  String get themeLight => '浅色';
 
   @override
-  String get themeSystem => 'System Default';
+  String get themeSystem => '跟随系统';
 
   @override
-  String get language => 'Language';
+  String get language => '语言';
 
   @override
-  String get languageEnglish => 'English';
+  String get languageEnglish => '英语';
 
   @override
-  String get languageUrdu => 'اردو';
+  String get languageUrdu => '乌尔都语';
 
   @override
-  String get languageRussian => 'Русский';
+  String get languageRussian => '俄语';
 
   @override
   String get languageChinese => '中文';
 
   @override
-  String get languageJapanese => '日本語';
+  String get languageJapanese => '日语';
 
   @override
-  String get languageFrench => 'Français';
+  String get languageFrench => '法语';
 
   @override
-  String get languageArabic => 'العربية';
+  String get languageArabic => '阿拉伯语';
 
   @override
-  String get languageSpanish => 'Español';
+  String get languageSpanish => '西班牙语';
 
   @override
-  String get languageGerman => 'Deutsch';
+  String get languageGerman => '德语';
 
   @override
-  String get languagePortuguese => 'Português';
+  String get languagePortuguese => '葡萄牙语';
 
   @override
-  String get languageHindi => 'हिन्दी';
+  String get languageHindi => '印地语';
 
   @override
   String get appVersion => 'App Version';
@@ -324,43 +324,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copiedToClipboard => 'Copied to clipboard';
 
   @override
-  String get navHome => 'Home';
+  String get navHome => '主页';
 
   @override
-  String get navLibrary => 'Library';
+  String get navLibrary => '文库';
 
   @override
-  String get navSettings => 'Settings';
+  String get navSettings => '设置';
 
   @override
-  String get navRecents => 'Recents';
+  String get navRecents => '最近';
 
   @override
-  String get categoryAll => 'All';
+  String get categoryAll => '全部';
 
   @override
-  String get categoryPdfs => 'PDFs';
+  String get categoryPdfs => 'PDF';
 
   @override
-  String get categoryDocs => 'Docs';
+  String get categoryDocs => '文档';
 
   @override
-  String get categorySheets => 'Sheets';
+  String get categorySheets => '表格';
 
   @override
-  String get categorySlides => 'Slides';
+  String get categorySlides => '幻灯片';
 
   @override
-  String get categoryCode => 'Code';
+  String get categoryCode => '代码';
 
   @override
-  String get categoryScans => 'Scans';
+  String get categoryScans => '扫描';
 
   @override
-  String get categoryOther => 'Other';
+  String get categoryOther => '其他';
 
   @override
-  String get categoryPresentations => 'Presentations';
+  String get categoryPresentations => '演示文稿';
 
   @override
   String get supportDevelopment => 'Support Development';
@@ -381,10 +381,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discordTitle => 'Join our Discord';
 
   @override
-  String get openInBrowser => 'Open in Browser';
+  String get openInBrowser => '在浏览器中打开';
 
   @override
-  String get comingSoon => 'Coming Soon';
+  String get comingSoon => '即将推出';
 
   @override
   String get newBadge => 'NEW';
@@ -495,85 +495,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monthDec => 'Dec';
 
   @override
-  String get homeWelcomeTitle => 'Welcome to Fadocx';
+  String get homeWelcomeTitle => '欢迎使用 Fadocx';
 
   @override
-  String get homeWelcomeSubtitle => 'Explore sample files or import your own documents to get started';
+  String get homeWelcomeSubtitle => '浏览示例文件或导入您自己的文档以开始使用';
 
   @override
-  String get homeExploreSamples => 'Explore Sample Files';
+  String get homeExploreSamples => '浏览示例文件';
 
   @override
   String get homeDocumentManagement => 'Document Management';
 
   @override
-  String get homeSeeAll => 'See All';
+  String get homeSeeAll => '查看全部';
 
   @override
-  String get homeNoRecentFiles => 'No recent files';
+  String get homeNoRecentFiles => '暂无最近文件';
 
   @override
-  String get homeScanDocument => 'Scan a Document';
+  String get homeScanDocument => '扫描文档';
 
   @override
-  String get homeScanDocumentDesc => 'Extract text from documents using OCR';
+  String get homeScanDocumentDesc => '使用 OCR 从文档中提取文本';
 
   @override
-  String get homeImportDocument => 'Import a Document';
+  String get homeImportDocument => '导入文档';
 
   @override
-  String get homeImportDocumentDesc => 'Browse and import files from your device';
+  String get homeImportDocumentDesc => '浏览并导入设备中的文件';
 
   @override
-  String get onboardingSkip => 'Skip';
+  String get onboardingSkip => '跳过';
 
   @override
-  String get onboardingNext => 'Next';
+  String get onboardingNext => '下一步';
 
   @override
-  String get onboardingGetStarted => 'Get Started';
+  String get onboardingGetStarted => '开始使用';
 
   @override
-  String get onboardingSlide1Title => 'Welcome to Fadocx';
+  String get onboardingSlide1Title => '欢迎使用 Fadocx';
 
   @override
-  String get onboardingSlide1Tagline => 'Your all-in-one private document companion';
+  String get onboardingSlide1Tagline => '您的一体化私人文档伴侣';
 
   @override
-  String get onboardingSlide1Bullet1 => 'Open any format — PDFs, Office files, images & more';
+  String get onboardingSlide1Bullet1 => '支持所有格式 — PDF、Office 文件、图片等更多';
 
   @override
-  String get onboardingSlide1Bullet2 => 'Private storage, hidden from your gallery & file manager';
+  String get onboardingSlide1Bullet2 => '私密存储，隐藏于相册和文件管理器之外';
 
   @override
-  String get onboardingSlide1Bullet3 => 'Free, open-source — no account or signup needed';
+  String get onboardingSlide1Bullet3 => '免费开源 — 无需账号或注册';
 
   @override
-  String get onboardingSlide2Title => 'Built-in Power Tools';
+  String get onboardingSlide2Title => '内置强大工具';
 
   @override
-  String get onboardingSlide2Bullet1 => 'Scan paper docs with your camera — text extracted instantly';
+  String get onboardingSlide2Bullet1 => '用相机扫描纸质文档 — 即时提取文字';
 
   @override
-  String get onboardingSlide2Bullet2 => 'Play audio & video right in the app, no extras needed';
+  String get onboardingSlide2Bullet2 => '直接在应用内播放音频和视频，无需额外应用';
 
   @override
-  String get onboardingSlide2Bullet3 => 'Everything auto-sorted into categories the moment you import';
+  String get onboardingSlide2Bullet3 => '导入时自动按类别排序';
 
   @override
-  String get onboardingSlide2Bullet4 => 'Safe delete — restore anything from trash, anytime';
+  String get onboardingSlide2Bullet4 => '安全删除 — 随时从回收站恢复';
 
   @override
-  String get onboardingSlide3Title => 'Privacy by Design';
+  String get onboardingSlide3Title => '隐私设计';
 
   @override
-  String get onboardingSlide3Bullet1 => 'Nothing ever leaves your device — no cloud, no servers';
+  String get onboardingSlide3Bullet1 => '任何数据都不会离开您的设备 — 无云端，无服务器';
 
   @override
-  String get onboardingSlide3Bullet2 => 'No tracking, no ads, no analytics. Ever.';
+  String get onboardingSlide3Bullet2 => '无跟踪，无广告，无分析。永远如此。';
 
   @override
-  String get onboardingSlide3Bullet3 => 'Open-source — every line of code is public';
+  String get onboardingSlide3Bullet3 => '开源 — 每行代码均公开';
 
   @override
   String get homeStatDocuments => 'Documents';
@@ -588,7 +588,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeStatLastOpened => 'Last Opened: ';
 
   @override
-  String get homePressBackExit => 'Press back again to exit';
+  String get homePressBackExit => '再按一次退出';
 
   @override
   String get homeImportingSamples => 'Importing sample files...';
@@ -727,10 +727,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get libraryTitle => 'Library';
+  String get libraryTitle => '文库';
 
   @override
-  String get librarySearchHint => 'Search library...';
+  String get librarySearchHint => '搜索文库...';
 
   @override
   String librarySelected(num count) {
@@ -772,13 +772,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get libraryNoDocuments => 'No documents yet';
+  String get libraryNoDocuments => '暂无文档';
 
   @override
-  String get libraryAdjustSearch => 'Try adjusting your search or filters';
+  String get libraryAdjustSearch => '请尝试调整搜索或筛选条件';
 
   @override
-  String get libraryDocumentsAppearHere => 'Your documents will appear here';
+  String get libraryDocumentsAppearHere => '您的文档将显示在这里';
 
   @override
   String get browseTitle => 'Import Documents';
@@ -863,13 +863,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get trashTitle => 'Trash';
+  String get trashTitle => '回收站';
 
   @override
-  String get trashEmpty => 'Trash is empty';
+  String get trashEmpty => '回收站为空';
 
   @override
-  String get trashEmptySubtitle => 'Deleted files will appear here';
+  String get trashEmptySubtitle => '已删除的文件将显示在此处';
 
   @override
   String get trashErrorLoading => 'Error loading trash';
@@ -886,7 +886,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trashFileRestored => 'File restored successfully';
 
   @override
-  String get trashDeletePermanently => 'Delete Permanently';
+  String get trashDeletePermanently => '永久删除';
 
   @override
   String get trashDeletePermanentlyConfirm => 'Delete Permanently?';
@@ -908,7 +908,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get whatsNewTitle => 'What\'s New';
+  String get whatsNewTitle => '最新动态';
 
   @override
   String get whatsNewWhatsIncluded => 'What\'s Included';
@@ -1111,10 +1111,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateBannerBeta => 'Beta Update';
 
   @override
-  String get settingsAppearance => 'Appearance';
+  String get settingsAppearance => '外观';
 
   @override
-  String get settingsStorage => 'Storage';
+  String get settingsStorage => '存储';
 
   @override
   String get settingsDocumentsSize => 'Documents Size';
@@ -1171,43 +1171,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsStorageFailedLoad => 'Failed to load storage data';
 
   @override
-  String get settingsUpdates => 'Updates';
+  String get settingsUpdates => '更新';
 
   @override
-  String get settingsAutoUpdateCheck => 'Auto Update Check';
+  String get settingsAutoUpdateCheck => '自动检查更新';
 
   @override
-  String get settingsReplayOnboarding => 'Replay Onboarding';
+  String get settingsReplayOnboarding => '重播引导页';
 
   @override
-  String get settingsReplayOnboardingDesc => 'Show introduction slides on next launch';
+  String get settingsReplayOnboardingDesc => '在下次启动时显示介绍幻灯片';
 
   @override
-  String get settingsEnabled => 'Enabled';
+  String get settingsEnabled => '已启用';
 
   @override
-  String get settingsDisabled => 'Disabled';
+  String get settingsDisabled => '已禁用';
 
   @override
   String get settingsAppLock => 'App Lock';
 
   @override
-  String get settingsAbout => 'About';
+  String get settingsAbout => '关于';
 
   @override
-  String get settingsVersion => 'Version';
+  String get settingsVersion => '版本';
 
   @override
-  String get settingsSourceCode => 'Source Code';
+  String get settingsSourceCode => '源代码';
 
   @override
-  String get settingsContact => 'Contact';
+  String get settingsContact => '联系我们';
 
   @override
   String get settingsJoinCommunity => 'Join Community';
 
   @override
-  String get settingsPrivacyPolicy => 'Privacy Policy';
+  String get settingsPrivacyPolicy => '隐私政策';
 
   @override
   String get settingsMoreFromFadsec => 'More from FadSec Lab';
@@ -1216,34 +1216,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsFadocxDesc => 'Your private document viewer';
 
   @override
-  String get settingsDangerZone => 'Danger Zone';
+  String get settingsDangerZone => '危险区域';
 
   @override
-  String get settingsTrash => 'Trash';
+  String get settingsTrash => '回收站';
 
   @override
-  String get settingsTrashDesc => 'View deleted files';
+  String get settingsTrashDesc => '查看已删除的文件';
 
   @override
-  String get settingsResetSettings => 'Reset Settings';
+  String get settingsResetSettings => '重置设置';
 
   @override
-  String get settingsResetSettingsDesc => 'Restore all settings to defaults';
+  String get settingsResetSettingsDesc => '将所有设置恢复为默认值';
 
   @override
-  String get settingsResetDone => 'Settings reset to defaults';
+  String get settingsResetDone => '设置已重置';
 
   @override
   String get settingsRetry => 'Retry';
 
   @override
-  String get settingsChooseTheme => 'Choose Theme';
+  String get settingsChooseTheme => '选择主题';
 
   @override
-  String get settingsSelectLanguage => 'Select Language';
+  String get settingsSelectLanguage => '选择语言';
 
   @override
-  String get settingsCheckForUpdates => 'Check for Updates';
+  String get settingsCheckForUpdates => '检查更新';
 
   @override
   String get settingsCheckingUpdates => 'Checking for updates…';
@@ -1350,7 +1350,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get confirm => 'Confirm';
+  String get confirm => '确认';
 
   @override
   String get settingsPrivacyOfflineDesc => 'All processing happens on your device. No internet required.';
@@ -1658,16 +1658,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get scannerTitle => 'Document Scanner';
+  String get scannerTitle => '文档扫描仪';
 
   @override
-  String get scannerCapture => 'Capture';
+  String get scannerCapture => '拍摄';
 
   @override
-  String get scannerProcessing => 'Processing';
+  String get scannerProcessing => '处理中';
 
   @override
-  String get scannerResults => 'Results';
+  String get scannerResults => '结果';
 
   @override
   String get scannerInitializingCamera => 'Initializing Camera...';
@@ -1734,22 +1734,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scannerTextCopied => 'Text copied to clipboard';
 
   @override
-  String get scannerCopyAll => 'Copy All';
+  String get scannerCopyAll => '复制全部';
 
   @override
-  String get scannerNewScan => 'New Scan';
+  String get scannerNewScan => '新扫描';
 
   @override
-  String get linkTileCopy => 'Copy';
+  String get linkTileCopy => '复制';
 
   @override
   String get linkTileCopiedToClipboard => 'Copied to clipboard';
 
   @override
-  String get linkTileSendEmail => 'Send Email';
+  String get linkTileSendEmail => '发送邮件';
 
   @override
-  String get linkTileOpenInBrowser => 'Open in Browser';
+  String get linkTileOpenInBrowser => '在浏览器中打开';
 
   @override
   String linkTileCouldNotOpen(String value) {
