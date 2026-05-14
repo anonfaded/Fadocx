@@ -1,27 +1,22 @@
 {
   "@@locale": "ur",
   "@@author": "FadSec Lab",
-
   "appName": "Fadocx",
   "appDescription": "دستاویز ویور",
   "homeTitle": "Fadocx",
-
   "recentFiles": "حالیہ فائلیں",
   "noRecentFiles": "کوئی حالیہ فائل نہیں۔ شروع کرنے کے لیے ایک دستاویز کھولیں۔",
   "openFile": "فائل کھولیں",
   "openFileTooltip": "ایک دستاویز تلاش کریں اور کھولیں",
-
   "pdfFile": "PDF فائل",
   "docxFile": "Word دستاویز",
   "xlsxFile": "Excel سپریڈ شیٹ",
   "csvFile": "CSV فائل",
   "unknownFile": "نامعلوم فائل",
-
   "page": "صفحہ",
   "pageOf": "میں سے",
   "jumpToPage": "صفحہ پر جائیں",
   "sheet": "شیٹ",
-
   "ok": "ٹھیک ہے",
   "cancel": "منسوخ کریں",
   "delete": "حذف کریں",
@@ -37,19 +32,16 @@
   "next": "اگلا",
   "previous": "پچھلا",
   "back": "واپس",
-
   "settings": "ترتیبات",
   "about": "کے بارے میں",
   "error": "خرابی",
   "warning": "انتباہ",
   "success": "کامیاب",
-
   "unsupportedFileType": "فائل کی قسم معاون نہیں ہے",
   "fileNotFound": "فائل نہیں ملی",
   "permissionDenied": "اجازت مسترد کر دی گئی",
   "corruptedFile": "فائل خراب لگتی ہے",
   "loadingDocument": "دستاویز لوڈ ہو رہی ہے...",
-
   "settingsTitle": "ترتیبات",
   "theme": "تھیم",
   "themeDark": "تاریک",
@@ -70,16 +62,12 @@
   "appVersion": "ایپ ورژن",
   "clearRecentFiles": "حالیہ فائلوں کو صاف کریں",
   "backButton": "واپسی",
-
   "emptyTitle": "کوئی دستاویزات نہیں",
   "emptyMessage": "اپنی ڈیوائس سے ایک دستاویز کھول کر شروع کریں",
   "startBrowsing": "براؤز کرنا شروع کریں",
-
   "languageChanged": "زبان اردو میں تبدیل ہو گئی",
-
   "privacyDescription": "Fadocx ایک دستاویز ویور ہے۔ آپ کی فائلیں آپ کی ڈیوائس پر مقامی طور پر محفوظ ہیں اور کسی سرور کو ہرگز منتقل نہیں کی جاتی۔",
   "aboutDescription": "Fadocx v1.0.0 - آپ کا نجی دستاویز ویور۔ آپ کی رازداری کو احترام دینے کے لیے بنایا گیا۔",
-
   "tableRows": "قطاریں",
   "tableEmpty": "کوئی ڈیٹا نہیں",
   "tableNoContent": "شیٹ خالی ہے",
@@ -117,14 +105,11 @@
   "unsupportedFormat": "فائل کی قسم معاون نہیں ہے",
   "txtLoaded": "ٹی ایکس ٹی",
   "charactersLoaded": "حروف",
-
   "copiedToClipboard": "کلیپ بورڈ پر کاپی ہو گیا",
-
   "navHome": "ہوم",
   "navLibrary": "لائبریری",
   "navSettings": "ترتیبات",
   "navRecents": "حالیہ",
-
   "categoryAll": "سب",
   "categoryPdfs": "PDFs",
   "categoryDocs": "ڈاکز",
@@ -134,20 +119,15 @@
   "categoryScans": "اسکینز",
   "categoryOther": "دیگر",
   "categoryPresentations": "پریزنٹیشنز",
-
   "supportDevelopment": "ڈویلپمنٹ سپورٹ کریں",
   "visitPatreon": "Patreon وزٹ کریں",
   "copyLink": "لنک کاپی کریں",
   "becomeAPatron": "پیٹرن بنیں",
   "patreonDescription": "آپ کی سپورٹ Fadocx اور FadCam کو بڑھنے میں مدد دیتی ہے۔ Patreon سبسکرائبرز کو خصوصی فوائد ملتے ہیں جن میں پریمیم فیچرز اور FadSec Lab کی تمام ایپس میں جلد رسائی شامل ہے۔\n\nمزید معلومات کے لیے نیچے دیے گئے لنک سے Patreon وزٹ کریں اور دستیاب tiers اور ان کے فوائد دیکھیں۔",
-
   "discordTitle": "ہماری ڈسکورڈ میں شامل ہوں",
   "openInBrowser": "براؤزر میں کھولیں",
-
   "comingSoon": "جلد آ رہا ہے",
-
   "newBadge": "نیا",
-
   "timeAgoJustNow": "ابھی ابھی",
   "timeAgoMinute": "{count, plural, =1{1 منٹ پہلے} other{{count} منٹ پہلے}}",
   "timeAgoHour": "{count, plural, =1{1 گھنٹہ پہلے} other{{count} گھنٹے پہلے}}",
@@ -155,7 +135,6 @@
   "timeAgoWeek": "{count, plural, =1{1 ہفتہ پہلے} other{{count} ہفتے پہلے}}",
   "timeAgoMonth": "{count, plural, =1{1 مہینہ پہلے} other{{count} مہینے پہلے}}",
   "timeAgoYear": "{count, plural, =1{1 سال پہلے} other{{count} سال پہلے}}",
-
   "monthJan": "جنوری",
   "monthFeb": "فروری",
   "monthMar": "مارچ",
@@ -168,7 +147,6 @@
   "monthOct": "اکتوبر",
   "monthNov": "نومبر",
   "monthDec": "دسمبر",
-
   "homeWelcomeTitle": "Fadocx میں خوش آمدید",
   "homeWelcomeSubtitle": "نمونہ فائلیں دیکھیں یا اپنی دستاویزات درآمد کریں",
   "homeExploreSamples": "نمونہ فائلیں دیکھیں",
@@ -179,7 +157,6 @@
   "homeScanDocumentDesc": "OCR کے ذریعے دستاویزات سے متن نکالیں",
   "homeImportDocument": "دستاویز درآمد کریں",
   "homeImportDocumentDesc": "اپنی ڈیوائس سے فائلیں براؤز اور درآمد کریں",
-
   "onboardingSkip": "چھوڑیں",
   "onboardingNext": "اگلا",
   "onboardingGetStarted": "شروع کریں",
@@ -197,7 +174,6 @@
   "onboardingSlide3Bullet1": "کچھ بھی آپ کے ڈیوائس سے نہیں جاتا — کوئی کلاؤڈ نہیں",
   "onboardingSlide3Bullet2": "کوئی ٹریکنگ نہیں، کوئی اشتہار نہیں، کوئی اینالیٹکس نہیں۔ کبھی نہیں۔",
   "onboardingSlide3Bullet3": "اوپن سورس — کوڈ کی ہر لائن عوامی ہے",
-
   "homeStatDocuments": "دستاویزات",
   "homeStatStorage": "سٹوریج",
   "homeStatTimeRead": "پڑھنے کا وقت",
@@ -239,7 +215,6 @@
   "homeFadDriveComingSoon": "FadDrive جلد آ رہا ہے!",
   "homePresentationsTooltip": "جلد آ رہا ہے",
   "homeErrorPrefix": "خرابی: {error}",
-
   "libraryTitle": "لائبریری",
   "librarySearchHint": "لائبریری میں تلاش کریں...",
   "librarySelected": "{count} منتخب",
@@ -254,7 +229,6 @@
   "libraryNoDocuments": "ابھی کوئی دستاویزات نہیں",
   "libraryAdjustSearch": "تلاش یا فلٹرز ایڈجسٹ کرنے کی کوشش کریں",
   "libraryDocumentsAppearHere": "آپ کی دستاویزات یہاں ظاہر ہوں گی",
-
   "browseTitle": "دستاویزات درآمد کریں",
   "browseBack": "واپس",
   "browseSearchHint": "دستاویزات تلاش کریں...",
@@ -279,7 +253,6 @@
   "browseErrorPrefix": "خرابی: {error}",
   "browseSortBy": "ترتیب",
   "browseImportedFiles": "{count, plural, =1{1 فائل درآمد کی گئی} other{{count} فائلیں درآمد کی گئیں}}",
-
   "trashTitle": "ٹراش",
   "trashEmpty": "ٹراش خالی ہے",
   "trashEmptySubtitle": "حذف شدہ فائلیں یہاں ظاہر ہوں گی",
@@ -293,7 +266,6 @@
   "trashDeleteTypeConfirm": "تصدیق کے لیے بڑے حروف میں DELETE ٹائپ کریں:",
   "trashDeleteHint": "DELETE",
   "trashFilesPermanentlyDeleted": "{count} فائل(یں) مستقل طور پر حذف ہو گئیں",
-
   "whatsNewTitle": "نیا کیا ہے",
   "whatsNewWhatsIncluded": "کیا شامل ہے",
   "whatsNewPlanned": "منصوبہ بند",
@@ -329,13 +301,11 @@
   "whatsNewOfflineFirst": "ایک آف لائن پر مبنی دستاویز ویور جو رازداری کے لیے بنایا گیا۔ کوئی اکاؤنٹس نہیں، کوئی ٹریکنگ نہیں، کوئی انٹرنیٹ درکار نہیں۔",
   "whatsNewThankYou": "Fadocx استعمال کرنے کے لیے شکریہ",
   "whatsNewThankYouDesc": "اگر آپ کو Fadocx مفید لگتا ہے، تو اس کی ڈویلپمنٹ سپورٹ کرنے پر غور کریں۔ آپ کا تعاون ہمیں رازداری پر مبنی اوزار بناتے رکھنے میں مدد کرتا ہے۔",
-
   "drawerWhatNew": "نیا کیا ہے",
   "drawerRecentFiles": "حالیہ فائلیں",
   "drawerVisible": "مرئی",
   "drawerHidden": "پوشیدہ",
   "drawerUnlockBenefits": "خصوصی فوائد کھولیں",
-
   "fileActionRename": "نام تبدیل کریں",
   "fileActionRenameDesc": "فائل کا نام تبدیل کریں",
   "fileActionDuplicate": "ڈپلیکیٹ",
@@ -350,7 +320,6 @@
   "fileActionUploadDesc": "کلاؤڈ سٹوریج پر سنک کریں",
   "fileActionFileInfo": "فائل کی معلومات",
   "fileActionSubtitle": "فائل کے عمل اور مینجمنٹ",
-
   "updateAvailableTitle": "اپ ڈیٹ دستیاب",
   "updateAvailableSubtitle": "ایک نئی ورژن ڈاؤن لوڈ کے لیے تیار ہے",
   "updateStableRelease": "مستحکم ریلیز",
@@ -362,10 +331,8 @@
   "updateNew": "نیا",
   "updateVisitGithub": "GitHub وزٹ کریں",
   "updateBetaInfo": "Fadocx بیٹا ایک اسٹینڈ-alone ایپ ہے جسے اسٹیبل ورژن کے ساتھ انسٹال کیا جا سکتا ہے۔ یہ آپ کے اسٹیبل ایپ یا اس کے ڈیٹا میں مداخلت نہیں کرے گا۔\n\nنئی خصوصیات کو اسٹیبل ریلیز سے پہلے ٹیسٹ کرنے کے لیے بیٹا انسٹال کریں۔",
-
   "updateBannerStable": "مستحکم اپ ڈیٹ",
   "updateBannerBeta": "بیٹا اپ ڈیٹ",
-
   "settingsAppearance": "ظاہر",
   "settingsStorage": "سٹوریج",
   "settingsDocumentsSize": "دستاویزات کی سائز",
@@ -453,17 +420,16 @@
   "settingsFadcatDesc": "ہلکا پھلکا، فیچر سے بھرپور، کراس پلیٹ فارم اینڈرائیڈ لاگ کیٹ متبادل — Android Studio کی غیر ضروری بھاری پن کے بغیر۔ ADB شامل ہے، GUI، CLI یا MCP سرور موڈ میں چلتا ہے۔",
   "settingsMacosComingSoon": "macOS جلد آ رہا ہے",
   "settingsOpenInBrowser": "براؤزر میں کھولیں",
-
-   "viewerFindHint": "تلاش کریں...",
-   "viewerTypeToFind": "تلاش کرنے کے لیے ٹائپ کریں",
-   "viewerSidebarPages": "صفحات",
-   "viewerSidebarSearch": "تلاش",
-   "viewerSidebarTOC": "فہرست",
-   "viewerSidebarNotes": "نوٹس",
-   "viewerSidebarBookmarks": "نشانات",
-   "viewerSidebarNotesDesc": "PDF صفحات میں نوٹس اور تشریحات شامل کریں",
-   "viewerSidebarBookmarksDesc": "اہم صفحات کو محفوظ کریں اور منظم کریں",
-   "viewerCellCopied": "سیل {value} کاپی ہو گیا",
+  "viewerFindHint": "تلاش کریں...",
+  "viewerTypeToFind": "تلاش کرنے کے لیے ٹائپ کریں",
+  "viewerSidebarPages": "صفحات",
+  "viewerSidebarSearch": "تلاش",
+  "viewerSidebarTOC": "فہرست",
+  "viewerSidebarNotes": "نوٹس",
+  "viewerSidebarBookmarks": "نشانات",
+  "viewerSidebarNotesDesc": "PDF صفحات میں نوٹس اور تشریحات شامل کریں",
+  "viewerSidebarBookmarksDesc": "اہم صفحات کو محفوظ کریں اور منظم کریں",
+  "viewerCellCopied": "سیل {value} کاپی ہو گیا",
   "viewerGoToPage": "صفحہ پر جائیں",
   "viewerGoToPageHint": "صفحہ نمبر درج کریں (1-{totalPages})",
   "viewerGo": "جائیں",
@@ -526,7 +492,6 @@
   "viewerGoBack": "واپس جائیں",
   "viewerReadingTimeMinutes": "{count, plural, =1{1 منٹ پڑھیں} other{{count} منٹ پڑھیں}}",
   "viewerReadingTimeHoursMinutes": "{hours} گھنٹے {minutes} منٹ پڑھیں",
-
   "scannerTitle": "دستاویز اسکینر",
   "scannerCapture": "کیپچر",
   "scannerProcessing": "پروسیسنگ",
@@ -553,97 +518,517 @@
   "scannerTextCopied": "متن کلیپ بورڈ پر کاپی ہو گیا",
   "scannerCopyAll": "سب کاپی",
   "scannerNewScan": "نیا اسکین",
-
   "linkTileCopy": "کاپی",
   "linkTileCopiedToClipboard": "کلیپ بورڈ پر کاپی ہو گیا",
   "linkTileSendEmail": "ای میل بھیجیں",
   "linkTileOpenInBrowser": "براؤزر میں کھولیں",
   "linkTileCouldNotOpen": "{value} کھول نہیں سکے",
-
   "librarySortBy": "ترتیب",
   "librarySortLatest": "تازہ ترین",
   "librarySortOldest": "سب سے پرانا",
   "librarySortLargest": "سب سے بڑا",
   "librarySortSmallest": "سب سے چھوٹا",
-
   "homeDeleteFile": "فائل حذف کریں؟",
   "homeDeleteFileConfirm": "\"{name}\" کو ٹراش میں منتقل کریں؟ آپ اسے بعد میں بحال کر سکتے ہیں۔",
   "homeCopiedCharactersToClipboard": "{count} حروف کلیپ بورڈ پر کاپی ہو گئے",
   "homeFileInTrashDetail": "ٹراش میں: ہاں (حذف کرنے کی تاریخ: {date})",
   "homeUnknown": "نامعلوم",
-
-  "@timeAgoMinute": {"placeholders": {"count": {"type": "num"}}},
-  "@timeAgoHour": {"placeholders": {"count": {"type": "num"}}},
-  "@timeAgoDay": {"placeholders": {"count": {"type": "num"}}},
-  "@timeAgoWeek": {"placeholders": {"count": {"type": "num"}}},
-  "@timeAgoMonth": {"placeholders": {"count": {"type": "num"}}},
-  "@timeAgoYear": {"placeholders": {"count": {"type": "num"}}},
-  "@homeSamplesImported": {"placeholders": {"count": {"type": "num"}}},
-  "@homeFailedImportSamples": {"placeholders": {"error": {"type": "String"}}},
-  "@homeFileMovedToTrash": {"placeholders": {"name": {"type": "String"}}},
-  "@homeCopySuffixCounter": {"placeholders": {"counter": {"type": "num"}}},
-  "@homeDuplicatedAs": {"placeholders": {"name": {"type": "String"}}},
-  "@homeFailedDuplicate": {"placeholders": {"error": {"type": "String"}}},
-  "@homeRenamedTo": {"placeholders": {"name": {"type": "String"}}},
-  "@homeSaveToDownloadsPath": {"placeholders": {"name": {"type": "String"}}},
-  "@homeSavedToDownloads": {"placeholders": {"name": {"type": "String"}}},
-  "@homeSavedTo": {"placeholders": {"path": {"type": "String"}}},
-  "@homeErrorPrefix": {"placeholders": {"error": {"type": "String"}}},
-  "@librarySelected": {"placeholders": {"count": {"type": "num"}}},
-  "@libraryDeleteConfirm": {"placeholders": {"count": {"type": "num"}}},
-  "@libraryItemsMovedToTrash": {"placeholders": {"count": {"type": "num"}}},
-  "@libraryErrorLoading": {"placeholders": {"error": {"type": "String"}}},
-  "@libraryItemCount": {"placeholders": {"count": {"type": "num"}}},
-  "@libraryNoCategoryFound": {"placeholders": {"category": {"type": "String"}}},
-  "@browseErrorPrefix": {"placeholders": {"error": {"type": "String"}}},
-  "@browseImportedFiles": {"placeholders": {"count": {"type": "num"}}},
-  "@trashFilesSelected": {"placeholders": {"count": {"type": "num"}}},
-  "@trashDeletePermanentlyMessage": {"placeholders": {"count": {"type": "num"}}},
-  "@trashFilesPermanentlyDeleted": {"placeholders": {"count": {"type": "num"}}},
-  "@whatsNewReleasedDate": {"placeholders": {"date": {"type": "String"}}},
-  "@settingsUpToDateDesc": {"placeholders": {"version": {"type": "String"}}},
-  "@settingsBetaAvailable": {"placeholders": {"version": {"type": "String"}}},
-  "@settingsVersionWithBuild": {"placeholders": {"version": {"type": "String"}, "buildNumber": {"type": "String"}}},
-  "@settingsStorageFilesSummary": {"placeholders": {"size": {"type": "String"}, "count": {"type": "num"}}},
-  "@settingsErrorPrefix": {"placeholders": {"error": {"type": "String"}}},
-  "@settingsCopiedText": {"placeholders": {"text": {"type": "String"}}},
-  "@settingsTypeToConfirm": {"placeholders": {"text": {"type": "String"}}},
-  "@viewerCellCopied": {"placeholders": {"value": {"type": "String"}}},
-  "@viewerGoToPageHint": {"placeholders": {"totalPages": {"type": "num"}}},
-  "@viewerInvalidPage": {"placeholders": {"totalPages": {"type": "num"}}},
-  "@viewerCopyPageOnly": {"placeholders": {"page": {"type": "num"}}},
-  "@viewerCopyAllPages": {"placeholders": {"totalPages": {"type": "num"}}},
-  "@viewerExtractingText": {"placeholders": {"label": {"type": "String"}}},
-  "@viewerPageLabel": {"placeholders": {"currentPage": {"type": "num"}}},
-  "@viewerAllPagesLabel": {"placeholders": {"totalPages": {"type": "num"}}},
-  "@viewerTextExtracted": {"placeholders": {"pageLabel": {"type": "String"}}},
-  "@viewerWordsFound": {"placeholders": {"count": {"type": "num"}}},
-  "@viewerCopiedWords": {"placeholders": {"count": {"type": "num"}, "pageLabel": {"type": "String"}}},
-  "@viewerCopyAllTextConfirm": {"placeholders": {"pageCount": {"type": "num"}}},
-  "@viewerCopiedAllPages": {"placeholders": {"count": {"type": "num"}, "pageCount": {"type": "num"}}},
-  "@viewerWordsLines": {"placeholders": {"words": {"type": "num"}, "lines": {"type": "num"}}},
-  "@viewerWordsOnly": {"placeholders": {"count": {"type": "num"}}},
-  "@viewerLinesOnly": {"placeholders": {"lines": {"type": "num"}}},
-  "@viewerCopiedFromLines": {"placeholders": {"words": {"type": "num"}, "lines": {"type": "num"}}},
-  "@viewerCharactersCount": {"placeholders": {"count": {"type": "num"}}},
-  "@viewerCopiedWordsChars": {"placeholders": {"words": {"type": "num"}, "chars": {"type": "num"}}},
-  "@viewerReadingTime": {"placeholders": {"minutes": {"type": "num"}}},
-  "@viewerErrorPrefix": {"placeholders": {"error": {"type": "String"}}},
-  "@viewerCellValue": {"placeholders": {"cell": {"type": "String"}}},
-  "@viewerLowerPageLabel": {"placeholders": {"page": {"type": "num"}}},
-  "@viewerReadingTimeMinutes": {"placeholders": {"count": {"type": "num"}}},
-  "@viewerReadingTimeHoursMinutes": {"placeholders": {"hours": {"type": "num"}, "minutes": {"type": "num"}}},
-  "@scannerFailedOpenImage": {"placeholders": {"error": {"type": "String"}}},
-  "@scannerFailedTorch": {"placeholders": {"error": {"type": "String"}}},
-  "@linkTileCouldNotOpen": {"placeholders": {"value": {"type": "String"}}},
-  "@homeDeleteFileConfirm": {"placeholders": {"name": {"type": "String"}}},
-  "@homeCopiedCharactersToClipboard": {"placeholders": {"count": {"type": "num"}}},
-  "@homeFileInTrashDetail": {"placeholders": {"date": {"type": "String"}}},
-
+  "@timeAgoMinute": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@timeAgoHour": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@timeAgoDay": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@timeAgoWeek": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@timeAgoMonth": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@timeAgoYear": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@homeSamplesImported": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@homeFailedImportSamples": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeFileMovedToTrash": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeCopySuffixCounter": {
+    "placeholders": {
+      "counter": {
+        "type": "num"
+      }
+    }
+  },
+  "@homeDuplicatedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeFailedDuplicate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeRenamedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeSaveToDownloadsPath": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeSavedToDownloads": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeSavedTo": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@librarySelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@libraryDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@libraryItemsMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@libraryErrorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@libraryItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@libraryNoCategoryFound": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "@browseErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@browseImportedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@trashFilesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@trashDeletePermanentlyMessage": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@trashFilesPermanentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@whatsNewReleasedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@settingsUpToDateDesc": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@settingsBetaAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@settingsVersionWithBuild": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "@settingsStorageFilesSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@settingsErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@settingsCopiedText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@settingsTypeToConfirm": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewerCellCopied": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewerGoToPageHint": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerInvalidPage": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerCopyPageOnly": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerCopyAllPages": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerExtractingText": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewerPageLabel": {
+    "placeholders": {
+      "currentPage": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerAllPagesLabel": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerTextExtracted": {
+    "placeholders": {
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewerWordsFound": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerCopiedWords": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewerCopyAllTextConfirm": {
+    "placeholders": {
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerCopiedAllPages": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerWordsLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerWordsOnly": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerLinesOnly": {
+    "placeholders": {
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerCopiedFromLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerCharactersCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerCopiedWordsChars": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "chars": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerReadingTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewerCellValue": {
+    "placeholders": {
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewerLowerPageLabel": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerReadingTimeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@viewerReadingTimeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "@scannerFailedOpenImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@scannerFailedTorch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@linkTileCouldNotOpen": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeDeleteFileConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeCopiedCharactersToClipboard": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@homeFileInTrashDetail": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "routeNotFound": "راستہ نہیں ملا: {path}",
   "routeGoHome": "گھر جائیں",
   "routeInvalidDocumentPath": "غلط دستاویز راستہ",
-
   "pdfCopyTextTitle": "PDF متن کاپی کریں",
   "pdfExtractingText": "متن نکال رہے ہیں...",
   "pdfExtractingTextProgress": "متن نکال رہے ہیں... ({current}/{total} صفحات)",
@@ -659,44 +1044,81 @@
   "pdfTextCannotBeExtracted": "اس صفحے سے متن نہیں نکالا جا سکتا",
   "pdfLoadingPageTexts": "صفحات کا متن لوڈ ہو رہا ہے...",
   "pdfPageCopied": "صفحہ {page} کا متن کاپی ہو گیا",
-
   "viewerTooltipSidebar": "سائیڈ بار",
   "viewerTooltipFirst": "پہلا",
   "viewerTooltipLast": "آخری",
   "viewerTooltipCopyPageText": "صفحے کا متن کاپی کریں",
-
   "textDocSearchHint": "متن تلاش کریں...",
   "textDocSearchPrevResult": "پچھلا نتیجہ",
   "textDocSearchNextResult": "اگلا نتیجہ",
-
   "imageFailedToLoad": "تصویر لوڈ نہیں ہو سکی",
-
   "mediaLoading": "میڈیا لوڈ ہو رہا ہے...",
   "mediaFailedToPlay": "میڈیا چلانے میں ناکامی",
   "mediaPlay": "چلائیں",
   "audioPlaybackNote": "آڈیو پلے بیک کے لیے ایک اضافی لائبریری درکار ہے۔",
-
   "sheetNoData": "{sheetName} میں کوئی ڈیٹا نہیں",
   "documentNoSheets": "{format} میں کوئی شیٹ نہیں ملی",
-
   "viewerPlaybackSpeed": "پلے بیک رفتار",
-
   "urlCopiedToClipboard": "URL کلپ بورڈ میں کاپی ہوئی: {url}",
-
   "lokitPreparingDoc": "آپ کی دستاویز تیار ہو رہی ہے...",
   "lokitWarmingUp": "Fadocx انجن چالو ہو رہا ہے...",
   "lokitAlmostThere": "تقریباً تیار",
   "lokitJustAMoment": "بس ایک لمحہ",
   "lokitFailedToRender": "دستاویز رینڈر نہیں ہو سکی",
-
-  "@routeNotFound": {"placeholders": {"path": {"type": "String"}}},
-  "@pdfExtractingTextProgress": {"placeholders": {"current": {"type": "num"}, "total": {"type": "num"}}},
-  "@pdfWordCount": {"placeholders": {"count": {"type": "num"}}},
-  "@pdfPageCopied": {"placeholders": {"page": {"type": "num"}}},
-  "@sheetNoData": {"placeholders": {"sheetName": {"type": "String"}}},
-  "@documentNoSheets": {"placeholders": {"format": {"type": "String"}}},
-  "@urlCopiedToClipboard": {"placeholders": {"url": {"type": "String"}}},
+  "@routeNotFound": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "@pdfExtractingTextProgress": {
+    "placeholders": {
+      "current": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "@pdfWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@pdfPageCopied": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "@sheetNoData": {
+    "placeholders": {
+      "sheetName": {
+        "type": "String"
+      }
+    }
+  },
+  "@documentNoSheets": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "@urlCopiedToClipboard": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "trashSelect": "منتخب کریں",
   "settingsVersionClipboardInfo": "{appName} v{version} (بلڈ {buildNumber})\nپیکیج: {packageName}",
-  "settingsShareMessage": "Fadocx دیکھیں!\n\nایک آل اِن ون دستاویز ویور: PDF، Office، اسپریڈشیٹس، پریزنٹیشنز، کوڈ فائلیں اور OCR ٹیکسٹ استخراج — مکمل آف لائن، بغیر ٹریکنگ، اوپن سورس۔\n\nhttps://github.com/anonfaded/Fadocx"
+  "settingsShareMessage": "Fadocx دیکھیں!\n\nایک آل اِن ون دستاویز ویور: PDF، Office، اسپریڈشیٹس، پریزنٹیشنز، کوڈ فائلیں اور OCR ٹیکسٹ استخراج — مکمل آف لائن، بغیر ٹریکنگ، اوپن سورس۔\n\nhttps://github.com/anonfaded/Fadocx",
+  "drawerFadSecLab": "فادسیک لیب"
 }

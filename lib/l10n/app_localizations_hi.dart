@@ -849,7 +849,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get browseSortBy => 'क्रमबद्ध करें';
+  String get browseSortBy => 'इसके अनुसार सॉर्ट करें';
 
   @override
   String browseImportedFiles(num count) {
@@ -1075,43 +1075,43 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fileActionSubtitle => 'फ़ाइल क्रियाएँ और प्रबंधन';
 
   @override
-  String get updateAvailableTitle => 'Update Available';
+  String get updateAvailableTitle => 'अपडेट उपलब्ध है';
 
   @override
-  String get updateAvailableSubtitle => 'A new version is ready to download';
+  String get updateAvailableSubtitle => 'Fadocx का एक नया संस्करण डाउनलोड के लिए तैयार है';
 
   @override
-  String get updateStableRelease => 'Stable Release';
+  String get updateStableRelease => 'स्थिर रिलीज़';
 
   @override
-  String get updateStableDesc => 'Recommended for most users';
+  String get updateStableDesc => 'उत्पादन उपयोग के लिए स्थिर और परीक्षित रिलीज़';
 
   @override
-  String get updateBetaRelease => 'Beta Release';
+  String get updateBetaRelease => 'बीटा रिलीज़';
 
   @override
-  String get updateBetaDesc => 'Latest features — may be unstable';
+  String get updateBetaDesc => 'नई सुविधाओं तक प्रारंभिक पहुंच, में बग हो सकते हैं';
 
   @override
-  String get updateMaybeLater => 'Maybe Later';
+  String get updateMaybeLater => 'शायद बाद में';
 
   @override
-  String get updateCurrent => 'Current';
+  String get updateCurrent => 'वर्तमान';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => 'नया';
 
   @override
-  String get updateVisitGithub => 'Visit GitHub';
+  String get updateVisitGithub => 'GitHub पर जाएं';
 
   @override
   String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
-  String get updateBannerStable => 'Stable Update';
+  String get updateBannerStable => 'स्थिर अपडेट';
 
   @override
-  String get updateBannerBeta => 'Beta Update';
+  String get updateBannerBeta => 'बीटा अपडेट';
 
   @override
   String get settingsAppearance => 'दिखावट';
@@ -1933,4 +1933,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'दस्तावेज़ रेंडर नहीं हो सका';
+
+  @override
+  String get drawerFadSecLab => 'फैडसेक लैब';
 }

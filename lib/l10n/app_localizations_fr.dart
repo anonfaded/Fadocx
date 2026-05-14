@@ -1075,43 +1075,43 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fileActionSubtitle => 'Actions et gestion du fichier';
 
   @override
-  String get updateAvailableTitle => 'Update Available';
+  String get updateAvailableTitle => 'Mise à jour disponible';
 
   @override
-  String get updateAvailableSubtitle => 'A new version is ready to download';
+  String get updateAvailableSubtitle => 'Une nouvelle version de Fadocx est prête à télécharger';
 
   @override
-  String get updateStableRelease => 'Stable Release';
+  String get updateStableRelease => 'Version stable';
 
   @override
-  String get updateStableDesc => 'Recommended for most users';
+  String get updateStableDesc => 'Version stable et testée pour une utilisation en production';
 
   @override
-  String get updateBetaRelease => 'Beta Release';
+  String get updateBetaRelease => 'Version bêta';
 
   @override
-  String get updateBetaDesc => 'Latest features — may be unstable';
+  String get updateBetaDesc => 'Accès anticipé aux nouvelles fonctionnalités, peut contenir des erreurs';
 
   @override
-  String get updateMaybeLater => 'Maybe Later';
+  String get updateMaybeLater => 'Peut-être plus tard';
 
   @override
-  String get updateCurrent => 'Current';
+  String get updateCurrent => 'Actuel';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => 'Nouveau';
 
   @override
-  String get updateVisitGithub => 'Visit GitHub';
+  String get updateVisitGithub => 'Visiter GitHub';
 
   @override
   String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
-  String get updateBannerStable => 'Stable Update';
+  String get updateBannerStable => 'Mise à jour stable';
 
   @override
-  String get updateBannerBeta => 'Beta Update';
+  String get updateBannerBeta => 'Mise à jour bêta';
 
   @override
   String get settingsAppearance => 'Apparence';
@@ -1933,4 +1933,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'Échec du rendu du document';
+
+  @override
+  String get drawerFadSecLab => 'FadSec Lab';
 }

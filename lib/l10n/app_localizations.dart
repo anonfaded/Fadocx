@@ -3556,6 +3556,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to render document'**
   String get lokitFailedToRender;
+
+  /// No description provided for @drawerFadSecLab.
+  ///
+  /// In en, this message translates to:
+  /// **'FadSec Lab'**
+  String get drawerFadSecLab;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

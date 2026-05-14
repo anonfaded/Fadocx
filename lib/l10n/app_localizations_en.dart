@@ -1933,4 +1933,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'Failed to render document';
+
+  @override
+  String get drawerFadSecLab => 'FadSec Lab';
 }

@@ -1933,4 +1933,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'دستاویز رینڈر نہیں ہو سکی';
+
+  @override
+  String get drawerFadSecLab => 'فادسیک لیب';
 }

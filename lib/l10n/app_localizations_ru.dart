@@ -1075,43 +1075,43 @@ class AppLocalizationsRu extends AppLocalizations {
   String get fileActionSubtitle => 'Действия и управление файлом';
 
   @override
-  String get updateAvailableTitle => 'Update Available';
+  String get updateAvailableTitle => 'Доступно обновление';
 
   @override
-  String get updateAvailableSubtitle => 'A new version is ready to download';
+  String get updateAvailableSubtitle => 'Новая версия Fadocx готова к загрузке';
 
   @override
-  String get updateStableRelease => 'Stable Release';
+  String get updateStableRelease => 'Стабильный выпуск';
 
   @override
-  String get updateStableDesc => 'Recommended for most users';
+  String get updateStableDesc => 'Стабильный и протестированный выпуск для использования в производстве';
 
   @override
-  String get updateBetaRelease => 'Beta Release';
+  String get updateBetaRelease => 'Бета-выпуск';
 
   @override
-  String get updateBetaDesc => 'Latest features — may be unstable';
+  String get updateBetaDesc => 'Ранний доступ к новым функциям, могут содержать ошибки';
 
   @override
-  String get updateMaybeLater => 'Maybe Later';
+  String get updateMaybeLater => 'Может быть позже';
 
   @override
-  String get updateCurrent => 'Current';
+  String get updateCurrent => 'Текущий';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => 'Новый';
 
   @override
-  String get updateVisitGithub => 'Visit GitHub';
+  String get updateVisitGithub => 'Посетить GitHub';
 
   @override
   String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
-  String get updateBannerStable => 'Stable Update';
+  String get updateBannerStable => 'Стабильное обновление';
 
   @override
-  String get updateBannerBeta => 'Beta Update';
+  String get updateBannerBeta => 'Бета-обновление';
 
   @override
   String get settingsAppearance => 'Внешний вид';
@@ -1933,4 +1933,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'Не удалось отобразить документ';
+
+  @override
+  String get drawerFadSecLab => 'FadSec Lab';
 }
