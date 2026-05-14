@@ -381,10 +381,10 @@ class _MainShellState extends ConsumerState<MainShell>
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity == null) return;
         final velocity = details.primaryVelocity!;
-        if (velocity < -500) {
+        if (velocity < -300) {
           // Swipe left → next tab
           if (_currentPage < 2) _switchToPage(_currentPage + 1);
-        } else if (velocity > 500) {
+        } else if (velocity > 300) {
           // Swipe right → previous tab, or drawer on Home
           if (_currentPage > 0) {
             _switchToPage(_currentPage - 1);

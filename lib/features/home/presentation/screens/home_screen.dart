@@ -2467,13 +2467,11 @@ class _ModernActionCardState extends State<_ModernActionCard>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(_controller);
 
     // Shimmer animation for continuous subtle effect
     _shimmerController = AnimationController(
@@ -2528,10 +2526,23 @@ class _ModernActionCardState extends State<_ModernActionCard>
           child: Material(
             color: Colors.transparent,
             child: InkWell(
+              onTapDown: (_) {
+                _controller.animateTo(1.0,
+                    duration: const Duration(milliseconds: 80),
+                    curve: Curves.easeOut);
+              },
+              onTapCancel: () {
+                _controller.animateTo(0.0,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.elasticOut);
+              },
               onTap: () {
-                _controller.forward().then((_) {
-                  _controller.reverse();
-                  widget.onTap();
+                _controller.animateTo(0.0,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.elasticOut);
+                // Let bounce play for 150ms then navigate
+                Future.delayed(const Duration(milliseconds: 150), () {
+                  if (mounted) widget.onTap();
                 });
               },
               borderRadius: BorderRadius.circular(16),

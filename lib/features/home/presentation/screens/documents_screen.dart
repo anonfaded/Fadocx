@@ -593,7 +593,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               await ref.read(recentFilesProvider.future);
             },
             child: filteredFiles.isEmpty
-                    ? Center(
+                    ? CustomScrollView(
+                        slivers: [
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -622,7 +626,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                         ),
                       ],
                     ),
-                  )
+                          ),
+                        ),
+                      ],
+                    )
                 : isGridView
                     ? CustomScrollView(
                         slivers: [
