@@ -638,5 +638,62 @@
   "@linkTileCouldNotOpen": {"placeholders": {"value": {"type": "String"}}},
   "@homeDeleteFileConfirm": {"placeholders": {"name": {"type": "String"}}},
   "@homeCopiedCharactersToClipboard": {"placeholders": {"count": {"type": "num"}}},
-  "@homeFileInTrashDetail": {"placeholders": {"date": {"type": "String"}}}
+  "@homeFileInTrashDetail": {"placeholders": {"date": {"type": "String"}}},
+
+  "routeNotFound": "راستہ نہیں ملا: {path}",
+  "routeGoHome": "گھر جائیں",
+  "routeInvalidDocumentPath": "غلط دستاویز راستہ",
+
+  "pdfCopyTextTitle": "PDF متن کاپی کریں",
+  "pdfExtractingText": "متن نکال رہے ہیں...",
+  "pdfExtractingTextProgress": "متن نکال رہے ہیں... ({current}/{total} صفحات)",
+  "pdfErrorExtractingText": "متن نکالنے میں خرابی",
+  "pdfWordCount": "الفاظ کی تعداد: {count}",
+  "pdfNoTextFound": "PDF میں کوئی متن نہیں ملا",
+  "pdfFullTextCopied": "مکمل PDF متن کلپ بورڈ میں کاپی ہو گیا",
+  "pdfPasswordRequired": "PDF پاس ورڈ درکار ہے",
+  "pdfPasswordDesc": "یہ PDF پاس ورڈ سے محفوظ ہے۔ کھولنے کے لیے پاس ورڈ درج کریں۔",
+  "pdfPasswordLabel": "پاس ورڈ",
+  "pdfUnlock": "کھولیں",
+  "pdfSearchHint": "PDF تلاش کریں...",
+  "pdfTextCannotBeExtracted": "اس صفحے سے متن نہیں نکالا جا سکتا",
+  "pdfLoadingPageTexts": "صفحات کا متن لوڈ ہو رہا ہے...",
+  "pdfPageCopied": "صفحہ {page} کا متن کاپی ہو گیا",
+
+  "viewerTooltipSidebar": "سائیڈ بار",
+  "viewerTooltipFirst": "پہلا",
+  "viewerTooltipLast": "آخری",
+  "viewerTooltipCopyPageText": "صفحے کا متن کاپی کریں",
+
+  "textDocSearchHint": "متن تلاش کریں...",
+  "textDocSearchPrevResult": "پچھلا نتیجہ",
+  "textDocSearchNextResult": "اگلا نتیجہ",
+
+  "imageFailedToLoad": "تصویر لوڈ نہیں ہو سکی",
+
+  "mediaLoading": "میڈیا لوڈ ہو رہا ہے...",
+  "mediaFailedToPlay": "میڈیا چلانے میں ناکامی",
+  "mediaPlay": "چلائیں",
+  "audioPlaybackNote": "آڈیو پلے بیک کے لیے ایک اضافی لائبریری درکار ہے۔",
+
+  "sheetNoData": "{sheetName} میں کوئی ڈیٹا نہیں",
+  "documentNoSheets": "{format} میں کوئی شیٹ نہیں ملی",
+
+  "viewerPlaybackSpeed": "پلے بیک رفتار",
+
+  "urlCopiedToClipboard": "URL کلپ بورڈ میں کاپی ہوئی: {url}",
+
+  "lokitPreparingDoc": "آپ کی دستاویز تیار ہو رہی ہے...",
+  "lokitWarmingUp": "Fadocx انجن چالو ہو رہا ہے...",
+  "lokitAlmostThere": "تقریباً تیار",
+  "lokitJustAMoment": "بس ایک لمحہ",
+  "lokitFailedToRender": "دستاویز رینڈر نہیں ہو سکی",
+
+  "@routeNotFound": {"placeholders": {"path": {"type": "String"}}},
+  "@pdfExtractingTextProgress": {"placeholders": {"current": {"type": "num"}, "total": {"type": "num"}}},
+  "@pdfWordCount": {"placeholders": {"count": {"type": "num"}}},
+  "@pdfPageCopied": {"placeholders": {"page": {"type": "num"}}},
+  "@sheetNoData": {"placeholders": {"sheetName": {"type": "String"}}},
+  "@documentNoSheets": {"placeholders": {"format": {"type": "String"}}},
+  "@urlCopiedToClipboard": {"placeholders": {"url": {"type": "String"}}}
 }

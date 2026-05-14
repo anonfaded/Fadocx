@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 const _audioFormats = {
   'aac', 'mp3', 'wav', 'ogg', 'flac', 'm4a', 'wma', 'opus', 'aiff',
@@ -270,7 +271,7 @@ class MediaViewerState extends State<MediaViewer> {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
-            Text('Loading media...', style: theme.textTheme.bodyMedium),
+            Text(AppLocalizations.of(context)!.mediaLoading, style: theme.textTheme.bodyMedium),
           ],
         ),
       );
@@ -283,7 +284,7 @@ class MediaViewerState extends State<MediaViewer> {
           children: [
             Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 16),
-            Text('Failed to play media', style: theme.textTheme.bodyLarge),
+            Text(AppLocalizations.of(context)!.mediaFailedToPlay, style: theme.textTheme.bodyLarge),
           ],
         ),
       );

@@ -1791,4 +1791,135 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get homeUnknown => 'unknown';
+
+  @override
+  String routeNotFound(String path) {
+    return 'Маршрут не найден: $path';
+  }
+
+  @override
+  String get routeGoHome => 'На главную';
+
+  @override
+  String get routeInvalidDocumentPath => 'Неверный путь к документу';
+
+  @override
+  String get pdfCopyTextTitle => 'Копировать текст PDF';
+
+  @override
+  String get pdfExtractingText => 'Извлечение текста...';
+
+  @override
+  String pdfExtractingTextProgress(num current, num total) {
+    return 'Извлечение текста... ($current/$total страниц)';
+  }
+
+  @override
+  String get pdfErrorExtractingText => 'Ошибка при извлечении текста';
+
+  @override
+  String pdfWordCount(num count) {
+    return 'Количество слов: $count';
+  }
+
+  @override
+  String get pdfNoTextFound => 'Текст в PDF не найден';
+
+  @override
+  String get pdfFullTextCopied => 'Полный текст PDF скопирован в буфер обмена';
+
+  @override
+  String get pdfPasswordRequired => 'Требуется пароль PDF';
+
+  @override
+  String get pdfPasswordDesc => 'Этот PDF защищён паролем. Введите пароль для разблокировки.';
+
+  @override
+  String get pdfPasswordLabel => 'Пароль';
+
+  @override
+  String get pdfUnlock => 'Разблокировать';
+
+  @override
+  String get pdfSearchHint => 'Поиск в PDF...';
+
+  @override
+  String get pdfTextCannotBeExtracted => 'Текст не может быть извлечён с этой страницы';
+
+  @override
+  String get pdfLoadingPageTexts => 'Загрузка текстов страниц...';
+
+  @override
+  String pdfPageCopied(num page) {
+    return 'Текст страницы $page скопирован в буфер обмена';
+  }
+
+  @override
+  String get viewerTooltipSidebar => 'Боковая панель';
+
+  @override
+  String get viewerTooltipFirst => 'Первая';
+
+  @override
+  String get viewerTooltipLast => 'Последняя';
+
+  @override
+  String get viewerTooltipCopyPageText => 'Копировать текст страницы';
+
+  @override
+  String get textDocSearchHint => 'Поиск текста...';
+
+  @override
+  String get textDocSearchPrevResult => 'Предыдущий результат';
+
+  @override
+  String get textDocSearchNextResult => 'Следующий результат';
+
+  @override
+  String get imageFailedToLoad => 'Не удалось загрузить изображение';
+
+  @override
+  String get mediaLoading => 'Загрузка медиа...';
+
+  @override
+  String get mediaFailedToPlay => 'Не удалось воспроизвести медиа';
+
+  @override
+  String get mediaPlay => 'Воспроизвести';
+
+  @override
+  String get audioPlaybackNote => 'Для воспроизведения аудио требуется дополнительная библиотека.';
+
+  @override
+  String sheetNoData(String sheetName) {
+    return 'Нет данных в $sheetName';
+  }
+
+  @override
+  String documentNoSheets(String format) {
+    return 'В $format не найдено листов';
+  }
+
+  @override
+  String get viewerPlaybackSpeed => 'Скорость воспроизведения';
+
+  @override
+  String urlCopiedToClipboard(String url) {
+    return 'URL скопирован в буфер обмена: $url';
+  }
+
+  @override
+  String get lokitPreparingDoc => 'Подготовка вашего документа...';
+
+  @override
+  String get lokitWarmingUp => 'Запуск движка Fadocx...';
+
+  @override
+  String get lokitAlmostThere => 'Почти готово';
+
+  @override
+  String get lokitJustAMoment => 'Подождите секунду';
+
+  @override
+  String get lokitFailedToRender => 'Не удалось отобразить документ';
 }

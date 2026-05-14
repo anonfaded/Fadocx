@@ -1791,4 +1791,135 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get homeUnknown => 'unknown';
+
+  @override
+  String routeNotFound(String path) {
+    return '未找到路由：$path';
+  }
+
+  @override
+  String get routeGoHome => '返回主页';
+
+  @override
+  String get routeInvalidDocumentPath => '无效的文档路径';
+
+  @override
+  String get pdfCopyTextTitle => '复制PDF文本';
+
+  @override
+  String get pdfExtractingText => '正在提取文本...';
+
+  @override
+  String pdfExtractingTextProgress(num current, num total) {
+    return '正在提取文本（$current/$total 页）...';
+  }
+
+  @override
+  String get pdfErrorExtractingText => '提取文本时出错';
+
+  @override
+  String pdfWordCount(num count) {
+    return '字数：$count';
+  }
+
+  @override
+  String get pdfNoTextFound => 'PDF中未找到文本';
+
+  @override
+  String get pdfFullTextCopied => '已将完整PDF文本复制到剪贴板';
+
+  @override
+  String get pdfPasswordRequired => '需要PDF密码';
+
+  @override
+  String get pdfPasswordDesc => '此PDF受密码保护，请输入密码以解锁。';
+
+  @override
+  String get pdfPasswordLabel => '密码';
+
+  @override
+  String get pdfUnlock => '解锁';
+
+  @override
+  String get pdfSearchHint => '搜索PDF...';
+
+  @override
+  String get pdfTextCannotBeExtracted => '无法从此页提取文本';
+
+  @override
+  String get pdfLoadingPageTexts => '正在加载页面文本...';
+
+  @override
+  String pdfPageCopied(num page) {
+    return '第$page页文本已复制到剪贴板';
+  }
+
+  @override
+  String get viewerTooltipSidebar => '侧边栏';
+
+  @override
+  String get viewerTooltipFirst => '第一页';
+
+  @override
+  String get viewerTooltipLast => '最后一页';
+
+  @override
+  String get viewerTooltipCopyPageText => '复制页面文本';
+
+  @override
+  String get textDocSearchHint => '搜索文本...';
+
+  @override
+  String get textDocSearchPrevResult => '上一个结果';
+
+  @override
+  String get textDocSearchNextResult => '下一个结果';
+
+  @override
+  String get imageFailedToLoad => '加载图片失败';
+
+  @override
+  String get mediaLoading => '正在加载媒体...';
+
+  @override
+  String get mediaFailedToPlay => '播放媒体失败';
+
+  @override
+  String get mediaPlay => '播放';
+
+  @override
+  String get audioPlaybackNote => '音频播放需要额外的库。';
+
+  @override
+  String sheetNoData(String sheetName) {
+    return '$sheetName 中没有数据';
+  }
+
+  @override
+  String documentNoSheets(String format) {
+    return '$format 中未找到工作表';
+  }
+
+  @override
+  String get viewerPlaybackSpeed => '播放速度';
+
+  @override
+  String urlCopiedToClipboard(String url) {
+    return 'URL已复制到剪贴板：$url';
+  }
+
+  @override
+  String get lokitPreparingDoc => '正在准备您的文档...';
+
+  @override
+  String get lokitWarmingUp => '正在启动 Fadocx 引擎...';
+
+  @override
+  String get lokitAlmostThere => '即将完成';
+
+  @override
+  String get lokitJustAMoment => '请稍候';
+
+  @override
+  String get lokitFailedToRender => '文档渲染失败';
 }

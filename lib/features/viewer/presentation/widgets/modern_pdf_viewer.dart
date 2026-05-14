@@ -407,6 +407,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
   Future<void> _showCopyDialog() async {
     if (_document == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
     int currentPage = 0;
     int totalPages = _document!.pages.length;
 
@@ -414,7 +415,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Copy PDF Text'),
+          title: Text(l10n.pdfCopyTextTitle),
           content: FutureBuilder<Map<String, dynamic>>(
             future: extractAllText((current, total) {
               if (mounted) {
@@ -436,8 +437,8 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                         const SizedBox(height: 16),
                         Text(
                           currentPage > 0
-                              ? 'Extracting text... ($currentPage/$totalPages pages)'
-                              : 'Extracting text...',
+                              ? l10n.pdfExtractingTextProgress(currentPage, totalPages)
+                              : l10n.pdfExtractingText,
                         ),
                         if (currentPage > 0) ...[
                           const SizedBox(height: 8),
@@ -452,10 +453,10 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
               }
 
               if (snapshot.hasError) {
-                return const SizedBox(
+                return SizedBox(
                   height: 100,
                   child: Center(
-                    child: Text('Error extracting text'),
+                    child: Text(l10n.pdfErrorExtractingText),
                   ),
                 );
               }
@@ -471,7 +472,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Word count: $wordCount',
+                      l10n.pdfWordCount(wordCount),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.outline,
                           ),
@@ -483,7 +484,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                       ),
                       child: SingleChildScrollView(
                         child: SelectableText(
-                          text.isEmpty ? 'No text found in PDF' : text,
+                          text.isEmpty ? l10n.pdfNoTextFound : text,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
@@ -496,7 +497,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             FutureBuilder<Map<String, dynamic>>(
               future: extractAllText(),
@@ -509,16 +510,16 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                           Navigator.of(dialogContext).pop();
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content:
-                                    Text('Full PDF text copied to clipboard'),
+                                    Text(l10n.pdfFullTextCopied),
                                 duration: Duration(seconds: 2),
                               ),
                             );
                           }
                         }
                       : null,
-                  child: const Text('Copy All'),
+                  child: Text(l10n.scannerCopyAll),
                 );
               },
             ),
@@ -973,23 +974,24 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
 
   Future<String?> _showPasswordDialog() async {
     final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context)!;
     final password = await showDialog<String>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('PDF Password Required'),
+        title: Text(l10n.pdfPasswordRequired),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('This PDF is password-protected. Enter the password to unlock.'),
+            Text(l10n.pdfPasswordDesc),
             const SizedBox(height: 16),
             TextField(
               controller: controller,
               obscureText: true,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.pdfPasswordLabel,
+                border: const OutlineInputBorder(),
               ),
               onSubmitted: (v) => Navigator.pop(ctx, v),
             ),
@@ -998,11 +1000,11 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, null),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Unlock'),
+            child: Text(l10n.pdfUnlock),
           ),
         ],
       ),
@@ -1211,17 +1213,17 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                         iconSize: 18,
                         onPressed: () async {
                           final messenger = ScaffoldMessenger.of(context);
+                          final snackText = AppLocalizations.of(context)!.pdfPageCopied(index + 1);
                           await Clipboard.setData(
                               ClipboardData(text: pageText));
                           messenger.showSnackBar(
                             SnackBar(
-                              content: Text(
-                                  'Page ${index + 1} text copied to clipboard'),
+                              content: Text(snackText),
                               duration: const Duration(seconds: 2),
                             ),
                           );
                         },
-                        tooltip: 'Copy page text',
+                        tooltip: AppLocalizations.of(context)!.viewerTooltipCopyPageText,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                   ],
@@ -1245,7 +1247,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                     widget.onTap?.call();
                   },
                   child: Text(
-                    'Text cannot be extracted from this page',
+                    AppLocalizations.of(context)!.pdfTextCannotBeExtracted,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.outline,
                           fontStyle: FontStyle.italic,
@@ -1294,7 +1296,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'Loading page texts...',
+                    AppLocalizations.of(context)!.pdfLoadingPageTexts,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -1557,7 +1559,7 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search PDF...',
+                      hintText: AppLocalizations.of(context)!.pdfSearchHint,
                       border: InputBorder.none,
                       prefixIcon: Icon(Icons.search,
                           color: Theme.of(context).colorScheme.primary),
@@ -1678,13 +1680,13 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                                   icon: const Icon(Icons.arrow_upward),
                                   iconSize: 18,
                                   onPressed: _previousSearchResult,
-                                  tooltip: 'Previous',
+                                  tooltip: AppLocalizations.of(context)!.previous,
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.arrow_downward),
                                   iconSize: 18,
                                   onPressed: _nextSearchResult,
-                                  tooltip: 'Next',
+                                  tooltip: AppLocalizations.of(context)!.next,
                                 ),
                               ],
                             ),
@@ -1993,23 +1995,23 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
               IconButton(
                 icon: const Icon(Icons.menu),
                 onPressed: () => setState(() => _showSidebar = !_showSidebar),
-                tooltip: 'Sidebar',
+                tooltip: AppLocalizations.of(context)!.viewerTooltipSidebar,
               ),
               IconButton(
                 icon: const Icon(Icons.content_copy),
                 onPressed: _document != null ? _showCopyDialog : null,
-                tooltip: 'Copy PDF Text',
+                tooltip: AppLocalizations.of(context)!.pdfCopyTextTitle,
               ),
               IconButton(
                 icon: const Icon(Icons.first_page),
                 onPressed: _currentPage > 1 ? () => _goToPage(1) : null,
-                tooltip: 'First',
+                tooltip: AppLocalizations.of(context)!.viewerTooltipFirst,
               ),
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed:
                     _currentPage > 1 ? () => _goToPage(_currentPage - 1) : null,
-                tooltip: 'Previous',
+                tooltip: AppLocalizations.of(context)!.previous,
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -2037,14 +2039,14 @@ class _ModernPdfViewerState extends State<ModernPdfViewer>
                 onPressed: _currentPage < _totalPages
                     ? () => _goToPage(_currentPage + 1)
                     : null,
-                tooltip: 'Next',
+                tooltip: AppLocalizations.of(context)!.next,
               ),
               IconButton(
                 icon: const Icon(Icons.last_page),
                 onPressed: _currentPage < _totalPages
                     ? () => _goToPage(_totalPages)
                     : null,
-                tooltip: 'Last',
+                tooltip: AppLocalizations.of(context)!.viewerTooltipLast,
               ),
             ],
           ),

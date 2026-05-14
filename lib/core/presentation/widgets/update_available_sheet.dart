@@ -429,7 +429,7 @@ Future<void> _openUrl(BuildContext context, String? url) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('URL copied to clipboard: $url')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.urlCopiedToClipboard(url))),
       );
     }
   }

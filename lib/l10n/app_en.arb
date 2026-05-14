@@ -638,5 +638,62 @@
   "@linkTileCouldNotOpen": {"placeholders": {"value": {"type": "String"}}},
   "@homeDeleteFileConfirm": {"placeholders": {"name": {"type": "String"}}},
   "@homeCopiedCharactersToClipboard": {"placeholders": {"count": {"type": "num"}}},
-  "@homeFileInTrashDetail": {"placeholders": {"date": {"type": "String"}}}
+  "@homeFileInTrashDetail": {"placeholders": {"date": {"type": "String"}}},
+
+  "routeNotFound": "Route not found: {path}",
+  "routeGoHome": "Go Home",
+  "routeInvalidDocumentPath": "Invalid document path",
+
+  "pdfCopyTextTitle": "Copy PDF Text",
+  "pdfExtractingText": "Extracting text...",
+  "pdfExtractingTextProgress": "Extracting text... ({current}/{total} pages)",
+  "pdfErrorExtractingText": "Error extracting text",
+  "pdfWordCount": "Word count: {count}",
+  "pdfNoTextFound": "No text found in PDF",
+  "pdfFullTextCopied": "Full PDF text copied to clipboard",
+  "pdfPasswordRequired": "PDF Password Required",
+  "pdfPasswordDesc": "This PDF is password-protected. Enter the password to unlock.",
+  "pdfPasswordLabel": "Password",
+  "pdfUnlock": "Unlock",
+  "pdfSearchHint": "Search PDF...",
+  "pdfTextCannotBeExtracted": "Text cannot be extracted from this page",
+  "pdfLoadingPageTexts": "Loading page texts...",
+  "pdfPageCopied": "Page {page} text copied to clipboard",
+
+  "viewerTooltipSidebar": "Sidebar",
+  "viewerTooltipFirst": "First",
+  "viewerTooltipLast": "Last",
+  "viewerTooltipCopyPageText": "Copy page text",
+
+  "textDocSearchHint": "Search text...",
+  "textDocSearchPrevResult": "Previous result",
+  "textDocSearchNextResult": "Next result",
+
+  "imageFailedToLoad": "Failed to load image",
+
+  "mediaLoading": "Loading media...",
+  "mediaFailedToPlay": "Failed to play media",
+  "mediaPlay": "Play",
+  "audioPlaybackNote": "Audio playback requires an additional library.",
+
+  "sheetNoData": "No data in {sheetName}",
+  "documentNoSheets": "No sheets found in {format}",
+
+  "viewerPlaybackSpeed": "Playback Speed",
+
+  "urlCopiedToClipboard": "URL copied to clipboard: {url}",
+
+  "lokitPreparingDoc": "Preparing your document...",
+  "lokitWarmingUp": "Warming up the Fadocx engine...",
+  "lokitAlmostThere": "Almost there",
+  "lokitJustAMoment": "Just a moment",
+  "lokitFailedToRender": "Failed to render document",
+
+  "@routeNotFound": {"placeholders": {"path": {"type": "String"}}},
+  "@pdfExtractingTextProgress": {"placeholders": {"current": {"type": "num"}, "total": {"type": "num"}}},
+  "@pdfWordCount": {"placeholders": {"count": {"type": "num"}}},
+  "@pdfPageCopied": {"placeholders": {"page": {"type": "num"}}},
+  "@sheetNoData": {"placeholders": {"sheetName": {"type": "String"}}},
+  "@documentNoSheets": {"placeholders": {"format": {"type": "String"}}},
+  "@urlCopiedToClipboard": {"placeholders": {"url": {"type": "String"}}}
 }

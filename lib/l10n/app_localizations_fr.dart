@@ -1791,4 +1791,135 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeUnknown => 'unknown';
+
+  @override
+  String routeNotFound(String path) {
+    return 'Itinéraire introuvable : $path';
+  }
+
+  @override
+  String get routeGoHome => 'Accueil';
+
+  @override
+  String get routeInvalidDocumentPath => 'Chemin de document invalide';
+
+  @override
+  String get pdfCopyTextTitle => 'Copier le texte PDF';
+
+  @override
+  String get pdfExtractingText => 'Extraction du texte...';
+
+  @override
+  String pdfExtractingTextProgress(num current, num total) {
+    return 'Extraction du texte... ($current/$total pages)';
+  }
+
+  @override
+  String get pdfErrorExtractingText => 'Erreur lors de l\'extraction du texte';
+
+  @override
+  String pdfWordCount(num count) {
+    return 'Nombre de mots : $count';
+  }
+
+  @override
+  String get pdfNoTextFound => 'Aucun texte trouvé dans le PDF';
+
+  @override
+  String get pdfFullTextCopied => 'Texte complet du PDF copié dans le presse-papiers';
+
+  @override
+  String get pdfPasswordRequired => 'Mot de passe PDF requis';
+
+  @override
+  String get pdfPasswordDesc => 'Ce PDF est protégé par un mot de passe. Entrez le mot de passe pour le déverrouiller.';
+
+  @override
+  String get pdfPasswordLabel => 'Mot de passe';
+
+  @override
+  String get pdfUnlock => 'Déverrouiller';
+
+  @override
+  String get pdfSearchHint => 'Rechercher dans le PDF...';
+
+  @override
+  String get pdfTextCannotBeExtracted => 'Le texte ne peut pas être extrait de cette page';
+
+  @override
+  String get pdfLoadingPageTexts => 'Chargement des textes des pages...';
+
+  @override
+  String pdfPageCopied(num page) {
+    return 'Texte de la page $page copié dans le presse-papiers';
+  }
+
+  @override
+  String get viewerTooltipSidebar => 'Barre latérale';
+
+  @override
+  String get viewerTooltipFirst => 'Premier';
+
+  @override
+  String get viewerTooltipLast => 'Dernier';
+
+  @override
+  String get viewerTooltipCopyPageText => 'Copier le texte de la page';
+
+  @override
+  String get textDocSearchHint => 'Rechercher du texte...';
+
+  @override
+  String get textDocSearchPrevResult => 'Résultat précédent';
+
+  @override
+  String get textDocSearchNextResult => 'Résultat suivant';
+
+  @override
+  String get imageFailedToLoad => 'Échec du chargement de l\'image';
+
+  @override
+  String get mediaLoading => 'Chargement du média...';
+
+  @override
+  String get mediaFailedToPlay => 'Échec de la lecture du média';
+
+  @override
+  String get mediaPlay => 'Lire';
+
+  @override
+  String get audioPlaybackNote => 'La lecture audio nécessite une bibliothèque supplémentaire.';
+
+  @override
+  String sheetNoData(String sheetName) {
+    return 'Aucune donnée dans $sheetName';
+  }
+
+  @override
+  String documentNoSheets(String format) {
+    return 'Aucune feuille trouvée dans $format';
+  }
+
+  @override
+  String get viewerPlaybackSpeed => 'Vitesse de lecture';
+
+  @override
+  String urlCopiedToClipboard(String url) {
+    return 'URL copiée dans le presse-papiers : $url';
+  }
+
+  @override
+  String get lokitPreparingDoc => 'Préparation de votre document...';
+
+  @override
+  String get lokitWarmingUp => 'Démarrage du moteur Fadocx...';
+
+  @override
+  String get lokitAlmostThere => 'Presque prêt';
+
+  @override
+  String get lokitJustAMoment => 'Un instant';
+
+  @override
+  String get lokitFailedToRender => 'Échec du rendu du document';
 }

@@ -3304,6 +3304,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'unknown'**
   String get homeUnknown;
+
+  /// No description provided for @routeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Route not found: {path}'**
+  String routeNotFound(String path);
+
+  /// No description provided for @routeGoHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Home'**
+  String get routeGoHome;
+
+  /// No description provided for @routeInvalidDocumentPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid document path'**
+  String get routeInvalidDocumentPath;
+
+  /// No description provided for @pdfCopyTextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy PDF Text'**
+  String get pdfCopyTextTitle;
+
+  /// No description provided for @pdfExtractingText.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting text...'**
+  String get pdfExtractingText;
+
+  /// No description provided for @pdfExtractingTextProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting text... ({current}/{total} pages)'**
+  String pdfExtractingTextProgress(num current, num total);
+
+  /// No description provided for @pdfErrorExtractingText.
+  ///
+  /// In en, this message translates to:
+  /// **'Error extracting text'**
+  String get pdfErrorExtractingText;
+
+  /// No description provided for @pdfWordCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Word count: {count}'**
+  String pdfWordCount(num count);
+
+  /// No description provided for @pdfNoTextFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No text found in PDF'**
+  String get pdfNoTextFound;
+
+  /// No description provided for @pdfFullTextCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Full PDF text copied to clipboard'**
+  String get pdfFullTextCopied;
+
+  /// No description provided for @pdfPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Password Required'**
+  String get pdfPasswordRequired;
+
+  /// No description provided for @pdfPasswordDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This PDF is password-protected. Enter the password to unlock.'**
+  String get pdfPasswordDesc;
+
+  /// No description provided for @pdfPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get pdfPasswordLabel;
+
+  /// No description provided for @pdfUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get pdfUnlock;
+
+  /// No description provided for @pdfSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search PDF...'**
+  String get pdfSearchHint;
+
+  /// No description provided for @pdfTextCannotBeExtracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Text cannot be extracted from this page'**
+  String get pdfTextCannotBeExtracted;
+
+  /// No description provided for @pdfLoadingPageTexts.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading page texts...'**
+  String get pdfLoadingPageTexts;
+
+  /// No description provided for @pdfPageCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} text copied to clipboard'**
+  String pdfPageCopied(num page);
+
+  /// No description provided for @viewerTooltipSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Sidebar'**
+  String get viewerTooltipSidebar;
+
+  /// No description provided for @viewerTooltipFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First'**
+  String get viewerTooltipFirst;
+
+  /// No description provided for @viewerTooltipLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Last'**
+  String get viewerTooltipLast;
+
+  /// No description provided for @viewerTooltipCopyPageText.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy page text'**
+  String get viewerTooltipCopyPageText;
+
+  /// No description provided for @textDocSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search text...'**
+  String get textDocSearchHint;
+
+  /// No description provided for @textDocSearchPrevResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous result'**
+  String get textDocSearchPrevResult;
+
+  /// No description provided for @textDocSearchNextResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Next result'**
+  String get textDocSearchNextResult;
+
+  /// No description provided for @imageFailedToLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load image'**
+  String get imageFailedToLoad;
+
+  /// No description provided for @mediaLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading media...'**
+  String get mediaLoading;
+
+  /// No description provided for @mediaFailedToPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to play media'**
+  String get mediaFailedToPlay;
+
+  /// No description provided for @mediaPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get mediaPlay;
+
+  /// No description provided for @audioPlaybackNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio playback requires an additional library.'**
+  String get audioPlaybackNote;
+
+  /// No description provided for @sheetNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data in {sheetName}'**
+  String sheetNoData(String sheetName);
+
+  /// No description provided for @documentNoSheets.
+  ///
+  /// In en, this message translates to:
+  /// **'No sheets found in {format}'**
+  String documentNoSheets(String format);
+
+  /// No description provided for @viewerPlaybackSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback Speed'**
+  String get viewerPlaybackSpeed;
+
+  /// No description provided for @urlCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'URL copied to clipboard: {url}'**
+  String urlCopiedToClipboard(String url);
+
+  /// No description provided for @lokitPreparingDoc.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your document...'**
+  String get lokitPreparingDoc;
+
+  /// No description provided for @lokitWarmingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Warming up the Fadocx engine...'**
+  String get lokitWarmingUp;
+
+  /// No description provided for @lokitAlmostThere.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there'**
+  String get lokitAlmostThere;
+
+  /// No description provided for @lokitJustAMoment.
+  ///
+  /// In en, this message translates to:
+  /// **'Just a moment'**
+  String get lokitJustAMoment;
+
+  /// No description provided for @lokitFailedToRender.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to render document'**
+  String get lokitFailedToRender;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -161,7 +161,7 @@ void showFileActionBottomSheet({
               _buildActionRow(
                 context: ctx,
                 icon: Icons.delete_outline,
-                title: 'Delete',
+                title: AppLocalizations.of(ctx)!.delete,
                 iconColor: Colors.red,
                 titleColor: Colors.red,
                 onTap: callbacks.onDelete!,

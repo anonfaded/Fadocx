@@ -118,7 +118,7 @@ class LOKitDocumentViewerState extends ConsumerState<LOKitDocumentViewer>
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  'Page $pageNum',
+                                  AppLocalizations.of(context)!.viewerPageLabel(pageNum),
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: isActive
                                         ? theme.colorScheme.primary
@@ -361,7 +361,7 @@ class LOKitDocumentViewerState extends ConsumerState<LOKitDocumentViewer>
               const SizedBox(height: 24),
               FilledButton.tonal(
                 onPressed: _loadDocument,
-                child: const Text('Retry'),
+                child: Text(AppLocalizations.of(context)!.retry),
               ),
             ],
           ),

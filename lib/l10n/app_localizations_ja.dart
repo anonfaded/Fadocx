@@ -1791,4 +1791,135 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get homeUnknown => 'unknown';
+
+  @override
+  String routeNotFound(String path) {
+    return 'ルートが見つかりません: $path';
+  }
+
+  @override
+  String get routeGoHome => 'ホームへ戻る';
+
+  @override
+  String get routeInvalidDocumentPath => '無効なドキュメントパス';
+
+  @override
+  String get pdfCopyTextTitle => 'PDFテキストをコピー';
+
+  @override
+  String get pdfExtractingText => 'テキストを抽出中...';
+
+  @override
+  String pdfExtractingTextProgress(num current, num total) {
+    return 'テキストを抽出中（$current/$total ページ）...';
+  }
+
+  @override
+  String get pdfErrorExtractingText => 'テキスト抽出エラー';
+
+  @override
+  String pdfWordCount(num count) {
+    return '単語数: $count';
+  }
+
+  @override
+  String get pdfNoTextFound => 'PDFにテキストが見つかりませんでした';
+
+  @override
+  String get pdfFullTextCopied => 'PDFの全テキストをクリップボードにコピーしました';
+
+  @override
+  String get pdfPasswordRequired => 'PDFパスワードが必要です';
+
+  @override
+  String get pdfPasswordDesc => 'このPDFはパスワードで保護されています。パスワードを入力していただけますか？';
+
+  @override
+  String get pdfPasswordLabel => 'パスワード';
+
+  @override
+  String get pdfUnlock => 'ロック記解除';
+
+  @override
+  String get pdfSearchHint => 'PDFを検索...';
+
+  @override
+  String get pdfTextCannotBeExtracted => 'このページからテキストを抽出できません';
+
+  @override
+  String get pdfLoadingPageTexts => 'ページのテキストを読み込み中...';
+
+  @override
+  String pdfPageCopied(num page) {
+    return '$pageページのテキストをクリップボードにコピーしました';
+  }
+
+  @override
+  String get viewerTooltipSidebar => 'サイドバー';
+
+  @override
+  String get viewerTooltipFirst => '最初';
+
+  @override
+  String get viewerTooltipLast => '最後';
+
+  @override
+  String get viewerTooltipCopyPageText => 'ページのテキストをコピー';
+
+  @override
+  String get textDocSearchHint => 'テキストを検索...';
+
+  @override
+  String get textDocSearchPrevResult => '前の結果';
+
+  @override
+  String get textDocSearchNextResult => '次の結果';
+
+  @override
+  String get imageFailedToLoad => '画像の読み込みに失敗しました';
+
+  @override
+  String get mediaLoading => 'メディアを読み込み中...';
+
+  @override
+  String get mediaFailedToPlay => 'メディアを再生できませんでした';
+
+  @override
+  String get mediaPlay => '再生';
+
+  @override
+  String get audioPlaybackNote => '音声の再生には追加のライブラリが必要です。';
+
+  @override
+  String sheetNoData(String sheetName) {
+    return '$sheetName にデータがありません';
+  }
+
+  @override
+  String documentNoSheets(String format) {
+    return '$format にシートが見つかりません';
+  }
+
+  @override
+  String get viewerPlaybackSpeed => '再生速度';
+
+  @override
+  String urlCopiedToClipboard(String url) {
+    return 'URLをクリップボードにコピーしました: $url';
+  }
+
+  @override
+  String get lokitPreparingDoc => 'ドキュメントを準備中...';
+
+  @override
+  String get lokitWarmingUp => 'Fadocx エンジンを起動中...';
+
+  @override
+  String get lokitAlmostThere => 'もう少し';
+
+  @override
+  String get lokitJustAMoment => '少々お待ちください';
+
+  @override
+  String get lokitFailedToRender => 'ドキュメントの表示に失敗しました';
 }

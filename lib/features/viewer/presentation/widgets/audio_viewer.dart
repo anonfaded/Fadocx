@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Info-only viewer for audio files.
 /// Shows file metadata and a placeholder — full playback requires audio lib.
@@ -47,11 +48,11 @@ class AudioViewer extends StatelessWidget {
             FilledButton.tonalIcon(
               onPressed: null,
               icon: const Icon(Icons.play_arrow),
-              label: const Text('Play'),
+              label: Text(AppLocalizations.of(context)!.mediaPlay),
             ),
             const SizedBox(height: 8),
             Text(
-              'Audio playback requires an additional library.',
+              AppLocalizations.of(context)!.audioPlaybackNote,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

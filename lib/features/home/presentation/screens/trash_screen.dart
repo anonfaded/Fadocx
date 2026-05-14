@@ -38,7 +38,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
               child: IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed: () => context.pop(),
-                tooltip: 'Back',
+                tooltip: AppLocalizations.of(context)!.back,
                 iconSize: 20,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 padding: EdgeInsets.zero,

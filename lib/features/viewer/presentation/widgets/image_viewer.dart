@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Full-bleed image viewer with pinch-to-zoom and tap-to-toggle-controls.
 class ImageViewer extends StatelessWidget {
@@ -30,7 +31,7 @@ class ImageViewer extends StatelessWidget {
                   const Icon(Icons.broken_image_outlined,
                       size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  Text('Failed to load image',
+                  Text(AppLocalizations.of(context)!.imageFailedToLoad,
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.error)),
                 ],
