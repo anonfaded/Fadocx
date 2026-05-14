@@ -185,5 +185,6 @@
   "lokitWarmingUp": "Fadocx エンジンを起動中...",
   "lokitAlmostThere": "もう少し",
   "lokitJustAMoment": "少々お待ちください",
-  "lokitFailedToRender": "ドキュメントの表示に失敗しました"
+  "lokitFailedToRender": "ドキュメントの表示に失敗しました",
+  "trashSelect": "選択"
 }

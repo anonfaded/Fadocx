@@ -197,7 +197,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
                     _isSelectionMode = true;
                   });
                 },
-                child: const Text('Select'),
+                child: Text(AppLocalizations.of(context)!.trashSelect),
               ),
           ],
         ),

@@ -185,5 +185,6 @@
   "lokitWarmingUp": "Démarrage du moteur Fadocx...",
   "lokitAlmostThere": "Presque prêt",
   "lokitJustAMoment": "Un instant",
-  "lokitFailedToRender": "Échec du rendu du document"
+  "lokitFailedToRender": "Échec du rendu du document",
+  "trashSelect": "Sélectionner"
 }

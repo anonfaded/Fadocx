@@ -286,6 +286,7 @@
   "trashErrorLoading": "Error loading trash",
   "trashFilesSelected": "{count} selected",
   "trashFilesLabel": "files",
+  "trashSelect": "Select",
   "trashFileRestored": "File restored successfully",
   "trashDeletePermanently": "Delete Permanently",
   "trashDeletePermanentlyConfirm": "Delete Permanently?",

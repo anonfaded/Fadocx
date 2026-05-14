@@ -949,7 +949,7 @@ class SettingsScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       _LanguageOption(
-                        flag: '🇺🇸',
+                        flag: '🇬🇧',
                         title: l10n.languageEnglish,
                         subtitle: 'English',
                         isSelected: currentCode == 'en',
