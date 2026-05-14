@@ -883,6 +883,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trashFilesLabel => 'files';
 
   @override
+  String get trashSelect => '選択';
+
+  @override
   String get trashFileRestored => 'File restored successfully';
 
   @override

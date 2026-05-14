@@ -883,6 +883,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trashFilesLabel => 'files';
 
   @override
+  String get trashSelect => '选择';
+
+  @override
   String get trashFileRestored => 'File restored successfully';
 
   @override

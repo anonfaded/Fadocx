@@ -883,6 +883,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get trashFilesLabel => 'فائلیں';
 
   @override
+  String get trashSelect => 'منتخب کریں';
+
+  @override
   String get trashFileRestored => 'فائل کامیابی سے بحال ہو گئی';
 
   @override

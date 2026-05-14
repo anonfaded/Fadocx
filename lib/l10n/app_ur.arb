@@ -695,5 +695,6 @@
   "@pdfPageCopied": {"placeholders": {"page": {"type": "num"}}},
   "@sheetNoData": {"placeholders": {"sheetName": {"type": "String"}}},
   "@documentNoSheets": {"placeholders": {"format": {"type": "String"}}},
-  "@urlCopiedToClipboard": {"placeholders": {"url": {"type": "String"}}}
+  "@urlCopiedToClipboard": {"placeholders": {"url": {"type": "String"}}},
+  "trashSelect": "منتخب کریں"
 }

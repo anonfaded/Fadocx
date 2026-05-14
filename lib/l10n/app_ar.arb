@@ -185,5 +185,6 @@
   "lokitWarmingUp": "جارٍ تشغيل محرك Fadocx...",
   "lokitAlmostThere": "على وشك الانتهاء",
   "lokitJustAMoment": "لحظة من فضلك",
-  "lokitFailedToRender": "فشل في عرض المستند"
+  "lokitFailedToRender": "فشل في عرض المستند",
+  "trashSelect": "تحديد"
 }

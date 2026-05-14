@@ -185,5 +185,6 @@
   "lokitWarmingUp": "正在启动 Fadocx 引擎...",
   "lokitAlmostThere": "即将完成",
   "lokitJustAMoment": "请稍候",
-  "lokitFailedToRender": "文档渲染失败"
+  "lokitFailedToRender": "文档渲染失败",
+  "trashSelect": "选择"
 }

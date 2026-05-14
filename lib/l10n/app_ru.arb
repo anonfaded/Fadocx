@@ -185,5 +185,6 @@
   "lokitWarmingUp": "Запуск движка Fadocx...",
   "lokitAlmostThere": "Почти готово",
   "lokitJustAMoment": "Подождите секунду",
-  "lokitFailedToRender": "Не удалось отобразить документ"
+  "lokitFailedToRender": "Не удалось отобразить документ",
+  "trashSelect": "Выбрать"
 }

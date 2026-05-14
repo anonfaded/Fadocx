@@ -1661,6 +1661,12 @@ abstract class AppLocalizations {
   /// **'files'**
   String get trashFilesLabel;
 
+  /// No description provided for @trashSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get trashSelect;
+
   /// No description provided for @trashFileRestored.
   ///
   /// In en, this message translates to:

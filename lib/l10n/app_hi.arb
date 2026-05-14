@@ -185,5 +185,6 @@
   "lokitWarmingUp": "Fadocx इंजन शुरू हो रहा है...",
   "lokitAlmostThere": "लगभग तैयार",
   "lokitJustAMoment": "बस एक पल",
-  "lokitFailedToRender": "दस्तावेज़ रेंडर नहीं हो सका"
+  "lokitFailedToRender": "दस्तावेज़ रेंडर नहीं हो सका",
+  "trashSelect": "चुनें"
 }

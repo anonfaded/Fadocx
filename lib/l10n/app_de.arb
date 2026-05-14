@@ -185,5 +185,6 @@
   "lokitWarmingUp": "Fadocx-Engine wird gestartet...",
   "lokitAlmostThere": "Fast fertig",
   "lokitJustAMoment": "Einen Moment",
-  "lokitFailedToRender": "Dokument konnte nicht gerendert werden"
+  "lokitFailedToRender": "Dokument konnte nicht gerendert werden",
+  "trashSelect": "Auswählen"
 }
