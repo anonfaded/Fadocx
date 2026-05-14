@@ -57,6 +57,7 @@ class SettingsMapper {
       syncStatus: hive.syncStatus,
       syncedAt: hive.syncedAt,
       autoUpdateCheck: hive.autoUpdateCheck ?? true,
+      showOnboardingNextLaunch: hive.showOnboardingNextLaunch ?? false,
     );
   }
 
@@ -74,6 +75,7 @@ class SettingsMapper {
       syncStatus: domain.syncStatus,
       syncedAt: domain.syncedAt,
       autoUpdateCheck: domain.autoUpdateCheck,
+      showOnboardingNextLaunch: domain.showOnboardingNextLaunch,
     );
   }
 }

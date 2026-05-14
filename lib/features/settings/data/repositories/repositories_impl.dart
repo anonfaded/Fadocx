@@ -149,6 +149,28 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
   }
 
   @override
+  Future<Result<void>> updateShowOnboardingNextLaunch(bool show) async {
+    try {
+      var settings = await _datasource.getSettings();
+      settings ??= HiveAppSettings();
+
+      final updated = settings.copyWith(
+        showOnboardingNextLaunch: show,
+        syncStatus: 'pending',
+        updatedAt: DateTime.now(),
+      );
+
+      await _datasource.saveSettings(updated);
+      log.i('Updated showOnboardingNextLaunch to: $show');
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to update showOnboardingNextLaunch', error: e, stackTrace: st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to update showOnboardingNextLaunch'));
+    }
+  }
+
+  @override
   Future<Result<void>> updateAutoUpdateCheck(bool enabled) async {
     try {
       var settings = await _datasource.getSettings();

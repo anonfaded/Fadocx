@@ -156,6 +156,9 @@ class HiveAppSettings {
   @HiveField(10)
   final bool? autoUpdateCheck;
 
+  @HiveField(11)
+  final bool? showOnboardingNextLaunch;
+
   HiveAppSettings({
     String? id,
     this.theme = 'dark',
@@ -168,6 +171,7 @@ class HiveAppSettings {
     this.syncStatus = 'pending',
     this.syncedAt,
     this.autoUpdateCheck,
+    this.showOnboardingNextLaunch,
   })  : hasDismissedWelcome = hasDismissedWelcome ?? false,
         id = id ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now(),
@@ -185,6 +189,7 @@ class HiveAppSettings {
     String? syncStatus,
     DateTime? syncedAt,
     bool? autoUpdateCheck,
+    bool? showOnboardingNextLaunch,
   }) {
     return HiveAppSettings(
       id: id ?? this.id,
@@ -198,6 +203,7 @@ class HiveAppSettings {
       syncStatus: syncStatus ?? this.syncStatus,
       syncedAt: syncedAt ?? this.syncedAt,
       autoUpdateCheck: autoUpdateCheck ?? this.autoUpdateCheck,
+      showOnboardingNextLaunch: showOnboardingNextLaunch ?? this.showOnboardingNextLaunch,
     );
   }
 

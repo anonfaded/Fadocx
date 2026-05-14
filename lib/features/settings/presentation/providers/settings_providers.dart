@@ -119,6 +119,15 @@ class SettingsMutator {
     );
   }
 
+  Future<void> updateShowOnboardingNextLaunch(bool show) async {
+    log.i('Updating showOnboardingNextLaunch to: $show');
+    final result = await _repository.updateShowOnboardingNextLaunch(show);
+    result.fold(
+      (failure) => log.e('Failed to update showOnboardingNextLaunch: ${failure.message}'),
+      (success) => log.i('showOnboardingNextLaunch updated successfully'),
+    );
+  }
+
   Future<void> updateAutoUpdateCheck(bool enabled) async {
     log.i('Updating autoUpdateCheck to: $enabled');
     final result = await _repository.updateAutoUpdateCheck(enabled);

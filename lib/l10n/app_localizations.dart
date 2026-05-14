@@ -977,6 +977,60 @@ abstract class AppLocalizations {
   /// **'Browse and import files from your device'**
   String get homeImportDocumentDesc;
 
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get onboardingGetStarted;
+
+  /// No description provided for @onboardingSlide1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Private Document Hub'**
+  String get onboardingSlide1Title;
+
+  /// No description provided for @onboardingSlide1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'All-in-one offline document viewer for Android with OCR and desktop-class rendering — private, open-source, zero tracking.'**
+  String get onboardingSlide1Desc;
+
+  /// No description provided for @onboardingSlide2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import & Own Your Documents'**
+  String get onboardingSlide2Title;
+
+  /// No description provided for @onboardingSlide2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Import documents into Fadocx\'s private storage — they stay hidden from your phone gallery and file manager. Export anytime, or keep them safely isolated.'**
+  String get onboardingSlide2Desc;
+
+  /// No description provided for @onboardingSlide3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'100% On-Device. Always.'**
+  String get onboardingSlide3Title;
+
+  /// No description provided for @onboardingSlide3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'No tracking. No analytics. No crash logs. No telemetry. All OCR and AI runs entirely on your device. What\'s yours stays yours.'**
+  String get onboardingSlide3Desc;
+
   /// No description provided for @homeStatDocuments.
   ///
   /// In en, this message translates to:
@@ -2062,6 +2116,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Auto Update Check'**
   String get settingsAutoUpdateCheck;
+
+  /// No description provided for @settingsReplayOnboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay Onboarding'**
+  String get settingsReplayOnboarding;
+
+  /// No description provided for @settingsReplayOnboardingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Show introduction slides on next launch'**
+  String get settingsReplayOnboardingDesc;
 
   /// No description provided for @settingsEnabled.
   ///

@@ -9,12 +9,14 @@ import 'package:fadocx/features/home/presentation/screens/whats_new_screen.dart'
 import 'package:fadocx/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fadocx/features/viewer/presentation/screens/viewer_screen.dart';
 import 'package:fadocx/features/scanner/presentation/screens/scanner_screen.dart';
+import 'package:fadocx/features/onboarding/presentation/screens/onboarding_screen.dart';
 
 final log = Logger();
 
 /// Route names constant
 class RouteNames {
   static const String home = '/';
+  static const String onboarding = '/onboarding';
   static const String documents = '/documents';
   static const String browse = '/browse';
   static const String trash = '/trash';
@@ -29,6 +31,11 @@ GoRouter? _routerInstance;
 
 /// Current route location preserved across rebuilds
 String _currentLocation = RouteNames.home;
+
+/// Set the initial route before the router is created (called from main.dart).
+void setInitialRoute(String route) {
+  _currentLocation = route;
+}
 
 /// Helper to create a fade transition page
 Page<dynamic> _fadeTransitionPage(
@@ -81,6 +88,16 @@ GoRouter createGoRouter() {
       );
     },
     routes: [
+      // Onboarding — shown on first launch
+      GoRoute(
+        path: RouteNames.onboarding,
+        name: 'onboarding',
+        pageBuilder: (context, state) {
+          log.d('Navigating to onboarding');
+          return _fadeTransitionPage(context, state, const OnboardingScreen());
+        },
+      ),
+
       // Home screen (tab shell with Home, Library, Settings)
       GoRoute(
         path: RouteNames.home,
