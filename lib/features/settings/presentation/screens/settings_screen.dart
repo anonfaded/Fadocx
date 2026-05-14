@@ -962,8 +962,6 @@ class SettingsScreen extends ConsumerWidget {
                         isSelected: currentCode == 'ur',
                         onTap: () => pickLang('ur'),
                       ),
-                      Divider(height: 1, indent: 16, endIndent: 16,
-                          color: Theme.of(context).colorScheme.outlineVariant),
                       _LanguageOption(
                         flag: '🇸🇦',
                         title: l10n.languageArabic,
@@ -971,6 +969,8 @@ class SettingsScreen extends ConsumerWidget {
                         isSelected: currentCode == 'ar',
                         onTap: () => pickLang('ar'),
                       ),
+                      Divider(height: 1, indent: 16, endIndent: 16,
+                          color: Theme.of(context).colorScheme.outlineVariant),
                       _LanguageOption(
                         flag: '🇨🇳',
                         title: l10n.languageChinese,

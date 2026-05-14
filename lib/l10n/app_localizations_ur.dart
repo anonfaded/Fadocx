@@ -1791,4 +1791,135 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get homeUnknown => 'نامعلوم';
+
+  @override
+  String routeNotFound(String path) {
+    return 'راستہ نہیں ملا: $path';
+  }
+
+  @override
+  String get routeGoHome => 'گھر جائیں';
+
+  @override
+  String get routeInvalidDocumentPath => 'غلط دستاویز راستہ';
+
+  @override
+  String get pdfCopyTextTitle => 'PDF متن کاپی کریں';
+
+  @override
+  String get pdfExtractingText => 'متن نکال رہے ہیں...';
+
+  @override
+  String pdfExtractingTextProgress(num current, num total) {
+    return 'متن نکال رہے ہیں... ($current/$total صفحات)';
+  }
+
+  @override
+  String get pdfErrorExtractingText => 'متن نکالنے میں خرابی';
+
+  @override
+  String pdfWordCount(num count) {
+    return 'الفاظ کی تعداد: $count';
+  }
+
+  @override
+  String get pdfNoTextFound => 'PDF میں کوئی متن نہیں ملا';
+
+  @override
+  String get pdfFullTextCopied => 'مکمل PDF متن کلپ بورڈ میں کاپی ہو گیا';
+
+  @override
+  String get pdfPasswordRequired => 'PDF پاس ورڈ درکار ہے';
+
+  @override
+  String get pdfPasswordDesc => 'یہ PDF پاس ورڈ سے محفوظ ہے۔ کھولنے کے لیے پاس ورڈ درج کریں۔';
+
+  @override
+  String get pdfPasswordLabel => 'پاس ورڈ';
+
+  @override
+  String get pdfUnlock => 'کھولیں';
+
+  @override
+  String get pdfSearchHint => 'PDF تلاش کریں...';
+
+  @override
+  String get pdfTextCannotBeExtracted => 'اس صفحے سے متن نہیں نکالا جا سکتا';
+
+  @override
+  String get pdfLoadingPageTexts => 'صفحات کا متن لوڈ ہو رہا ہے...';
+
+  @override
+  String pdfPageCopied(num page) {
+    return 'صفحہ $page کا متن کاپی ہو گیا';
+  }
+
+  @override
+  String get viewerTooltipSidebar => 'سائیڈ بار';
+
+  @override
+  String get viewerTooltipFirst => 'پہلا';
+
+  @override
+  String get viewerTooltipLast => 'آخری';
+
+  @override
+  String get viewerTooltipCopyPageText => 'صفحے کا متن کاپی کریں';
+
+  @override
+  String get textDocSearchHint => 'متن تلاش کریں...';
+
+  @override
+  String get textDocSearchPrevResult => 'پچھلا نتیجہ';
+
+  @override
+  String get textDocSearchNextResult => 'اگلا نتیجہ';
+
+  @override
+  String get imageFailedToLoad => 'تصویر لوڈ نہیں ہو سکی';
+
+  @override
+  String get mediaLoading => 'میڈیا لوڈ ہو رہا ہے...';
+
+  @override
+  String get mediaFailedToPlay => 'میڈیا چلانے میں ناکامی';
+
+  @override
+  String get mediaPlay => 'چلائیں';
+
+  @override
+  String get audioPlaybackNote => 'آڈیو پلے بیک کے لیے ایک اضافی لائبریری درکار ہے۔';
+
+  @override
+  String sheetNoData(String sheetName) {
+    return '$sheetName میں کوئی ڈیٹا نہیں';
+  }
+
+  @override
+  String documentNoSheets(String format) {
+    return '$format میں کوئی شیٹ نہیں ملی';
+  }
+
+  @override
+  String get viewerPlaybackSpeed => 'پلے بیک رفتار';
+
+  @override
+  String urlCopiedToClipboard(String url) {
+    return 'URL کلپ بورڈ میں کاپی ہوئی: $url';
+  }
+
+  @override
+  String get lokitPreparingDoc => 'آپ کی دستاویز تیار ہو رہی ہے...';
+
+  @override
+  String get lokitWarmingUp => 'Fadocx انجن چالو ہو رہا ہے...';
+
+  @override
+  String get lokitAlmostThere => 'تقریباً تیار';
+
+  @override
+  String get lokitJustAMoment => 'بس ایک لمحہ';
+
+  @override
+  String get lokitFailedToRender => 'دستاویز رینڈر نہیں ہو سکی';
 }

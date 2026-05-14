@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 /// Professional Spreadsheet Viewer — virtualized for 50k+ rows.
 class ProfessionalSheetViewer extends StatefulWidget {
@@ -275,7 +276,7 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
   @override
   Widget build(BuildContext context) {
     if (_rows.isEmpty) {
-      return Center(child: Text('No data in ${widget.sheet.name}'));
+      return Center(child: Text(AppLocalizations.of(context)!.sheetNoData(widget.sheet.name)));
     }
 
     final colors = _ThemeColors.of(context);

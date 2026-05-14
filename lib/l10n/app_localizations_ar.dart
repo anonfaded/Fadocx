@@ -1791,4 +1791,135 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeUnknown => 'unknown';
+
+  @override
+  String routeNotFound(String path) {
+    return 'المسار غير موجود: $path';
+  }
+
+  @override
+  String get routeGoHome => 'العودة للرئيسية';
+
+  @override
+  String get routeInvalidDocumentPath => 'مسار المستند غير صالح';
+
+  @override
+  String get pdfCopyTextTitle => 'نسخ نص PDF';
+
+  @override
+  String get pdfExtractingText => 'جارٍ استخراج النص...';
+
+  @override
+  String pdfExtractingTextProgress(num current, num total) {
+    return 'جارٍ استخراج النص... ($current/$total صفحات)';
+  }
+
+  @override
+  String get pdfErrorExtractingText => 'خطأ في استخراج النص';
+
+  @override
+  String pdfWordCount(num count) {
+    return 'عدد الكلمات: $count';
+  }
+
+  @override
+  String get pdfNoTextFound => 'لم يُعثر على نص في PDF';
+
+  @override
+  String get pdfFullTextCopied => 'تم نسخ نص PDF الكامل إلى الحافظة';
+
+  @override
+  String get pdfPasswordRequired => 'مطلوب كلمة مرور PDF';
+
+  @override
+  String get pdfPasswordDesc => 'هذا الـ PDF محمي بكلمة مرور. أدخل كلمة المرور لفتحه.';
+
+  @override
+  String get pdfPasswordLabel => 'كلمة المرور';
+
+  @override
+  String get pdfUnlock => 'إلغاء القفل';
+
+  @override
+  String get pdfSearchHint => 'البحث في PDF...';
+
+  @override
+  String get pdfTextCannotBeExtracted => 'لا يمكن استخراج النص من هذه الصفحة';
+
+  @override
+  String get pdfLoadingPageTexts => 'جارٍ تحميل نصوص الصفحات...';
+
+  @override
+  String pdfPageCopied(num page) {
+    return 'تم نسخ نص الصفحة $page';
+  }
+
+  @override
+  String get viewerTooltipSidebar => 'الشريط الجانبي';
+
+  @override
+  String get viewerTooltipFirst => 'الأول';
+
+  @override
+  String get viewerTooltipLast => 'الأخير';
+
+  @override
+  String get viewerTooltipCopyPageText => 'نسخ نص الصفحة';
+
+  @override
+  String get textDocSearchHint => 'البحث في النص...';
+
+  @override
+  String get textDocSearchPrevResult => 'النتيجة السابقة';
+
+  @override
+  String get textDocSearchNextResult => 'النتيجة التالية';
+
+  @override
+  String get imageFailedToLoad => 'فشل تحميل الصورة';
+
+  @override
+  String get mediaLoading => 'جارٍ تحميل الوسائط...';
+
+  @override
+  String get mediaFailedToPlay => 'فشل تشغيل الوسائط';
+
+  @override
+  String get mediaPlay => 'تشغيل';
+
+  @override
+  String get audioPlaybackNote => 'تشغيل الصوت يتطلب مكتبة إضافية.';
+
+  @override
+  String sheetNoData(String sheetName) {
+    return 'لا توجد بيانات في $sheetName';
+  }
+
+  @override
+  String documentNoSheets(String format) {
+    return 'لم يُعثر على أوراق في $format';
+  }
+
+  @override
+  String get viewerPlaybackSpeed => 'سرعة التشغيل';
+
+  @override
+  String urlCopiedToClipboard(String url) {
+    return 'تم نسخ الرابط إلى الحافظة: $url';
+  }
+
+  @override
+  String get lokitPreparingDoc => 'جارٍ تحضير مستندك...';
+
+  @override
+  String get lokitWarmingUp => 'جارٍ تشغيل محرك Fadocx...';
+
+  @override
+  String get lokitAlmostThere => 'على وشك الانتهاء';
+
+  @override
+  String get lokitJustAMoment => 'لحظة من فضلك';
+
+  @override
+  String get lokitFailedToRender => 'فشل في عرض المستند';
 }

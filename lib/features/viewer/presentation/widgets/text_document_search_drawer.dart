@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 
 class TextSearchResult {
   final int lineNumber;
@@ -54,7 +55,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                 controller: searchController,
                 onChanged: onQueryChanged,
                 decoration: InputDecoration(
-                  hintText: 'Search text...',
+                  hintText: AppLocalizations.of(context)!.textDocSearchHint,
                   prefixIcon: Icon(
                     Icons.search,
                     size: 20,
@@ -101,7 +102,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                       padding: const EdgeInsets.all(4),
                       constraints:
                           const BoxConstraints(minWidth: 28, minHeight: 28),
-                      tooltip: 'Previous result',
+                      tooltip: AppLocalizations.of(context)!.textDocSearchPrevResult,
                     ),
                     Text(
                       '${activeResultIndex + 1}/${results.length}',
@@ -117,7 +118,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                       padding: const EdgeInsets.all(4),
                       constraints:
                           const BoxConstraints(minWidth: 28, minHeight: 28),
-                      tooltip: 'Next result',
+                      tooltip: AppLocalizations.of(context)!.textDocSearchNextResult,
                     ),
                   ],
                 ],

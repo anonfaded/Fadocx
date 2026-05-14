@@ -2751,7 +2751,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Playback Speed'),
+        title: Text(l10n.viewerPlaybackSpeed),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: speeds.map((speed) {

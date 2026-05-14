@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 import 'package:fadocx/features/home/presentation/screens/main_shell.dart';
 import 'package:fadocx/features/home/presentation/screens/documents_screen.dart';
 import 'package:fadocx/features/home/presentation/screens/browse_screen.dart';
@@ -68,19 +69,20 @@ GoRouter createGoRouter() {
     debugLogDiagnostics: false, // Set to true for debugging
     errorBuilder: (context, state) {
       log.e('Route error: ${state.error}');
+      final l10n = AppLocalizations.of(context)!;
       return Scaffold(
-        appBar: AppBar(title: const Text('Error')),
+        appBar: AppBar(title: Text(l10n.error)),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Route not found: ${state.uri.toString()}'),
+              Text(l10n.routeNotFound(state.uri.toString())),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.go(RouteNames.home),
-                child: const Text('Go Home'),
+                child: Text(l10n.routeGoHome),
               ),
             ],
           ),
@@ -149,18 +151,18 @@ GoRouter createGoRouter() {
           if (filePath == null || filePath.isEmpty) {
             log.w('Document path is empty, redirecting to home');
             final errorWidget = Scaffold(
-              appBar: AppBar(title: const Text('Error')),
+              appBar: AppBar(title: Builder(builder: (ctx) => Text(AppLocalizations.of(ctx)!.error))),
               body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(Icons.warning, size: 64),
                     const SizedBox(height: 16),
-                    const Text('Invalid document path'),
+                    Builder(builder: (ctx) => Text(AppLocalizations.of(ctx)!.routeInvalidDocumentPath)),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => context.go(RouteNames.home),
-                      child: const Text('Go Home'),
+                      child: Builder(builder: (ctx) => Text(AppLocalizations.of(ctx)!.routeGoHome)),
                     ),
                   ],
                 ),

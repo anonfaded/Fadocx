@@ -1791,4 +1791,135 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeUnknown => 'unknown';
+
+  @override
+  String routeNotFound(String path) {
+    return 'Ruta no encontrada: $path';
+  }
+
+  @override
+  String get routeGoHome => 'Ir al inicio';
+
+  @override
+  String get routeInvalidDocumentPath => 'Ruta de documento inválida';
+
+  @override
+  String get pdfCopyTextTitle => 'Copiar texto del PDF';
+
+  @override
+  String get pdfExtractingText => 'Extrayendo texto...';
+
+  @override
+  String pdfExtractingTextProgress(num current, num total) {
+    return 'Extrayendo texto... ($current/$total páginas)';
+  }
+
+  @override
+  String get pdfErrorExtractingText => 'Error al extraer el texto';
+
+  @override
+  String pdfWordCount(num count) {
+    return 'Recuento de palabras: $count';
+  }
+
+  @override
+  String get pdfNoTextFound => 'No se encontró texto en el PDF';
+
+  @override
+  String get pdfFullTextCopied => 'Texto completo del PDF copiado al portapapeles';
+
+  @override
+  String get pdfPasswordRequired => 'Se requiere contraseña del PDF';
+
+  @override
+  String get pdfPasswordDesc => 'Este PDF está protegido con contraseña. Ingrese la contraseña para desbloquearlo.';
+
+  @override
+  String get pdfPasswordLabel => 'Contraseña';
+
+  @override
+  String get pdfUnlock => 'Desbloquear';
+
+  @override
+  String get pdfSearchHint => 'Buscar en PDF...';
+
+  @override
+  String get pdfTextCannotBeExtracted => 'El texto no puede extraerse de esta página';
+
+  @override
+  String get pdfLoadingPageTexts => 'Cargando textos de páginas...';
+
+  @override
+  String pdfPageCopied(num page) {
+    return 'Texto de la página $page copiado al portapapeles';
+  }
+
+  @override
+  String get viewerTooltipSidebar => 'Barra lateral';
+
+  @override
+  String get viewerTooltipFirst => 'Primero';
+
+  @override
+  String get viewerTooltipLast => 'Último';
+
+  @override
+  String get viewerTooltipCopyPageText => 'Copiar texto de la página';
+
+  @override
+  String get textDocSearchHint => 'Buscar texto...';
+
+  @override
+  String get textDocSearchPrevResult => 'Resultado anterior';
+
+  @override
+  String get textDocSearchNextResult => 'Resultado siguiente';
+
+  @override
+  String get imageFailedToLoad => 'Error al cargar la imagen';
+
+  @override
+  String get mediaLoading => 'Cargando medios...';
+
+  @override
+  String get mediaFailedToPlay => 'Error al reproducir los medios';
+
+  @override
+  String get mediaPlay => 'Reproducir';
+
+  @override
+  String get audioPlaybackNote => 'La reproducción de audio requiere una biblioteca adicional.';
+
+  @override
+  String sheetNoData(String sheetName) {
+    return 'Sin datos en $sheetName';
+  }
+
+  @override
+  String documentNoSheets(String format) {
+    return 'No se encontraron hojas en $format';
+  }
+
+  @override
+  String get viewerPlaybackSpeed => 'Velocidad de reproducción';
+
+  @override
+  String urlCopiedToClipboard(String url) {
+    return 'URL copiada al portapapeles: $url';
+  }
+
+  @override
+  String get lokitPreparingDoc => 'Preparando tu documento...';
+
+  @override
+  String get lokitWarmingUp => 'Iniciando el motor de Fadocx...';
+
+  @override
+  String get lokitAlmostThere => 'Casi listo';
+
+  @override
+  String get lokitJustAMoment => 'Un momento';
+
+  @override
+  String get lokitFailedToRender => 'Error al renderizar el documento';
 }

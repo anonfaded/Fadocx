@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fadocx/features/viewer/domain/entities/parsed_document_entity.dart';
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
+import 'package:fadocx/l10n/app_localizations.dart';
 import 'professional_sheet_viewer.dart';
 import 'modern_pdf_viewer.dart';
 import 'text_document_viewer.dart';
@@ -38,7 +39,7 @@ class DocumentViewerFactory {
   static Widget _buildSpreadsheetViewer(ParsedDocumentEntity document, void Function(String?, String)? onSelectionChanged, Key? sheetViewerKey, {double zoom = 1.0}) {
     if (document.sheets.isEmpty) {
       return Center(
-        child: Text('No sheets found in ${document.format}'),
+        child: Builder(builder: (ctx) => Text(AppLocalizations.of(ctx)!.documentNoSheets(document.format))),
       );
     }
 
@@ -68,7 +69,7 @@ class DocumentViewerFactory {
   static Widget _buildSheetTable(SheetEntity sheet, void Function(String?, String)? onSelectionChanged, Key? sheetViewerKey, {double zoom = 1.0}) {
     if (sheet.rows.isEmpty) {
       return Center(
-        child: Text('No data in ${sheet.name}'),
+        child: Builder(builder: (ctx) => Text(AppLocalizations.of(ctx)!.sheetNoData(sheet.name))),
       );
     }
 
