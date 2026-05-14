@@ -1075,43 +1075,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fileActionSubtitle => 'إجراءات الملف وإدارته';
 
   @override
-  String get updateAvailableTitle => 'Update Available';
+  String get updateAvailableTitle => 'تحديث متاح';
 
   @override
-  String get updateAvailableSubtitle => 'A new version is ready to download';
+  String get updateAvailableSubtitle => 'نسخة جديدة من Fadocx جاهزة للتنزيل';
 
   @override
-  String get updateStableRelease => 'Stable Release';
+  String get updateStableRelease => 'إصدار مستقر';
 
   @override
-  String get updateStableDesc => 'Recommended for most users';
+  String get updateStableDesc => 'إصدار مستقر واختبار للاستخدام في الإنتاج';
 
   @override
-  String get updateBetaRelease => 'Beta Release';
+  String get updateBetaRelease => 'إصدار بيتا';
 
   @override
-  String get updateBetaDesc => 'Latest features — may be unstable';
+  String get updateBetaDesc => 'وصول مبكر إلى الميزات الجديدة، قد تحتوي على أخطاء';
 
   @override
-  String get updateMaybeLater => 'Maybe Later';
+  String get updateMaybeLater => 'ربما لاحقاً';
 
   @override
-  String get updateCurrent => 'Current';
+  String get updateCurrent => 'الحالي';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => 'جديد';
 
   @override
-  String get updateVisitGithub => 'Visit GitHub';
+  String get updateVisitGithub => 'زيارة GitHub';
 
   @override
   String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
-  String get updateBannerStable => 'Stable Update';
+  String get updateBannerStable => 'تحديث مستقر';
 
   @override
-  String get updateBannerBeta => 'Beta Update';
+  String get updateBannerBeta => 'تحديث بيتا';
 
   @override
   String get settingsAppearance => 'المظهر';
@@ -1933,4 +1933,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'فشل في عرض المستند';
+
+  @override
+  String get drawerFadSecLab => 'فادسيك لاب';
 }

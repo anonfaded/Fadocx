@@ -1075,43 +1075,43 @@ class AppLocalizationsDe extends AppLocalizations {
   String get fileActionSubtitle => 'Dateiaktionen und Verwaltung';
 
   @override
-  String get updateAvailableTitle => 'Update Available';
+  String get updateAvailableTitle => 'Update verfügbar';
 
   @override
-  String get updateAvailableSubtitle => 'A new version is ready to download';
+  String get updateAvailableSubtitle => 'Eine neue Version von Fadocx ist zum Download bereit';
 
   @override
-  String get updateStableRelease => 'Stable Release';
+  String get updateStableRelease => 'Stabile Version';
 
   @override
-  String get updateStableDesc => 'Recommended for most users';
+  String get updateStableDesc => 'Stabile und getestete Version für den Produktionseinsatz';
 
   @override
-  String get updateBetaRelease => 'Beta Release';
+  String get updateBetaRelease => 'Beta-Version';
 
   @override
-  String get updateBetaDesc => 'Latest features — may be unstable';
+  String get updateBetaDesc => 'Früher Zugriff auf neue Funktionen, kann Fehler enthalten';
 
   @override
-  String get updateMaybeLater => 'Maybe Later';
+  String get updateMaybeLater => 'Vielleicht später';
 
   @override
-  String get updateCurrent => 'Current';
+  String get updateCurrent => 'Aktuell';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => 'Neu';
 
   @override
-  String get updateVisitGithub => 'Visit GitHub';
+  String get updateVisitGithub => 'GitHub besuchen';
 
   @override
   String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
-  String get updateBannerStable => 'Stable Update';
+  String get updateBannerStable => 'Stabiles Update';
 
   @override
-  String get updateBannerBeta => 'Beta Update';
+  String get updateBannerBeta => 'Beta-Update';
 
   @override
   String get settingsAppearance => 'Darstellung';
@@ -1933,4 +1933,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'Dokument konnte nicht gerendert werden';
+
+  @override
+  String get drawerFadSecLab => 'FadSec Lab';
 }

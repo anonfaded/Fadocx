@@ -242,12 +242,12 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
           ),
         ),
 
-        // Footer with copyright + Discord
+        // Footer with copyright + Discord + FadSecLab
         const Divider(height: 1),
         Padding(
           padding: const EdgeInsets.all(16),
           child: InkWell(
-            onTap: () => _openUrl('https://fadseclab.com'),
+            onTap: () => _showFadSecLabSheet(context),
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 2),
@@ -629,6 +629,87 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               label: AppLocalizations.of(context)!.copyLink,
               onTap: () {
                 Clipboard.setData(ClipboardData(text: discordUrl));
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFadSecLabSheet(BuildContext context) {
+    const fadsecLabUrl = 'https://fadseclab.com';
+    final brightness = Theme.of(context).brightness;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: brightness == Brightness.dark
+              ? const Color(0xFF1C1C1E)
+              : const Color(0xFFF2F2F7),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+        ),
+        padding: EdgeInsets.only(
+          top: 6,
+          bottom: MediaQuery.of(context).padding.bottom + 6,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 5,
+              margin: const EdgeInsets.only(top: 4, bottom: 12),
+              decoration: BoxDecoration(
+                color: brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+              child: Text(
+                AppLocalizations.of(context)!.drawerFadSecLab,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                fadsecLabUrl,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _sheetActionButton(
+              context,
+              icon: Icons.open_in_browser,
+              label: AppLocalizations.of(context)!.openInBrowser,
+              onTap: () {
+                Navigator.pop(ctx);
+                _openUrl(fadsecLabUrl);
+              },
+            ),
+            const SizedBox(height: 8),
+            _sheetActionButton(
+              context,
+              icon: Icons.content_copy,
+              label: AppLocalizations.of(context)!.copyLink,
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: fadsecLabUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),

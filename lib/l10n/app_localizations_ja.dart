@@ -849,7 +849,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get browseSortBy => '並び替え';
+  String get browseSortBy => '並び順:';
 
   @override
   String browseImportedFiles(num count) {
@@ -1075,43 +1075,43 @@ class AppLocalizationsJa extends AppLocalizations {
   String get fileActionSubtitle => 'ファイル操作と管理';
 
   @override
-  String get updateAvailableTitle => 'Update Available';
+  String get updateAvailableTitle => '更新利用可能';
 
   @override
-  String get updateAvailableSubtitle => 'A new version is ready to download';
+  String get updateAvailableSubtitle => 'Fadocxの新しいバージョンがダウンロード可能です';
 
   @override
-  String get updateStableRelease => 'Stable Release';
+  String get updateStableRelease => '安定版リリース';
 
   @override
-  String get updateStableDesc => 'Recommended for most users';
+  String get updateStableDesc => '本番環境で使用するための安定版でテスト済みのリリース';
 
   @override
-  String get updateBetaRelease => 'Beta Release';
+  String get updateBetaRelease => 'ベータ版リリース';
 
   @override
-  String get updateBetaDesc => 'Latest features — may be unstable';
+  String get updateBetaDesc => '新機能への早期アクセス、バグが含まれる場合があります';
 
   @override
-  String get updateMaybeLater => 'Maybe Later';
+  String get updateMaybeLater => '後で';
 
   @override
-  String get updateCurrent => 'Current';
+  String get updateCurrent => '現在';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => '新規';
 
   @override
-  String get updateVisitGithub => 'Visit GitHub';
+  String get updateVisitGithub => 'GitHubにアクセス';
 
   @override
   String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
-  String get updateBannerStable => 'Stable Update';
+  String get updateBannerStable => '安定版更新';
 
   @override
-  String get updateBannerBeta => 'Beta Update';
+  String get updateBannerBeta => 'ベータ版更新';
 
   @override
   String get settingsAppearance => '外観';
@@ -1933,4 +1933,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'ドキュメントの表示に失敗しました';
+
+  @override
+  String get drawerFadSecLab => 'FadSec Lab';
 }

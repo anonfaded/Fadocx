@@ -1075,43 +1075,43 @@ class AppLocalizationsEs extends AppLocalizations {
   String get fileActionSubtitle => 'Acciones y gestión del archivo';
 
   @override
-  String get updateAvailableTitle => 'Update Available';
+  String get updateAvailableTitle => 'Actualización disponible';
 
   @override
-  String get updateAvailableSubtitle => 'A new version is ready to download';
+  String get updateAvailableSubtitle => 'Una nueva versión de Fadocx está lista para descargar';
 
   @override
-  String get updateStableRelease => 'Stable Release';
+  String get updateStableRelease => 'Versión estable';
 
   @override
-  String get updateStableDesc => 'Recommended for most users';
+  String get updateStableDesc => 'Versión estable y probada para uso en producción';
 
   @override
-  String get updateBetaRelease => 'Beta Release';
+  String get updateBetaRelease => 'Versión beta';
 
   @override
-  String get updateBetaDesc => 'Latest features — may be unstable';
+  String get updateBetaDesc => 'Acceso anticipado a nuevas características, puede contener errores';
 
   @override
-  String get updateMaybeLater => 'Maybe Later';
+  String get updateMaybeLater => 'Quizás luego';
 
   @override
-  String get updateCurrent => 'Current';
+  String get updateCurrent => 'Actual';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => 'Nuevo';
 
   @override
-  String get updateVisitGithub => 'Visit GitHub';
+  String get updateVisitGithub => 'Visitar GitHub';
 
   @override
   String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
-  String get updateBannerStable => 'Stable Update';
+  String get updateBannerStable => 'Actualización estable';
 
   @override
-  String get updateBannerBeta => 'Beta Update';
+  String get updateBannerBeta => 'Actualización beta';
 
   @override
   String get settingsAppearance => 'Apariencia';
@@ -1933,4 +1933,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => 'Error al renderizar el documento';
+
+  @override
+  String get drawerFadSecLab => 'FadSec Lab';
 }

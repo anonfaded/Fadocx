@@ -1075,43 +1075,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fileActionSubtitle => '文件操作与管理';
 
   @override
-  String get updateAvailableTitle => 'Update Available';
+  String get updateAvailableTitle => '可用更新';
 
   @override
-  String get updateAvailableSubtitle => 'A new version is ready to download';
+  String get updateAvailableSubtitle => 'Fadocx的新版本已准备好下载';
 
   @override
-  String get updateStableRelease => 'Stable Release';
+  String get updateStableRelease => '稳定版本';
 
   @override
-  String get updateStableDesc => 'Recommended for most users';
+  String get updateStableDesc => '用于生产环境的稳定且经过测试的版本';
 
   @override
-  String get updateBetaRelease => 'Beta Release';
+  String get updateBetaRelease => '测试版';
 
   @override
-  String get updateBetaDesc => 'Latest features — may be unstable';
+  String get updateBetaDesc => '新功能的早期访问权限，可能包含缺陷';
 
   @override
-  String get updateMaybeLater => 'Maybe Later';
+  String get updateMaybeLater => '稍后再说';
 
   @override
-  String get updateCurrent => 'Current';
+  String get updateCurrent => '当前';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => '新';
 
   @override
-  String get updateVisitGithub => 'Visit GitHub';
+  String get updateVisitGithub => '访问 GitHub';
 
   @override
   String get updateBetaInfo => 'The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.';
 
   @override
-  String get updateBannerStable => 'Stable Update';
+  String get updateBannerStable => '稳定更新';
 
   @override
-  String get updateBannerBeta => 'Beta Update';
+  String get updateBannerBeta => '测试版更新';
 
   @override
   String get settingsAppearance => '外观';
@@ -1933,4 +1933,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lokitFailedToRender => '文档渲染失败';
+
+  @override
+  String get drawerFadSecLab => 'FadSec 实验室';
 }
