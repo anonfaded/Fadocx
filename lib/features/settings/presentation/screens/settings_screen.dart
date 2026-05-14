@@ -385,9 +385,20 @@ class SettingsScreen extends ConsumerWidget {
 
   String _getLanguageDisplayName(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
-    return locale.languageCode == 'en'
-        ? AppLocalizations.of(context)!.languageEnglish
-        : AppLocalizations.of(context)!.languageUrdu;
+    final l10n = AppLocalizations.of(context)!;
+    switch (locale.languageCode) {
+      case 'ur': return l10n.languageUrdu;
+      case 'ru': return l10n.languageRussian;
+      case 'zh': return l10n.languageChinese;
+      case 'ja': return l10n.languageJapanese;
+      case 'fr': return l10n.languageFrench;
+      case 'ar': return l10n.languageArabic;
+      case 'es': return l10n.languageSpanish;
+      case 'de': return l10n.languageGerman;
+      case 'pt': return l10n.languagePortuguese;
+      case 'hi': return l10n.languageHindi;
+      default:   return l10n.languageEnglish;
+    }
   }
 
   void _copyToClipboard(BuildContext context, String text) {
@@ -905,9 +916,18 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showLanguagePicker(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final currentCode = ref.read(localeProvider).languageCode;
+
+    void pickLang(String code) {
+      ref.read(localeProvider.notifier).setLocale(code);
+      ref.read(settingsMutatorProvider).updateLanguage(code);
+      Navigator.pop(context);
+    }
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) => Container(
         decoration: _bottomSheetDecoration(context),
         child: SafeArea(
@@ -916,7 +936,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               _handle(context),
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
                 child: Text(
                   l10n.settingsSelectLanguage,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -924,27 +944,94 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                 ),
               ),
-              _LanguageOption(
-                flag: '🇺🇸',
-                title: AppLocalizations.of(context)!.languageEnglish,
-                isSelected: ref.read(localeProvider).languageCode == 'en',
-                onTap: () {
-                  ref.read(localeProvider.notifier).setLocale('en');
-                  ref.read(settingsMutatorProvider).updateLanguage('en');
-                  Navigator.pop(context);
-                },
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _LanguageOption(
+                        flag: '🇺🇸',
+                        title: l10n.languageEnglish,
+                        subtitle: 'English',
+                        isSelected: currentCode == 'en',
+                        onTap: () => pickLang('en'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇵🇰',
+                        title: l10n.languageUrdu,
+                        subtitle: 'Urdu',
+                        isSelected: currentCode == 'ur',
+                        onTap: () => pickLang('ur'),
+                      ),
+                      Divider(height: 1, indent: 16, endIndent: 16,
+                          color: Theme.of(context).colorScheme.outlineVariant),
+                      _LanguageOption(
+                        flag: '🇸🇦',
+                        title: l10n.languageArabic,
+                        subtitle: 'Arabic',
+                        isSelected: currentCode == 'ar',
+                        onTap: () => pickLang('ar'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇨🇳',
+                        title: l10n.languageChinese,
+                        subtitle: 'Chinese',
+                        isSelected: currentCode == 'zh',
+                        onTap: () => pickLang('zh'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇫🇷',
+                        title: l10n.languageFrench,
+                        subtitle: 'French',
+                        isSelected: currentCode == 'fr',
+                        onTap: () => pickLang('fr'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇩🇪',
+                        title: l10n.languageGerman,
+                        subtitle: 'German',
+                        isSelected: currentCode == 'de',
+                        onTap: () => pickLang('de'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇮🇳',
+                        title: l10n.languageHindi,
+                        subtitle: 'Hindi',
+                        isSelected: currentCode == 'hi',
+                        onTap: () => pickLang('hi'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇯🇵',
+                        title: l10n.languageJapanese,
+                        subtitle: 'Japanese',
+                        isSelected: currentCode == 'ja',
+                        onTap: () => pickLang('ja'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇧🇷',
+                        title: l10n.languagePortuguese,
+                        subtitle: 'Portuguese',
+                        isSelected: currentCode == 'pt',
+                        onTap: () => pickLang('pt'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇷🇺',
+                        title: l10n.languageRussian,
+                        subtitle: 'Russian',
+                        isSelected: currentCode == 'ru',
+                        onTap: () => pickLang('ru'),
+                      ),
+                      _LanguageOption(
+                        flag: '🇪🇸',
+                        title: l10n.languageSpanish,
+                        subtitle: 'Spanish',
+                        isSelected: currentCode == 'es',
+                        onTap: () => pickLang('es'),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
               ),
-              _LanguageOption(
-                flag: '🇵🇰',
-                title: AppLocalizations.of(context)!.languageUrdu,
-                isSelected: ref.read(localeProvider).languageCode == 'ur',
-                onTap: () {
-                  ref.read(localeProvider.notifier).setLocale('ur');
-                  ref.read(settingsMutatorProvider).updateLanguage('ur');
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -2277,12 +2364,14 @@ class _ThemeOption extends StatelessWidget {
 class _LanguageOption extends StatelessWidget {
   final String flag;
   final String title;
+  final String? subtitle;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _LanguageOption({
     required this.flag,
     required this.title,
+    this.subtitle,
     required this.isSelected,
     required this.onTap,
   });
@@ -2292,6 +2381,14 @@ class _LanguageOption extends StatelessWidget {
     return ListTile(
       leading: Text(flag, style: const TextStyle(fontSize: 28)),
       title: Text(title),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            )
+          : null,
       trailing: isSelected
           ? Icon(Icons.check_circle,
               color: Theme.of(context).colorScheme.primary)

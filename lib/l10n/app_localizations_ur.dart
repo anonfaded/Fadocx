@@ -156,6 +156,33 @@ class AppLocalizationsUr extends AppLocalizations {
   String get languageUrdu => 'اردو';
 
   @override
+  String get languageRussian => 'روسی';
+
+  @override
+  String get languageChinese => 'چینی';
+
+  @override
+  String get languageJapanese => 'جاپانی';
+
+  @override
+  String get languageFrench => 'فرانسیسی';
+
+  @override
+  String get languageArabic => 'عربی';
+
+  @override
+  String get languageSpanish => 'ہسپانوی';
+
+  @override
+  String get languageGerman => 'جرمن';
+
+  @override
+  String get languagePortuguese => 'پرتگالی';
+
+  @override
+  String get languageHindi => 'ہندی';
+
+  @override
   String get appVersion => 'ایپ ورژن';
 
   @override
@@ -507,22 +534,46 @@ class AppLocalizationsUr extends AppLocalizations {
   String get onboardingGetStarted => 'شروع کریں';
 
   @override
-  String get onboardingSlide1Title => 'آپ کا پرائیویٹ دستاویزی مرکز';
+  String get onboardingSlide1Title => 'Fadocx میں خوش آمدید';
 
   @override
-  String get onboardingSlide1Desc => 'اینڈرائیڈ کے لیے آف لائن دستاویز ناظر، OCR اور ڈیسک ٹاپ کلاس رینڈرنگ کے ساتھ — پرائیویٹ، اوپن سورس، زیرو ٹریکنگ۔';
+  String get onboardingSlide1Tagline => 'آپ کا آل-ان-ون پرائیویٹ دستاویزی ساتھی';
 
   @override
-  String get onboardingSlide2Title => 'دستاویزات درآمد کریں اور ان کے مالک بنیں';
+  String get onboardingSlide1Bullet1 => 'ہر فارمیٹ کھولیں — PDFs، آفس فائلیں، تصاویر اور مزید';
 
   @override
-  String get onboardingSlide2Desc => 'Fadocx کی پرائیویٹ اسٹوریج میں دستاویزات درآمد کریں — یہ آپ کی فون گیلری اور فائل مینیجر سے پوشیدہ رہتی ہیں۔ کسی بھی وقت ایکسپورٹ کریں، یا محفوظ طریقے سے الگ رکھیں۔';
+  String get onboardingSlide1Bullet2 => 'پرائیویٹ اسٹوریج، گیلری اور فائل منیجر سے پوشیدہ';
 
   @override
-  String get onboardingSlide3Title => '100٪ آن ڈیوائس۔ ہمیشہ۔';
+  String get onboardingSlide1Bullet3 => 'مفت، اوپن سورس — کوئی اکاؤنٹ یا سائن اپ نہیں';
 
   @override
-  String get onboardingSlide3Desc => 'کوئی ٹریکنگ نہیں۔ کوئی اینالیٹکس نہیں۔ کوئی کریش لاگ نہیں۔ کوئی ٹیلیمیٹری نہیں۔ تمام OCR اور AI مکمل طور پر آپ کی ڈیوائس پر چلتے ہیں۔ جو آپ کا ہے وہ آپ کا رہتا ہے۔';
+  String get onboardingSlide2Title => 'بلٹ این پاور ٹولز';
+
+  @override
+  String get onboardingSlide2Bullet1 => 'کیمرے سے کاغذی دستاویزات اسکین کریں — متن فوری نکلے';
+
+  @override
+  String get onboardingSlide2Bullet2 => 'ایپ میں ہی آڈیو اور ویڈیو چلائیں، کوئی اضافی ایپ نہیں';
+
+  @override
+  String get onboardingSlide2Bullet3 => 'درآمد پر سب خودبخود زمروں میں ترتیب پاتا ہے';
+
+  @override
+  String get onboardingSlide2Bullet4 => 'محفوظ حذف — ٹریش سے کسی بھی وقت بحال کریں';
+
+  @override
+  String get onboardingSlide3Title => 'پرائیویسی بہ ڈیزائن';
+
+  @override
+  String get onboardingSlide3Bullet1 => 'کچھ بھی آپ کے ڈیوائس سے نہیں جاتا — کوئی کلاؤڈ نہیں';
+
+  @override
+  String get onboardingSlide3Bullet2 => 'کوئی ٹریکنگ نہیں، کوئی اشتہار نہیں، کوئی اینالیٹکس نہیں۔ کبھی نہیں۔';
+
+  @override
+  String get onboardingSlide3Bullet3 => 'اوپن سورس — کوڈ کی ہر لائن عوامی ہے';
 
   @override
   String get homeStatDocuments => 'دستاویزات';

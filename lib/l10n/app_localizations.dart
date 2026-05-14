@@ -5,8 +5,17 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_hi.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
 import 'app_localizations_ur.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -91,8 +100,17 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('de'),
     Locale('en'),
-    Locale('ur')
+    Locale('es'),
+    Locale('fr'),
+    Locale('hi'),
+    Locale('ja'),
+    Locale('pt'),
+    Locale('ru'),
+    Locale('ur'),
+    Locale('zh')
   ];
 
   /// No description provided for @appName.
@@ -388,6 +406,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'اردو'**
   String get languageUrdu;
+
+  /// No description provided for @languageRussian.
+  ///
+  /// In en, this message translates to:
+  /// **'Русский'**
+  String get languageRussian;
+
+  /// No description provided for @languageChinese.
+  ///
+  /// In en, this message translates to:
+  /// **'中文'**
+  String get languageChinese;
+
+  /// No description provided for @languageJapanese.
+  ///
+  /// In en, this message translates to:
+  /// **'日本語'**
+  String get languageJapanese;
+
+  /// No description provided for @languageFrench.
+  ///
+  /// In en, this message translates to:
+  /// **'Français'**
+  String get languageFrench;
+
+  /// No description provided for @languageArabic.
+  ///
+  /// In en, this message translates to:
+  /// **'العربية'**
+  String get languageArabic;
+
+  /// No description provided for @languageSpanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Español'**
+  String get languageSpanish;
+
+  /// No description provided for @languageGerman.
+  ///
+  /// In en, this message translates to:
+  /// **'Deutsch'**
+  String get languageGerman;
+
+  /// No description provided for @languagePortuguese.
+  ///
+  /// In en, this message translates to:
+  /// **'Português'**
+  String get languagePortuguese;
+
+  /// No description provided for @languageHindi.
+  ///
+  /// In en, this message translates to:
+  /// **'हिन्दी'**
+  String get languageHindi;
 
   /// No description provided for @appVersion.
   ///
@@ -998,38 +1070,86 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSlide1Title.
   ///
   /// In en, this message translates to:
-  /// **'Your Private Document Hub'**
+  /// **'Welcome to Fadocx'**
   String get onboardingSlide1Title;
 
-  /// No description provided for @onboardingSlide1Desc.
+  /// No description provided for @onboardingSlide1Tagline.
   ///
   /// In en, this message translates to:
-  /// **'All-in-one offline document viewer for Android with OCR and desktop-class rendering — private, open-source, zero tracking.'**
-  String get onboardingSlide1Desc;
+  /// **'Your all-in-one private document companion'**
+  String get onboardingSlide1Tagline;
+
+  /// No description provided for @onboardingSlide1Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open any format — PDFs, Office files, images & more'**
+  String get onboardingSlide1Bullet1;
+
+  /// No description provided for @onboardingSlide1Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Private storage, hidden from your gallery & file manager'**
+  String get onboardingSlide1Bullet2;
+
+  /// No description provided for @onboardingSlide1Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Free, open-source — no account or signup needed'**
+  String get onboardingSlide1Bullet3;
 
   /// No description provided for @onboardingSlide2Title.
   ///
   /// In en, this message translates to:
-  /// **'Import & Own Your Documents'**
+  /// **'Built-in Power Tools'**
   String get onboardingSlide2Title;
 
-  /// No description provided for @onboardingSlide2Desc.
+  /// No description provided for @onboardingSlide2Bullet1.
   ///
   /// In en, this message translates to:
-  /// **'Import documents into Fadocx\'s private storage — they stay hidden from your phone gallery and file manager. Export anytime, or keep them safely isolated.'**
-  String get onboardingSlide2Desc;
+  /// **'Scan paper docs with your camera — text extracted instantly'**
+  String get onboardingSlide2Bullet1;
+
+  /// No description provided for @onboardingSlide2Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Play audio & video right in the app, no extras needed'**
+  String get onboardingSlide2Bullet2;
+
+  /// No description provided for @onboardingSlide2Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything auto-sorted into categories the moment you import'**
+  String get onboardingSlide2Bullet3;
+
+  /// No description provided for @onboardingSlide2Bullet4.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe delete — restore anything from trash, anytime'**
+  String get onboardingSlide2Bullet4;
 
   /// No description provided for @onboardingSlide3Title.
   ///
   /// In en, this message translates to:
-  /// **'100% On-Device. Always.'**
+  /// **'Privacy by Design'**
   String get onboardingSlide3Title;
 
-  /// No description provided for @onboardingSlide3Desc.
+  /// No description provided for @onboardingSlide3Bullet1.
   ///
   /// In en, this message translates to:
-  /// **'No tracking. No analytics. No crash logs. No telemetry. All OCR and AI runs entirely on your device. What\'s yours stays yours.'**
-  String get onboardingSlide3Desc;
+  /// **'Nothing ever leaves your device — no cloud, no servers'**
+  String get onboardingSlide3Bullet1;
+
+  /// No description provided for @onboardingSlide3Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'No tracking, no ads, no analytics. Ever.'**
+  String get onboardingSlide3Bullet2;
+
+  /// No description provided for @onboardingSlide3Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Open-source — every line of code is public'**
+  String get onboardingSlide3Bullet3;
 
   /// No description provided for @homeStatDocuments.
   ///
@@ -3195,7 +3315,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'ur'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['ar', 'de', 'en', 'es', 'fr', 'hi', 'ja', 'pt', 'ru', 'ur', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -3206,8 +3326,17 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar': return AppLocalizationsAr();
+    case 'de': return AppLocalizationsDe();
     case 'en': return AppLocalizationsEn();
+    case 'es': return AppLocalizationsEs();
+    case 'fr': return AppLocalizationsFr();
+    case 'hi': return AppLocalizationsHi();
+    case 'ja': return AppLocalizationsJa();
+    case 'pt': return AppLocalizationsPt();
+    case 'ru': return AppLocalizationsRu();
     case 'ur': return AppLocalizationsUr();
+    case 'zh': return AppLocalizationsZh();
   }
 
   throw FlutterError(
