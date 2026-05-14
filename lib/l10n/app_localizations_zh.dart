@@ -321,7 +321,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get charactersLoaded => 'characters';
 
   @override
-  String get copiedToClipboard => 'Copied to clipboard';
+  String get copiedToClipboard => '已复制到剪贴板';
 
   @override
   String get navHome => '主页';
@@ -363,22 +363,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get categoryPresentations => '演示文稿';
 
   @override
-  String get supportDevelopment => 'Support Development';
+  String get supportDevelopment => '支持开发';
 
   @override
-  String get visitPatreon => 'Visit Patreon';
+  String get visitPatreon => '访问 Patreon';
 
   @override
-  String get copyLink => 'Copy Link';
+  String get copyLink => '复制链接';
 
   @override
   String get becomeAPatron => 'Become a Patron';
 
   @override
-  String get patreonDescription => 'Your support keeps Fadocx and FadCam growing. Patreon subscribers unlock exclusive benefits including premium features and early access across all FadSec Lab apps.\n\nFor more info, visit Patreon from the link below and check the available tiers with their benefits.';
+  String get patreonDescription => '你的支持能帮助 Fadocx 和 FadCam 持续成长。Patreon 订阅者可解锁专属福利，包括高级功能以及 FadSec Lab 全部应用的抢先体验。\n\n想了解更多，请通过下方链接访问 Patreon，并查看可用档位及其福利。';
 
   @override
-  String get discordTitle => 'Join our Discord';
+  String get discordTitle => '加入我们的 Discord';
 
   @override
   String get openInBrowser => '在浏览器中打开';
@@ -390,15 +390,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get newBadge => 'NEW';
 
   @override
-  String get timeAgoJustNow => 'Just now';
+  String get timeAgoJustNow => '刚刚';
 
   @override
   String timeAgoMinute(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count minutes ago',
-      one: '1 minute ago',
+      other: '$count 分钟前',
+      one: '1 分钟前',
     );
     return '$_temp0';
   }
@@ -408,8 +408,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count hours ago',
-      one: '1 hour ago',
+      other: '$count 小时前',
+      one: '1 小时前',
     );
     return '$_temp0';
   }
@@ -419,8 +419,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count days ago',
-      one: '1 day ago',
+      other: '$count 天前',
+      one: '1 天前',
     );
     return '$_temp0';
   }
@@ -430,8 +430,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count weeks ago',
-      one: '1 week ago',
+      other: '$count 周前',
+      one: '1 周前',
     );
     return '$_temp0';
   }
@@ -441,8 +441,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count months ago',
-      one: '1 month ago',
+      other: '$count 个月前',
+      one: '1 个月前',
     );
     return '$_temp0';
   }
@@ -452,47 +452,47 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count years ago',
-      one: '1 year ago',
+      other: '$count 年前',
+      one: '1 年前',
     );
     return '$_temp0';
   }
 
   @override
-  String get monthJan => 'Jan';
+  String get monthJan => '1月';
 
   @override
-  String get monthFeb => 'Feb';
+  String get monthFeb => '2月';
 
   @override
-  String get monthMar => 'Mar';
+  String get monthMar => '3月';
 
   @override
-  String get monthApr => 'Apr';
+  String get monthApr => '4月';
 
   @override
-  String get monthMay => 'May';
+  String get monthMay => '5月';
 
   @override
-  String get monthJun => 'Jun';
+  String get monthJun => '6月';
 
   @override
-  String get monthJul => 'Jul';
+  String get monthJul => '7月';
 
   @override
-  String get monthAug => 'Aug';
+  String get monthAug => '8月';
 
   @override
-  String get monthSep => 'Sep';
+  String get monthSep => '9月';
 
   @override
-  String get monthOct => 'Oct';
+  String get monthOct => '10月';
 
   @override
-  String get monthNov => 'Nov';
+  String get monthNov => '11月';
 
   @override
-  String get monthDec => 'Dec';
+  String get monthDec => '12月';
 
   @override
   String get homeWelcomeTitle => '欢迎使用 Fadocx';
@@ -504,7 +504,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeExploreSamples => '浏览示例文件';
 
   @override
-  String get homeDocumentManagement => 'Document Management';
+  String get homeDocumentManagement => '文档管理';
 
   @override
   String get homeSeeAll => '查看全部';
@@ -576,16 +576,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingSlide3Bullet3 => '开源 — 每行代码均公开';
 
   @override
-  String get homeStatDocuments => 'Documents';
+  String get homeStatDocuments => '文档';
 
   @override
-  String get homeStatStorage => 'Storage';
+  String get homeStatStorage => '存储';
 
   @override
-  String get homeStatTimeRead => 'Time Read';
+  String get homeStatTimeRead => '阅读时长';
 
   @override
-  String get homeStatLastOpened => 'Last Opened: ';
+  String get homeStatLastOpened => '最后打开: ';
 
   @override
   String get homePressBackExit => '再按一次退出';
@@ -618,31 +618,31 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get homeFileInfo => 'File info';
+  String get homeFileInfo => '文件信息';
 
   @override
-  String get homeFileName => 'Name';
+  String get homeFileName => '名称';
 
   @override
-  String get homeFileType => 'Type';
+  String get homeFileType => '类型';
 
   @override
-  String get homeFileSize => 'Size';
+  String get homeFileSize => '大小';
 
   @override
-  String get homeFileLocation => 'Location';
+  String get homeFileLocation => '位置';
 
   @override
-  String get homeFileDateOpened => 'Date opened';
+  String get homeFileDateOpened => '打开日期';
 
   @override
-  String get homeFileLastModified => 'Last modified';
+  String get homeFileLastModified => '最后修改';
 
   @override
-  String get homeFileInTrash => 'In trash';
+  String get homeFileInTrash => '在回收站中';
 
   @override
-  String get homeFileInfoCopied => 'File info copied';
+  String get homeFileInfoCopied => '文件信息已复制';
 
   @override
   String get homeCopySuffix => ' (copy)';
@@ -781,83 +781,83 @@ class AppLocalizationsZh extends AppLocalizations {
   String get libraryDocumentsAppearHere => '您的文档将显示在这里';
 
   @override
-  String get browseTitle => 'Import Documents';
+  String get browseTitle => '导入文档';
 
   @override
-  String get browseBack => 'Back';
+  String get browseBack => '返回';
 
   @override
-  String get browseSearchHint => 'Search documents...';
+  String get browseSearchHint => '搜索文档...';
 
   @override
-  String get browseCancel => 'Cancel';
+  String get browseCancel => '取消';
 
   @override
-  String get browseBrowseFiles => 'Browse';
+  String get browseBrowseFiles => '浏览';
 
   @override
-  String get browseBrowseFilesDesc => 'Import additional files manually';
+  String get browseBrowseFilesDesc => '手动导入更多文件';
 
   @override
-  String get browseScanFailed => 'Scan failed';
+  String get browseScanFailed => '扫描失败';
 
   @override
-  String get browseUnknownError => 'Unknown error occurred';
+  String get browseUnknownError => '发生未知错误';
 
   @override
-  String get browseRetryScan => 'Retry Scan';
+  String get browseRetryScan => '重新扫描';
 
   @override
-  String get browseImportManually => 'Import Files Manually';
+  String get browseImportManually => '手动导入文件';
 
   @override
-  String get browseNoDocumentsFound => 'No documents found';
+  String get browseNoDocumentsFound => '未找到文档';
 
   @override
-  String get browseNoDocumentsMatch => 'No documents match your search';
+  String get browseNoDocumentsMatch => '没有文档匹配你的搜索';
 
   @override
-  String get browseAdjustSearch => 'Try adjusting your search or filters';
+  String get browseAdjustSearch => '请尝试调整搜索或筛选条件';
 
   @override
-  String get browseClearSelection => 'Clear';
+  String get browseClearSelection => '清除';
 
   @override
-  String get browseImport => 'Import';
+  String get browseImport => '导入';
 
   @override
-  String get browseAllFilesAccessRequired => 'All files access permission is required to browse documents on your device';
+  String get browseAllFilesAccessRequired => '要浏览设备上的文档，需要授予所有文件访问权限';
 
   @override
-  String get browsePermissionRequired => 'Permission Required';
+  String get browsePermissionRequired => '需要权限';
 
   @override
-  String get browseAllFilesAccessDenied => 'All files access permission is required to browse and read documents on your device. Please grant this permission to continue.';
+  String get browseAllFilesAccessDenied => '浏览和读取设备上的文档需要所有文件访问权限。请授予该权限后继续。';
 
   @override
-  String get browseOpenSettings => 'Open Settings';
+  String get browseOpenSettings => '打开设置';
 
   @override
-  String get browseAccessStillDisabled => 'All files access is still disabled. Please enable it in Settings to continue.';
+  String get browseAccessStillDisabled => '所有文件访问权限仍未启用。请在设置中启用后继续。';
 
   @override
-  String get browseNoDirectories => 'No document directories found on device';
+  String get browseNoDirectories => '设备上未找到文档目录';
 
   @override
   String browseErrorPrefix(String error) {
-    return 'Error: $error';
+    return '错误：$error';
   }
 
   @override
-  String get browseSortBy => 'Sort by';
+  String get browseSortBy => '排序方式';
 
   @override
   String browseImportedFiles(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Imported $count files',
-      one: 'Imported 1 file',
+      other: '已导入 $count 个文件',
+      one: '已导入 1 个文件',
     );
     return '$_temp0';
   }
@@ -914,165 +914,165 @@ class AppLocalizationsZh extends AppLocalizations {
   String get whatsNewTitle => '最新动态';
 
   @override
-  String get whatsNewWhatsIncluded => 'What\'s Included';
+  String get whatsNewWhatsIncluded => '包含内容';
 
   @override
-  String get whatsNewPlanned => 'Planned';
+  String get whatsNewPlanned => '计划中';
 
   @override
-  String get whatsNewReleasedToday => 'Released today';
+  String get whatsNewReleasedToday => '今天发布';
 
   @override
-  String get whatsNewReleasedYesterday => 'Released yesterday';
+  String get whatsNewReleasedYesterday => '昨天发布';
 
   @override
   String whatsNewReleasedDate(String date) {
-    return 'Released $date';
+    return '发布于 $date';
   }
 
   @override
-  String get whatsNewDocAndSheets => 'Documents & Spreadsheets';
+  String get whatsNewDocAndSheets => '文档与电子表格';
 
   @override
-  String get whatsNewDocAndSheetsDesc => 'View PDFs, Word documents, Excel spreadsheets, and more — all locally on your device.';
+  String get whatsNewDocAndSheetsDesc => '查看 PDF、Word 文档、Excel 表格等内容，全部本地处理，保存在你的设备上。';
 
   @override
-  String get whatsNewOcrAi => 'Intelligent OCR & On-Device AI';
+  String get whatsNewOcrAi => '智能 OCR 与本地 AI';
 
   @override
-  String get whatsNewOcrAiDesc => 'Extract text from images using advanced on-device OCR. Multiple languages supported.';
+  String get whatsNewOcrAiDesc => '使用高级本地 OCR 从图片中提取文本，支持多种语言。';
 
   @override
-  String get whatsNewSyntaxHighlighting => 'Syntax Highlighting';
+  String get whatsNewSyntaxHighlighting => '语法高亮';
 
   @override
-  String get whatsNewSyntaxHighlightingDesc => 'Beautiful code highlighting for 50+ programming languages.';
+  String get whatsNewSyntaxHighlightingDesc => '为 50 多种编程语言提供精美代码高亮。';
 
   @override
-  String get whatsNewReadingStats => 'Reading Stats Dashboard';
+  String get whatsNewReadingStats => '阅读统计面板';
 
   @override
-  String get whatsNewReadingStatsDesc => 'Track your reading progress with detailed statistics and time tracking.';
+  String get whatsNewReadingStatsDesc => '通过详细统计和时间追踪查看你的阅读进度。';
 
   @override
-  String get whatsNewLibraryCategories => 'Library with Category Folders';
+  String get whatsNewLibraryCategories => '按类别分组的资料库';
 
   @override
-  String get whatsNewLibraryCategoriesDesc => 'Organize your documents by type with smart automatic categorization.';
+  String get whatsNewLibraryCategoriesDesc => '通过智能自动分类，按类型整理你的文档。';
 
   @override
-  String get whatsNewFileManagement => 'File Management';
+  String get whatsNewFileManagement => '文件管理';
 
   @override
-  String get whatsNewFileManagementDesc => 'Rename, duplicate, export, and delete your documents with ease.';
+  String get whatsNewFileManagementDesc => '轻松重命名、复制、导出和删除文档。';
 
   @override
-  String get whatsNewThemes => 'Light & Dark Themes';
+  String get whatsNewThemes => '浅色与深色主题';
 
   @override
-  String get whatsNewThemesDesc => 'Choose the look that suits you — dark mode for night, light mode for day.';
+  String get whatsNewThemesDesc => '选择适合你的外观：夜晚用深色模式，白天用浅色模式。';
 
   @override
   String get whatsNewFadDrive => 'FadDrive';
 
   @override
-  String get whatsNewFadDriveDesc => 'Cloud sync for your documents — access them anywhere, anytime.';
+  String get whatsNewFadDriveDesc => '为你的文档提供云同步，随时随地访问。';
 
   @override
-  String get whatsNewEditing => 'Document Editing';
+  String get whatsNewEditing => '文档编辑';
 
   @override
-  String get whatsNewEditingDesc => 'Make quick edits to your documents right within Fadocx.';
+  String get whatsNewEditingDesc => '直接在 Fadocx 中快速编辑你的文档。';
 
   @override
-  String get whatsNewBookmarks => 'Bookmarks & Annotations';
+  String get whatsNewBookmarks => '书签与注释';
 
   @override
-  String get whatsNewBookmarksDesc => 'Mark important pages and add annotations for later reference.';
+  String get whatsNewBookmarksDesc => '标记重要页面并添加注释，以便日后查看。';
 
   @override
-  String get whatsNewConversion => 'Document Conversion';
+  String get whatsNewConversion => '文档转换';
 
   @override
-  String get whatsNewConversionDesc => 'Convert between formats like PDF, DOCX, and more.';
+  String get whatsNewConversionDesc => '在 PDF、DOCX 等格式之间进行转换。';
 
   @override
-  String get whatsNewAmoled => 'AMOLED Black Theme';
+  String get whatsNewAmoled => 'AMOLED 黑色主题';
 
   @override
-  String get whatsNewAmoledDesc => 'Pure black theme for AMOLED displays — save battery on dark mode.';
+  String get whatsNewAmoledDesc => '适用于 AMOLED 屏幕的纯黑主题，在深色模式下更省电。';
 
   @override
-  String get whatsNewMoreOcr => 'More OCR Languages';
+  String get whatsNewMoreOcr => '更多 OCR 语言';
 
   @override
-  String get whatsNewMoreOcrDesc => 'Support for additional OCR languages and improved recognition accuracy.';
+  String get whatsNewMoreOcrDesc => '支持更多 OCR 语言并提升识别准确率。';
 
   @override
-  String get whatsNewOfflineFirst => 'An offline-first document viewer built for privacy. No accounts, no tracking, no internet required.';
+  String get whatsNewOfflineFirst => '为隐私而生的离线优先文档查看器。无需账号、无跟踪、无需联网。';
 
   @override
-  String get whatsNewThankYou => 'Thank You for Using Fadocx';
+  String get whatsNewThankYou => '感谢使用 Fadocx';
 
   @override
-  String get whatsNewThankYouDesc => 'If you find value in Fadocx, consider supporting its development. Your contribution helps us keep building privacy-first tools.';
+  String get whatsNewThankYouDesc => '如果你觉得 Fadocx 有价值，欢迎支持它的开发。你的贡献能帮助我们继续打造以隐私为先的工具。';
 
   @override
-  String get drawerWhatNew => 'What\'s New';
+  String get drawerWhatNew => '最新动态';
 
   @override
-  String get drawerRecentFiles => 'Recent Files';
+  String get drawerRecentFiles => '最近文件';
 
   @override
-  String get drawerVisible => 'Visible';
+  String get drawerVisible => '可见';
 
   @override
-  String get drawerHidden => 'Hidden';
+  String get drawerHidden => '已隐藏';
 
   @override
-  String get drawerUnlockBenefits => 'Unlock exclusive benefits';
+  String get drawerUnlockBenefits => '解锁专属福利';
 
   @override
-  String get fileActionRename => 'Rename';
+  String get fileActionRename => '重命名';
 
   @override
-  String get fileActionRenameDesc => 'Change file name';
+  String get fileActionRenameDesc => '更改文件名';
 
   @override
-  String get fileActionDuplicate => 'Duplicate';
+  String get fileActionDuplicate => '复制';
 
   @override
-  String get fileActionDuplicateDesc => 'Create a copy';
+  String get fileActionDuplicateDesc => '创建副本';
 
   @override
-  String get fileActionExport => 'Export / Save As';
+  String get fileActionExport => '导出 / 另存为';
 
   @override
-  String get fileActionExportDesc => 'Save a copy to Downloads';
+  String get fileActionExportDesc => '将副本保存到下载目录';
 
   @override
-  String get fileActionCopyText => 'Copy Text';
+  String get fileActionCopyText => '复制文本';
 
   @override
-  String get fileActionCopyTextDesc => 'Copy extracted text to clipboard';
+  String get fileActionCopyTextDesc => '将提取的文本复制到剪贴板';
 
   @override
-  String get fileActionConvert => 'Convert';
+  String get fileActionConvert => '转换';
 
   @override
-  String get fileActionConvertDesc => 'Convert to another format';
+  String get fileActionConvertDesc => '转换为其他格式';
 
   @override
-  String get fileActionUpload => 'Upload to FadDrive';
+  String get fileActionUpload => '上传到 FadDrive';
 
   @override
-  String get fileActionUploadDesc => 'Sync to cloud storage';
+  String get fileActionUploadDesc => '同步到云存储';
 
   @override
-  String get fileActionFileInfo => 'File info';
+  String get fileActionFileInfo => '文件信息';
 
   @override
-  String get fileActionSubtitle => 'File actions and management';
+  String get fileActionSubtitle => '文件操作与管理';
 
   @override
   String get updateAvailableTitle => 'Update Available';
@@ -1120,58 +1120,58 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsStorage => '存储';
 
   @override
-  String get settingsDocumentsSize => 'Documents Size';
+  String get settingsDocumentsSize => '文档大小';
 
   @override
-  String get settingsCalculating => 'Calculating...';
+  String get settingsCalculating => '计算中...';
 
   @override
-  String get settingsCustomStorage => 'Custom Storage';
+  String get settingsCustomStorage => '自定义存储';
 
   @override
   String get settingsUnknown => 'Unknown';
 
   @override
-  String get settingsStorageDetails => 'Storage';
+  String get settingsStorageDetails => '存储';
 
   @override
-  String get settingsStoragePdfs => 'PDFs';
+  String get settingsStoragePdfs => 'PDF';
 
   @override
-  String get settingsStorageDocs => 'Docs';
+  String get settingsStorageDocs => '文档';
 
   @override
-  String get settingsStorageSheets => 'Sheets';
+  String get settingsStorageSheets => '表格';
 
   @override
-  String get settingsStoragePresentations => 'Presentations';
+  String get settingsStoragePresentations => '演示文稿';
 
   @override
-  String get settingsStorageCode => 'Code';
+  String get settingsStorageCode => '代码';
 
   @override
-  String get settingsStorageScans => 'Scans';
+  String get settingsStorageScans => '扫描件';
 
   @override
-  String get settingsStorageImages => 'Images';
+  String get settingsStorageImages => '图片';
 
   @override
-  String get settingsStorageOther => 'Other';
+  String get settingsStorageOther => '其他';
 
   @override
-  String get settingsStorageInfo => 'Documents are stored in a private folder on your device and cannot be accessed by other apps';
+  String get settingsStorageInfo => '文档存储在设备上的私有文件夹中，其他应用无法访问';
 
   @override
-  String get settingsStoragePrivateFolderInfo => 'Documents are stored in a private folder, hidden from other apps and file managers. Only Fadocx can access them.';
+  String get settingsStoragePrivateFolderInfo => '文档存储在私有文件夹中，对其他应用和文件管理器隐藏。只有 Fadocx 可以访问。';
 
   @override
-  String get settingsStorageDeleteInfo => 'Delete documents from Danger Zone in Settings';
+  String get settingsStorageDeleteInfo => '请在设置中的危险区域删除文档';
 
   @override
-  String get settingsStorageEmpty => 'No documents';
+  String get settingsStorageEmpty => '没有文档';
 
   @override
-  String get settingsStorageFailedLoad => 'Failed to load storage data';
+  String get settingsStorageFailedLoad => '加载存储数据失败';
 
   @override
   String get settingsUpdates => '更新';
@@ -1192,7 +1192,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsDisabled => '已禁用';
 
   @override
-  String get settingsAppLock => 'App Lock';
+  String get settingsAppLock => '应用锁';
 
   @override
   String get settingsAbout => '关于';
@@ -1207,13 +1207,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsContact => '联系我们';
 
   @override
-  String get settingsJoinCommunity => 'Join Community';
+  String get settingsJoinCommunity => '加入社区';
 
   @override
   String get settingsPrivacyPolicy => '隐私政策';
 
   @override
-  String get settingsMoreFromFadsec => 'More from FadSec Lab';
+  String get settingsMoreFromFadsec => '来自 FadSec Lab 的更多应用';
 
   @override
   String get settingsFadocxDesc => 'Your private document viewer';
@@ -1273,22 +1273,30 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get settingsCopiedInfo => 'Copied to clipboard';
+  String get settingsCopiedInfo => '已复制到剪贴板';
 
   @override
-  String get settingsCopyInfo => 'Copy Info';
+  String get settingsCopyInfo => '复制信息';
 
   @override
-  String get settingsShareApp => 'Share with Friends';
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
+    return '$appName v$version（构建 $buildNumber）\n包名：$packageName';
+  }
 
   @override
-  String get settingsShareVia => 'Share via...';
+  String get settingsShareApp => '分享给朋友';
+
+  @override
+  String get settingsShareMessage => '来看看 Fadocx！\n\n一体化文档查看器：支持 PDF、Office、电子表格、演示文稿、代码文件和 OCR 文本提取，完全离线、无跟踪、开源。\n\nhttps://github.com/anonfaded/Fadocx';
+
+  @override
+  String get settingsShareVia => '通过以下方式分享...';
 
   @override
   String get settingsShareWhatsApp => 'WhatsApp';
 
   @override
-  String get settingsWhatsAppNotInstalled => 'WhatsApp is not installed on this device';
+  String get settingsWhatsAppNotInstalled => '此设备未安装 WhatsApp';
 
   @override
   String get settingsPrivacyOffline => '100% Offline';
@@ -1315,7 +1323,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsViewSourceCode => 'View Source Code';
 
   @override
-  String get settingsSecurity => 'Security';
+  String get settingsSecurity => '安全';
 
   @override
   String settingsStorageFilesSummary(String size, num count) {
@@ -1371,19 +1379,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsPrivacyNoAdsDesc => 'No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.';
 
   @override
-  String get settingsFadcamDesc => 'Privacy-focused Android multimedia suite: background video recording, dashcam, screen recorder, live streaming & remote control — ad-free & open-source.';
+  String get settingsFadcamDesc => '注重隐私的 Android 多媒体套件：后台录像、行车记录仪、录屏、直播与远程控制，无广告且开源。';
 
   @override
-  String get settingsQuranCliDesc => 'Your Terminal Companion for the Holy Quran: Read, Listen & Generate Subtitles for Video Editing!';
+  String get settingsQuranCliDesc => '你的《古兰经》终端伙伴：阅读、聆听，并为视频剪辑生成字幕！';
 
   @override
-  String get settingsFadcryptDesc => 'Advanced and elegant cross-platform app locker — files, folders, and applications all protected with military-grade AES-256-GCM encryption. Open-source, completely free, no telemetry!';
+  String get settingsFadcryptDesc => '高级且优雅的跨平台应用锁工具，文件、文件夹和应用全部采用军用级 AES-256-GCM 加密保护。开源、完全免费、无遥测！';
 
   @override
-  String get settingsFadcatDesc => 'Lightweight, feature-rich, cross-platform Android logcat replacement — no Android Studio bloat. Bundles ADB for supported architectures, runs in GUI, CLI, or MCP server mode.';
+  String get settingsFadcatDesc => '轻量、功能丰富、跨平台的 Android logcat 替代工具，无需臃肿的 Android Studio。内置适配架构的 ADB，可运行于 GUI、CLI 或 MCP 服务器模式。';
 
   @override
-  String get settingsMacosComingSoon => 'macOS coming soon';
+  String get settingsMacosComingSoon => 'macOS 即将推出';
 
   @override
   String get settingsOpenInBrowser => 'Open in Browser';
@@ -1673,74 +1681,74 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scannerResults => '结果';
 
   @override
-  String get scannerInitializingCamera => 'Initializing Camera...';
+  String get scannerInitializingCamera => '正在初始化相机...';
 
   @override
-  String get scannerDocumentDetected => 'Document detected — hold steady';
+  String get scannerDocumentDetected => '已检测到文档，请保持稳定';
 
   @override
-  String get scannerKeepDocumentFlat => 'Keep document upright & flat for best results';
+  String get scannerKeepDocumentFlat => '请保持文档平整端正，以获得最佳效果';
 
   @override
-  String get scannerUpload => 'Upload';
+  String get scannerUpload => '上传';
 
   @override
   String scannerFailedOpenImage(String error) {
-    return 'Failed to open image: $error';
+    return '打开图片失败：$error';
   }
 
   @override
-  String get scannerFlash => 'Flash';
+  String get scannerFlash => '闪光灯';
 
   @override
   String scannerFailedTorch(String error) {
-    return 'Failed to toggle torch: $error';
+    return '切换手电筒失败：$error';
   }
 
   @override
-  String get scannerStartingCamera => 'Starting Camera...';
+  String get scannerStartingCamera => '正在启动相机...';
 
   @override
-  String get scannerCameraUnavailable => 'Camera Unavailable';
+  String get scannerCameraUnavailable => '相机不可用';
 
   @override
-  String get scannerCameraUnavailableDesc => 'Unable to initialize camera';
+  String get scannerCameraUnavailableDesc => '无法初始化相机';
 
   @override
-  String get scannerAnalysisComplete => 'Analysis Complete';
+  String get scannerAnalysisComplete => '分析完成';
 
   @override
-  String get scannerAnalyzing => 'Analyzing Document...';
+  String get scannerAnalyzing => '正在分析文档...';
 
   @override
-  String get scannerEnhancing => 'Enhancing image quality...';
+  String get scannerEnhancing => '正在增强图像质量...';
 
   @override
-  String get scannerExtractingText => 'Extracting text data...';
+  String get scannerExtractingText => '正在提取文本数据...';
 
   @override
-  String get scannerNoScansYet => 'No Scans Yet';
+  String get scannerNoScansYet => '还没有扫描记录';
 
   @override
-  String get scannerNoScansDesc => 'Capture a document to see extracted text here';
+  String get scannerNoScansDesc => '拍摄文档后，提取的文本将显示在这里';
 
   @override
-  String get scannerExtractedText => 'Extracted Text';
+  String get scannerExtractedText => '提取的文本';
 
   @override
-  String get scannerNoTextExtracted => '(No text extracted)';
+  String get scannerNoTextExtracted => '（未提取到文本）';
 
   @override
-  String get scannerDetectedLines => 'Detected Lines';
+  String get scannerDetectedLines => '检测到的行';
 
   @override
-  String get scannerTextCopied => 'Text copied to clipboard';
+  String get scannerTextCopied => '文本已复制到剪贴板';
 
   @override
-  String get scannerCopyAll => '复制全部';
+  String get scannerCopyAll => '全部复制';
 
   @override
-  String get scannerNewScan => '新扫描';
+  String get scannerNewScan => '新建扫描';
 
   @override
   String get linkTileCopy => '复制';
@@ -1789,7 +1797,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String homeFileInTrashDetail(String date) {
-    return 'In trash: yes (deleted at: $date)';
+    return '在回收站中: 是 (删除时间: $date)';
   }
 
   @override

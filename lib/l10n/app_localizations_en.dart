@@ -1279,7 +1279,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCopyInfo => 'Copy Info';
 
   @override
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
+    return '$appName v$version (Build $buildNumber)\nPackage: $packageName';
+  }
+
+  @override
   String get settingsShareApp => 'Share with Friends';
+
+  @override
+  String get settingsShareMessage => 'Check out Fadocx!\n\nAll-in-one document viewer: PDF, Office, spreadsheets, presentations, code files & OCR text extraction — fully offline, zero tracking, open-source.\n\nhttps://github.com/anonfaded/Fadocx';
 
   @override
   String get settingsShareVia => 'Share via...';

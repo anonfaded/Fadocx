@@ -2507,7 +2507,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
           Expanded(
             child: _buildTile(
               icon: Icons.speed,
-              label: 'Speed',
+              label: l10n.viewerPlaybackSpeed,
               onTap: () => _showSpeedDialog(context, _mediaViewerKey.currentState),
             ),
           ),

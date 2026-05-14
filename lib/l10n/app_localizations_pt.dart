@@ -321,7 +321,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get charactersLoaded => 'characters';
 
   @override
-  String get copiedToClipboard => 'Copied to clipboard';
+  String get copiedToClipboard => 'Copiado para a área de transferência';
 
   @override
   String get navHome => 'Início';
@@ -363,22 +363,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get categoryPresentations => 'Apresentações';
 
   @override
-  String get supportDevelopment => 'Support Development';
+  String get supportDevelopment => 'Apoiar o desenvolvimento';
 
   @override
-  String get visitPatreon => 'Visit Patreon';
+  String get visitPatreon => 'Visitar Patreon';
 
   @override
-  String get copyLink => 'Copy Link';
+  String get copyLink => 'Copiar link';
 
   @override
   String get becomeAPatron => 'Become a Patron';
 
   @override
-  String get patreonDescription => 'Your support keeps Fadocx and FadCam growing. Patreon subscribers unlock exclusive benefits including premium features and early access across all FadSec Lab apps.\n\nFor more info, visit Patreon from the link below and check the available tiers with their benefits.';
+  String get patreonDescription => 'Seu apoio ajuda Fadocx e FadCam a continuar crescendo. Assinantes do Patreon desbloqueiam benefícios exclusivos, incluindo recursos premium e acesso antecipado em todos os apps da FadSec Lab.\n\nPara mais informações, visite o Patreon pelo link abaixo e confira os níveis disponíveis com seus benefícios.';
 
   @override
-  String get discordTitle => 'Join our Discord';
+  String get discordTitle => 'Entre no nosso Discord';
 
   @override
   String get openInBrowser => 'Abrir no navegador';
@@ -390,15 +390,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newBadge => 'NEW';
 
   @override
-  String get timeAgoJustNow => 'Just now';
+  String get timeAgoJustNow => 'Agora mesmo';
 
   @override
   String timeAgoMinute(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count minutes ago',
-      one: '1 minute ago',
+      other: 'há $count minutos',
+      one: 'há 1 minuto',
     );
     return '$_temp0';
   }
@@ -408,8 +408,8 @@ class AppLocalizationsPt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count hours ago',
-      one: '1 hour ago',
+      other: 'há $count horas',
+      one: 'há 1 hora',
     );
     return '$_temp0';
   }
@@ -419,8 +419,8 @@ class AppLocalizationsPt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count days ago',
-      one: '1 day ago',
+      other: 'há $count dias',
+      one: 'há 1 dia',
     );
     return '$_temp0';
   }
@@ -430,8 +430,8 @@ class AppLocalizationsPt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count weeks ago',
-      one: '1 week ago',
+      other: 'há $count semanas',
+      one: 'há 1 semana',
     );
     return '$_temp0';
   }
@@ -441,8 +441,8 @@ class AppLocalizationsPt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count months ago',
-      one: '1 month ago',
+      other: 'há $count meses',
+      one: 'há 1 mês',
     );
     return '$_temp0';
   }
@@ -452,47 +452,47 @@ class AppLocalizationsPt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count years ago',
-      one: '1 year ago',
+      other: 'há $count anos',
+      one: 'há 1 ano',
     );
     return '$_temp0';
   }
 
   @override
-  String get monthJan => 'Jan';
+  String get monthJan => 'jan';
 
   @override
-  String get monthFeb => 'Feb';
+  String get monthFeb => 'fev';
 
   @override
-  String get monthMar => 'Mar';
+  String get monthMar => 'mar';
 
   @override
-  String get monthApr => 'Apr';
+  String get monthApr => 'abr';
 
   @override
-  String get monthMay => 'May';
+  String get monthMay => 'mai';
 
   @override
-  String get monthJun => 'Jun';
+  String get monthJun => 'jun';
 
   @override
-  String get monthJul => 'Jul';
+  String get monthJul => 'jul';
 
   @override
-  String get monthAug => 'Aug';
+  String get monthAug => 'ago';
 
   @override
-  String get monthSep => 'Sep';
+  String get monthSep => 'set';
 
   @override
-  String get monthOct => 'Oct';
+  String get monthOct => 'out';
 
   @override
-  String get monthNov => 'Nov';
+  String get monthNov => 'nov';
 
   @override
-  String get monthDec => 'Dec';
+  String get monthDec => 'dez';
 
   @override
   String get homeWelcomeTitle => 'Bem-vindo ao Fadocx';
@@ -504,7 +504,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeExploreSamples => 'Explorar arquivos de exemplo';
 
   @override
-  String get homeDocumentManagement => 'Document Management';
+  String get homeDocumentManagement => 'Gerenciamento de documentos';
 
   @override
   String get homeSeeAll => 'Ver tudo';
@@ -576,16 +576,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingSlide3Bullet3 => 'Código aberto — cada linha de código é pública';
 
   @override
-  String get homeStatDocuments => 'Documents';
+  String get homeStatDocuments => 'Documentos';
 
   @override
-  String get homeStatStorage => 'Storage';
+  String get homeStatStorage => 'Armazenamento';
 
   @override
-  String get homeStatTimeRead => 'Time Read';
+  String get homeStatTimeRead => 'Tempo de leitura';
 
   @override
-  String get homeStatLastOpened => 'Last Opened: ';
+  String get homeStatLastOpened => 'Última abertura: ';
 
   @override
   String get homePressBackExit => 'Pressione voltar novamente para sair';
@@ -618,31 +618,31 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get homeFileInfo => 'File info';
+  String get homeFileInfo => 'Informações do arquivo';
 
   @override
-  String get homeFileName => 'Name';
+  String get homeFileName => 'Nome';
 
   @override
-  String get homeFileType => 'Type';
+  String get homeFileType => 'Tipo';
 
   @override
-  String get homeFileSize => 'Size';
+  String get homeFileSize => 'Tamanho';
 
   @override
-  String get homeFileLocation => 'Location';
+  String get homeFileLocation => 'Local';
 
   @override
-  String get homeFileDateOpened => 'Date opened';
+  String get homeFileDateOpened => 'Data de abertura';
 
   @override
-  String get homeFileLastModified => 'Last modified';
+  String get homeFileLastModified => 'Última modificação';
 
   @override
-  String get homeFileInTrash => 'In trash';
+  String get homeFileInTrash => 'Na lixeira';
 
   @override
-  String get homeFileInfoCopied => 'File info copied';
+  String get homeFileInfoCopied => 'Informações do arquivo copiadas';
 
   @override
   String get homeCopySuffix => ' (copy)';
@@ -781,83 +781,83 @@ class AppLocalizationsPt extends AppLocalizations {
   String get libraryDocumentsAppearHere => 'Seus documentos aparecerão aqui';
 
   @override
-  String get browseTitle => 'Import Documents';
+  String get browseTitle => 'Importar documentos';
 
   @override
-  String get browseBack => 'Back';
+  String get browseBack => 'Voltar';
 
   @override
-  String get browseSearchHint => 'Search documents...';
+  String get browseSearchHint => 'Pesquisar documentos...';
 
   @override
-  String get browseCancel => 'Cancel';
+  String get browseCancel => 'Cancelar';
 
   @override
-  String get browseBrowseFiles => 'Browse';
+  String get browseBrowseFiles => 'Procurar';
 
   @override
-  String get browseBrowseFilesDesc => 'Import additional files manually';
+  String get browseBrowseFilesDesc => 'Importar arquivos adicionais manualmente';
 
   @override
-  String get browseScanFailed => 'Scan failed';
+  String get browseScanFailed => 'Falha na varredura';
 
   @override
-  String get browseUnknownError => 'Unknown error occurred';
+  String get browseUnknownError => 'Ocorreu um erro desconhecido';
 
   @override
-  String get browseRetryScan => 'Retry Scan';
+  String get browseRetryScan => 'Tentar novamente';
 
   @override
-  String get browseImportManually => 'Import Files Manually';
+  String get browseImportManually => 'Importar arquivos manualmente';
 
   @override
-  String get browseNoDocumentsFound => 'No documents found';
+  String get browseNoDocumentsFound => 'Nenhum documento encontrado';
 
   @override
-  String get browseNoDocumentsMatch => 'No documents match your search';
+  String get browseNoDocumentsMatch => 'Nenhum documento corresponde à sua busca';
 
   @override
-  String get browseAdjustSearch => 'Try adjusting your search or filters';
+  String get browseAdjustSearch => 'Tente ajustar sua busca ou filtros';
 
   @override
-  String get browseClearSelection => 'Clear';
+  String get browseClearSelection => 'Limpar';
 
   @override
-  String get browseImport => 'Import';
+  String get browseImport => 'Importar';
 
   @override
-  String get browseAllFilesAccessRequired => 'All files access permission is required to browse documents on your device';
+  String get browseAllFilesAccessRequired => 'É necessária permissão de acesso a todos os arquivos para navegar pelos documentos no seu dispositivo';
 
   @override
-  String get browsePermissionRequired => 'Permission Required';
+  String get browsePermissionRequired => 'Permissão necessária';
 
   @override
-  String get browseAllFilesAccessDenied => 'All files access permission is required to browse and read documents on your device. Please grant this permission to continue.';
+  String get browseAllFilesAccessDenied => 'É necessária permissão de acesso a todos os arquivos para navegar e ler documentos no seu dispositivo. Conceda essa permissão para continuar.';
 
   @override
-  String get browseOpenSettings => 'Open Settings';
+  String get browseOpenSettings => 'Abrir configurações';
 
   @override
-  String get browseAccessStillDisabled => 'All files access is still disabled. Please enable it in Settings to continue.';
+  String get browseAccessStillDisabled => 'O acesso a todos os arquivos ainda está desativado. Ative-o nas Configurações para continuar.';
 
   @override
-  String get browseNoDirectories => 'No document directories found on device';
+  String get browseNoDirectories => 'Nenhum diretório de documentos encontrado no dispositivo';
 
   @override
   String browseErrorPrefix(String error) {
-    return 'Error: $error';
+    return 'Erro: $error';
   }
 
   @override
-  String get browseSortBy => 'Sort by';
+  String get browseSortBy => 'Ordenar por';
 
   @override
   String browseImportedFiles(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Imported $count files',
-      one: 'Imported 1 file',
+      other: 'Importados $count arquivos',
+      one: 'Importado 1 arquivo',
     );
     return '$_temp0';
   }
@@ -911,168 +911,168 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get whatsNewTitle => 'O que há de novo';
+  String get whatsNewTitle => 'Novidades';
 
   @override
-  String get whatsNewWhatsIncluded => 'What\'s Included';
+  String get whatsNewWhatsIncluded => 'O que está incluído';
 
   @override
-  String get whatsNewPlanned => 'Planned';
+  String get whatsNewPlanned => 'Planejado';
 
   @override
-  String get whatsNewReleasedToday => 'Released today';
+  String get whatsNewReleasedToday => 'Lançado hoje';
 
   @override
-  String get whatsNewReleasedYesterday => 'Released yesterday';
+  String get whatsNewReleasedYesterday => 'Lançado ontem';
 
   @override
   String whatsNewReleasedDate(String date) {
-    return 'Released $date';
+    return 'Lançado em $date';
   }
 
   @override
-  String get whatsNewDocAndSheets => 'Documents & Spreadsheets';
+  String get whatsNewDocAndSheets => 'Documentos e planilhas';
 
   @override
-  String get whatsNewDocAndSheetsDesc => 'View PDFs, Word documents, Excel spreadsheets, and more — all locally on your device.';
+  String get whatsNewDocAndSheetsDesc => 'Veja PDFs, documentos do Word, planilhas do Excel e muito mais, tudo localmente no seu dispositivo.';
 
   @override
-  String get whatsNewOcrAi => 'Intelligent OCR & On-Device AI';
+  String get whatsNewOcrAi => 'OCR inteligente e IA no dispositivo';
 
   @override
-  String get whatsNewOcrAiDesc => 'Extract text from images using advanced on-device OCR. Multiple languages supported.';
+  String get whatsNewOcrAiDesc => 'Extraia texto de imagens usando OCR avançado no dispositivo. Vários idiomas são suportados.';
 
   @override
-  String get whatsNewSyntaxHighlighting => 'Syntax Highlighting';
+  String get whatsNewSyntaxHighlighting => 'Realce de sintaxe';
 
   @override
-  String get whatsNewSyntaxHighlightingDesc => 'Beautiful code highlighting for 50+ programming languages.';
+  String get whatsNewSyntaxHighlightingDesc => 'Belo realce de código para mais de 50 linguagens de programação.';
 
   @override
-  String get whatsNewReadingStats => 'Reading Stats Dashboard';
+  String get whatsNewReadingStats => 'Painel de estatísticas de leitura';
 
   @override
-  String get whatsNewReadingStatsDesc => 'Track your reading progress with detailed statistics and time tracking.';
+  String get whatsNewReadingStatsDesc => 'Acompanhe seu progresso de leitura com estatísticas detalhadas e controle de tempo.';
 
   @override
-  String get whatsNewLibraryCategories => 'Library with Category Folders';
+  String get whatsNewLibraryCategories => 'Biblioteca com pastas por categoria';
 
   @override
-  String get whatsNewLibraryCategoriesDesc => 'Organize your documents by type with smart automatic categorization.';
+  String get whatsNewLibraryCategoriesDesc => 'Organize seus documentos por tipo com categorização automática inteligente.';
 
   @override
-  String get whatsNewFileManagement => 'File Management';
+  String get whatsNewFileManagement => 'Gerenciamento de arquivos';
 
   @override
-  String get whatsNewFileManagementDesc => 'Rename, duplicate, export, and delete your documents with ease.';
+  String get whatsNewFileManagementDesc => 'Renomeie, duplique, exporte e exclua seus documentos com facilidade.';
 
   @override
-  String get whatsNewThemes => 'Light & Dark Themes';
+  String get whatsNewThemes => 'Temas claro e escuro';
 
   @override
-  String get whatsNewThemesDesc => 'Choose the look that suits you — dark mode for night, light mode for day.';
+  String get whatsNewThemesDesc => 'Escolha o visual ideal para você — modo escuro à noite e claro de dia.';
 
   @override
   String get whatsNewFadDrive => 'FadDrive';
 
   @override
-  String get whatsNewFadDriveDesc => 'Cloud sync for your documents — access them anywhere, anytime.';
+  String get whatsNewFadDriveDesc => 'Sincronização em nuvem para seus documentos — acesse-os em qualquer lugar, a qualquer hora.';
 
   @override
-  String get whatsNewEditing => 'Document Editing';
+  String get whatsNewEditing => 'Edição de documentos';
 
   @override
-  String get whatsNewEditingDesc => 'Make quick edits to your documents right within Fadocx.';
+  String get whatsNewEditingDesc => 'Faça edições rápidas nos seus documentos diretamente no Fadocx.';
 
   @override
-  String get whatsNewBookmarks => 'Bookmarks & Annotations';
+  String get whatsNewBookmarks => 'Favoritos e anotações';
 
   @override
-  String get whatsNewBookmarksDesc => 'Mark important pages and add annotations for later reference.';
+  String get whatsNewBookmarksDesc => 'Marque páginas importantes e adicione anotações para referência futura.';
 
   @override
-  String get whatsNewConversion => 'Document Conversion';
+  String get whatsNewConversion => 'Conversão de documentos';
 
   @override
-  String get whatsNewConversionDesc => 'Convert between formats like PDF, DOCX, and more.';
+  String get whatsNewConversionDesc => 'Converta entre formatos como PDF, DOCX e outros.';
 
   @override
-  String get whatsNewAmoled => 'AMOLED Black Theme';
+  String get whatsNewAmoled => 'Tema preto AMOLED';
 
   @override
-  String get whatsNewAmoledDesc => 'Pure black theme for AMOLED displays — save battery on dark mode.';
+  String get whatsNewAmoledDesc => 'Tema preto puro para telas AMOLED — economize bateria no modo escuro.';
 
   @override
-  String get whatsNewMoreOcr => 'More OCR Languages';
+  String get whatsNewMoreOcr => 'Mais idiomas de OCR';
 
   @override
-  String get whatsNewMoreOcrDesc => 'Support for additional OCR languages and improved recognition accuracy.';
+  String get whatsNewMoreOcrDesc => 'Suporte para idiomas adicionais de OCR e maior precisão de reconhecimento.';
 
   @override
-  String get whatsNewOfflineFirst => 'An offline-first document viewer built for privacy. No accounts, no tracking, no internet required.';
+  String get whatsNewOfflineFirst => 'Um visualizador de documentos offline-first feito para privacidade. Sem contas, sem rastreamento, sem necessidade de internet.';
 
   @override
-  String get whatsNewThankYou => 'Thank You for Using Fadocx';
+  String get whatsNewThankYou => 'Obrigado por usar o Fadocx';
 
   @override
-  String get whatsNewThankYouDesc => 'If you find value in Fadocx, consider supporting its development. Your contribution helps us keep building privacy-first tools.';
+  String get whatsNewThankYouDesc => 'Se você vê valor no Fadocx, considere apoiar seu desenvolvimento. Sua contribuição nos ajuda a continuar criando ferramentas com foco em privacidade.';
 
   @override
-  String get drawerWhatNew => 'What\'s New';
+  String get drawerWhatNew => 'Novidades';
 
   @override
-  String get drawerRecentFiles => 'Recent Files';
+  String get drawerRecentFiles => 'Arquivos recentes';
 
   @override
-  String get drawerVisible => 'Visible';
+  String get drawerVisible => 'Visível';
 
   @override
-  String get drawerHidden => 'Hidden';
+  String get drawerHidden => 'Oculto';
 
   @override
-  String get drawerUnlockBenefits => 'Unlock exclusive benefits';
+  String get drawerUnlockBenefits => 'Desbloqueie benefícios exclusivos';
 
   @override
-  String get fileActionRename => 'Rename';
+  String get fileActionRename => 'Renomear';
 
   @override
-  String get fileActionRenameDesc => 'Change file name';
+  String get fileActionRenameDesc => 'Alterar nome do arquivo';
 
   @override
-  String get fileActionDuplicate => 'Duplicate';
+  String get fileActionDuplicate => 'Duplicar';
 
   @override
-  String get fileActionDuplicateDesc => 'Create a copy';
+  String get fileActionDuplicateDesc => 'Criar uma cópia';
 
   @override
-  String get fileActionExport => 'Export / Save As';
+  String get fileActionExport => 'Exportar / Salvar como';
 
   @override
-  String get fileActionExportDesc => 'Save a copy to Downloads';
+  String get fileActionExportDesc => 'Salvar uma cópia em Downloads';
 
   @override
-  String get fileActionCopyText => 'Copy Text';
+  String get fileActionCopyText => 'Copiar texto';
 
   @override
-  String get fileActionCopyTextDesc => 'Copy extracted text to clipboard';
+  String get fileActionCopyTextDesc => 'Copiar texto extraído para a área de transferência';
 
   @override
-  String get fileActionConvert => 'Convert';
+  String get fileActionConvert => 'Converter';
 
   @override
-  String get fileActionConvertDesc => 'Convert to another format';
+  String get fileActionConvertDesc => 'Converter para outro formato';
 
   @override
-  String get fileActionUpload => 'Upload to FadDrive';
+  String get fileActionUpload => 'Enviar para FadDrive';
 
   @override
-  String get fileActionUploadDesc => 'Sync to cloud storage';
+  String get fileActionUploadDesc => 'Sincronizar com armazenamento em nuvem';
 
   @override
-  String get fileActionFileInfo => 'File info';
+  String get fileActionFileInfo => 'Informações do arquivo';
 
   @override
-  String get fileActionSubtitle => 'File actions and management';
+  String get fileActionSubtitle => 'Ações e gerenciamento do arquivo';
 
   @override
   String get updateAvailableTitle => 'Update Available';
@@ -1120,58 +1120,58 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsStorage => 'Armazenamento';
 
   @override
-  String get settingsDocumentsSize => 'Documents Size';
+  String get settingsDocumentsSize => 'Tamanho dos documentos';
 
   @override
-  String get settingsCalculating => 'Calculating...';
+  String get settingsCalculating => 'Calculando...';
 
   @override
-  String get settingsCustomStorage => 'Custom Storage';
+  String get settingsCustomStorage => 'Armazenamento personalizado';
 
   @override
   String get settingsUnknown => 'Unknown';
 
   @override
-  String get settingsStorageDetails => 'Storage';
+  String get settingsStorageDetails => 'Armazenamento';
 
   @override
   String get settingsStoragePdfs => 'PDFs';
 
   @override
-  String get settingsStorageDocs => 'Docs';
+  String get settingsStorageDocs => 'Documentos';
 
   @override
-  String get settingsStorageSheets => 'Sheets';
+  String get settingsStorageSheets => 'Planilhas';
 
   @override
-  String get settingsStoragePresentations => 'Presentations';
+  String get settingsStoragePresentations => 'Apresentações';
 
   @override
-  String get settingsStorageCode => 'Code';
+  String get settingsStorageCode => 'Código';
 
   @override
-  String get settingsStorageScans => 'Scans';
+  String get settingsStorageScans => 'Digitalizações';
 
   @override
-  String get settingsStorageImages => 'Images';
+  String get settingsStorageImages => 'Imagens';
 
   @override
-  String get settingsStorageOther => 'Other';
+  String get settingsStorageOther => 'Outros';
 
   @override
-  String get settingsStorageInfo => 'Documents are stored in a private folder on your device and cannot be accessed by other apps';
+  String get settingsStorageInfo => 'Os documentos são armazenados em uma pasta privada no seu dispositivo e não podem ser acessados por outros apps';
 
   @override
-  String get settingsStoragePrivateFolderInfo => 'Documents are stored in a private folder, hidden from other apps and file managers. Only Fadocx can access them.';
+  String get settingsStoragePrivateFolderInfo => 'Os documentos são armazenados em uma pasta privada, oculta de outros apps e gerenciadores de arquivos. Somente o Fadocx pode acessá-los.';
 
   @override
-  String get settingsStorageDeleteInfo => 'Delete documents from Danger Zone in Settings';
+  String get settingsStorageDeleteInfo => 'Exclua documentos na zona de perigo em Configurações';
 
   @override
-  String get settingsStorageEmpty => 'No documents';
+  String get settingsStorageEmpty => 'Nenhum documento';
 
   @override
-  String get settingsStorageFailedLoad => 'Failed to load storage data';
+  String get settingsStorageFailedLoad => 'Falha ao carregar dados de armazenamento';
 
   @override
   String get settingsUpdates => 'Atualizações';
@@ -1192,7 +1192,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsDisabled => 'Desativado';
 
   @override
-  String get settingsAppLock => 'App Lock';
+  String get settingsAppLock => 'Bloqueio do app';
 
   @override
   String get settingsAbout => 'Sobre';
@@ -1207,13 +1207,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsContact => 'Contato';
 
   @override
-  String get settingsJoinCommunity => 'Join Community';
+  String get settingsJoinCommunity => 'Entrar na comunidade';
 
   @override
   String get settingsPrivacyPolicy => 'Política de privacidade';
 
   @override
-  String get settingsMoreFromFadsec => 'More from FadSec Lab';
+  String get settingsMoreFromFadsec => 'Mais da FadSec Lab';
 
   @override
   String get settingsFadocxDesc => 'Your private document viewer';
@@ -1273,22 +1273,30 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get settingsCopiedInfo => 'Copied to clipboard';
+  String get settingsCopiedInfo => 'Copiado para a área de transferência';
 
   @override
-  String get settingsCopyInfo => 'Copy Info';
+  String get settingsCopyInfo => 'Copiar informações';
 
   @override
-  String get settingsShareApp => 'Share with Friends';
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
+    return '$appName v$version (Build $buildNumber)\nPacote: $packageName';
+  }
 
   @override
-  String get settingsShareVia => 'Share via...';
+  String get settingsShareApp => 'Compartilhar com amigos';
+
+  @override
+  String get settingsShareMessage => 'Confira o Fadocx!\n\nVisualizador de documentos tudo-em-um: PDF, Office, planilhas, apresentações, arquivos de código e extração de texto por OCR — totalmente offline, sem rastreamento e open source.\n\nhttps://github.com/anonfaded/Fadocx';
+
+  @override
+  String get settingsShareVia => 'Compartilhar via...';
 
   @override
   String get settingsShareWhatsApp => 'WhatsApp';
 
   @override
-  String get settingsWhatsAppNotInstalled => 'WhatsApp is not installed on this device';
+  String get settingsWhatsAppNotInstalled => 'WhatsApp não está instalado neste dispositivo';
 
   @override
   String get settingsPrivacyOffline => '100% Offline';
@@ -1315,7 +1323,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsViewSourceCode => 'View Source Code';
 
   @override
-  String get settingsSecurity => 'Security';
+  String get settingsSecurity => 'Segurança';
 
   @override
   String settingsStorageFilesSummary(String size, num count) {
@@ -1371,19 +1379,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsPrivacyNoAdsDesc => 'No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.';
 
   @override
-  String get settingsFadcamDesc => 'Privacy-focused Android multimedia suite: background video recording, dashcam, screen recorder, live streaming & remote control — ad-free & open-source.';
+  String get settingsFadcamDesc => 'Suite multimídia Android focada em privacidade: gravação de vídeo em segundo plano, dashcam, gravador de tela, transmissão ao vivo e controle remoto — sem anúncios e open source.';
 
   @override
-  String get settingsQuranCliDesc => 'Your Terminal Companion for the Holy Quran: Read, Listen & Generate Subtitles for Video Editing!';
+  String get settingsQuranCliDesc => 'Seu companheiro de terminal para o Sagrado Alcorão: leia, ouça e gere legendas para edição de vídeo!';
 
   @override
-  String get settingsFadcryptDesc => 'Advanced and elegant cross-platform app locker — files, folders, and applications all protected with military-grade AES-256-GCM encryption. Open-source, completely free, no telemetry!';
+  String get settingsFadcryptDesc => 'Bloqueador de apps avançado e elegante multiplataforma — arquivos, pastas e aplicativos protegidos com criptografia AES-256-GCM de nível militar. Open source, totalmente grátis, sem telemetria!';
 
   @override
-  String get settingsFadcatDesc => 'Lightweight, feature-rich, cross-platform Android logcat replacement — no Android Studio bloat. Bundles ADB for supported architectures, runs in GUI, CLI, or MCP server mode.';
+  String get settingsFadcatDesc => 'Substituto leve, rico em recursos e multiplataforma para o Android logcat — sem o peso do Android Studio. Inclui ADB para arquiteturas suportadas e roda em GUI, CLI ou modo servidor MCP.';
 
   @override
-  String get settingsMacosComingSoon => 'macOS coming soon';
+  String get settingsMacosComingSoon => 'macOS em breve';
 
   @override
   String get settingsOpenInBrowser => 'Open in Browser';
@@ -1673,20 +1681,20 @@ class AppLocalizationsPt extends AppLocalizations {
   String get scannerResults => 'Resultados';
 
   @override
-  String get scannerInitializingCamera => 'Initializing Camera...';
+  String get scannerInitializingCamera => 'Inicializando câmera...';
 
   @override
-  String get scannerDocumentDetected => 'Document detected — hold steady';
+  String get scannerDocumentDetected => 'Documento detectado — mantenha firme';
 
   @override
-  String get scannerKeepDocumentFlat => 'Keep document upright & flat for best results';
+  String get scannerKeepDocumentFlat => 'Mantenha o documento reto e plano para melhores resultados';
 
   @override
-  String get scannerUpload => 'Upload';
+  String get scannerUpload => 'Enviar';
 
   @override
   String scannerFailedOpenImage(String error) {
-    return 'Failed to open image: $error';
+    return 'Falha ao abrir imagem: $error';
   }
 
   @override
@@ -1694,47 +1702,47 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String scannerFailedTorch(String error) {
-    return 'Failed to toggle torch: $error';
+    return 'Falha ao alternar a lanterna: $error';
   }
 
   @override
-  String get scannerStartingCamera => 'Starting Camera...';
+  String get scannerStartingCamera => 'Iniciando câmera...';
 
   @override
-  String get scannerCameraUnavailable => 'Camera Unavailable';
+  String get scannerCameraUnavailable => 'Câmera indisponível';
 
   @override
-  String get scannerCameraUnavailableDesc => 'Unable to initialize camera';
+  String get scannerCameraUnavailableDesc => 'Não foi possível inicializar a câmera';
 
   @override
-  String get scannerAnalysisComplete => 'Analysis Complete';
+  String get scannerAnalysisComplete => 'Análise concluída';
 
   @override
-  String get scannerAnalyzing => 'Analyzing Document...';
+  String get scannerAnalyzing => 'Analisando documento...';
 
   @override
-  String get scannerEnhancing => 'Enhancing image quality...';
+  String get scannerEnhancing => 'Melhorando qualidade da imagem...';
 
   @override
-  String get scannerExtractingText => 'Extracting text data...';
+  String get scannerExtractingText => 'Extraindo dados de texto...';
 
   @override
-  String get scannerNoScansYet => 'No Scans Yet';
+  String get scannerNoScansYet => 'Ainda não há digitalizações';
 
   @override
-  String get scannerNoScansDesc => 'Capture a document to see extracted text here';
+  String get scannerNoScansDesc => 'Capture um documento para ver aqui o texto extraído';
 
   @override
-  String get scannerExtractedText => 'Extracted Text';
+  String get scannerExtractedText => 'Texto extraído';
 
   @override
-  String get scannerNoTextExtracted => '(No text extracted)';
+  String get scannerNoTextExtracted => '(Nenhum texto extraído)';
 
   @override
-  String get scannerDetectedLines => 'Detected Lines';
+  String get scannerDetectedLines => 'Linhas detectadas';
 
   @override
-  String get scannerTextCopied => 'Text copied to clipboard';
+  String get scannerTextCopied => 'Texto copiado para a área de transferência';
 
   @override
   String get scannerCopyAll => 'Copiar tudo';
@@ -1789,7 +1797,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String homeFileInTrashDetail(String date) {
-    return 'In trash: yes (deleted at: $date)';
+    return 'Na lixeira: sim (excluído em: $date)';
   }
 
   @override

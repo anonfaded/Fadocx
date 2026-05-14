@@ -696,5 +696,7 @@
   "@sheetNoData": {"placeholders": {"sheetName": {"type": "String"}}},
   "@documentNoSheets": {"placeholders": {"format": {"type": "String"}}},
   "@urlCopiedToClipboard": {"placeholders": {"url": {"type": "String"}}},
-  "trashSelect": "منتخب کریں"
+  "trashSelect": "منتخب کریں",
+  "settingsVersionClipboardInfo": "{appName} v{version} (بلڈ {buildNumber})\nپیکیج: {packageName}",
+  "settingsShareMessage": "Fadocx دیکھیں!\n\nایک آل اِن ون دستاویز ویور: PDF، Office، اسپریڈشیٹس، پریزنٹیشنز، کوڈ فائلیں اور OCR ٹیکسٹ استخراج — مکمل آف لائن، بغیر ٹریکنگ، اوپن سورس۔\n\nhttps://github.com/anonfaded/Fadocx"
 }
