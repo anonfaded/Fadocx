@@ -2,6 +2,21 @@
   "@@locale": "ru",
   "@@author": "FadSec Lab",
   "appName": "Fadocx",
+  "appDescription": "Просмотр документов",
+  "homeTitle": "Fadocx",
+  "recentFiles": "Недавние файлы",
+  "noRecentFiles": "Нет недавних файлов. Откройте документ, чтобы начать.",
+  "openFile": "Открыть файл",
+  "openFileTooltip": "Просмотрите и откройте документ",
+  "pdfFile": "Файл PDF",
+  "docxFile": "Документ Word",
+  "xlsxFile": "Таблица Excel",
+  "csvFile": "Файл CSV",
+  "unknownFile": "Неизвестный файл",
+  "page": "Страница",
+  "pageOf": "из",
+  "jumpToPage": "Перейти к странице",
+  "sheet": "Лист",
   "ok": "ОК",
   "cancel": "Отмена",
   "delete": "Удалить",
@@ -22,10 +37,11 @@
   "error": "Ошибка",
   "warning": "Предупреждение",
   "success": "Успешно",
-  "loadingDocument": "Загрузка документа...",
   "unsupportedFileType": "Формат файла не поддерживается",
   "fileNotFound": "Файл не найден",
   "permissionDenied": "Доступ запрещён",
+  "corruptedFile": "Файл поврежден",
+  "loadingDocument": "Загрузка документа...",
   "settingsTitle": "Настройки",
   "theme": "Тема",
   "themeDark": "Тёмная",
@@ -43,47 +59,59 @@
   "languageGerman": "Немецкий",
   "languagePortuguese": "Португальский",
   "languageHindi": "Хинди",
+  "appVersion": "App Version",
+  "clearRecentFiles": "Очистить недавние файлы",
+  "backButton": "Назад",
+  "emptyTitle": "Нет документов",
+  "emptyMessage": "Начните с открытия документа с вашего устройства",
+  "startBrowsing": "Начать обзор",
+  "languageChanged": "Язык изменен на русский",
+  "privacyDescription": "Fadocx — это просмотрщик документов. Ваши файлы хранятся локально на устройстве и никогда не отправляются на сервер.",
+  "aboutDescription": "Fadocx v1.0.0 - Ваш приватный просмотрщик документов. Разработан с уважением к вашей конфиденциальности.",
+  "tableRows": "Строки",
+  "tableEmpty": "Нет данных для отображения",
+  "tableNoContent": "Лист пуст",
+  "sheetEmpty": "Лист пуст",
+  "noTableData": "Нет табличных данных",
+  "noSpreadsheetData": "Нет данных электронной таблицы",
+  "rowsSymbol": "строк",
+  "colsSymbol": "столб",
+  "noSlidesFound": "Слайды не найдены",
+  "slidesCount": "слайды",
+  "pptUnsupported": "Файл PPT разобран, но не содержит слайдов",
+  "odpUnsupported": "Файл ODP разобран, но не содержит слайдов или читаемого содержимого",
+  "noTextContent": "Текстовое содержимое не найдено",
+  "couldNotParse": "Не удалось разобрать файл",
+  "file": "Файл",
+  "slides": "Слайд",
+  "previewNotSupported": "Предпросмотр пока не поддерживается",
+  "openWithSystemApp": "Открыть системным приложением",
+  "systemAppNotImplemented": "Открытие системным приложением пока не реализовано",
+  "type": "Тип",
+  "fileNotFoundMessage": "Файл не найден",
+  "fileTooLarge": "Размер файла превышает максимальный лимит (100 МБ)",
+  "errorLoadingFile": "Ошибка загрузки файла",
+  "docxPreviewNotSupported": "Предпросмотр DOCX еще не полностью поддерживается",
+  "docParseError": "Не удалось проанализировать DOC файл. Попробуйте преобразовать в DOCX.",
+  "xlsxParseError": "Не удалось разобрать файл XLSX",
+  "xlsParseError": "Не удалось разобрать файл XLS. Попробуйте преобразовать его в XLSX.",
+  "csvParseError": "Не удалось проанализировать CSV файл",
+  "odtParseError": "Не удалось разобрать файл ODT",
+  "odsParseError": "Не удалось разобрать файл ODS",
+  "odpParseError": "Не удалось разобрать файл ODP",
+  "pptParseError": "Не удалось разобрать файл PPT",
+  "rtfParseError": "Не удалось разобрать файл RTF",
+  "txtFileEmpty": "Файл пуст",
+  "unsupportedFormat": "Формат файла пока не поддерживается",
+  "txtLoaded": "TXT",
+  "charactersLoaded": "символов",
+  "copiedToClipboard": "Скопировано в буфер обмена",
   "navHome": "Главная",
   "navLibrary": "Библиотека",
   "navSettings": "Настройки",
   "navRecents": "Недавние",
-  "onboardingSkip": "Пропустить",
-  "onboardingNext": "Далее",
-  "onboardingGetStarted": "Начать",
-  "onboardingSlide1Title": "Добро пожаловать в Fadocx",
-  "onboardingSlide1Tagline": "Ваш универсальный приватный помощник для документов",
-  "onboardingSlide1Bullet1": "Открывайте любые форматы — PDF, Office, изображения и не только",
-  "onboardingSlide1Bullet2": "Приватное хранилище, скрытое от галереи и файлового менеджера",
-  "onboardingSlide1Bullet3": "Бесплатно, открытый код — без регистрации и аккаунта",
-  "onboardingSlide2Title": "Встроенные инструменты",
-  "onboardingSlide2Bullet1": "Сканируйте документы камерой — текст извлекается мгновенно",
-  "onboardingSlide2Bullet2": "Воспроизводите аудио и видео прямо в приложении, без лишних программ",
-  "onboardingSlide2Bullet3": "Всё автоматически сортируется по категориям при импорте",
-  "onboardingSlide2Bullet4": "Безопасное удаление — восстановите всё из корзины в любой момент",
-  "onboardingSlide3Title": "Приватность по замыслу",
-  "onboardingSlide3Bullet1": "Ничто никогда не покидает ваше устройство — без облака и серверов",
-  "onboardingSlide3Bullet2": "Без слежки, без рекламы, без аналитики. Никогда.",
-  "onboardingSlide3Bullet3": "Открытый код — каждая строка кода публична",
-  "homeTitle": "Fadocx",
-  "recentFiles": "Недавние файлы",
-  "noRecentFiles": "Нет недавних файлов. Откройте документ, чтобы начать.",
-  "homeWelcomeTitle": "Добро пожаловать в Fadocx",
-  "homeWelcomeSubtitle": "Изучите примеры файлов или импортируйте свои документы",
-  "homeExploreSamples": "Просмотреть примеры файлов",
-  "homeScanDocument": "Сканировать документ",
-  "homeScanDocumentDesc": "Извлечь текст из документов с помощью OCR",
-  "homeImportDocument": "Импортировать документ",
-  "homeImportDocumentDesc": "Просмотреть и импортировать файлы с устройства",
-  "homeSeeAll": "Смотреть все",
-  "homeNoRecentFiles": "Нет недавних файлов",
-  "homePressBackExit": "Нажмите ещё раз для выхода",
-  "libraryTitle": "Библиотека",
-  "librarySearchHint": "Поиск в библиотеке...",
-  "libraryNoDocuments": "Нет документов",
-  "libraryAdjustSearch": "Попробуйте изменить поиск или фильтры",
-  "libraryDocumentsAppearHere": "Ваши документы появятся здесь",
   "categoryAll": "Все",
-  "categoryPdfs": "PDF",
+  "categoryPdfs": "Файлы PDF",
   "categoryDocs": "Документы",
   "categorySheets": "Таблицы",
   "categorySlides": "Слайды",
@@ -91,98 +119,64 @@
   "categoryScans": "Сканы",
   "categoryOther": "Прочее",
   "categoryPresentations": "Презентации",
-  "settingsAppearance": "Внешний вид",
-  "settingsStorage": "Хранилище",
-  "settingsUpdates": "Обновления",
-  "settingsAbout": "О приложении",
-  "settingsVersion": "Версия",
-  "settingsDangerZone": "Зона опасности",
-  "settingsTrash": "Корзина",
-  "settingsTrashDesc": "Просмотр удалённых файлов",
-  "settingsEnabled": "Включено",
-  "settingsDisabled": "Выключено",
-  "settingsChooseTheme": "Выберите тему",
-  "settingsSelectLanguage": "Выберите язык",
-  "settingsReplayOnboarding": "Повторить знакомство",
-  "settingsReplayOnboardingDesc": "Показывать вводные слайды при следующем запуске",
-  "settingsResetSettings": "Сбросить настройки",
-  "settingsResetSettingsDesc": "Восстановить все настройки по умолчанию",
-  "settingsResetDone": "Настройки сброшены",
-  "settingsAutoUpdateCheck": "Автопроверка обновлений",
-  "settingsCheckForUpdates": "Проверить обновления",
-  "settingsSourceCode": "Исходный код",
-  "settingsContact": "Связаться",
-  "settingsPrivacyPolicy": "Политика конфиденциальности",
-  "trashTitle": "Корзина",
-  "trashEmpty": "Корзина пуста",
-  "trashEmptySubtitle": "Удалённые файлы появятся здесь",
-  "trashDeletePermanently": "Удалить навсегда",
-  "scannerTitle": "Сканер документов",
-  "scannerCapture": "Снять",
-  "scannerProcessing": "Обработка",
-  "scannerResults": "Результаты",
-  "scannerCopyAll": "Копировать всё",
-  "scannerNewScan": "Новый скан",
-  "whatsNewTitle": "Что нового",
-  "linkTileCopy": "Копировать",
-  "linkTileSendEmail": "Отправить письмо",
-  "linkTileOpenInBrowser": "Открыть в браузере",
-  "confirm": "Подтвердить",
-  "openInBrowser": "Открыть в браузере",
-  "comingSoon": "Скоро",
-  "routeNotFound": "Маршрут не найден: {path}",
-  "routeGoHome": "На главную",
-  "routeInvalidDocumentPath": "Неверный путь к документу",
-  "pdfCopyTextTitle": "Копировать текст PDF",
-  "pdfExtractingText": "Извлечение текста...",
-  "pdfExtractingTextProgress": "Извлечение текста... ({current}/{total} страниц)",
-  "pdfErrorExtractingText": "Ошибка при извлечении текста",
-  "pdfWordCount": "Количество слов: {count}",
-  "pdfNoTextFound": "Текст в PDF не найден",
-  "pdfFullTextCopied": "Полный текст PDF скопирован в буфер обмена",
-  "pdfPasswordRequired": "Требуется пароль PDF",
-  "pdfPasswordDesc": "Этот PDF защищён паролем. Введите пароль для разблокировки.",
-  "pdfPasswordLabel": "Пароль",
-  "pdfUnlock": "Разблокировать",
-  "pdfSearchHint": "Поиск в PDF...",
-  "pdfTextCannotBeExtracted": "Текст не может быть извлечён с этой страницы",
-  "pdfLoadingPageTexts": "Загрузка текстов страниц...",
-  "pdfPageCopied": "Текст страницы {page} скопирован в буфер обмена",
-  "viewerTooltipSidebar": "Боковая панель",
-  "viewerTooltipFirst": "Первая",
-  "viewerTooltipLast": "Последняя",
-  "viewerTooltipCopyPageText": "Копировать текст страницы",
-  "textDocSearchHint": "Поиск текста...",
-  "textDocSearchPrevResult": "Предыдущий результат",
-  "textDocSearchNextResult": "Следующий результат",
-  "imageFailedToLoad": "Не удалось загрузить изображение",
-  "mediaLoading": "Загрузка медиа...",
-  "mediaFailedToPlay": "Не удалось воспроизвести медиа",
-  "mediaPlay": "Воспроизвести",
-  "audioPlaybackNote": "Для воспроизведения аудио требуется дополнительная библиотека.",
-  "sheetNoData": "Нет данных в {sheetName}",
-  "documentNoSheets": "В {format} не найдено листов",
-  "viewerPlaybackSpeed": "Скорость воспроизведения",
-  "urlCopiedToClipboard": "URL скопирован в буфер обмена: {url}",
-  "lokitPreparingDoc": "Подготовка вашего документа...",
-  "lokitWarmingUp": "Запуск движка Fadocx...",
-  "lokitAlmostThere": "Почти готово",
-  "lokitJustAMoment": "Подождите секунду",
-  "lokitFailedToRender": "Не удалось отобразить документ",
-  "trashSelect": "Выбрать",
-  "copiedToClipboard": "Скопировано в буфер обмена",
   "supportDevelopment": "Поддержать разработку",
   "visitPatreon": "Открыть Patreon",
   "copyLink": "Копировать ссылку",
+  "becomeAPatron": "Стать спонсором",
   "patreonDescription": "Ваша поддержка помогает Fadocx и FadCam развиваться. Подписчики Patreon получают эксклюзивные преимущества, включая премиальные функции и ранний доступ во всех приложениях FadSec Lab.\n\nЧтобы узнать больше, откройте Patreon по ссылке ниже и посмотрите доступные уровни с их преимуществами.",
   "discordTitle": "Присоединяйтесь к нашему Discord",
+  "openInBrowser": "Открыть в браузере",
+  "comingSoon": "Скоро",
+  "newBadge": "НОВОЕ",
   "timeAgoJustNow": "Только что",
   "timeAgoMinute": "{count, plural, =1{1 минуту назад} other{{count} минут назад}}",
+  "@timeAgoMinute": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoHour": "{count, plural, =1{1 час назад} other{{count} часов назад}}",
+  "@timeAgoHour": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoDay": "{count, plural, =1{1 день назад} other{{count} дней назад}}",
+  "@timeAgoDay": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoWeek": "{count, plural, =1{1 неделю назад} other{{count} недель назад}}",
+  "@timeAgoWeek": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoMonth": "{count, plural, =1{1 месяц назад} other{{count} месяцев назад}}",
+  "@timeAgoMonth": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoYear": "{count, plural, =1{1 год назад} other{{count} лет назад}}",
+  "@timeAgoYear": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "monthJan": "янв",
   "monthFeb": "фев",
   "monthMar": "мар",
@@ -195,30 +189,207 @@
   "monthOct": "окт",
   "monthNov": "ноя",
   "monthDec": "дек",
+  "homeWelcomeTitle": "Добро пожаловать в Fadocx",
+  "homeWelcomeSubtitle": "Изучите примеры файлов или импортируйте свои документы",
+  "homeExploreSamples": "Просмотреть примеры файлов",
+  "homeDocumentManagement": "Управление документами",
+  "homeSeeAll": "Смотреть все",
+  "homeNoRecentFiles": "Нет недавних файлов",
+  "homeScanDocument": "Сканировать документ",
+  "homeScanDocumentDesc": "Извлечь текст из документов с помощью OCR",
+  "homeImportDocument": "Импортировать документ",
+  "homeImportDocumentDesc": "Просмотреть и импортировать файлы с устройства",
+  "onboardingSkip": "Пропустить",
+  "onboardingNext": "Далее",
+  "onboardingGetStarted": "Начать",
+  "onboardingSlide1Title": "Добро пожаловать в Fadocx",
+  "onboardingSlide1Tagline": "Ваш универсальный приватный помощник для документов",
+  "onboardingSlide1Bullet1": "Приватный просмотрщик документов",
+  "onboardingSlide1Bullet2": "Без отслеживания или данных",
+  "onboardingSlide1Bullet3": "Открытый исходный код",
+  "onboardingSlide2Title": "Поддержка форматов",
+  "onboardingSlide2Bullet1": "PDF, DOCX, XLSX, CSV, PPT",
+  "onboardingSlide2Bullet2": "Распознавание текста, изображений и OCR",
+  "onboardingSlide2Bullet3": "Импорт и сравнение",
+  "onboardingSlide2Bullet4": "Многоязычная поддержка",
+  "onboardingSlide3Title": "Готовы начать?",
+  "onboardingSlide3Bullet1": "Откройте документ со своего устройства",
+  "onboardingSlide3Bullet2": "Или выберите примеры для тестирования",
+  "onboardingSlide3Bullet3": "Узнайте больше в настройках",
   "homeStatDocuments": "Документы",
   "homeStatStorage": "Хранилище",
   "homeStatTimeRead": "Время чтения",
   "homeStatLastOpened": "Открыто в последний раз: ",
-  "settingsDocumentsSize": "Размер документов",
-  "settingsCalculating": "Вычисление...",
-  "settingsCustomStorage": "Пользовательское хранилище",
-  "settingsAppLock": "Блокировка приложения",
-  "settingsJoinCommunity": "Присоединиться к сообществу",
-  "settingsMoreFromFadsec": "Больше от FadSec Lab",
-  "settingsCopiedInfo": "Скопировано в буфер обмена",
-  "settingsCopyInfo": "Копировать информацию",
-  "settingsVersionClipboardInfo": "{appName} v{version} (Build {buildNumber})\nПакет: {packageName}",
-  "settingsShareApp": "Поделиться с друзьями",
-  "settingsShareMessage": "Попробуйте Fadocx!\n\nУниверсальный просмотрщик документов: PDF, Office, таблицы, презентации, файлы кода и OCR-извлечение текста — полностью офлайн, без отслеживания, с открытым исходным кодом.\n\nhttps://github.com/anonfaded/Fadocx",
-  "settingsShareVia": "Поделиться через...",
-  "settingsShareWhatsApp": "WhatsApp",
-  "settingsWhatsAppNotInstalled": "WhatsApp не установлен на этом устройстве",
-  "settingsSecurity": "Безопасность",
-  "settingsFadcamDesc": "Мультимедийный набор для Android с упором на приватность: фоновая видеозапись, видеорегистратор, запись экрана, прямые трансляции и удалённое управление — без рекламы и с открытым исходным кодом.",
-  "settingsQuranCliDesc": "Ваш терминальный помощник для Священного Корана: читайте, слушайте и создавайте субтитры для видеомонтажа!",
-  "settingsFadcryptDesc": "Продвинутый и элегантный кроссплатформенный блокировщик приложений — файлы, папки и приложения защищены шифрованием AES-256-GCM военного уровня. Открытый исходный код, полностью бесплатно, без телеметрии!",
-  "settingsFadcatDesc": "Лёгкая, функциональная, кроссплатформенная замена Android logcat — без тяжести Android Studio. Включает ADB для поддерживаемых архитектур и работает в режимах GUI, CLI или MCP-сервера.",
-  "settingsMacosComingSoon": "macOS скоро появится",
+  "homePressBackExit": "Нажмите ещё раз для выхода",
+  "homeImportingSamples": "Импорт файлов-образцов…",
+  "homeSamplesImported": "{count, plural, =1{1 файл-образец успешно импортирован!} other{{count} файлы-образцы успешно импортированы!}}",
+  "@homeSamplesImported": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "homeViewFiles": "Просмотреть файлы",
+  "homeFailedImportSamples": "Ошибка импорта файлов-образцов: {error}",
+  "@homeFailedImportSamples": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileMovedToTrash": "{name} перемещен в корзину",
+  "@homeFileMovedToTrash": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileInfo": "Информация о файле",
+  "homeFileName": "Имя",
+  "homeFileType": "Тип",
+  "homeFileSize": "Размер",
+  "homeFileLocation": "Расположение",
+  "homeFileDateOpened": "Дата открытия",
+  "homeFileLastModified": "Последнее изменение",
+  "homeFileInTrash": "В корзине",
+  "homeFileInfoCopied": "Информация о файле скопирована",
+  "homeCopySuffix": " (копия)",
+  "homeCopySuffixCounter": " (копия {counter})",
+  "@homeCopySuffixCounter": {
+    "placeholders": {
+      "counter": {
+        "type": "num"
+      }
+    }
+  },
+  "homeDuplicatedAs": "Дублировано как {name}",
+  "@homeDuplicatedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedDuplicate": "Ошибка дублирования файла: {error}",
+  "@homeFailedDuplicate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRenameFile": "Переименовать файл",
+  "homeFileNameLabel": "Имя файла",
+  "homeFileAlreadyExists": "Файл с таким именем уже существует",
+  "homeRenamedTo": "Переименовано в {name}",
+  "@homeRenamedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedRename": "Ошибка переименования",
+  "homeExport": "Экспортировать",
+  "homeSaveToDownloads": "Сохранить в Загрузки",
+  "homeSaveToDownloadsPath": "Загрузки/Fadocx/{name}",
+  "@homeSaveToDownloadsPath": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeChooseLocation": "Выбрать местоположение",
+  "homeChooseLocationDesc": "Выберите пользовательскую директорию сохранения",
+  "homeSavedToDownloads": "Сохранено в Загрузки/Fadocx/{name}",
+  "@homeSavedToDownloads": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSavedTo": "Сохранено в {path}",
+  "@homeSavedTo": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedExport": "Не удалось экспортировать файл",
+  "homeChooseSaveLocation": "Выберите место сохранения",
+  "homeConvertComingSoon": "Функция конвертирования скоро!",
+  "homeFadDriveComingSoon": "FadDrive скоро!",
+  "homePresentationsTooltip": "Скоро",
+  "homeErrorPrefix": "Ошибка: {error}",
+  "@homeErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryTitle": "Библиотека",
+  "librarySearchHint": "Поиск в библиотеке...",
+  "librarySelected": "Выбрано: {count}",
+  "@librarySelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeleteSelected": "Удалить выбранное?",
+  "libraryDeleteConfirm": "Переместить {count} файлов в корзину? Вы сможете восстановить их позже.",
+  "@libraryDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryItemsMovedToTrash": "{count} элементов перемещено в корзину",
+  "@libraryItemsMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryErrorLoading": "Ошибка загрузки библиотеки: {error}",
+  "@libraryErrorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryItemCount": "{count} элементов",
+  "@libraryItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeselectAll": "Снять выделение",
+  "librarySelectAll": "Выбрать все",
+  "libraryNoCategoryFound": "{category} не найдено",
+  "@libraryNoCategoryFound": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryNoDocuments": "Нет документов",
+  "libraryAdjustSearch": "Попробуйте изменить поиск или фильтры",
+  "libraryDocumentsAppearHere": "Ваши документы появятся здесь",
   "browseTitle": "Импорт документов",
   "browseBack": "Назад",
   "browseSearchHint": "Поиск документов...",
@@ -240,14 +411,71 @@
   "browseOpenSettings": "Открыть настройки",
   "browseAccessStillDisabled": "Доступ ко всем файлам всё ещё отключён. Включите его в настройках, чтобы продолжить.",
   "browseNoDirectories": "На устройстве не найдены каталоги с документами",
-  "browseErrorPrefix": "Ошибка: {error}",
+  "browseErrorPrefix": "Ошибка импорта: {error}",
+  "@browseErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "browseSortBy": "Сортировать по",
   "browseImportedFiles": "{count, plural, =1{Импортирован 1 файл} other{Импортировано {count} файлов}}",
+  "@browseImportedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashTitle": "Корзина",
+  "trashEmpty": "Корзина пуста",
+  "trashEmptySubtitle": "Удалённые файлы появятся здесь",
+  "trashErrorLoading": "Ошибка загрузки корзины",
+  "trashFilesSelected": "{count} выбрано",
+  "@trashFilesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashFilesLabel": "Файлы",
+  "trashSelect": "Выбрать",
+  "trashFileRestored": "Файл успешно восстановлен",
+  "trashDeletePermanently": "Удалить навсегда",
+  "trashDeletePermanentlyConfirm": "Удалить навсегда?",
+  "trashDeletePermanentlyMessage": "Вы собираетесь окончательно удалить {count} файл(ов). Это действие нельзя отменить.",
+  "@trashDeletePermanentlyMessage": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashDeleteTypeConfirm": "Введите DELETE (заглавными буквами) для подтверждения:",
+  "trashDeleteHint": "DELETE",
+  "trashFilesPermanentlyDeleted": "{count} файл(ов) окончательно удален(ы)",
+  "@trashFilesPermanentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "whatsNewTitle": "Что нового",
   "whatsNewWhatsIncluded": "Что входит",
   "whatsNewPlanned": "Запланировано",
   "whatsNewReleasedToday": "Выпущено сегодня",
   "whatsNewReleasedYesterday": "Выпущено вчера",
   "whatsNewReleasedDate": "Выпущено {date}",
+  "@whatsNewReleasedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "whatsNewDocAndSheets": "Документы и таблицы",
   "whatsNewDocAndSheetsDesc": "Просматривайте PDF, документы Word, таблицы Excel и многое другое — всё локально на вашем устройстве.",
   "whatsNewOcrAi": "Интеллектуальный OCR и ИИ на устройстве",
@@ -262,7 +490,7 @@
   "whatsNewFileManagementDesc": "Переименовывайте, дублируйте, экспортируйте и удаляйте документы с лёгкостью.",
   "whatsNewThemes": "Светлая и тёмная темы",
   "whatsNewThemesDesc": "Выберите подходящий вид — тёмный режим ночью, светлый днём.",
-  "whatsNewFadDrive": "FadDrive",
+  "whatsNewFadDrive": "Интеграция FadDrive",
   "whatsNewFadDriveDesc": "Облачная синхронизация для ваших документов — доступ откуда угодно и когда угодно.",
   "whatsNewEditing": "Редактирование документов",
   "whatsNewEditingDesc": "Быстро вносите изменения в документы прямо в Fadocx.",
@@ -279,7 +507,7 @@
   "whatsNewThankYouDesc": "Если Fadocx приносит вам пользу, рассмотрите возможность поддержать его развитие. Ваш вклад помогает нам и дальше создавать инструменты с приоритетом приватности.",
   "drawerWhatNew": "Что нового",
   "drawerRecentFiles": "Недавние файлы",
-  "drawerVisible": "Видимо",
+  "drawerVisible": "Видимый",
   "drawerHidden": "Скрыто",
   "drawerUnlockBenefits": "Откройте эксклюзивные преимущества",
   "fileActionRename": "Переименовать",
@@ -296,13 +524,469 @@
   "fileActionUploadDesc": "Синхронизировать с облачным хранилищем",
   "fileActionFileInfo": "Информация о файле",
   "fileActionSubtitle": "Действия и управление файлом",
+  "updateAvailableTitle": "Доступно обновление",
+  "updateAvailableSubtitle": "Новая версия Fadocx готова к загрузке",
+  "updateStableRelease": "Стабильный релиз",
+  "updateStableDesc": "Стабильный и протестированный выпуск для использования в производстве",
+  "updateBetaRelease": "Бета-релиз",
+  "updateBetaDesc": "Ранний доступ к новым функциям, могут содержать ошибки",
+  "updateMaybeLater": "Может быть позже",
+  "updateCurrent": "Текущий",
+  "updateNew": "Новый",
+  "updateVisitGithub": "Посетить GitHub",
+  "updateBetaInfo": "Бета-версия Fadocx — отдельное приложение, которое можно установить рядом со стабильной версией. Она не повлияет на стабильное приложение или его данные.\n\nУстановите бета-версию, чтобы тестировать новые функции до их появления в стабильном выпуске.",
+  "updateBannerStable": "Стабильное обновление",
+  "updateBannerBeta": "Бета-обновление",
+  "settingsAppearance": "Внешний вид",
+  "settingsStorage": "Хранилище",
+  "settingsDocumentsSize": "Размер документов",
+  "settingsCalculating": "Вычисление...",
+  "settingsCustomStorage": "Пользовательское хранилище",
+  "settingsUnknown": "Неизвестно",
+  "settingsStorageDetails": "Хранилище",
+  "settingsStoragePdfs": "Файлы PDF",
+  "settingsStorageDocs": "Документы",
+  "settingsStorageSheets": "Таблицы",
+  "settingsStoragePresentations": "Презентации",
+  "settingsStorageCode": "Код",
+  "settingsStorageScans": "Сканы",
+  "settingsStorageImages": "Изображения",
+  "settingsStorageOther": "Прочее",
+  "settingsStorageInfo": "Документы хранятся в приватной папке на вашем устройстве и недоступны другим приложениям",
+  "settingsStoragePrivateFolderInfo": "Документы хранятся в приватной папке, скрытой от других приложений и файловых менеджеров. Доступ к ним есть только у Fadocx.",
+  "settingsStorageDeleteInfo": "Удаляйте документы из опасной зоны в настройках",
+  "settingsStorageEmpty": "Нет документов",
+  "settingsStorageFailedLoad": "Не удалось загрузить данные хранилища",
+  "settingsUpdates": "Обновления",
+  "settingsAutoUpdateCheck": "Автопроверка обновлений",
+  "settingsReplayOnboarding": "Повторить знакомство",
+  "settingsReplayOnboardingDesc": "Показывать вводные слайды при следующем запуске",
+  "settingsEnabled": "Включено",
+  "settingsDisabled": "Выключено",
+  "settingsAppLock": "Блокировка приложения",
+  "settingsAbout": "О приложении",
+  "settingsVersion": "Версия",
+  "settingsSourceCode": "Исходный код",
+  "settingsContact": "Связаться",
+  "settingsJoinCommunity": "Присоединиться к сообществу",
+  "settingsPrivacyPolicy": "Политика конфиденциальности",
+  "settingsMoreFromFadsec": "Больше от FadSec Lab",
+  "settingsFadocxDesc": "Ваш просмотрщик документов",
+  "settingsDangerZone": "Зона опасности",
+  "settingsTrash": "Корзина",
+  "settingsTrashDesc": "Просмотр удалённых файлов",
+  "settingsResetSettings": "Сбросить настройки",
+  "settingsResetSettingsDesc": "Восстановить все настройки по умолчанию",
+  "settingsResetDone": "Настройки сброшены",
+  "settingsRetry": "Повторить попытку",
+  "settingsChooseTheme": "Выберите тему",
+  "settingsSelectLanguage": "Выберите язык",
+  "settingsCheckForUpdates": "Проверить обновления",
+  "settingsCheckingUpdates": "Проверка обновлений…",
+  "settingsNoInternet": "Нет подключения к интернету. Проверьте вашу сеть и повторите попытку.",
+  "settingsUpToDate": "Вы обновлены",
+  "settingsUpToDateDesc": "v{version} - это последняя версия.",
+  "@settingsUpToDateDesc": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBetaAvailable": "Бета v{version} доступна",
+  "@settingsBetaAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVersionWithBuild": "Версия {version} (сборка {buildNumber})",
+  "@settingsVersionWithBuild": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedInfo": "Скопировано в буфер обмена",
+  "settingsCopyInfo": "Копировать информацию",
+  "settingsVersionClipboardInfo": "{appName} v{version} (Build {buildNumber})\nПакет: {packageName}",
+  "@settingsVersionClipboardInfo": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      },
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsShareApp": "Поделиться с друзьями",
+  "settingsShareMessage": "Попробуйте Fadocx!\n\nУниверсальный просмотрщик документов: PDF, Office, таблицы, презентации, файлы кода и OCR-извлечение текста — полностью офлайн, без отслеживания, с открытым исходным кодом.\n\nhttps://github.com/anonfaded/Fadocx",
+  "settingsShareVia": "Поделиться через...",
+  "settingsShareWhatsApp": "WhatsApp",
+  "settingsWhatsAppNotInstalled": "WhatsApp не установлен на этом устройстве",
+  "settingsPrivacyOffline": "100% офлайн",
+  "settingsPrivacyLocalStorage": "Только локальное хранилище",
+  "settingsPrivacyOnDevice": "ИИ на устройстве",
+  "settingsPrivacyOpenSource": "Открытый исходный код",
+  "settingsPrivacyNoAds": "Без рекламы",
+  "settingsPrivacyByDesign": "Мы верим в приватность по замыслу.",
+  "settingsPrivacyTransparency": "Fadocx построен с прозрачностью. Ваши документы - ваше дело - не наше.",
+  "settingsViewSourceCode": "Посмотреть исходный код",
+  "settingsSecurity": "Безопасность",
+  "settingsStorageFilesSummary": "{size} • {count} файлов",
+  "@settingsStorageFilesSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "settingsErrorPrefix": "Ошибка: {error}",
+  "@settingsErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedText": "Скопировано: {text}",
+  "@settingsCopiedText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVisitGithub": "Посетить GitHub",
+  "settingsMadeWith": "Сделано с",
+  "settingsAt": "в",
+  "settingsIn": "в",
+  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
+  "settingsTypeToConfirm": "Введите \"{text}\" для подтверждения:",
+  "@settingsTypeToConfirm": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "Подтвердить",
+  "settingsPrivacyOfflineDesc": "Вся обработка происходит на вашем устройстве. Интернет не требуется.",
+  "settingsPrivacyLocalStorageDesc": "Ваши документы остаются на вашем устройстве. Ничего не загружается.",
+  "settingsPrivacyOnDeviceDesc": "Использует OpenCV + Tesseract для OCR. ИИ работает локально.",
+  "settingsPrivacyOpenSourceDesc": "Код открыт. Проверьте его сами на GitHub.",
+  "settingsPrivacyNoAdsDesc": "Нет объявлений. Нет отслеживания. Нет аналитики. Нет crash-логов. Нулевая телеметрия.",
+  "settingsFadcamDesc": "Мультимедийный набор для Android с упором на приватность: фоновая видеозапись, видеорегистратор, запись экрана, прямые трансляции и удалённое управление — без рекламы и с открытым исходным кодом.",
+  "settingsQuranCliDesc": "Ваш терминальный помощник для Священного Корана: читайте, слушайте и создавайте субтитры для видеомонтажа!",
+  "settingsFadcryptDesc": "Продвинутый и элегантный кроссплатформенный блокировщик приложений — файлы, папки и приложения защищены шифрованием AES-256-GCM военного уровня. Открытый исходный код, полностью бесплатно, без телеметрии!",
+  "settingsFadcatDesc": "Лёгкая, функциональная, кроссплатформенная замена Android logcat — без тяжести Android Studio. Включает ADB для поддерживаемых архитектур и работает в режимах GUI, CLI или MCP-сервера.",
+  "settingsMacosComingSoon": "macOS скоро появится",
+  "settingsOpenInBrowser": "Открыть в браузере",
+  "viewerFindHint": "Найти...",
+  "viewerTypeToFind": "Введите для поиска",
+  "viewerSidebarPages": "Страницы",
+  "viewerSidebarSearch": "Поиск",
+  "viewerSidebarTOC": "Оглавление",
+  "viewerSidebarNotes": "Заметки",
+  "viewerSidebarBookmarks": "Закладки",
+  "viewerSidebarNotesDesc": "Добавляйте заметки и аннотации к страницам PDF",
+  "viewerSidebarBookmarksDesc": "Сохраняйте и упорядочивайте любимые страницы",
+  "viewerCellCopied": "Ячейка {value} скопирована",
+  "@viewerCellCopied": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerGoToPage": "Перейти к странице",
+  "viewerGoToPageHint": "Введите номер страницы (1-{totalPages})",
+  "@viewerGoToPageHint": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerGo": "Перейти",
+  "viewerInvalidPage": "Введите число от 1 до {totalPages}",
+  "@viewerInvalidPage": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerNoContent": "Нет содержимого",
+  "viewerResetZoom": "Сбросить масштаб",
+  "viewerCopyTextTitle": "Копировать текст",
+  "viewerCopyTextChoose": "Выберите, что копировать:",
+  "viewerCopyPageOnly": "Только страница {page}",
+  "@viewerCopyPageOnly": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyAllPages": "Все {totalPages} страниц",
+  "@viewerCopyAllPages": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerExtractingText": "Извлечение текста из {label}...",
+  "@viewerExtractingText": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerNoTextFound": "Текстовое содержимое не найдено",
+  "viewerPageLabel": "Страница {currentPage}",
+  "@viewerPageLabel": {
+    "placeholders": {
+      "currentPage": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLabel": "{totalPages} страниц",
+  "@viewerAllPagesLabel": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTextExtracted": "Текст извлечен из {pageLabel}.",
+  "@viewerTextExtracted": {
+    "placeholders": {
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerWordsFound": "Найдено слов: {count}",
+  "@viewerWordsFound": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedWords": "Скопировано слов: {count} из {pageLabel}",
+  "@viewerCopiedWords": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCopyAllTextTitle": "Копировать весь текст",
+  "viewerCopyAllTextConfirm": "Текст будет извлечен со всех {pageCount} страниц и скопирован в буфер обмена.",
+  "@viewerCopyAllTextConfirm": {
+    "placeholders": {
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedAllPages": "Скопировано слов: {count} со страниц: {pageCount}",
+  "@viewerCopiedAllPages": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyDocumentText": "Все содержимое документа будет скопировано в буфер обмена.",
+  "viewerWordsLines": "{words} слов, {lines} строк",
+  "@viewerWordsLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerWordsOnly": "{count} слов",
+  "@viewerWordsOnly": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerLinesOnly": "{lines} строк",
+  "@viewerLinesOnly": {
+    "placeholders": {
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedFromLines": "Скопировано {words} слов из {lines} строк",
+  "@viewerCopiedFromLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCharactersCount": "{count} символов",
+  "@viewerCharactersCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyExtractedTitle": "Копировать извлеченный текст",
+  "viewerCopyExtractedDesc": "Копировать текст, извлеченный из этого изображения через OCR.",
+  "viewerCopiedWordsChars": "Скопировано {words} слов ({chars} символов)",
+  "@viewerCopiedWordsChars": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "chars": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerErrorAccessText": "Ошибка доступа к извлеченному тексту",
+  "viewerNoTextForImage": "Для этого изображения нет извлеченного текста",
+  "viewerExtractingAllPages": "Извлечение текста со всех страниц...",
+  "viewerTextExtractionUnavailable": "Извлечение текста недоступно",
+  "viewerNoPdfText": "В этом PDF текст не найден",
+  "viewerNoTextAvailable": "Текстовое содержимое недоступно",
+  "viewerReadingTime": "{minutes} мин чтения",
+  "@viewerReadingTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeSingle": "1 мин чтения",
+  "viewerCopy": "Копировать",
+  "viewerErrorPrefix": "Ошибка: {error}",
+  "@viewerErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCellValue": "Ячейка {cell}",
+  "@viewerCellValue": {
+    "placeholders": {
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerLowerPageLabel": "страница {page}",
+  "@viewerLowerPageLabel": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLower": "все страницы",
+  "viewerCopied": "Скопировано",
+  "viewerCopyValue": "Копировать значение",
+  "viewerToggleFullscreen": "Переключить полноэкранный режим",
+  "viewerInvert": "Инвертировать",
+  "viewerText": "Текст",
+  "viewerSyntax": "Синтаксис",
+  "viewerFont": "Шрифт",
+  "viewerFontStyle": "Стиль шрифта",
+  "viewerMonospaceCourier": "Monospace (Courier)",
+  "viewerSystemUbuntu": "System (Ubuntu)",
+  "viewerEdit": "Редактировать",
+  "viewerEditWithEngine": "Редактировать в Fadocx Engine",
+  "viewerEditWithEngineDesc": "Откройте эту таблицу в движке рендеринга Fadocx для точного визуального предпросмотра с полным форматированием, диаграммами и версткой.",
+  "viewerEditWithEngineNote": "Примечание: интерактивное редактирование появится в будущем обновлении.",
+  "viewerNotNow": "Не сейчас",
+  "viewerGotIt": "Понятно",
+  "viewerErrorLoadingDocument": "Ошибка загрузки документа",
+  "viewerGoBack": "Назад",
+  "viewerReadingTimeMinutes": "{count, plural, =1{1 минута чтения} other{{count} минут чтения}}",
+  "@viewerReadingTimeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeHoursMinutes": "{hours}ч {minutes}м чтения",
+  "@viewerReadingTimeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "scannerTitle": "Сканер документов",
+  "scannerCapture": "Снять",
+  "scannerProcessing": "Обработка",
+  "scannerResults": "Результаты",
   "scannerInitializingCamera": "Инициализация камеры...",
   "scannerDocumentDetected": "Документ обнаружен — держите неподвижно",
   "scannerKeepDocumentFlat": "Держите документ ровно и плоско для лучшего результата",
   "scannerUpload": "Загрузить",
   "scannerFailedOpenImage": "Не удалось открыть изображение: {error}",
+  "@scannerFailedOpenImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerFlash": "Вспышка",
   "scannerFailedTorch": "Не удалось переключить фонарик: {error}",
+  "@scannerFailedTorch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerStartingCamera": "Запуск камеры...",
   "scannerCameraUnavailable": "Камера недоступна",
   "scannerCameraUnavailableDesc": "Не удалось инициализировать камеру",
@@ -316,264 +1000,141 @@
   "scannerNoTextExtracted": "(Текст не извлечён)",
   "scannerDetectedLines": "Обнаруженные строки",
   "scannerTextCopied": "Текст скопирован в буфер обмена",
-  "appDescription": "Document Viewer",
-  "openFile": "Open File",
-  "openFileTooltip": "Browse and open a document",
-  "pdfFile": "PDF File",
-  "docxFile": "Word Document",
-  "xlsxFile": "Excel Spreadsheet",
-  "csvFile": "CSV File",
-  "unknownFile": "Unknown File",
-  "page": "Page",
-  "pageOf": "of",
-  "jumpToPage": "Jump to page",
-  "sheet": "Sheet",
-  "corruptedFile": "File appears to be corrupted",
-  "appVersion": "App Version",
-  "clearRecentFiles": "Clear recent files",
-  "backButton": "Back",
-  "emptyTitle": "No Documents",
-  "emptyMessage": "Start by opening a document from your device",
-  "startBrowsing": "Start Browsing",
-  "languageChanged": "Language changed to English",
-  "privacyDescription": "Fadocx is a document viewer. Your files are stored locally on your device and are never transmitted to any server.",
-  "aboutDescription": "Fadocx v1.0.0 - Your private document viewer. Built to respect your privacy.",
-  "tableRows": "rows",
-  "tableEmpty": "No data to display",
-  "tableNoContent": "Sheet is empty",
-  "sheetEmpty": "Sheet is empty",
-  "noTableData": "No table data",
-  "noSpreadsheetData": "No spreadsheet data",
-  "rowsSymbol": "rows",
-  "colsSymbol": "cols",
-  "noSlidesFound": "No slides found",
-  "slidesCount": "slides",
-  "pptUnsupported": "PPT file parsed but contains no slides",
-  "odpUnsupported": "ODP file parsed but contains no slides or unreadable content",
-  "noTextContent": "No text content found",
-  "couldNotParse": "Could not parse file",
-  "file": "File",
-  "slides": "Slide",
-  "previewNotSupported": "Preview not yet supported",
-  "openWithSystemApp": "Open with System App",
-  "systemAppNotImplemented": "System app opening not yet implemented",
-  "type": "Type",
-  "fileNotFoundMessage": "File not found",
-  "fileTooLarge": "File size exceeds maximum limit (100MB)",
-  "errorLoadingFile": "Error loading file",
-  "docxPreviewNotSupported": "DOCX preview not yet fully supported",
-  "docParseError": "Could not parse DOC file. Try converting to DOCX.",
-  "xlsxParseError": "Could not parse XLSX file",
-  "xlsParseError": "Could not parse XLS file. Try converting to XLSX.",
-  "csvParseError": "Could not parse CSV file",
-  "odtParseError": "Could not parse ODT file",
-  "odsParseError": "Could not parse ODS file",
-  "odpParseError": "Could not parse ODP file",
-  "pptParseError": "Could not parse PPT file",
-  "rtfParseError": "Could not parse RTF file",
-  "txtFileEmpty": "File is empty",
-  "unsupportedFormat": "File format is not supported yet",
-  "txtLoaded": "TXT",
-  "charactersLoaded": "characters",
-  "becomeAPatron": "Become a Patron",
-  "newBadge": "NEW",
-  "homeDocumentManagement": "Управление документами",
-  "homeImportingSamples": "Importing sample files...",
-  "homeSamplesImported": "{count, plural, =1{1 sample file imported successfully!} other{{count} sample files imported successfully!}}",
-  "homeViewFiles": "View Files",
-  "homeFailedImportSamples": "Failed to import sample files: {error}",
-  "homeFileMovedToTrash": "{name} moved to trash",
-  "homeFileInfo": "Информация о файле",
-  "homeFileName": "Имя",
-  "homeFileType": "Тип",
-  "homeFileSize": "Размер",
-  "homeFileLocation": "Расположение",
-  "homeFileDateOpened": "Дата открытия",
-  "homeFileLastModified": "Последнее изменение",
-  "homeFileInTrash": "В корзине",
-  "homeFileInfoCopied": "Информация о файле скопирована",
-  "homeCopySuffix": " (copy)",
-  "homeCopySuffixCounter": " (copy {counter})",
-  "homeDuplicatedAs": "Duplicated as {name}",
-  "homeFailedDuplicate": "Failed to duplicate file: {error}",
-  "homeRenameFile": "Rename file",
-  "homeFileNameLabel": "File name",
-  "homeFileAlreadyExists": "A file with this name already exists",
-  "homeRenamedTo": "Renamed to {name}",
-  "homeFailedRename": "Failed to rename file",
-  "homeExport": "Export",
-  "homeSaveToDownloads": "Save to Downloads",
-  "homeSaveToDownloadsPath": "Download/Fadocx/{name}",
-  "homeChooseLocation": "Choose location",
-  "homeChooseLocationDesc": "Pick a custom save directory",
-  "homeSavedToDownloads": "Saved to Download/Fadocx/{name}",
-  "homeSavedTo": "Saved to {path}",
-  "homeFailedExport": "Failed to export file",
-  "homeChooseSaveLocation": "Choose save location",
-  "homeConvertComingSoon": "Convert feature coming soon!",
-  "homeFadDriveComingSoon": "FadDrive coming soon!",
-  "homePresentationsTooltip": "Coming Soon",
-  "homeErrorPrefix": "Error: {error}",
-  "librarySelected": "{count} selected",
-  "libraryDeleteSelected": "Delete selected?",
-  "libraryDeleteConfirm": "Move {count} files to trash? You can restore them later.",
-  "libraryItemsMovedToTrash": "{count} items moved to trash",
-  "libraryErrorLoading": "Error loading library: {error}",
-  "libraryItemCount": "{count} items",
-  "libraryDeselectAll": "Deselect all",
-  "librarySelectAll": "Select all",
-  "libraryNoCategoryFound": "No {category} found",
-  "trashErrorLoading": "Error loading trash",
-  "trashFilesSelected": "{count} selected",
-  "trashFilesLabel": "files",
-  "trashFileRestored": "File restored successfully",
-  "trashDeletePermanentlyConfirm": "Delete Permanently?",
-  "trashDeletePermanentlyMessage": "You are about to permanently delete {count} file(s). This action cannot be undone.",
-  "trashDeleteTypeConfirm": "Type DELETE in capital letters to confirm:",
-  "trashDeleteHint": "DELETE",
-  "trashFilesPermanentlyDeleted": "{count} file(s) permanently deleted",
-  "updateAvailableTitle": "Доступно обновление",
-  "updateAvailableSubtitle": "Новая версия Fadocx готова к загрузке",
-  "updateStableRelease": "Стабильный выпуск",
-  "updateStableDesc": "Стабильный и протестированный выпуск для использования в производстве",
-  "updateBetaRelease": "Бета-выпуск",
-  "updateBetaDesc": "Ранний доступ к новым функциям, могут содержать ошибки",
-  "updateMaybeLater": "Может быть позже",
-  "updateCurrent": "Текущий",
-  "updateNew": "Новый",
-  "updateVisitGithub": "Посетить GitHub",
-  "updateBetaInfo": "The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.",
-  "updateBannerStable": "Стабильное обновление",
-  "updateBannerBeta": "Бета-обновление",
-  "settingsUnknown": "Unknown",
-  "settingsStorageDetails": "Хранилище",
-  "settingsStoragePdfs": "PDF",
-  "settingsStorageDocs": "Документы",
-  "settingsStorageSheets": "Таблицы",
-  "settingsStoragePresentations": "Презентации",
-  "settingsStorageCode": "Код",
-  "settingsStorageScans": "Сканы",
-  "settingsStorageImages": "Изображения",
-  "settingsStorageOther": "Прочее",
-  "settingsStorageInfo": "Документы хранятся в приватной папке на вашем устройстве и недоступны другим приложениям",
-  "settingsStoragePrivateFolderInfo": "Документы хранятся в приватной папке, скрытой от других приложений и файловых менеджеров. Доступ к ним есть только у Fadocx.",
-  "settingsStorageDeleteInfo": "Удаляйте документы из опасной зоны в настройках",
-  "settingsStorageEmpty": "Нет документов",
-  "settingsStorageFailedLoad": "Не удалось загрузить данные хранилища",
-  "settingsFadocxDesc": "Your private document viewer",
-  "settingsRetry": "Retry",
-  "settingsCheckingUpdates": "Checking for updates…",
-  "settingsNoInternet": "No internet connection. Check your network and try again.",
-  "settingsUpToDate": "You're up to date",
-  "settingsUpToDateDesc": "v{version} is the latest version.",
-  "settingsBetaAvailable": "Beta v{version} available",
-  "settingsVersionWithBuild": "Version {version} (Build {buildNumber})",
-  "settingsPrivacyOffline": "100% Offline",
-  "settingsPrivacyLocalStorage": "Local Storage Only",
-  "settingsPrivacyOnDevice": "On-Device AI",
-  "settingsPrivacyOpenSource": "Open Source",
-  "settingsPrivacyNoAds": "No Ads",
-  "settingsPrivacyByDesign": "We believe in privacy by design.",
-  "settingsPrivacyTransparency": "Fadocx is built with transparency. Your documents are your business - not ours.",
-  "settingsViewSourceCode": "View Source Code",
-  "settingsStorageFilesSummary": "{size} • {count} files",
-  "settingsErrorPrefix": "Error: {error}",
-  "settingsCopiedText": "Copied: {text}",
-  "settingsVisitGithub": "Visit GitHub",
-  "settingsMadeWith": "Made with",
-  "settingsAt": "at",
-  "settingsIn": "in",
-  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
-  "settingsTypeToConfirm": "Type \"{text}\" to confirm:",
-  "settingsPrivacyOfflineDesc": "All processing happens on your device. No internet required.",
-  "settingsPrivacyLocalStorageDesc": "Your documents stay on your device. Nothing is uploaded.",
-  "settingsPrivacyOnDeviceDesc": "Uses OpenCV + Tesseract for OCR. AI runs locally.",
-  "settingsPrivacyOpenSourceDesc": "Code is public. Audit it yourself on GitHub.",
-  "settingsPrivacyNoAdsDesc": "No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.",
-  "settingsOpenInBrowser": "Open in Browser",
-  "viewerFindHint": "Find...",
-  "viewerTypeToFind": "Type to find",
-  "viewerSidebarPages": "Pages",
-  "viewerSidebarSearch": "Search",
-  "viewerSidebarTOC": "TOC",
-  "viewerSidebarNotes": "Notes",
-  "viewerSidebarBookmarks": "Bookmarks",
-  "viewerSidebarNotesDesc": "Add notes and annotations to PDF pages",
-  "viewerSidebarBookmarksDesc": "Save and organize your favorite pages",
-  "viewerCellCopied": "Cell {value} copied",
-  "viewerGoToPage": "Go to Page",
-  "viewerGoToPageHint": "Enter page number (1-{totalPages})",
-  "viewerGo": "Go",
-  "viewerInvalidPage": "Please enter a number between 1 and {totalPages}",
-  "viewerNoContent": "No content",
-  "viewerResetZoom": "Reset zoom",
-  "viewerCopyTextTitle": "Copy Text",
-  "viewerCopyTextChoose": "Choose what to copy:",
-  "viewerCopyPageOnly": "Page {page} only",
-  "viewerCopyAllPages": "All {totalPages} pages",
-  "viewerExtractingText": "Extracting text from {label}...",
-  "viewerNoTextFound": "No text content found",
-  "viewerPageLabel": "Page {currentPage}",
-  "viewerAllPagesLabel": "{totalPages} pages",
-  "viewerTextExtracted": "Text extracted from {pageLabel}.",
-  "viewerWordsFound": "{count} words found",
-  "viewerCopiedWords": "Copied {count} words from {pageLabel}",
-  "viewerCopyAllTextTitle": "Copy All Text",
-  "viewerCopyAllTextConfirm": "This will extract text from all {pageCount} pages and copy to clipboard.",
-  "viewerCopiedAllPages": "Copied {count} words from {pageCount} pages",
-  "viewerCopyDocumentText": "This will copy the entire document content to clipboard.",
-  "viewerWordsLines": "{words} words, {lines} lines",
-  "viewerWordsOnly": "{count} words",
-  "viewerLinesOnly": "{lines} lines",
-  "viewerCopiedFromLines": "Copied {words} words from {lines} lines",
-  "viewerCharactersCount": "{count} characters",
-  "viewerCopyExtractedTitle": "Copy Extracted Text",
-  "viewerCopyExtractedDesc": "Copy text extracted from this image via OCR.",
-  "viewerCopiedWordsChars": "Copied {words} words ({chars} characters)",
-  "viewerErrorAccessText": "Error accessing extracted text",
-  "viewerNoTextForImage": "No extracted text available for this image",
-  "viewerExtractingAllPages": "Extracting text from all pages...",
-  "viewerTextExtractionUnavailable": "Text extraction not available",
-  "viewerNoPdfText": "No text found in this PDF",
-  "viewerNoTextAvailable": "No text content available",
-  "viewerReadingTime": "{minutes} min read",
-  "viewerReadingTimeSingle": "1 min read",
-  "viewerCopy": "Copy",
-  "viewerErrorPrefix": "Error: {error}",
-  "viewerCellValue": "Cell {cell}",
-  "viewerLowerPageLabel": "page {page}",
-  "viewerAllPagesLower": "all pages",
-  "viewerCopied": "Copied",
-  "viewerCopyValue": "Copy value",
-  "viewerToggleFullscreen": "Toggle fullscreen",
-  "viewerInvert": "Invert",
-  "viewerText": "Text",
-  "viewerSyntax": "Syntax",
-  "viewerFont": "Font",
-  "viewerFontStyle": "Font Style",
-  "viewerMonospaceCourier": "Monospace (Courier)",
-  "viewerSystemUbuntu": "System (Ubuntu)",
-  "viewerEdit": "Edit",
-  "viewerEditWithEngine": "Edit with Fadocx Engine",
-  "viewerEditWithEngineDesc": "Open this spreadsheet in the Fadocx rendering engine for a faithful visual preview with full formatting, charts, and layout fidelity.",
-  "viewerEditWithEngineNote": "Note: Interactive editing is coming in a future update.",
-  "viewerNotNow": "Not Now",
-  "viewerGotIt": "Got It",
-  "viewerErrorLoadingDocument": "Error loading document",
-  "viewerGoBack": "Go Back",
-  "viewerReadingTimeMinutes": "{count, plural, =1{1 minute read} other{{count} minutes read}}",
-  "viewerReadingTimeHoursMinutes": "{hours}h {minutes}m read",
-  "linkTileCopiedToClipboard": "Copied to clipboard",
-  "linkTileCouldNotOpen": "Could not open {value}",
-  "librarySortBy": "Sort by",
-  "librarySortLatest": "Latest",
-  "librarySortOldest": "Oldest",
-  "librarySortLargest": "Largest",
-  "librarySortSmallest": "Smallest",
-  "homeDeleteFile": "Delete file?",
-  "homeDeleteFileConfirm": "Move \"{name}\" to trash? You can restore it later.",
-  "homeCopiedCharactersToClipboard": "Copied {count} characters to clipboard",
+  "scannerCopyAll": "Копировать всё",
+  "scannerNewScan": "Новый скан",
+  "linkTileCopy": "Копировать",
+  "linkTileCopiedToClipboard": "Скопировано в буфер обмена",
+  "linkTileSendEmail": "Отправить письмо",
+  "linkTileOpenInBrowser": "Открыть в браузере",
+  "linkTileCouldNotOpen": "Не удалось открыть {value}",
+  "@linkTileCouldNotOpen": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySortBy": "Сортировать по",
+  "librarySortLatest": "Новые",
+  "librarySortOldest": "Старые",
+  "librarySortLargest": "Крупные",
+  "librarySortSmallest": "Малые",
+  "homeDeleteFile": "Удалить файл?",
+  "homeDeleteFileConfirm": "Переместить \"{name}\" в корзину? Вы можете восстановить его позже.",
+  "@homeDeleteFileConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCopiedCharactersToClipboard": "{count} символов скопировано в буфер обмена",
+  "@homeCopiedCharactersToClipboard": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "homeFileInTrashDetail": "В корзине: да (удалено: {date})",
-  "homeUnknown": "unknown",
+  "@homeFileInTrashDetail": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeUnknown": "неизвестно",
+  "routeNotFound": "Маршрут не найден: {path}",
+  "@routeNotFound": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "routeGoHome": "На главную",
+  "routeInvalidDocumentPath": "Неверный путь к документу",
+  "pdfCopyTextTitle": "Копировать текст PDF",
+  "pdfExtractingText": "Извлечение текста...",
+  "pdfExtractingTextProgress": "Извлечение текста... ({current}/{total} страниц)",
+  "@pdfExtractingTextProgress": {
+    "placeholders": {
+      "current": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfErrorExtractingText": "Ошибка при извлечении текста",
+  "pdfWordCount": "Количество слов: {count}",
+  "@pdfWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfNoTextFound": "Текст в PDF не найден",
+  "pdfFullTextCopied": "Полный текст PDF скопирован в буфер обмена",
+  "pdfPasswordRequired": "Требуется пароль PDF",
+  "pdfPasswordDesc": "Этот PDF защищён паролем. Введите пароль для разблокировки.",
+  "pdfPasswordLabel": "Пароль",
+  "pdfUnlock": "Разблокировать",
+  "pdfSearchHint": "Поиск в PDF...",
+  "pdfTextCannotBeExtracted": "Текст не может быть извлечён с этой страницы",
+  "pdfLoadingPageTexts": "Загрузка текстов страниц...",
+  "pdfPageCopied": "Текст страницы {page} скопирован в буфер обмена",
+  "@pdfPageCopied": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTooltipSidebar": "Боковая панель",
+  "viewerTooltipFirst": "Первая",
+  "viewerTooltipLast": "Последняя",
+  "viewerTooltipCopyPageText": "Копировать текст страницы",
+  "textDocSearchHint": "Поиск текста...",
+  "textDocSearchPrevResult": "Предыдущий результат",
+  "textDocSearchNextResult": "Следующий результат",
+  "imageFailedToLoad": "Не удалось загрузить изображение",
+  "mediaLoading": "Загрузка медиа...",
+  "mediaFailedToPlay": "Не удалось воспроизвести медиа",
+  "mediaPlay": "Воспроизвести",
+  "audioPlaybackNote": "Для воспроизведения аудио требуется дополнительная библиотека.",
+  "sheetNoData": "Нет данных в {sheetName}",
+  "@sheetNoData": {
+    "placeholders": {
+      "sheetName": {
+        "type": "String"
+      }
+    }
+  },
+  "documentNoSheets": "В {format} не найдено листов",
+  "@documentNoSheets": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerPlaybackSpeed": "Скорость воспроизведения",
+  "urlCopiedToClipboard": "URL скопирован в буфер обмена: {url}",
+  "@urlCopiedToClipboard": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "lokitPreparingDoc": "Подготовка вашего документа...",
+  "lokitWarmingUp": "Запуск движка Fadocx...",
+  "lokitAlmostThere": "Почти готово",
+  "lokitJustAMoment": "Подождите секунду",
+  "lokitFailedToRender": "Не удалось отобразить документ",
   "drawerFadSecLab": "FadSec Lab"
 }

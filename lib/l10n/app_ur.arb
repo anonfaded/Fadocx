@@ -10,7 +10,7 @@
   "openFileTooltip": "ایک دستاویز تلاش کریں اور کھولیں",
   "pdfFile": "PDF فائل",
   "docxFile": "Word دستاویز",
-  "xlsxFile": "Excel سپریڈ شیٹ",
+  "xlsxFile": "Excel اسپریڈشیٹ",
   "csvFile": "CSV فائل",
   "unknownFile": "نامعلوم فائل",
   "page": "صفحہ",
@@ -111,7 +111,7 @@
   "navSettings": "ترتیبات",
   "navRecents": "حالیہ",
   "categoryAll": "سب",
-  "categoryPdfs": "PDFs",
+  "categoryPdfs": "PDF فائلیں",
   "categoryDocs": "ڈاکز",
   "categorySheets": "شیٹس",
   "categorySlides": "سلائڈز",
@@ -130,11 +130,53 @@
   "newBadge": "نیا",
   "timeAgoJustNow": "ابھی ابھی",
   "timeAgoMinute": "{count, plural, =1{1 منٹ پہلے} other{{count} منٹ پہلے}}",
+  "@timeAgoMinute": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoHour": "{count, plural, =1{1 گھنٹہ پہلے} other{{count} گھنٹے پہلے}}",
+  "@timeAgoHour": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoDay": "{count, plural, =1{1 دن پہلے} other{{count} دن پہلے}}",
+  "@timeAgoDay": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoWeek": "{count, plural, =1{1 ہفتہ پہلے} other{{count} ہفتے پہلے}}",
+  "@timeAgoWeek": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoMonth": "{count, plural, =1{1 مہینہ پہلے} other{{count} مہینے پہلے}}",
+  "@timeAgoMonth": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoYear": "{count, plural, =1{1 سال پہلے} other{{count} سال پہلے}}",
+  "@timeAgoYear": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "monthJan": "جنوری",
   "monthFeb": "فروری",
   "monthMar": "مارچ",
@@ -181,9 +223,30 @@
   "homePressBackExit": "باہر نکلنے کے لیے دوبارہ واپس دبائیں",
   "homeImportingSamples": "نمونہ فائلیں درآمد ہو رہی ہیں...",
   "homeSamplesImported": "{count, plural, =1{1 نمونہ فائل کامیابی سے درآمد ہو گئی!} other{{count} نمونہ فائلیں کامیابی سے درآمد ہو گئیں!}}",
+  "@homeSamplesImported": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "homeViewFiles": "فائلیں دیکھیں",
   "homeFailedImportSamples": "نمونہ فائلیں درآمد کرنے میں ناکامی: {error}",
+  "@homeFailedImportSamples": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "homeFileMovedToTrash": "{name} ٹراش میں منتقل ہو گیا",
+  "@homeFileMovedToTrash": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeFileInfo": "فائل کی معلومات",
   "homeFileName": "نام",
   "homeFileType": "قسم",
@@ -195,37 +258,135 @@
   "homeFileInfoCopied": "فائل کی معلومات کاپی ہو گئیں",
   "homeCopySuffix": " (کاپی)",
   "homeCopySuffixCounter": " (کاپی {counter})",
+  "@homeCopySuffixCounter": {
+    "placeholders": {
+      "counter": {
+        "type": "num"
+      }
+    }
+  },
   "homeDuplicatedAs": "{name} کے نام سے ڈپلیکیٹ ہو گیا",
+  "@homeDuplicatedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeFailedDuplicate": "فائل ڈپلیکیٹ کرنے میں ناکامی: {error}",
+  "@homeFailedDuplicate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "homeRenameFile": "فائل کا نام تبدیل کریں",
   "homeFileNameLabel": "فائل کا نام",
   "homeFileAlreadyExists": "اس نام کی فائل پہلے سے موجود ہے",
   "homeRenamedTo": "نام تبدیل ہو کر {name} ہو گیا",
+  "@homeRenamedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeFailedRename": "فائل کا نام تبدیل کرنے میں ناکامی",
   "homeExport": "ایکسپورٹ",
   "homeSaveToDownloads": "ڈاؤن لوڈز میں محفوظ کریں",
   "homeSaveToDownloadsPath": "ڈاؤن لوڈ/Fadocx/{name}",
+  "@homeSaveToDownloadsPath": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeChooseLocation": "مقام منتخب کریں",
   "homeChooseLocationDesc": "کسٹم سیو ڈائریکٹری منتخب کریں",
   "homeSavedToDownloads": "ڈاؤن لوڈ/Fadocx/{name} میں محفوظ ہو گیا",
+  "@homeSavedToDownloads": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeSavedTo": "{path} میں محفوظ ہو گیا",
-  "homeFailedExport": "فائل ایکسپورٹ کرنے میں ناکامی",
+  "@homeSavedTo": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedExport": "فائل ایکسپورٹ کرنے میں ناکام",
   "homeChooseSaveLocation": "سیو کا مقام منتخب کریں",
   "homeConvertComingSoon": "کنورٹ فیچر جلد آ رہا ہے!",
   "homeFadDriveComingSoon": "FadDrive جلد آ رہا ہے!",
   "homePresentationsTooltip": "جلد آ رہا ہے",
   "homeErrorPrefix": "خرابی: {error}",
+  "@homeErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "libraryTitle": "لائبریری",
   "librarySearchHint": "لائبریری میں تلاش کریں...",
   "librarySelected": "{count} منتخب",
+  "@librarySelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "libraryDeleteSelected": "منتخب شدہ حذف کریں؟",
   "libraryDeleteConfirm": "{count} فائلیں ٹراش میں منتقل کریں؟ آپ انہیں بعد میں بحال کر سکتے ہیں۔",
+  "@libraryDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "libraryItemsMovedToTrash": "{count} آئٹمز ٹراش میں منتقل ہو گئے",
+  "@libraryItemsMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "libraryErrorLoading": "لائبریری لوڈ کرنے میں خرابی: {error}",
+  "@libraryErrorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "libraryItemCount": "{count} آئٹمز",
+  "@libraryItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "libraryDeselectAll": "سب غیر منتخب",
   "librarySelectAll": "سب منتخب",
   "libraryNoCategoryFound": "کوئی {category} نہیں ملا",
+  "@libraryNoCategoryFound": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
   "libraryNoDocuments": "ابھی کوئی دستاویزات نہیں",
   "libraryAdjustSearch": "تلاش یا فلٹرز ایڈجسٹ کرنے کی کوشش کریں",
   "libraryDocumentsAppearHere": "آپ کی دستاویزات یہاں ظاہر ہوں گی",
@@ -251,27 +412,70 @@
   "browseAccessStillDisabled": "تمام فائلز تک رسائی ابھی بند ہے۔ براہ کرم جاری رکھنے کے لیے ترتیبات میں فعال کریں۔",
   "browseNoDirectories": "ڈیوائس پر کوئی دستاویز ڈائریکٹریز نہیں ملیں",
   "browseErrorPrefix": "خرابی: {error}",
+  "@browseErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "browseSortBy": "ترتیب",
   "browseImportedFiles": "{count, plural, =1{1 فائل درآمد کی گئی} other{{count} فائلیں درآمد کی گئیں}}",
+  "@browseImportedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "trashTitle": "ٹراش",
   "trashEmpty": "ٹراش خالی ہے",
   "trashEmptySubtitle": "حذف شدہ فائلیں یہاں ظاہر ہوں گی",
   "trashErrorLoading": "ٹراش لوڈ کرنے میں خرابی",
   "trashFilesSelected": "{count} منتخب",
+  "@trashFilesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "trashFilesLabel": "فائلیں",
+  "trashSelect": "منتخب کریں",
   "trashFileRestored": "فائل کامیابی سے بحال ہو گئی",
   "trashDeletePermanently": "مستقل حذف کریں",
   "trashDeletePermanentlyConfirm": "مستقل حذف کریں؟",
   "trashDeletePermanentlyMessage": "آپ {count} فائل(یں) مستقل طور پر حذف کر رہے ہیں۔ یہ عمل واپس نہیں کیا جا سکتا۔",
+  "@trashDeletePermanentlyMessage": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "trashDeleteTypeConfirm": "تصدیق کے لیے بڑے حروف میں DELETE ٹائپ کریں:",
   "trashDeleteHint": "DELETE",
   "trashFilesPermanentlyDeleted": "{count} فائل(یں) مستقل طور پر حذف ہو گئیں",
+  "@trashFilesPermanentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "whatsNewTitle": "نیا کیا ہے",
   "whatsNewWhatsIncluded": "کیا شامل ہے",
   "whatsNewPlanned": "منصوبہ بند",
   "whatsNewReleasedToday": "آج جاری",
   "whatsNewReleasedYesterday": "کل جاری",
   "whatsNewReleasedDate": "{date} کو جاری",
+  "@whatsNewReleasedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "whatsNewDocAndSheets": "دستاویزات اور اسپریڈ شیٹس",
   "whatsNewDocAndSheetsDesc": "PDFs، Word دستاویزات، Excel اسپریڈ شیٹس اور مزید دیکھیں — سب آپ کی ڈیوائس پر مقامی طور پر۔",
   "whatsNewOcrAi": "ذہین OCR اور آن-ڈیوائس AI",
@@ -340,7 +544,7 @@
   "settingsCustomStorage": "کسٹم سٹوریج",
   "settingsUnknown": "نامعلوم",
   "settingsStorageDetails": "سٹوریج",
-  "settingsStoragePdfs": "PDFs",
+  "settingsStoragePdfs": "PDF فائلیں",
   "settingsStorageDocs": "ڈاکز",
   "settingsStorageSheets": "شیٹس",
   "settingsStoragePresentations": "پریزنٹیشنز",
@@ -382,11 +586,53 @@
   "settingsNoInternet": "انٹرنیٹ کنکشن نہیں۔ اپنا نیٹ ورک چیک کریں اور دوبارہ کوشش کریں۔",
   "settingsUpToDate": "آپ اپ ٹو ڈیٹ ہیں",
   "settingsUpToDateDesc": "v{version} تازہ ترین ورژن ہے۔",
+  "@settingsUpToDateDesc": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "settingsBetaAvailable": "بیٹا v{version} دستیاب",
+  "@settingsBetaAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "settingsVersionWithBuild": "ورژن {version} (بلڈ {buildNumber})",
+  "@settingsVersionWithBuild": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
   "settingsCopiedInfo": "کلیپ بورڈ پر کاپی ہو گیا",
   "settingsCopyInfo": "معلومات کاپی",
+  "settingsVersionClipboardInfo": "{appName} v{version} (بلڈ {buildNumber})\nپیکیج: {packageName}",
+  "@settingsVersionClipboardInfo": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      },
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
   "settingsShareApp": "دوستوں کے ساتھ شیئر کریں",
+  "settingsShareMessage": "Fadocx دیکھیں!\n\nایک آل اِن ون دستاویز ویور: PDF، Office، اسپریڈشیٹس، پریزنٹیشنز، کوڈ فائلیں اور OCR ٹیکسٹ استخراج — مکمل آف لائن، بغیر ٹریکنگ، اوپن سورس۔\n\nhttps://github.com/anonfaded/Fadocx",
   "settingsShareVia": "شیئر کریں...",
   "settingsShareWhatsApp": "واٹس ایپ",
   "settingsWhatsAppNotInstalled": "اس ڈیوائس پر واٹس ایپ انسٹال نہیں ہے",
@@ -400,14 +646,45 @@
   "settingsViewSourceCode": "سورس کوڈ دیکھیں",
   "settingsSecurity": "سیکیورٹی",
   "settingsStorageFilesSummary": "{size} • {count} فائلیں",
+  "@settingsStorageFilesSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "settingsErrorPrefix": "خرابی: {error}",
+  "@settingsErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "settingsCopiedText": "کاپی ہوا: {text}",
+  "@settingsCopiedText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "settingsVisitGithub": "GitHub وزٹ کریں",
   "settingsMadeWith": "بنایا گیا",
   "settingsAt": "پر",
   "settingsIn": "میں",
   "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
   "settingsTypeToConfirm": "تصدیق کے لیے \"{text}\" ٹائپ کریں:",
+  "@settingsTypeToConfirm": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "confirm": "تصدیق",
   "settingsPrivacyOfflineDesc": "تمام پراسیسنگ آپ کی ڈیوائس پر ہوتی ہے۔ انٹرنیٹ درکار نہیں۔",
   "settingsPrivacyLocalStorageDesc": "آپ کی دستاویزات آپ کی ڈیوائس پر رہتی ہیں۔ کچھ بھی اپ لوڈ نہیں ہوتا۔",
@@ -430,35 +707,183 @@
   "viewerSidebarNotesDesc": "PDF صفحات میں نوٹس اور تشریحات شامل کریں",
   "viewerSidebarBookmarksDesc": "اہم صفحات کو محفوظ کریں اور منظم کریں",
   "viewerCellCopied": "سیل {value} کاپی ہو گیا",
+  "@viewerCellCopied": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "viewerGoToPage": "صفحہ پر جائیں",
   "viewerGoToPageHint": "صفحہ نمبر درج کریں (1-{totalPages})",
+  "@viewerGoToPageHint": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
   "viewerGo": "جائیں",
   "viewerInvalidPage": "براہ کرم 1 اور {totalPages} کے درمیان نمبر درج کریں",
+  "@viewerInvalidPage": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
   "viewerNoContent": "کوئی مواد نہیں",
   "viewerResetZoom": "زوم ری سیٹ کریں",
   "viewerCopyTextTitle": "متن کاپی کریں",
   "viewerCopyTextChoose": "کاپی کرنے کے لیے منتخب کریں:",
   "viewerCopyPageOnly": "صرف صفحہ {page}",
+  "@viewerCopyPageOnly": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
   "viewerCopyAllPages": "تمام {totalPages} صفحات",
+  "@viewerCopyAllPages": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
   "viewerExtractingText": "{label} سے متن نکالا جا رہا ہے...",
+  "@viewerExtractingText": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "viewerNoTextFound": "کوئی متن مواد نہیں ملا",
   "viewerPageLabel": "صفحہ {currentPage}",
+  "@viewerPageLabel": {
+    "placeholders": {
+      "currentPage": {
+        "type": "num"
+      }
+    }
+  },
   "viewerAllPagesLabel": "{totalPages} صفحات",
+  "@viewerAllPagesLabel": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
   "viewerTextExtracted": "{pageLabel} سے متن نکالا گیا۔",
+  "@viewerTextExtracted": {
+    "placeholders": {
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
   "viewerWordsFound": "{count} الفاظ ملے",
+  "@viewerWordsFound": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "viewerCopiedWords": "{pageLabel} سے {count} الفاظ کاپی ہو گئے",
+  "@viewerCopiedWords": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
   "viewerCopyAllTextTitle": "تمام متن کاپی کریں",
   "viewerCopyAllTextConfirm": "یہ تمام {pageCount} صفحات سے متن نکال کر کلیپ بورڈ پر کاپی کرے گا۔",
+  "@viewerCopyAllTextConfirm": {
+    "placeholders": {
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
   "viewerCopiedAllPages": "{pageCount} صفحات سے {count} الفاظ کاپی ہو گئے",
+  "@viewerCopiedAllPages": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
   "viewerCopyDocumentText": "یہ پوری دستاویز کا مواد کلیپ بورڈ پر کاپی کرے گا۔",
   "viewerWordsLines": "{words} الفاظ، {lines} سطریں",
+  "@viewerWordsLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
   "viewerWordsOnly": "{count} الفاظ",
+  "@viewerWordsOnly": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "viewerLinesOnly": "{lines} سطریں",
+  "@viewerLinesOnly": {
+    "placeholders": {
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
   "viewerCopiedFromLines": "{lines} سطروں سے {words} الفاظ کاپی ہو گئے",
+  "@viewerCopiedFromLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
   "viewerCharactersCount": "{count} حروف",
+  "@viewerCharactersCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "viewerCopyExtractedTitle": "نکالا ہوا متن کاپی کریں",
   "viewerCopyExtractedDesc": "OCR کے ذریعے اس تصویر سے نکالا ہوا متن کاپی کریں۔",
   "viewerCopiedWordsChars": "{words} الفاظ ({chars} حروف) کاپی ہو گئے",
+  "@viewerCopiedWordsChars": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "chars": {
+        "type": "num"
+      }
+    }
+  },
   "viewerErrorAccessText": "نکالا ہوا متن تک رسائی میں خرابی",
   "viewerNoTextForImage": "اس تصویر کے لیے کوئی نکالا ہوا متن دستیاب نہیں",
   "viewerExtractingAllPages": "تمام صفحات سے متن نکالا جا رہا ہے...",
@@ -466,11 +891,39 @@
   "viewerNoPdfText": "اس PDF میں کوئی متن نہیں ملا",
   "viewerNoTextAvailable": "کوئی متن مواد دستیاب نہیں",
   "viewerReadingTime": "{minutes} منٹ پڑھیں",
+  "@viewerReadingTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
   "viewerReadingTimeSingle": "1 منٹ پڑھیں",
   "viewerCopy": "کاپی",
   "viewerErrorPrefix": "خرابی: {error}",
+  "@viewerErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "viewerCellValue": "سیل {cell}",
+  "@viewerCellValue": {
+    "placeholders": {
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
   "viewerLowerPageLabel": "صفحہ {page}",
+  "@viewerLowerPageLabel": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
   "viewerAllPagesLower": "تمام صفحات",
   "viewerCopied": "کاپی ہو گیا",
   "viewerCopyValue": "ویلیو کاپی کریں",
@@ -491,7 +944,24 @@
   "viewerErrorLoadingDocument": "دستاویز لوڈ کرنے میں خرابی",
   "viewerGoBack": "واپس جائیں",
   "viewerReadingTimeMinutes": "{count, plural, =1{1 منٹ پڑھیں} other{{count} منٹ پڑھیں}}",
+  "@viewerReadingTimeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "viewerReadingTimeHoursMinutes": "{hours} گھنٹے {minutes} منٹ پڑھیں",
+  "@viewerReadingTimeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
   "scannerTitle": "دستاویز اسکینر",
   "scannerCapture": "کیپچر",
   "scannerProcessing": "پروسیسنگ",
@@ -501,8 +971,22 @@
   "scannerKeepDocumentFlat": "بہترین نتائج کے لیے دستاویز سیدھی اور ہموار رکھیں",
   "scannerUpload": "اپ لوڈ",
   "scannerFailedOpenImage": "تصویر کھولنے میں ناکامی: {error}",
+  "@scannerFailedOpenImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerFlash": "فلیش",
   "scannerFailedTorch": "ٹارچ ٹوگل کرنے میں ناکامی: {error}",
+  "@scannerFailedTorch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerStartingCamera": "کیمرہ شروع ہو رہا ہے...",
   "scannerCameraUnavailable": "کیمرہ دستیاب نہیں",
   "scannerCameraUnavailableDesc": "کیمرہ شروع کرنے میں ناکام",
@@ -523,481 +1007,6 @@
   "linkTileSendEmail": "ای میل بھیجیں",
   "linkTileOpenInBrowser": "براؤزر میں کھولیں",
   "linkTileCouldNotOpen": "{value} کھول نہیں سکے",
-  "librarySortBy": "ترتیب",
-  "librarySortLatest": "تازہ ترین",
-  "librarySortOldest": "سب سے پرانا",
-  "librarySortLargest": "سب سے بڑا",
-  "librarySortSmallest": "سب سے چھوٹا",
-  "homeDeleteFile": "فائل حذف کریں؟",
-  "homeDeleteFileConfirm": "\"{name}\" کو ٹراش میں منتقل کریں؟ آپ اسے بعد میں بحال کر سکتے ہیں۔",
-  "homeCopiedCharactersToClipboard": "{count} حروف کلیپ بورڈ پر کاپی ہو گئے",
-  "homeFileInTrashDetail": "ٹراش میں: ہاں (حذف کرنے کی تاریخ: {date})",
-  "homeUnknown": "نامعلوم",
-  "@timeAgoMinute": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@timeAgoHour": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@timeAgoDay": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@timeAgoWeek": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@timeAgoMonth": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@timeAgoYear": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@homeSamplesImported": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@homeFailedImportSamples": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@homeFileMovedToTrash": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@homeCopySuffixCounter": {
-    "placeholders": {
-      "counter": {
-        "type": "num"
-      }
-    }
-  },
-  "@homeDuplicatedAs": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@homeFailedDuplicate": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@homeRenamedTo": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@homeSaveToDownloadsPath": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@homeSavedToDownloads": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@homeSavedTo": {
-    "placeholders": {
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "@homeErrorPrefix": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@librarySelected": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@libraryDeleteConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@libraryItemsMovedToTrash": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@libraryErrorLoading": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@libraryItemCount": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@libraryNoCategoryFound": {
-    "placeholders": {
-      "category": {
-        "type": "String"
-      }
-    }
-  },
-  "@browseErrorPrefix": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@browseImportedFiles": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@trashFilesSelected": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@trashDeletePermanentlyMessage": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@trashFilesPermanentlyDeleted": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@whatsNewReleasedDate": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "@settingsUpToDateDesc": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
-  "@settingsBetaAvailable": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
-  "@settingsVersionWithBuild": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      },
-      "buildNumber": {
-        "type": "String"
-      }
-    }
-  },
-  "@settingsStorageFilesSummary": {
-    "placeholders": {
-      "size": {
-        "type": "String"
-      },
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@settingsErrorPrefix": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@settingsCopiedText": {
-    "placeholders": {
-      "text": {
-        "type": "String"
-      }
-    }
-  },
-  "@settingsTypeToConfirm": {
-    "placeholders": {
-      "text": {
-        "type": "String"
-      }
-    }
-  },
-  "@viewerCellCopied": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@viewerGoToPageHint": {
-    "placeholders": {
-      "totalPages": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerInvalidPage": {
-    "placeholders": {
-      "totalPages": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerCopyPageOnly": {
-    "placeholders": {
-      "page": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerCopyAllPages": {
-    "placeholders": {
-      "totalPages": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerExtractingText": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
-  "@viewerPageLabel": {
-    "placeholders": {
-      "currentPage": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerAllPagesLabel": {
-    "placeholders": {
-      "totalPages": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerTextExtracted": {
-    "placeholders": {
-      "pageLabel": {
-        "type": "String"
-      }
-    }
-  },
-  "@viewerWordsFound": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerCopiedWords": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      },
-      "pageLabel": {
-        "type": "String"
-      }
-    }
-  },
-  "@viewerCopyAllTextConfirm": {
-    "placeholders": {
-      "pageCount": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerCopiedAllPages": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      },
-      "pageCount": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerWordsLines": {
-    "placeholders": {
-      "words": {
-        "type": "num"
-      },
-      "lines": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerWordsOnly": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerLinesOnly": {
-    "placeholders": {
-      "lines": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerCopiedFromLines": {
-    "placeholders": {
-      "words": {
-        "type": "num"
-      },
-      "lines": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerCharactersCount": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerCopiedWordsChars": {
-    "placeholders": {
-      "words": {
-        "type": "num"
-      },
-      "chars": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerReadingTime": {
-    "placeholders": {
-      "minutes": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerErrorPrefix": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@viewerCellValue": {
-    "placeholders": {
-      "cell": {
-        "type": "String"
-      }
-    }
-  },
-  "@viewerLowerPageLabel": {
-    "placeholders": {
-      "page": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerReadingTimeMinutes": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@viewerReadingTimeHoursMinutes": {
-    "placeholders": {
-      "hours": {
-        "type": "num"
-      },
-      "minutes": {
-        "type": "num"
-      }
-    }
-  },
-  "@scannerFailedOpenImage": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@scannerFailedTorch": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "@linkTileCouldNotOpen": {
     "placeholders": {
       "value": {
@@ -1005,6 +1014,13 @@
       }
     }
   },
+  "librarySortBy": "ترتیب",
+  "librarySortLatest": "تازہ ترین",
+  "librarySortOldest": "سب سے پرانا",
+  "librarySortLargest": "سب سے بڑا",
+  "librarySortSmallest": "سب سے چھوٹا",
+  "homeDeleteFile": "فائل حذف کریں؟",
+  "homeDeleteFileConfirm": "\"{name}\" کو ٹراش میں منتقل کریں؟ آپ اسے بعد میں بحال کر سکتے ہیں۔",
   "@homeDeleteFileConfirm": {
     "placeholders": {
       "name": {
@@ -1012,6 +1028,7 @@
       }
     }
   },
+  "homeCopiedCharactersToClipboard": "{count} حروف کلیپ بورڈ پر کاپی ہو گئے",
   "@homeCopiedCharactersToClipboard": {
     "placeholders": {
       "count": {
@@ -1019,6 +1036,7 @@
       }
     }
   },
+  "homeFileInTrashDetail": "ٹراش میں: ہاں (حذف کرنے کی تاریخ: {date})",
   "@homeFileInTrashDetail": {
     "placeholders": {
       "date": {
@@ -1026,14 +1044,39 @@
       }
     }
   },
+  "homeUnknown": "نامعلوم",
   "routeNotFound": "راستہ نہیں ملا: {path}",
+  "@routeNotFound": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "routeGoHome": "گھر جائیں",
   "routeInvalidDocumentPath": "غلط دستاویز راستہ",
   "pdfCopyTextTitle": "PDF متن کاپی کریں",
   "pdfExtractingText": "متن نکال رہے ہیں...",
   "pdfExtractingTextProgress": "متن نکال رہے ہیں... ({current}/{total} صفحات)",
+  "@pdfExtractingTextProgress": {
+    "placeholders": {
+      "current": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
   "pdfErrorExtractingText": "متن نکالنے میں خرابی",
   "pdfWordCount": "الفاظ کی تعداد: {count}",
+  "@pdfWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "pdfNoTextFound": "PDF میں کوئی متن نہیں ملا",
   "pdfFullTextCopied": "مکمل PDF متن کلپ بورڈ میں کاپی ہو گیا",
   "pdfPasswordRequired": "PDF پاس ورڈ درکار ہے",
@@ -1044,6 +1087,13 @@
   "pdfTextCannotBeExtracted": "اس صفحے سے متن نہیں نکالا جا سکتا",
   "pdfLoadingPageTexts": "صفحات کا متن لوڈ ہو رہا ہے...",
   "pdfPageCopied": "صفحہ {page} کا متن کاپی ہو گیا",
+  "@pdfPageCopied": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
   "viewerTooltipSidebar": "سائیڈ بار",
   "viewerTooltipFirst": "پہلا",
   "viewerTooltipLast": "آخری",
@@ -1057,45 +1107,6 @@
   "mediaPlay": "چلائیں",
   "audioPlaybackNote": "آڈیو پلے بیک کے لیے ایک اضافی لائبریری درکار ہے۔",
   "sheetNoData": "{sheetName} میں کوئی ڈیٹا نہیں",
-  "documentNoSheets": "{format} میں کوئی شیٹ نہیں ملی",
-  "viewerPlaybackSpeed": "پلے بیک رفتار",
-  "urlCopiedToClipboard": "URL کلپ بورڈ میں کاپی ہوئی: {url}",
-  "lokitPreparingDoc": "آپ کی دستاویز تیار ہو رہی ہے...",
-  "lokitWarmingUp": "Fadocx انجن چالو ہو رہا ہے...",
-  "lokitAlmostThere": "تقریباً تیار",
-  "lokitJustAMoment": "بس ایک لمحہ",
-  "lokitFailedToRender": "دستاویز رینڈر نہیں ہو سکی",
-  "@routeNotFound": {
-    "placeholders": {
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "@pdfExtractingTextProgress": {
-    "placeholders": {
-      "current": {
-        "type": "num"
-      },
-      "total": {
-        "type": "num"
-      }
-    }
-  },
-  "@pdfWordCount": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
-  "@pdfPageCopied": {
-    "placeholders": {
-      "page": {
-        "type": "num"
-      }
-    }
-  },
   "@sheetNoData": {
     "placeholders": {
       "sheetName": {
@@ -1103,6 +1114,7 @@
       }
     }
   },
+  "documentNoSheets": "{format} میں کوئی شیٹ نہیں ملی",
   "@documentNoSheets": {
     "placeholders": {
       "format": {
@@ -1110,6 +1122,8 @@
       }
     }
   },
+  "viewerPlaybackSpeed": "پلے بیک رفتار",
+  "urlCopiedToClipboard": "URL کلپ بورڈ میں کاپی ہوئی: {url}",
   "@urlCopiedToClipboard": {
     "placeholders": {
       "url": {
@@ -1117,8 +1131,10 @@
       }
     }
   },
-  "trashSelect": "منتخب کریں",
-  "settingsVersionClipboardInfo": "{appName} v{version} (بلڈ {buildNumber})\nپیکیج: {packageName}",
-  "settingsShareMessage": "Fadocx دیکھیں!\n\nایک آل اِن ون دستاویز ویور: PDF، Office، اسپریڈشیٹس، پریزنٹیشنز، کوڈ فائلیں اور OCR ٹیکسٹ استخراج — مکمل آف لائن، بغیر ٹریکنگ، اوپن سورس۔\n\nhttps://github.com/anonfaded/Fadocx",
+  "lokitPreparingDoc": "آپ کی دستاویز تیار ہو رہی ہے...",
+  "lokitWarmingUp": "Fadocx انجن چالو ہو رہا ہے...",
+  "lokitAlmostThere": "تقریباً تیار",
+  "lokitJustAMoment": "بس ایک لمحہ",
+  "lokitFailedToRender": "دستاویز رینڈر نہیں ہو سکی",
   "drawerFadSecLab": "فادسیک لیب"
 }
