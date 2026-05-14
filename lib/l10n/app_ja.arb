@@ -2,6 +2,21 @@
   "@@locale": "ja",
   "@@author": "FadSec Lab",
   "appName": "Fadocx",
+  "appDescription": "ドキュメントビューアー",
+  "homeTitle": "Fadocx",
+  "recentFiles": "最近のファイル",
+  "noRecentFiles": "最近のファイルはありません。ドキュメントを開いてください。",
+  "openFile": "ファイルを開く",
+  "openFileTooltip": "ドキュメントを参照して開く",
+  "pdfFile": "PDF ファイル",
+  "docxFile": "Word ドキュメント",
+  "xlsxFile": "Excel スプレッドシート",
+  "csvFile": "CSV ファイル",
+  "unknownFile": "不明なファイル",
+  "page": "ページ",
+  "pageOf": "の",
+  "jumpToPage": "ページへ移動",
+  "sheet": "シート",
   "ok": "OK",
   "cancel": "キャンセル",
   "delete": "削除",
@@ -22,10 +37,11 @@
   "error": "エラー",
   "warning": "警告",
   "success": "成功",
-  "loadingDocument": "ドキュメントを読み込み中...",
   "unsupportedFileType": "このファイル形式はサポートされていません",
   "fileNotFound": "ファイルが見つかりません",
   "permissionDenied": "権限が拒否されました",
+  "corruptedFile": "ファイルが破損しているようです",
+  "loadingDocument": "ドキュメントを読み込み中...",
   "settingsTitle": "設定",
   "theme": "テーマ",
   "themeDark": "ダーク",
@@ -43,146 +59,124 @@
   "languageGerman": "ドイツ語",
   "languagePortuguese": "ポルトガル語",
   "languageHindi": "ヒンディー語",
+  "appVersion": "App Version",
+  "clearRecentFiles": "最近のファイルをクリア",
+  "backButton": "戻る",
+  "emptyTitle": "ドキュメントなし",
+  "emptyMessage": "デバイスからドキュメントを開いて開始します",
+  "startBrowsing": "参照を開始",
+  "languageChanged": "言語を日本語に変更しました",
+  "privacyDescription": "Fadocx はドキュメントビューアーです。ファイルは端末内に保存され、サーバーへ送信されることはありません。",
+  "aboutDescription": "Fadocx v1.0.0 - あなたのプライベートドキュメントビューアー。プライバシーを尊重して構築されました。",
+  "tableRows": "行",
+  "tableEmpty": "表示するデータがありません",
+  "tableNoContent": "シートは空です",
+  "sheetEmpty": "シートは空です",
+  "noTableData": "テーブルデータがありません",
+  "noSpreadsheetData": "スプレッドシートデータがありません",
+  "rowsSymbol": "行",
+  "colsSymbol": "列",
+  "noSlidesFound": "スライドが見つかりません",
+  "slidesCount": "スライド",
+  "pptUnsupported": "PPT ファイルは解析されましたがスライドがありません",
+  "odpUnsupported": "ODP ファイルは解析されましたが、スライドまたは読み取り可能な内容がありません",
+  "noTextContent": "テキスト内容が見つかりません",
+  "couldNotParse": "ファイルを解析できませんでした",
+  "file": "ファイル",
+  "slides": "スライド",
+  "previewNotSupported": "プレビューはまだサポートされていません",
+  "openWithSystemApp": "システムアプリで開く",
+  "systemAppNotImplemented": "システムアプリで開く機能はまだ実装されていません",
+  "type": "種類",
+  "fileNotFoundMessage": "ファイルが見つかりません",
+  "fileTooLarge": "ファイルサイズが最大制限を超えています (100MB)",
+  "errorLoadingFile": "ファイルの読み込みエラー",
+  "docxPreviewNotSupported": "DOCXプレビューはまだ完全にサポートされていません",
+  "docParseError": "DOCファイルを解析できませんでした。DOCXに変換してみてください。",
+  "xlsxParseError": "XLSX ファイルを解析できませんでした",
+  "xlsParseError": "XLS ファイルを解析できませんでした。XLSX への変換を試してください。",
+  "csvParseError": "CSVファイルを解析できませんでした",
+  "odtParseError": "ODT ファイルを解析できませんでした",
+  "odsParseError": "ODS ファイルを解析できませんでした",
+  "odpParseError": "ODP ファイルを解析できませんでした",
+  "pptParseError": "PPT ファイルを解析できませんでした",
+  "rtfParseError": "RTF ファイルを解析できませんでした",
+  "txtFileEmpty": "ファイルは空です",
+  "unsupportedFormat": "このファイル形式はまだサポートされていません",
+  "txtLoaded": "TXT",
+  "charactersLoaded": "文字",
+  "copiedToClipboard": "クリップボードにコピーしました",
   "navHome": "ホーム",
   "navLibrary": "ライブラリ",
   "navSettings": "設定",
   "navRecents": "最近",
-  "onboardingSkip": "スキップ",
-  "onboardingNext": "次へ",
-  "onboardingGetStarted": "始める",
-  "onboardingSlide1Title": "Fadocxへようこそ",
-  "onboardingSlide1Tagline": "オールインワンのプライベート文書管理",
-  "onboardingSlide1Bullet1": "あらゆる形式を開く — PDF、Officeファイル、画像など",
-  "onboardingSlide1Bullet2": "ギャラリーやファイルマネージャーに非表示のプライベートストレージ",
-  "onboardingSlide1Bullet3": "無料・オープンソース — アカウント不要",
-  "onboardingSlide2Title": "内蔵パワーツール",
-  "onboardingSlide2Bullet1": "カメラで書類をスキャン — テキストを即座に抽出",
-  "onboardingSlide2Bullet2": "アプリ内で音声・動画を再生、追加インストール不要",
-  "onboardingSlide2Bullet3": "インポート時に自動でカテゴリに分類",
-  "onboardingSlide2Bullet4": "安全な削除 — いつでもゴミ箱から復元可能",
-  "onboardingSlide3Title": "プライバシー優先設計",
-  "onboardingSlide3Bullet1": "データはデバイスから出ない — クラウドもサーバーも不要",
-  "onboardingSlide3Bullet2": "追跡なし、広告なし、分析なし。永遠に。",
-  "onboardingSlide3Bullet3": "オープンソース — すべてのコードが公開されています",
-  "homeTitle": "Fadocx",
-  "recentFiles": "最近のファイル",
-  "noRecentFiles": "最近のファイルはありません。ドキュメントを開いてください。",
-  "homeWelcomeTitle": "Fadocxへようこそ",
-  "homeWelcomeSubtitle": "サンプルファイルを探索するか、自分のドキュメントをインポートしてください",
-  "homeExploreSamples": "サンプルファイルを見る",
-  "homeScanDocument": "文書をスキャン",
-  "homeScanDocumentDesc": "OCRを使用して文書からテキストを抽出",
-  "homeImportDocument": "文書をインポート",
-  "homeImportDocumentDesc": "デバイスからファイルを参照してインポート",
-  "homeSeeAll": "すべて見る",
-  "homeNoRecentFiles": "最近のファイルはありません",
-  "homePressBackExit": "もう一度押すと終了します",
-  "libraryTitle": "ライブラリ",
-  "librarySearchHint": "ライブラリを検索...",
-  "libraryNoDocuments": "ドキュメントがありません",
-  "libraryAdjustSearch": "検索条件やフィルターを変更してみてください",
-  "libraryDocumentsAppearHere": "ドキュメントがここに表示されます",
   "categoryAll": "すべて",
-  "categoryPdfs": "PDF",
-  "categoryDocs": "文書",
+  "categoryPdfs": "PDF ファイル",
+  "categoryDocs": "ドキュメント",
   "categorySheets": "スプレッドシート",
   "categorySlides": "スライド",
   "categoryCode": "コード",
   "categoryScans": "スキャン",
   "categoryOther": "その他",
   "categoryPresentations": "プレゼンテーション",
-  "settingsAppearance": "外観",
-  "settingsStorage": "ストレージ",
-  "settingsUpdates": "アップデート",
-  "settingsAbout": "アプリについて",
-  "settingsVersion": "バージョン",
-  "settingsDangerZone": "危険ゾーン",
-  "settingsTrash": "ゴミ箱",
-  "settingsTrashDesc": "削除されたファイルを表示",
-  "settingsEnabled": "有効",
-  "settingsDisabled": "無効",
-  "settingsChooseTheme": "テーマを選択",
-  "settingsSelectLanguage": "言語を選択",
-  "settingsReplayOnboarding": "チュートリアルを再生",
-  "settingsReplayOnboardingDesc": "次回起動時に紹介スライドを表示",
-  "settingsResetSettings": "設定をリセット",
-  "settingsResetSettingsDesc": "すべての設定をデフォルトに戻す",
-  "settingsResetDone": "設定をリセットしました",
-  "settingsAutoUpdateCheck": "自動アップデート確認",
-  "settingsCheckForUpdates": "アップデートを確認",
-  "settingsSourceCode": "ソースコード",
-  "settingsContact": "お問い合わせ",
-  "settingsPrivacyPolicy": "プライバシーポリシー",
-  "trashTitle": "ゴミ箱",
-  "trashEmpty": "ゴミ箱は空です",
-  "trashEmptySubtitle": "削除されたファイルはここに表示されます",
-  "trashDeletePermanently": "完全に削除",
-  "scannerTitle": "文書スキャナー",
-  "scannerCapture": "撮影",
-  "scannerProcessing": "処理中",
-  "scannerResults": "結果",
-  "scannerCopyAll": "すべてコピー",
-  "scannerNewScan": "新しいスキャン",
-  "whatsNewTitle": "新機能",
-  "linkTileCopy": "コピー",
-  "linkTileSendEmail": "メールを送信",
-  "linkTileOpenInBrowser": "ブラウザで開く",
-  "confirm": "確認",
-  "openInBrowser": "ブラウザで開く",
-  "comingSoon": "近日公開",
-  "routeNotFound": "ルートが見つかりません: {path}",
-  "routeGoHome": "ホームへ戻る",
-  "routeInvalidDocumentPath": "無効なドキュメントパス",
-  "pdfCopyTextTitle": "PDFテキストをコピー",
-  "pdfExtractingText": "テキストを抽出中...",
-  "pdfExtractingTextProgress": "テキストを抽出中（{current}/{total} ページ）...",
-  "pdfErrorExtractingText": "テキスト抽出エラー",
-  "pdfWordCount": "単語数: {count}",
-  "pdfNoTextFound": "PDFにテキストが見つかりませんでした",
-  "pdfFullTextCopied": "PDFの全テキストをクリップボードにコピーしました",
-  "pdfPasswordRequired": "PDFパスワードが必要です",
-  "pdfPasswordDesc": "このPDFはパスワードで保護されています。パスワードを入力していただけますか？",
-  "pdfPasswordLabel": "パスワード",
-  "pdfUnlock": "ロック記解除",
-  "pdfSearchHint": "PDFを検索...",
-  "pdfTextCannotBeExtracted": "このページからテキストを抽出できません",
-  "pdfLoadingPageTexts": "ページのテキストを読み込み中...",
-  "pdfPageCopied": "{page}ページのテキストをクリップボードにコピーしました",
-  "viewerTooltipSidebar": "サイドバー",
-  "viewerTooltipFirst": "最初",
-  "viewerTooltipLast": "最後",
-  "viewerTooltipCopyPageText": "ページのテキストをコピー",
-  "textDocSearchHint": "テキストを検索...",
-  "textDocSearchPrevResult": "前の結果",
-  "textDocSearchNextResult": "次の結果",
-  "imageFailedToLoad": "画像の読み込みに失敗しました",
-  "mediaLoading": "メディアを読み込み中...",
-  "mediaFailedToPlay": "メディアを再生できませんでした",
-  "mediaPlay": "再生",
-  "audioPlaybackNote": "音声の再生には追加のライブラリが必要です。",
-  "sheetNoData": "{sheetName} にデータがありません",
-  "documentNoSheets": "{format} にシートが見つかりません",
-  "viewerPlaybackSpeed": "再生速度",
-  "urlCopiedToClipboard": "URLをクリップボードにコピーしました: {url}",
-  "lokitPreparingDoc": "ドキュメントを準備中...",
-  "lokitWarmingUp": "Fadocx エンジンを起動中...",
-  "lokitAlmostThere": "もう少し",
-  "lokitJustAMoment": "少々お待ちください",
-  "lokitFailedToRender": "ドキュメントの表示に失敗しました",
-  "trashSelect": "選択",
-  "copiedToClipboard": "クリップボードにコピーしました",
   "supportDevelopment": "開発を支援",
   "visitPatreon": "Patreon を開く",
   "copyLink": "リンクをコピー",
+  "becomeAPatron": "パトロンになる",
   "patreonDescription": "あなたの支援は Fadocx と FadCam の成長を支えます。Patreon の支援者は、プレミアム機能や FadSec Lab のすべてのアプリでの先行アクセスなど、限定特典を利用できます。\n\n詳しくは下のリンクから Patreon を開き、利用可能なプランと特典を確認してください。",
   "discordTitle": "Discord に参加",
+  "openInBrowser": "ブラウザで開く",
+  "comingSoon": "近日公開",
+  "newBadge": "新規",
   "timeAgoJustNow": "たった今",
   "timeAgoMinute": "{count, plural, =1{1分前} other{{count}分前}}",
+  "@timeAgoMinute": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoHour": "{count, plural, =1{1時間前} other{{count}時間前}}",
+  "@timeAgoHour": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoDay": "{count, plural, =1{1日前} other{{count}日前}}",
+  "@timeAgoDay": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoWeek": "{count, plural, =1{1週間前} other{{count}週間前}}",
+  "@timeAgoWeek": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoMonth": "{count, plural, =1{1か月前} other{{count}か月前}}",
+  "@timeAgoMonth": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoYear": "{count, plural, =1{1年前} other{{count}年前}}",
+  "@timeAgoYear": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "monthJan": "1月",
   "monthFeb": "2月",
   "monthMar": "3月",
@@ -195,30 +189,207 @@
   "monthOct": "10月",
   "monthNov": "11月",
   "monthDec": "12月",
+  "homeWelcomeTitle": "Fadocxへようこそ",
+  "homeWelcomeSubtitle": "サンプルファイルを探索するか、自分のドキュメントをインポートしてください",
+  "homeExploreSamples": "サンプルファイルを見る",
+  "homeDocumentManagement": "ドキュメント管理",
+  "homeSeeAll": "すべて見る",
+  "homeNoRecentFiles": "最近のファイルはありません",
+  "homeScanDocument": "文書をスキャン",
+  "homeScanDocumentDesc": "OCRを使用して文書からテキストを抽出",
+  "homeImportDocument": "文書をインポート",
+  "homeImportDocumentDesc": "デバイスからファイルを参照してインポート",
+  "onboardingSkip": "スキップ",
+  "onboardingNext": "次へ",
+  "onboardingGetStarted": "始める",
+  "onboardingSlide1Title": "Fadocxへようこそ",
+  "onboardingSlide1Tagline": "オールインワンのプライベート文書管理",
+  "onboardingSlide1Bullet1": "プライベートドキュメントビューアー",
+  "onboardingSlide1Bullet2": "トラッキングまたはデータなし",
+  "onboardingSlide1Bullet3": "オープンソース",
+  "onboardingSlide2Title": "フォーマットサポート",
+  "onboardingSlide2Bullet1": "PDF、DOCX、XLSX、CSV、PPT",
+  "onboardingSlide2Bullet2": "テキスト、画像、OCR認識",
+  "onboardingSlide2Bullet3": "インポートと比較",
+  "onboardingSlide2Bullet4": "マルチランゲージサポート",
+  "onboardingSlide3Title": "始める準備はいいですか?",
+  "onboardingSlide3Bullet1": "デバイスからドキュメントを開く",
+  "onboardingSlide3Bullet2": "またはテスト用のサンプルを選択",
+  "onboardingSlide3Bullet3": "設定で詳細を確認",
   "homeStatDocuments": "ドキュメント",
   "homeStatStorage": "ストレージ",
   "homeStatTimeRead": "読書時間",
   "homeStatLastOpened": "最終オープン: ",
-  "settingsDocumentsSize": "ドキュメントサイズ",
-  "settingsCalculating": "計算中...",
-  "settingsCustomStorage": "カスタムストレージ",
-  "settingsAppLock": "アプリロック",
-  "settingsJoinCommunity": "コミュニティに参加",
-  "settingsMoreFromFadsec": "FadSec Lab のその他の製品",
-  "settingsCopiedInfo": "クリップボードにコピーしました",
-  "settingsCopyInfo": "情報をコピー",
-  "settingsVersionClipboardInfo": "{appName} v{version} (Build {buildNumber})\nパッケージ: {packageName}",
-  "settingsShareApp": "友だちと共有",
-  "settingsShareMessage": "Fadocx をチェック！\n\nPDF、Office、スプレッドシート、プレゼンテーション、コードファイル、OCR テキスト抽出に対応したオールインワンドキュメントビューア。完全オフライン、トラッキングなし、オープンソース。\n\nhttps://github.com/anonfaded/Fadocx",
-  "settingsShareVia": "共有方法...",
-  "settingsShareWhatsApp": "WhatsApp",
-  "settingsWhatsAppNotInstalled": "この端末に WhatsApp はインストールされていません",
-  "settingsSecurity": "セキュリティ",
-  "settingsFadcamDesc": "プライバシー重視の Android マルチメディアスイート。バックグラウンド動画録画、ドライブレコーダー、画面録画、ライブ配信、リモート操作に対応。広告なし、オープンソース。",
-  "settingsQuranCliDesc": "聖クルアーンのためのターミナルコンパニオン。読んで、聞いて、動画編集用の字幕を生成できます。",
-  "settingsFadcryptDesc": "高度で洗練されたクロスプラットフォームのアプリロッカー。ファイル、フォルダー、アプリを AES-256-GCM の軍用レベル暗号化で保護。オープンソース、完全無料、テレメトリなし。",
-  "settingsFadcatDesc": "軽量で高機能なクロスプラットフォーム Android logcat 代替ツール。Android Studio の重さなし。対応アーキテクチャ向け ADB 同梱、GUI・CLI・MCP サーバーモードで動作。",
-  "settingsMacosComingSoon": "macOS は近日対応予定",
+  "homePressBackExit": "もう一度押すと終了します",
+  "homeImportingSamples": "サンプルファイルをインポート中…",
+  "homeSamplesImported": "{count, plural, =1{1つのサンプルファイルが正常にインポートされました!} other{{count}つのサンプルファイルが正常にインポートされました!}}",
+  "@homeSamplesImported": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "homeViewFiles": "ファイルを表示",
+  "homeFailedImportSamples": "サンプルファイルのインポートに失敗しました: {error}",
+  "@homeFailedImportSamples": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileMovedToTrash": "{name}がゴミ箱に移動されました",
+  "@homeFileMovedToTrash": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileInfo": "ファイル情報",
+  "homeFileName": "名前",
+  "homeFileType": "種類",
+  "homeFileSize": "サイズ",
+  "homeFileLocation": "場所",
+  "homeFileDateOpened": "開いた日",
+  "homeFileLastModified": "最終更新",
+  "homeFileInTrash": "ゴミ箱内",
+  "homeFileInfoCopied": "ファイル情報をコピーしました",
+  "homeCopySuffix": " (コピー)",
+  "homeCopySuffixCounter": " (コピー {counter})",
+  "@homeCopySuffixCounter": {
+    "placeholders": {
+      "counter": {
+        "type": "num"
+      }
+    }
+  },
+  "homeDuplicatedAs": "{name}として複製されました",
+  "@homeDuplicatedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedDuplicate": "ファイルの複製に失敗しました: {error}",
+  "@homeFailedDuplicate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRenameFile": "ファイルの名前を変更",
+  "homeFileNameLabel": "ファイル名",
+  "homeFileAlreadyExists": "この名前のファイルはすでに存在します",
+  "homeRenamedTo": "{name}に名前が変更されました",
+  "@homeRenamedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedRename": "名前変更に失敗しました",
+  "homeExport": "エクスポート",
+  "homeSaveToDownloads": "ダウンロードに保存",
+  "homeSaveToDownloadsPath": "ダウンロード/Fadocx/{name}",
+  "@homeSaveToDownloadsPath": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeChooseLocation": "場所を選択",
+  "homeChooseLocationDesc": "カスタム保存ディレクトリを選択",
+  "homeSavedToDownloads": "ダウンロード/Fadocx/{name}に保存されました",
+  "@homeSavedToDownloads": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSavedTo": "{path}に保存されました",
+  "@homeSavedTo": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedExport": "ファイルのエクスポートに失敗しました",
+  "homeChooseSaveLocation": "保存場所を選択",
+  "homeConvertComingSoon": "変換機能はまもなく公開予定です!",
+  "homeFadDriveComingSoon": "FadDrive は近日公開です!",
+  "homePresentationsTooltip": "まもなく公開予定",
+  "homeErrorPrefix": "エラー: {error}",
+  "@homeErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryTitle": "ライブラリ",
+  "librarySearchHint": "ライブラリを検索...",
+  "librarySelected": "{count} 件選択中",
+  "@librarySelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeleteSelected": "選択項目を削除しますか?",
+  "libraryDeleteConfirm": "{count} 個のファイルをゴミ箱へ移動しますか? 後で復元できます。",
+  "@libraryDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryItemsMovedToTrash": "{count} 件をゴミ箱へ移動しました",
+  "@libraryItemsMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryErrorLoading": "ライブラリの読み込みエラー: {error}",
+  "@libraryErrorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryItemCount": "{count} 件",
+  "@libraryItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeselectAll": "すべて選択解除",
+  "librarySelectAll": "すべて選択",
+  "libraryNoCategoryFound": "{category} が見つかりません",
+  "@libraryNoCategoryFound": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryNoDocuments": "ドキュメントがありません",
+  "libraryAdjustSearch": "検索条件やフィルターを変更してみてください",
+  "libraryDocumentsAppearHere": "ドキュメントがここに表示されます",
   "browseTitle": "ドキュメントをインポート",
   "browseBack": "戻る",
   "browseSearchHint": "ドキュメントを検索...",
@@ -240,14 +411,71 @@
   "browseOpenSettings": "設定を開く",
   "browseAccessStillDisabled": "すべてのファイルへのアクセスはまだ無効です。続行するには設定で有効にしてください。",
   "browseNoDirectories": "端末上にドキュメントディレクトリが見つかりません",
-  "browseErrorPrefix": "エラー: {error}",
-  "browseSortBy": "並び順:",
+  "browseErrorPrefix": "インポートエラー: {error}",
+  "@browseErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "browseSortBy": "でソート",
   "browseImportedFiles": "{count, plural, =1{1件のファイルをインポートしました} other{{count}件のファイルをインポートしました}}",
+  "@browseImportedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashTitle": "ゴミ箱",
+  "trashEmpty": "ゴミ箱は空です",
+  "trashEmptySubtitle": "削除されたファイルはここに表示されます",
+  "trashErrorLoading": "ゴミ箱の読み込みエラー",
+  "trashFilesSelected": "{count}個選択されました",
+  "@trashFilesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashFilesLabel": "ファイル",
+  "trashSelect": "選択",
+  "trashFileRestored": "ファイルが正常に復元されました",
+  "trashDeletePermanently": "完全に削除",
+  "trashDeletePermanentlyConfirm": "完全に削除しますか?",
+  "trashDeletePermanentlyMessage": "{count}個のファイルを完全に削除しようとしています。この操作は元に戻せません。",
+  "@trashDeletePermanentlyMessage": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashDeleteTypeConfirm": "確認するためにDELETE(大文字)と入力してください:",
+  "trashDeleteHint": "DELETE",
+  "trashFilesPermanentlyDeleted": "{count}個のファイルが完全に削除されました",
+  "@trashFilesPermanentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "whatsNewTitle": "新機能",
   "whatsNewWhatsIncluded": "含まれる内容",
   "whatsNewPlanned": "予定中",
   "whatsNewReleasedToday": "本日公開",
   "whatsNewReleasedYesterday": "昨日公開",
   "whatsNewReleasedDate": "{date} に公開",
+  "@whatsNewReleasedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "whatsNewDocAndSheets": "ドキュメントと表計算",
   "whatsNewDocAndSheetsDesc": "PDF、Word 文書、Excel シートなどを、すべて端末上でローカル表示できます。",
   "whatsNewOcrAi": "高性能 OCR とオンデバイス AI",
@@ -262,7 +490,7 @@
   "whatsNewFileManagementDesc": "名前変更、複製、エクスポート、削除を簡単に行えます。",
   "whatsNewThemes": "ライトテーマとダークテーマ",
   "whatsNewThemesDesc": "昼はライト、夜はダークなど、好みに合う見た目を選べます。",
-  "whatsNewFadDrive": "FadDrive",
+  "whatsNewFadDrive": "FadDrive統合",
   "whatsNewFadDriveDesc": "ドキュメントのクラウド同期。いつでもどこでもアクセスできます。",
   "whatsNewEditing": "ドキュメント編集",
   "whatsNewEditingDesc": "Fadocx 内でドキュメントをすばやく編集できます。",
@@ -279,7 +507,7 @@
   "whatsNewThankYouDesc": "Fadocx に価値を感じたら、開発支援をご検討ください。あなたの貢献が、プライバシー第一のツール開発を支えます。",
   "drawerWhatNew": "新機能",
   "drawerRecentFiles": "最近のファイル",
-  "drawerVisible": "表示中",
+  "drawerVisible": "表示",
   "drawerHidden": "非表示",
   "drawerUnlockBenefits": "限定特典を解除",
   "fileActionRename": "名前を変更",
@@ -296,13 +524,469 @@
   "fileActionUploadDesc": "クラウドストレージに同期",
   "fileActionFileInfo": "ファイル情報",
   "fileActionSubtitle": "ファイル操作と管理",
+  "updateAvailableTitle": "アップデートが利用可能です",
+  "updateAvailableSubtitle": "Fadocxの新しいバージョンがダウンロード可能です",
+  "updateStableRelease": "安定版リリース",
+  "updateStableDesc": "本番環境で使用するための安定版でテスト済みのリリース",
+  "updateBetaRelease": "ベータリリース",
+  "updateBetaDesc": "新機能への早期アクセス、バグが含まれる場合があります",
+  "updateMaybeLater": "もしかして後で",
+  "updateCurrent": "現在",
+  "updateNew": "新規",
+  "updateVisitGithub": "GitHubにアクセス",
+  "updateBetaInfo": "Fadocx ベータ版は安定版と並行してインストールできる独立したアプリです。安定版アプリやそのデータには影響しません。\n\n安定版に届く前に新機能を試すには、ベータ版をインストールしてください。",
+  "updateBannerStable": "安定版更新",
+  "updateBannerBeta": "ベータ版更新",
+  "settingsAppearance": "外観",
+  "settingsStorage": "ストレージ",
+  "settingsDocumentsSize": "ドキュメントサイズ",
+  "settingsCalculating": "計算中...",
+  "settingsCustomStorage": "カスタムストレージ",
+  "settingsUnknown": "不明",
+  "settingsStorageDetails": "ストレージ",
+  "settingsStoragePdfs": "PDF ファイル",
+  "settingsStorageDocs": "ドキュメント",
+  "settingsStorageSheets": "シート",
+  "settingsStoragePresentations": "プレゼンテーション",
+  "settingsStorageCode": "コード",
+  "settingsStorageScans": "スキャン",
+  "settingsStorageImages": "画像",
+  "settingsStorageOther": "その他",
+  "settingsStorageInfo": "ドキュメントは端末内のプライベートフォルダーに保存され、他のアプリからはアクセスできません",
+  "settingsStoragePrivateFolderInfo": "ドキュメントは他のアプリやファイルマネージャーから見えないプライベートフォルダーに保存されています。アクセスできるのは Fadocx のみです。",
+  "settingsStorageDeleteInfo": "設定の危険ゾーンからドキュメントを削除してください",
+  "settingsStorageEmpty": "ドキュメントはありません",
+  "settingsStorageFailedLoad": "ストレージデータの読み込みに失敗しました",
+  "settingsUpdates": "更新",
+  "settingsAutoUpdateCheck": "自動アップデート確認",
+  "settingsReplayOnboarding": "チュートリアルを再生",
+  "settingsReplayOnboardingDesc": "次回起動時に紹介スライドを表示",
+  "settingsEnabled": "有効",
+  "settingsDisabled": "無効",
+  "settingsAppLock": "アプリロック",
+  "settingsAbout": "アプリについて",
+  "settingsVersion": "バージョン",
+  "settingsSourceCode": "ソースコード",
+  "settingsContact": "お問い合わせ",
+  "settingsJoinCommunity": "コミュニティに参加",
+  "settingsPrivacyPolicy": "プライバシーポリシー",
+  "settingsMoreFromFadsec": "FadSec Lab のその他の製品",
+  "settingsFadocxDesc": "あなたのドキュメントビューアー",
+  "settingsDangerZone": "危険ゾーン",
+  "settingsTrash": "ゴミ箱",
+  "settingsTrashDesc": "削除されたファイルを表示",
+  "settingsResetSettings": "設定をリセット",
+  "settingsResetSettingsDesc": "すべての設定をデフォルトに戻す",
+  "settingsResetDone": "設定をリセットしました",
+  "settingsRetry": "再試行",
+  "settingsChooseTheme": "テーマを選択",
+  "settingsSelectLanguage": "言語を選択",
+  "settingsCheckForUpdates": "アップデートを確認",
+  "settingsCheckingUpdates": "アップデートを確認中…",
+  "settingsNoInternet": "インターネット接続がありません。ネットワークを確認してもう一度試してください。",
+  "settingsUpToDate": "あなたは最新です",
+  "settingsUpToDateDesc": "v{version}は最新バージョンです。",
+  "@settingsUpToDateDesc": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBetaAvailable": "ベータv{version}が利用可能です",
+  "@settingsBetaAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVersionWithBuild": "バージョン{version}(ビルド{buildNumber})",
+  "@settingsVersionWithBuild": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedInfo": "クリップボードにコピーしました",
+  "settingsCopyInfo": "情報をコピー",
+  "settingsVersionClipboardInfo": "{appName} v{version} (Build {buildNumber})\nパッケージ: {packageName}",
+  "@settingsVersionClipboardInfo": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      },
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsShareApp": "友だちと共有",
+  "settingsShareMessage": "Fadocx をチェック！\n\nPDF、Office、スプレッドシート、プレゼンテーション、コードファイル、OCR テキスト抽出に対応したオールインワンドキュメントビューア。完全オフライン、トラッキングなし、オープンソース。\n\nhttps://github.com/anonfaded/Fadocx",
+  "settingsShareVia": "共有方法...",
+  "settingsShareWhatsApp": "WhatsApp",
+  "settingsWhatsAppNotInstalled": "この端末に WhatsApp はインストールされていません",
+  "settingsPrivacyOffline": "100% オフライン",
+  "settingsPrivacyLocalStorage": "ローカル保存のみ",
+  "settingsPrivacyOnDevice": "端末上の AI",
+  "settingsPrivacyOpenSource": "オープンソース",
+  "settingsPrivacyNoAds": "広告なし",
+  "settingsPrivacyByDesign": "私たちは設計段階からのプライバシーを重視します。",
+  "settingsPrivacyTransparency": "Fadocxは透明性を持って構築されました。あなたのドキュメントはあなたのもの – 私たちのものではありません。",
+  "settingsViewSourceCode": "ソースコードを表示",
+  "settingsSecurity": "セキュリティ",
+  "settingsStorageFilesSummary": "{size} • {count}ファイル",
+  "@settingsStorageFilesSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "settingsErrorPrefix": "エラー: {error}",
+  "@settingsErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedText": "コピーしました: {text}",
+  "@settingsCopiedText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVisitGithub": "GitHubにアクセス",
+  "settingsMadeWith": "で作成",
+  "settingsAt": "で",
+  "settingsIn": "内",
+  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
+  "settingsTypeToConfirm": "確認するために\"{text}\"と入力してください:",
+  "@settingsTypeToConfirm": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "確認",
+  "settingsPrivacyOfflineDesc": "すべての処理はあなたのデバイスで行われます。インターネットは不要です。",
+  "settingsPrivacyLocalStorageDesc": "あなたのドキュメントはあなたのデバイスに保存されます。何もアップロードされません。",
+  "settingsPrivacyOnDeviceDesc": "OCRにOpenCV+Tesseractを使用します。AIはローカルで実行されます。",
+  "settingsPrivacyOpenSourceDesc": "コードは公開されています。GitHubで自分で確認してください。",
+  "settingsPrivacyNoAdsDesc": "広告なし。追跡なし。分析なし。クラッシュログなし。テレメトリーゼロ。",
+  "settingsFadcamDesc": "プライバシー重視の Android マルチメディアスイート。バックグラウンド動画録画、ドライブレコーダー、画面録画、ライブ配信、リモート操作に対応。広告なし、オープンソース。",
+  "settingsQuranCliDesc": "聖クルアーンのためのターミナルコンパニオン。読んで、聞いて、動画編集用の字幕を生成できます。",
+  "settingsFadcryptDesc": "高度で洗練されたクロスプラットフォームのアプリロッカー。ファイル、フォルダー、アプリを AES-256-GCM の軍用レベル暗号化で保護。オープンソース、完全無料、テレメトリなし。",
+  "settingsFadcatDesc": "軽量で高機能なクロスプラットフォーム Android logcat 代替ツール。Android Studio の重さなし。対応アーキテクチャ向け ADB 同梱、GUI・CLI・MCP サーバーモードで動作。",
+  "settingsMacosComingSoon": "macOS は近日対応予定",
+  "settingsOpenInBrowser": "ブラウザで開く",
+  "viewerFindHint": "検索...",
+  "viewerTypeToFind": "検索語を入力",
+  "viewerSidebarPages": "ページ",
+  "viewerSidebarSearch": "検索",
+  "viewerSidebarTOC": "目次",
+  "viewerSidebarNotes": "ノート",
+  "viewerSidebarBookmarks": "ブックマーク",
+  "viewerSidebarNotesDesc": "PDF ページにノートと注釈を追加します",
+  "viewerSidebarBookmarksDesc": "お気に入りのページを保存して整理します",
+  "viewerCellCopied": "セル {value} をコピーしました",
+  "@viewerCellCopied": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerGoToPage": "ページへ移動",
+  "viewerGoToPageHint": "ページ番号を入力 (1-{totalPages})",
+  "@viewerGoToPageHint": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerGo": "移動",
+  "viewerInvalidPage": "1 から {totalPages} までの数字を入力してください",
+  "@viewerInvalidPage": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerNoContent": "内容がありません",
+  "viewerResetZoom": "ズームをリセット",
+  "viewerCopyTextTitle": "テキストをコピー",
+  "viewerCopyTextChoose": "コピーする内容を選択:",
+  "viewerCopyPageOnly": "ページ {page} のみ",
+  "@viewerCopyPageOnly": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyAllPages": "全 {totalPages} ページ",
+  "@viewerCopyAllPages": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerExtractingText": "{label} からテキストを抽出中...",
+  "@viewerExtractingText": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerNoTextFound": "テキスト内容が見つかりません",
+  "viewerPageLabel": "ページ {currentPage}",
+  "@viewerPageLabel": {
+    "placeholders": {
+      "currentPage": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLabel": "{totalPages} ページ",
+  "@viewerAllPagesLabel": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTextExtracted": "{pageLabel} からテキストを抽出しました。",
+  "@viewerTextExtracted": {
+    "placeholders": {
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerWordsFound": "{count} 語が見つかりました",
+  "@viewerWordsFound": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedWords": "{pageLabel} から {count} 語をコピーしました",
+  "@viewerCopiedWords": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCopyAllTextTitle": "すべてのテキストをコピー",
+  "viewerCopyAllTextConfirm": "全 {pageCount} ページからテキストを抽出してクリップボードへコピーします。",
+  "@viewerCopyAllTextConfirm": {
+    "placeholders": {
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedAllPages": "{pageCount} ページから {count} 語をコピーしました",
+  "@viewerCopiedAllPages": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyDocumentText": "ドキュメント全体の内容をクリップボードへコピーします。",
+  "viewerWordsLines": "{words} 語、{lines} 行",
+  "@viewerWordsLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerWordsOnly": "{count} 語",
+  "@viewerWordsOnly": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerLinesOnly": "{lines} 行",
+  "@viewerLinesOnly": {
+    "placeholders": {
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedFromLines": "{lines} 行から {words} 語をコピーしました",
+  "@viewerCopiedFromLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCharactersCount": "{count} 文字",
+  "@viewerCharactersCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyExtractedTitle": "抽出テキストをコピー",
+  "viewerCopyExtractedDesc": "OCR でこの画像から抽出したテキストをコピーします。",
+  "viewerCopiedWordsChars": "{words} 語 ({chars} 文字) をコピーしました",
+  "@viewerCopiedWordsChars": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "chars": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerErrorAccessText": "抽出テキストへのアクセス中にエラー",
+  "viewerNoTextForImage": "この画像で利用できる抽出テキストはありません",
+  "viewerExtractingAllPages": "すべてのページからテキストを抽出中...",
+  "viewerTextExtractionUnavailable": "テキスト抽出は利用できません",
+  "viewerNoPdfText": "この PDF にテキストが見つかりません",
+  "viewerNoTextAvailable": "利用できるテキスト内容がありません",
+  "viewerReadingTime": "読了 {minutes} 分",
+  "@viewerReadingTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeSingle": "読了 1 分",
+  "viewerCopy": "コピー",
+  "viewerErrorPrefix": "エラー: {error}",
+  "@viewerErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCellValue": "セル {cell}",
+  "@viewerCellValue": {
+    "placeholders": {
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerLowerPageLabel": "ページ {page}",
+  "@viewerLowerPageLabel": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLower": "すべてのページ",
+  "viewerCopied": "コピーしました",
+  "viewerCopyValue": "値をコピー",
+  "viewerToggleFullscreen": "全画面表示を切り替え",
+  "viewerInvert": "反転",
+  "viewerText": "テキスト",
+  "viewerSyntax": "構文",
+  "viewerFont": "フォント",
+  "viewerFontStyle": "フォントスタイル",
+  "viewerMonospaceCourier": "Monospace (Courier)",
+  "viewerSystemUbuntu": "System (Ubuntu)",
+  "viewerEdit": "編集",
+  "viewerEditWithEngine": "Fadocx Engine で編集",
+  "viewerEditWithEngineDesc": "このスプレッドシートを Fadocx レンダリングエンジンで開き、完全な書式、グラフ、レイアウト再現性を備えた忠実なプレビューを表示します。",
+  "viewerEditWithEngineNote": "注: インタラクティブ編集は今後のアップデートで対応予定です。",
+  "viewerNotNow": "後で",
+  "viewerGotIt": "了解",
+  "viewerErrorLoadingDocument": "ドキュメントの読み込みエラー",
+  "viewerGoBack": "戻る",
+  "viewerReadingTimeMinutes": "{count, plural, =1{読了 1 分} other{読了 {count} 分}}",
+  "@viewerReadingTimeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeHoursMinutes": "読了 {hours}時間 {minutes}分",
+  "@viewerReadingTimeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "scannerTitle": "文書スキャナー",
+  "scannerCapture": "撮影",
+  "scannerProcessing": "処理中",
+  "scannerResults": "結果",
   "scannerInitializingCamera": "カメラを初期化中...",
   "scannerDocumentDetected": "文書を検出しました。動かさないでください",
   "scannerKeepDocumentFlat": "最良の結果のため、文書をまっすぐ平らに保ってください",
   "scannerUpload": "アップロード",
   "scannerFailedOpenImage": "画像を開けませんでした: {error}",
+  "@scannerFailedOpenImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerFlash": "フラッシュ",
   "scannerFailedTorch": "ライトの切り替えに失敗しました: {error}",
+  "@scannerFailedTorch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerStartingCamera": "カメラを起動中...",
   "scannerCameraUnavailable": "カメラを利用できません",
   "scannerCameraUnavailableDesc": "カメラを初期化できませんでした",
@@ -316,264 +1000,141 @@
   "scannerNoTextExtracted": "(テキストは抽出されませんでした)",
   "scannerDetectedLines": "検出された行",
   "scannerTextCopied": "テキストをクリップボードにコピーしました",
-  "appDescription": "Document Viewer",
-  "openFile": "Open File",
-  "openFileTooltip": "Browse and open a document",
-  "pdfFile": "PDF File",
-  "docxFile": "Word Document",
-  "xlsxFile": "Excel Spreadsheet",
-  "csvFile": "CSV File",
-  "unknownFile": "Unknown File",
-  "page": "Page",
-  "pageOf": "of",
-  "jumpToPage": "Jump to page",
-  "sheet": "Sheet",
-  "corruptedFile": "File appears to be corrupted",
-  "appVersion": "App Version",
-  "clearRecentFiles": "Clear recent files",
-  "backButton": "Back",
-  "emptyTitle": "No Documents",
-  "emptyMessage": "Start by opening a document from your device",
-  "startBrowsing": "Start Browsing",
-  "languageChanged": "Language changed to English",
-  "privacyDescription": "Fadocx is a document viewer. Your files are stored locally on your device and are never transmitted to any server.",
-  "aboutDescription": "Fadocx v1.0.0 - Your private document viewer. Built to respect your privacy.",
-  "tableRows": "rows",
-  "tableEmpty": "No data to display",
-  "tableNoContent": "Sheet is empty",
-  "sheetEmpty": "Sheet is empty",
-  "noTableData": "No table data",
-  "noSpreadsheetData": "No spreadsheet data",
-  "rowsSymbol": "rows",
-  "colsSymbol": "cols",
-  "noSlidesFound": "No slides found",
-  "slidesCount": "slides",
-  "pptUnsupported": "PPT file parsed but contains no slides",
-  "odpUnsupported": "ODP file parsed but contains no slides or unreadable content",
-  "noTextContent": "No text content found",
-  "couldNotParse": "Could not parse file",
-  "file": "File",
-  "slides": "Slide",
-  "previewNotSupported": "Preview not yet supported",
-  "openWithSystemApp": "Open with System App",
-  "systemAppNotImplemented": "System app opening not yet implemented",
-  "type": "Type",
-  "fileNotFoundMessage": "File not found",
-  "fileTooLarge": "File size exceeds maximum limit (100MB)",
-  "errorLoadingFile": "Error loading file",
-  "docxPreviewNotSupported": "DOCX preview not yet fully supported",
-  "docParseError": "Could not parse DOC file. Try converting to DOCX.",
-  "xlsxParseError": "Could not parse XLSX file",
-  "xlsParseError": "Could not parse XLS file. Try converting to XLSX.",
-  "csvParseError": "Could not parse CSV file",
-  "odtParseError": "Could not parse ODT file",
-  "odsParseError": "Could not parse ODS file",
-  "odpParseError": "Could not parse ODP file",
-  "pptParseError": "Could not parse PPT file",
-  "rtfParseError": "Could not parse RTF file",
-  "txtFileEmpty": "File is empty",
-  "unsupportedFormat": "File format is not supported yet",
-  "txtLoaded": "TXT",
-  "charactersLoaded": "characters",
-  "becomeAPatron": "Become a Patron",
-  "newBadge": "NEW",
-  "homeDocumentManagement": "ドキュメント管理",
-  "homeImportingSamples": "Importing sample files...",
-  "homeSamplesImported": "{count, plural, =1{1 sample file imported successfully!} other{{count} sample files imported successfully!}}",
-  "homeViewFiles": "View Files",
-  "homeFailedImportSamples": "Failed to import sample files: {error}",
-  "homeFileMovedToTrash": "{name} moved to trash",
-  "homeFileInfo": "ファイル情報",
-  "homeFileName": "名前",
-  "homeFileType": "種類",
-  "homeFileSize": "サイズ",
-  "homeFileLocation": "場所",
-  "homeFileDateOpened": "開いた日",
-  "homeFileLastModified": "最終更新",
-  "homeFileInTrash": "ゴミ箱内",
-  "homeFileInfoCopied": "ファイル情報をコピーしました",
-  "homeCopySuffix": " (copy)",
-  "homeCopySuffixCounter": " (copy {counter})",
-  "homeDuplicatedAs": "Duplicated as {name}",
-  "homeFailedDuplicate": "Failed to duplicate file: {error}",
-  "homeRenameFile": "Rename file",
-  "homeFileNameLabel": "File name",
-  "homeFileAlreadyExists": "A file with this name already exists",
-  "homeRenamedTo": "Renamed to {name}",
-  "homeFailedRename": "Failed to rename file",
-  "homeExport": "Export",
-  "homeSaveToDownloads": "Save to Downloads",
-  "homeSaveToDownloadsPath": "Download/Fadocx/{name}",
-  "homeChooseLocation": "Choose location",
-  "homeChooseLocationDesc": "Pick a custom save directory",
-  "homeSavedToDownloads": "Saved to Download/Fadocx/{name}",
-  "homeSavedTo": "Saved to {path}",
-  "homeFailedExport": "Failed to export file",
-  "homeChooseSaveLocation": "Choose save location",
-  "homeConvertComingSoon": "Convert feature coming soon!",
-  "homeFadDriveComingSoon": "FadDrive coming soon!",
-  "homePresentationsTooltip": "Coming Soon",
-  "homeErrorPrefix": "Error: {error}",
-  "librarySelected": "{count} selected",
-  "libraryDeleteSelected": "Delete selected?",
-  "libraryDeleteConfirm": "Move {count} files to trash? You can restore them later.",
-  "libraryItemsMovedToTrash": "{count} items moved to trash",
-  "libraryErrorLoading": "Error loading library: {error}",
-  "libraryItemCount": "{count} items",
-  "libraryDeselectAll": "Deselect all",
-  "librarySelectAll": "Select all",
-  "libraryNoCategoryFound": "No {category} found",
-  "trashErrorLoading": "Error loading trash",
-  "trashFilesSelected": "{count} selected",
-  "trashFilesLabel": "files",
-  "trashFileRestored": "File restored successfully",
-  "trashDeletePermanentlyConfirm": "Delete Permanently?",
-  "trashDeletePermanentlyMessage": "You are about to permanently delete {count} file(s). This action cannot be undone.",
-  "trashDeleteTypeConfirm": "Type DELETE in capital letters to confirm:",
-  "trashDeleteHint": "DELETE",
-  "trashFilesPermanentlyDeleted": "{count} file(s) permanently deleted",
-  "updateAvailableTitle": "更新利用可能",
-  "updateAvailableSubtitle": "Fadocxの新しいバージョンがダウンロード可能です",
-  "updateStableRelease": "安定版リリース",
-  "updateStableDesc": "本番環境で使用するための安定版でテスト済みのリリース",
-  "updateBetaRelease": "ベータ版リリース",
-  "updateBetaDesc": "新機能への早期アクセス、バグが含まれる場合があります",
-  "updateMaybeLater": "後で",
-  "updateCurrent": "現在",
-  "updateNew": "新規",
-  "updateVisitGithub": "GitHubにアクセス",
-  "updateBetaInfo": "The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.",
-  "updateBannerStable": "安定版更新",
-  "updateBannerBeta": "ベータ版更新",
-  "settingsUnknown": "Unknown",
-  "settingsStorageDetails": "ストレージ",
-  "settingsStoragePdfs": "PDF",
-  "settingsStorageDocs": "ドキュメント",
-  "settingsStorageSheets": "シート",
-  "settingsStoragePresentations": "プレゼンテーション",
-  "settingsStorageCode": "コード",
-  "settingsStorageScans": "スキャン",
-  "settingsStorageImages": "画像",
-  "settingsStorageOther": "その他",
-  "settingsStorageInfo": "ドキュメントは端末内のプライベートフォルダーに保存され、他のアプリからはアクセスできません",
-  "settingsStoragePrivateFolderInfo": "ドキュメントは他のアプリやファイルマネージャーから見えないプライベートフォルダーに保存されています。アクセスできるのは Fadocx のみです。",
-  "settingsStorageDeleteInfo": "設定の危険ゾーンからドキュメントを削除してください",
-  "settingsStorageEmpty": "ドキュメントはありません",
-  "settingsStorageFailedLoad": "ストレージデータの読み込みに失敗しました",
-  "settingsFadocxDesc": "Your private document viewer",
-  "settingsRetry": "Retry",
-  "settingsCheckingUpdates": "Checking for updates…",
-  "settingsNoInternet": "No internet connection. Check your network and try again.",
-  "settingsUpToDate": "You're up to date",
-  "settingsUpToDateDesc": "v{version} is the latest version.",
-  "settingsBetaAvailable": "Beta v{version} available",
-  "settingsVersionWithBuild": "Version {version} (Build {buildNumber})",
-  "settingsPrivacyOffline": "100% Offline",
-  "settingsPrivacyLocalStorage": "Local Storage Only",
-  "settingsPrivacyOnDevice": "On-Device AI",
-  "settingsPrivacyOpenSource": "Open Source",
-  "settingsPrivacyNoAds": "No Ads",
-  "settingsPrivacyByDesign": "We believe in privacy by design.",
-  "settingsPrivacyTransparency": "Fadocx is built with transparency. Your documents are your business - not ours.",
-  "settingsViewSourceCode": "View Source Code",
-  "settingsStorageFilesSummary": "{size} • {count} files",
-  "settingsErrorPrefix": "Error: {error}",
-  "settingsCopiedText": "Copied: {text}",
-  "settingsVisitGithub": "Visit GitHub",
-  "settingsMadeWith": "Made with",
-  "settingsAt": "at",
-  "settingsIn": "in",
-  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
-  "settingsTypeToConfirm": "Type \"{text}\" to confirm:",
-  "settingsPrivacyOfflineDesc": "All processing happens on your device. No internet required.",
-  "settingsPrivacyLocalStorageDesc": "Your documents stay on your device. Nothing is uploaded.",
-  "settingsPrivacyOnDeviceDesc": "Uses OpenCV + Tesseract for OCR. AI runs locally.",
-  "settingsPrivacyOpenSourceDesc": "Code is public. Audit it yourself on GitHub.",
-  "settingsPrivacyNoAdsDesc": "No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.",
-  "settingsOpenInBrowser": "Open in Browser",
-  "viewerFindHint": "Find...",
-  "viewerTypeToFind": "Type to find",
-  "viewerSidebarPages": "Pages",
-  "viewerSidebarSearch": "Search",
-  "viewerSidebarTOC": "TOC",
-  "viewerSidebarNotes": "Notes",
-  "viewerSidebarBookmarks": "Bookmarks",
-  "viewerSidebarNotesDesc": "Add notes and annotations to PDF pages",
-  "viewerSidebarBookmarksDesc": "Save and organize your favorite pages",
-  "viewerCellCopied": "Cell {value} copied",
-  "viewerGoToPage": "Go to Page",
-  "viewerGoToPageHint": "Enter page number (1-{totalPages})",
-  "viewerGo": "Go",
-  "viewerInvalidPage": "Please enter a number between 1 and {totalPages}",
-  "viewerNoContent": "No content",
-  "viewerResetZoom": "Reset zoom",
-  "viewerCopyTextTitle": "Copy Text",
-  "viewerCopyTextChoose": "Choose what to copy:",
-  "viewerCopyPageOnly": "Page {page} only",
-  "viewerCopyAllPages": "All {totalPages} pages",
-  "viewerExtractingText": "Extracting text from {label}...",
-  "viewerNoTextFound": "No text content found",
-  "viewerPageLabel": "Page {currentPage}",
-  "viewerAllPagesLabel": "{totalPages} pages",
-  "viewerTextExtracted": "Text extracted from {pageLabel}.",
-  "viewerWordsFound": "{count} words found",
-  "viewerCopiedWords": "Copied {count} words from {pageLabel}",
-  "viewerCopyAllTextTitle": "Copy All Text",
-  "viewerCopyAllTextConfirm": "This will extract text from all {pageCount} pages and copy to clipboard.",
-  "viewerCopiedAllPages": "Copied {count} words from {pageCount} pages",
-  "viewerCopyDocumentText": "This will copy the entire document content to clipboard.",
-  "viewerWordsLines": "{words} words, {lines} lines",
-  "viewerWordsOnly": "{count} words",
-  "viewerLinesOnly": "{lines} lines",
-  "viewerCopiedFromLines": "Copied {words} words from {lines} lines",
-  "viewerCharactersCount": "{count} characters",
-  "viewerCopyExtractedTitle": "Copy Extracted Text",
-  "viewerCopyExtractedDesc": "Copy text extracted from this image via OCR.",
-  "viewerCopiedWordsChars": "Copied {words} words ({chars} characters)",
-  "viewerErrorAccessText": "Error accessing extracted text",
-  "viewerNoTextForImage": "No extracted text available for this image",
-  "viewerExtractingAllPages": "Extracting text from all pages...",
-  "viewerTextExtractionUnavailable": "Text extraction not available",
-  "viewerNoPdfText": "No text found in this PDF",
-  "viewerNoTextAvailable": "No text content available",
-  "viewerReadingTime": "{minutes} min read",
-  "viewerReadingTimeSingle": "1 min read",
-  "viewerCopy": "Copy",
-  "viewerErrorPrefix": "Error: {error}",
-  "viewerCellValue": "Cell {cell}",
-  "viewerLowerPageLabel": "page {page}",
-  "viewerAllPagesLower": "all pages",
-  "viewerCopied": "Copied",
-  "viewerCopyValue": "Copy value",
-  "viewerToggleFullscreen": "Toggle fullscreen",
-  "viewerInvert": "Invert",
-  "viewerText": "Text",
-  "viewerSyntax": "Syntax",
-  "viewerFont": "Font",
-  "viewerFontStyle": "Font Style",
-  "viewerMonospaceCourier": "Monospace (Courier)",
-  "viewerSystemUbuntu": "System (Ubuntu)",
-  "viewerEdit": "Edit",
-  "viewerEditWithEngine": "Edit with Fadocx Engine",
-  "viewerEditWithEngineDesc": "Open this spreadsheet in the Fadocx rendering engine for a faithful visual preview with full formatting, charts, and layout fidelity.",
-  "viewerEditWithEngineNote": "Note: Interactive editing is coming in a future update.",
-  "viewerNotNow": "Not Now",
-  "viewerGotIt": "Got It",
-  "viewerErrorLoadingDocument": "Error loading document",
-  "viewerGoBack": "Go Back",
-  "viewerReadingTimeMinutes": "{count, plural, =1{1 minute read} other{{count} minutes read}}",
-  "viewerReadingTimeHoursMinutes": "{hours}h {minutes}m read",
-  "linkTileCopiedToClipboard": "Copied to clipboard",
-  "linkTileCouldNotOpen": "Could not open {value}",
-  "librarySortBy": "Sort by",
-  "librarySortLatest": "Latest",
-  "librarySortOldest": "Oldest",
-  "librarySortLargest": "Largest",
-  "librarySortSmallest": "Smallest",
-  "homeDeleteFile": "Delete file?",
-  "homeDeleteFileConfirm": "Move \"{name}\" to trash? You can restore it later.",
-  "homeCopiedCharactersToClipboard": "Copied {count} characters to clipboard",
+  "scannerCopyAll": "すべてコピー",
+  "scannerNewScan": "新しいスキャン",
+  "linkTileCopy": "コピー",
+  "linkTileCopiedToClipboard": "クリップボードにコピーしました",
+  "linkTileSendEmail": "メールを送信",
+  "linkTileOpenInBrowser": "ブラウザで開く",
+  "linkTileCouldNotOpen": "{value} を開けませんでした",
+  "@linkTileCouldNotOpen": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySortBy": "でソート",
+  "librarySortLatest": "最新",
+  "librarySortOldest": "古い順",
+  "librarySortLargest": "大きい順",
+  "librarySortSmallest": "小さい順",
+  "homeDeleteFile": "ファイルを削除しますか?",
+  "homeDeleteFileConfirm": "\"{name}\"をゴミ箱に移動しますか?後で復元できます。",
+  "@homeDeleteFileConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCopiedCharactersToClipboard": "{count}文字をクリップボードにコピーしました",
+  "@homeCopiedCharactersToClipboard": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "homeFileInTrashDetail": "ゴミ箱内: はい (削除日: {date})",
-  "homeUnknown": "unknown",
+  "@homeFileInTrashDetail": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeUnknown": "不明",
+  "routeNotFound": "ルートが見つかりません: {path}",
+  "@routeNotFound": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "routeGoHome": "ホームへ戻る",
+  "routeInvalidDocumentPath": "無効なドキュメントパス",
+  "pdfCopyTextTitle": "PDFテキストをコピー",
+  "pdfExtractingText": "テキストを抽出中...",
+  "pdfExtractingTextProgress": "テキストを抽出中（{current}/{total} ページ）...",
+  "@pdfExtractingTextProgress": {
+    "placeholders": {
+      "current": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfErrorExtractingText": "テキスト抽出エラー",
+  "pdfWordCount": "単語数: {count}",
+  "@pdfWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfNoTextFound": "PDFにテキストが見つかりませんでした",
+  "pdfFullTextCopied": "PDFの全テキストをクリップボードにコピーしました",
+  "pdfPasswordRequired": "PDFパスワードが必要です",
+  "pdfPasswordDesc": "このPDFはパスワードで保護されています。パスワードを入力していただけますか？",
+  "pdfPasswordLabel": "パスワード",
+  "pdfUnlock": "ロック記解除",
+  "pdfSearchHint": "PDFを検索...",
+  "pdfTextCannotBeExtracted": "このページからテキストを抽出できません",
+  "pdfLoadingPageTexts": "ページのテキストを読み込み中...",
+  "pdfPageCopied": "{page}ページのテキストをクリップボードにコピーしました",
+  "@pdfPageCopied": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTooltipSidebar": "サイドバー",
+  "viewerTooltipFirst": "最初",
+  "viewerTooltipLast": "最後",
+  "viewerTooltipCopyPageText": "ページのテキストをコピー",
+  "textDocSearchHint": "テキストを検索...",
+  "textDocSearchPrevResult": "前の結果",
+  "textDocSearchNextResult": "次の結果",
+  "imageFailedToLoad": "画像の読み込みに失敗しました",
+  "mediaLoading": "メディアを読み込み中...",
+  "mediaFailedToPlay": "メディアを再生できませんでした",
+  "mediaPlay": "再生",
+  "audioPlaybackNote": "音声の再生には追加のライブラリが必要です。",
+  "sheetNoData": "{sheetName} にデータがありません",
+  "@sheetNoData": {
+    "placeholders": {
+      "sheetName": {
+        "type": "String"
+      }
+    }
+  },
+  "documentNoSheets": "{format} にシートが見つかりません",
+  "@documentNoSheets": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerPlaybackSpeed": "再生速度",
+  "urlCopiedToClipboard": "URLをクリップボードにコピーしました: {url}",
+  "@urlCopiedToClipboard": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "lokitPreparingDoc": "ドキュメントを準備中...",
+  "lokitWarmingUp": "Fadocx エンジンを起動中...",
+  "lokitAlmostThere": "もう少し",
+  "lokitJustAMoment": "少々お待ちください",
+  "lokitFailedToRender": "ドキュメントの表示に失敗しました",
   "drawerFadSecLab": "FadSec Lab"
 }

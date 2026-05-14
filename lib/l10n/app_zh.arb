@@ -2,6 +2,21 @@
   "@@locale": "zh",
   "@@author": "FadSec Lab",
   "appName": "Fadocx",
+  "appDescription": "文档查看器",
+  "homeTitle": "Fadocx",
+  "recentFiles": "最近文件",
+  "noRecentFiles": "暂无最近文件。打开一个文档开始使用。",
+  "openFile": "打开文件",
+  "openFileTooltip": "浏览并打开文档",
+  "pdfFile": "PDF 文件",
+  "docxFile": "Word 文档",
+  "xlsxFile": "Excel 电子表格",
+  "csvFile": "CSV 文件",
+  "unknownFile": "未知文件",
+  "page": "页面",
+  "pageOf": "的",
+  "jumpToPage": "跳转到页面",
+  "sheet": "工作表",
   "ok": "确认",
   "cancel": "取消",
   "delete": "删除",
@@ -22,10 +37,11 @@
   "error": "错误",
   "warning": "警告",
   "success": "成功",
-  "loadingDocument": "加载文档中...",
   "unsupportedFileType": "不支持的文件格式",
   "fileNotFound": "未找到文件",
   "permissionDenied": "权限被拒绝",
+  "corruptedFile": "文件似乎已损坏",
+  "loadingDocument": "加载文档中...",
   "settingsTitle": "设置",
   "theme": "主题",
   "themeDark": "深色",
@@ -43,47 +59,59 @@
   "languageGerman": "德语",
   "languagePortuguese": "葡萄牙语",
   "languageHindi": "印地语",
+  "appVersion": "App Version",
+  "clearRecentFiles": "清除最近的文件",
+  "backButton": "返回",
+  "emptyTitle": "无文档",
+  "emptyMessage": "从您的设备中打开文档开始",
+  "startBrowsing": "开始浏览",
+  "languageChanged": "语言已更改为中文",
+  "privacyDescription": "Fadocx 是一款文档查看器。您的文件会本地保存在设备上，绝不会传输到任何服务器。",
+  "aboutDescription": "Fadocx v1.0.0 - 您的私人文档查看器。以尊重您的隐私为原则构建。",
+  "tableRows": "行",
+  "tableEmpty": "没有要显示的数据",
+  "tableNoContent": "工作表为空",
+  "sheetEmpty": "工作表为空",
+  "noTableData": "没有表格数据",
+  "noSpreadsheetData": "没有电子表格数据",
+  "rowsSymbol": "行",
+  "colsSymbol": "列",
+  "noSlidesFound": "未找到幻灯片",
+  "slidesCount": "幻灯片",
+  "pptUnsupported": "PPT 文件已解析，但不包含幻灯片",
+  "odpUnsupported": "ODP 文件已解析，但不包含幻灯片或可读内容",
+  "noTextContent": "未找到文本内容",
+  "couldNotParse": "无法解析文件",
+  "file": "文件",
+  "slides": "幻灯片",
+  "previewNotSupported": "尚不支持预览",
+  "openWithSystemApp": "使用系统应用打开",
+  "systemAppNotImplemented": "尚未实现使用系统应用打开",
+  "type": "类型",
+  "fileNotFoundMessage": "找不到文件",
+  "fileTooLarge": "文件大小超过最大限制 (100MB)",
+  "errorLoadingFile": "加载文件时出错",
+  "docxPreviewNotSupported": "DOCX 预览尚不完全支持",
+  "docParseError": "无法解析 DOC 文件。尝试转换为 DOCX。",
+  "xlsxParseError": "无法解析 XLSX 文件",
+  "xlsParseError": "无法解析 XLS 文件。请尝试转换为 XLSX。",
+  "csvParseError": "无法解析 CSV 文件",
+  "odtParseError": "无法解析 ODT 文件",
+  "odsParseError": "无法解析 ODS 文件",
+  "odpParseError": "无法解析 ODP 文件",
+  "pptParseError": "无法解析 PPT 文件",
+  "rtfParseError": "无法解析 RTF 文件",
+  "txtFileEmpty": "文件为空",
+  "unsupportedFormat": "尚不支持此文件格式",
+  "txtLoaded": "TXT",
+  "charactersLoaded": "个字符",
+  "copiedToClipboard": "已复制到剪贴板",
   "navHome": "主页",
   "navLibrary": "文库",
   "navSettings": "设置",
   "navRecents": "最近",
-  "onboardingSkip": "跳过",
-  "onboardingNext": "下一步",
-  "onboardingGetStarted": "开始使用",
-  "onboardingSlide1Title": "欢迎使用 Fadocx",
-  "onboardingSlide1Tagline": "您的一体化私人文档伴侣",
-  "onboardingSlide1Bullet1": "支持所有格式 — PDF、Office 文件、图片等更多",
-  "onboardingSlide1Bullet2": "私密存储，隐藏于相册和文件管理器之外",
-  "onboardingSlide1Bullet3": "免费开源 — 无需账号或注册",
-  "onboardingSlide2Title": "内置强大工具",
-  "onboardingSlide2Bullet1": "用相机扫描纸质文档 — 即时提取文字",
-  "onboardingSlide2Bullet2": "直接在应用内播放音频和视频，无需额外应用",
-  "onboardingSlide2Bullet3": "导入时自动按类别排序",
-  "onboardingSlide2Bullet4": "安全删除 — 随时从回收站恢复",
-  "onboardingSlide3Title": "隐私设计",
-  "onboardingSlide3Bullet1": "任何数据都不会离开您的设备 — 无云端，无服务器",
-  "onboardingSlide3Bullet2": "无跟踪，无广告，无分析。永远如此。",
-  "onboardingSlide3Bullet3": "开源 — 每行代码均公开",
-  "homeTitle": "Fadocx",
-  "recentFiles": "最近文件",
-  "noRecentFiles": "暂无最近文件。打开一个文档开始使用。",
-  "homeWelcomeTitle": "欢迎使用 Fadocx",
-  "homeWelcomeSubtitle": "浏览示例文件或导入您自己的文档以开始使用",
-  "homeExploreSamples": "浏览示例文件",
-  "homeScanDocument": "扫描文档",
-  "homeScanDocumentDesc": "使用 OCR 从文档中提取文本",
-  "homeImportDocument": "导入文档",
-  "homeImportDocumentDesc": "浏览并导入设备中的文件",
-  "homeSeeAll": "查看全部",
-  "homeNoRecentFiles": "暂无最近文件",
-  "homePressBackExit": "再按一次退出",
-  "libraryTitle": "文库",
-  "librarySearchHint": "搜索文库...",
-  "libraryNoDocuments": "暂无文档",
-  "libraryAdjustSearch": "请尝试调整搜索或筛选条件",
-  "libraryDocumentsAppearHere": "您的文档将显示在这里",
   "categoryAll": "全部",
-  "categoryPdfs": "PDF",
+  "categoryPdfs": "PDF 文件",
   "categoryDocs": "文档",
   "categorySheets": "表格",
   "categorySlides": "幻灯片",
@@ -91,98 +119,64 @@
   "categoryScans": "扫描",
   "categoryOther": "其他",
   "categoryPresentations": "演示文稿",
-  "settingsAppearance": "外观",
-  "settingsStorage": "存储",
-  "settingsUpdates": "更新",
-  "settingsAbout": "关于",
-  "settingsVersion": "版本",
-  "settingsDangerZone": "危险区域",
-  "settingsTrash": "回收站",
-  "settingsTrashDesc": "查看已删除的文件",
-  "settingsEnabled": "已启用",
-  "settingsDisabled": "已禁用",
-  "settingsChooseTheme": "选择主题",
-  "settingsSelectLanguage": "选择语言",
-  "settingsReplayOnboarding": "重播引导页",
-  "settingsReplayOnboardingDesc": "在下次启动时显示介绍幻灯片",
-  "settingsResetSettings": "重置设置",
-  "settingsResetSettingsDesc": "将所有设置恢复为默认值",
-  "settingsResetDone": "设置已重置",
-  "settingsAutoUpdateCheck": "自动检查更新",
-  "settingsCheckForUpdates": "检查更新",
-  "settingsSourceCode": "源代码",
-  "settingsContact": "联系我们",
-  "settingsPrivacyPolicy": "隐私政策",
-  "trashTitle": "回收站",
-  "trashEmpty": "回收站为空",
-  "trashEmptySubtitle": "已删除的文件将显示在此处",
-  "trashDeletePermanently": "永久删除",
-  "scannerTitle": "文档扫描仪",
-  "scannerCapture": "拍摄",
-  "scannerProcessing": "处理中",
-  "scannerResults": "结果",
-  "scannerCopyAll": "全部复制",
-  "scannerNewScan": "新建扫描",
-  "whatsNewTitle": "最新动态",
-  "linkTileCopy": "复制",
-  "linkTileSendEmail": "发送邮件",
-  "linkTileOpenInBrowser": "在浏览器中打开",
-  "confirm": "确认",
-  "openInBrowser": "在浏览器中打开",
-  "comingSoon": "即将推出",
-  "routeNotFound": "未找到路由：{path}",
-  "routeGoHome": "返回主页",
-  "routeInvalidDocumentPath": "无效的文档路径",
-  "pdfCopyTextTitle": "复制PDF文本",
-  "pdfExtractingText": "正在提取文本...",
-  "pdfExtractingTextProgress": "正在提取文本（{current}/{total} 页）...",
-  "pdfErrorExtractingText": "提取文本时出错",
-  "pdfWordCount": "字数：{count}",
-  "pdfNoTextFound": "PDF中未找到文本",
-  "pdfFullTextCopied": "已将完整PDF文本复制到剪贴板",
-  "pdfPasswordRequired": "需要PDF密码",
-  "pdfPasswordDesc": "此PDF受密码保护，请输入密码以解锁。",
-  "pdfPasswordLabel": "密码",
-  "pdfUnlock": "解锁",
-  "pdfSearchHint": "搜索PDF...",
-  "pdfTextCannotBeExtracted": "无法从此页提取文本",
-  "pdfLoadingPageTexts": "正在加载页面文本...",
-  "pdfPageCopied": "第{page}页文本已复制到剪贴板",
-  "viewerTooltipSidebar": "侧边栏",
-  "viewerTooltipFirst": "第一页",
-  "viewerTooltipLast": "最后一页",
-  "viewerTooltipCopyPageText": "复制页面文本",
-  "textDocSearchHint": "搜索文本...",
-  "textDocSearchPrevResult": "上一个结果",
-  "textDocSearchNextResult": "下一个结果",
-  "imageFailedToLoad": "加载图片失败",
-  "mediaLoading": "正在加载媒体...",
-  "mediaFailedToPlay": "播放媒体失败",
-  "mediaPlay": "播放",
-  "audioPlaybackNote": "音频播放需要额外的库。",
-  "sheetNoData": "{sheetName} 中没有数据",
-  "documentNoSheets": "{format} 中未找到工作表",
-  "viewerPlaybackSpeed": "播放速度",
-  "urlCopiedToClipboard": "URL已复制到剪贴板：{url}",
-  "lokitPreparingDoc": "正在准备您的文档...",
-  "lokitWarmingUp": "正在启动 Fadocx 引擎...",
-  "lokitAlmostThere": "即将完成",
-  "lokitJustAMoment": "请稍候",
-  "lokitFailedToRender": "文档渲染失败",
-  "trashSelect": "选择",
-  "copiedToClipboard": "已复制到剪贴板",
   "supportDevelopment": "支持开发",
   "visitPatreon": "访问 Patreon",
   "copyLink": "复制链接",
+  "becomeAPatron": "成为赞助者",
   "patreonDescription": "你的支持能帮助 Fadocx 和 FadCam 持续成长。Patreon 订阅者可解锁专属福利，包括高级功能以及 FadSec Lab 全部应用的抢先体验。\n\n想了解更多，请通过下方链接访问 Patreon，并查看可用档位及其福利。",
   "discordTitle": "加入我们的 Discord",
+  "openInBrowser": "在浏览器中打开",
+  "comingSoon": "即将推出",
+  "newBadge": "新",
   "timeAgoJustNow": "刚刚",
   "timeAgoMinute": "{count, plural, =1{1 分钟前} other{{count} 分钟前}}",
+  "@timeAgoMinute": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoHour": "{count, plural, =1{1 小时前} other{{count} 小时前}}",
+  "@timeAgoHour": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoDay": "{count, plural, =1{1 天前} other{{count} 天前}}",
+  "@timeAgoDay": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoWeek": "{count, plural, =1{1 周前} other{{count} 周前}}",
+  "@timeAgoWeek": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoMonth": "{count, plural, =1{1 个月前} other{{count} 个月前}}",
+  "@timeAgoMonth": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoYear": "{count, plural, =1{1 年前} other{{count} 年前}}",
+  "@timeAgoYear": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "monthJan": "1月",
   "monthFeb": "2月",
   "monthMar": "3月",
@@ -195,30 +189,207 @@
   "monthOct": "10月",
   "monthNov": "11月",
   "monthDec": "12月",
+  "homeWelcomeTitle": "欢迎使用 Fadocx",
+  "homeWelcomeSubtitle": "浏览示例文件或导入您自己的文档以开始使用",
+  "homeExploreSamples": "浏览示例文件",
+  "homeDocumentManagement": "文档管理",
+  "homeSeeAll": "查看全部",
+  "homeNoRecentFiles": "暂无最近文件",
+  "homeScanDocument": "扫描文档",
+  "homeScanDocumentDesc": "使用 OCR 从文档中提取文本",
+  "homeImportDocument": "导入文档",
+  "homeImportDocumentDesc": "浏览并导入设备中的文件",
+  "onboardingSkip": "跳过",
+  "onboardingNext": "下一步",
+  "onboardingGetStarted": "开始使用",
+  "onboardingSlide1Title": "欢迎使用 Fadocx",
+  "onboardingSlide1Tagline": "您的一体化私人文档伴侣",
+  "onboardingSlide1Bullet1": "私人文档查看器",
+  "onboardingSlide1Bullet2": "无跟踪或数据",
+  "onboardingSlide1Bullet3": "开源",
+  "onboardingSlide2Title": "格式支持",
+  "onboardingSlide2Bullet1": "PDF、DOCX、XLSX、CSV、PPT",
+  "onboardingSlide2Bullet2": "文本、图像和 OCR 识别",
+  "onboardingSlide2Bullet3": "导入和比较",
+  "onboardingSlide2Bullet4": "多语言支持",
+  "onboardingSlide3Title": "准备好开始了吗?",
+  "onboardingSlide3Bullet1": "从您的设备打开文档",
+  "onboardingSlide3Bullet2": "或选择示例进行测试",
+  "onboardingSlide3Bullet3": "在设置中了解更多",
   "homeStatDocuments": "文档",
   "homeStatStorage": "存储",
   "homeStatTimeRead": "阅读时长",
   "homeStatLastOpened": "最后打开: ",
-  "settingsDocumentsSize": "文档大小",
-  "settingsCalculating": "计算中...",
-  "settingsCustomStorage": "自定义存储",
-  "settingsAppLock": "应用锁",
-  "settingsJoinCommunity": "加入社区",
-  "settingsMoreFromFadsec": "来自 FadSec Lab 的更多应用",
-  "settingsCopiedInfo": "已复制到剪贴板",
-  "settingsCopyInfo": "复制信息",
-  "settingsVersionClipboardInfo": "{appName} v{version}（构建 {buildNumber}）\n包名：{packageName}",
-  "settingsShareApp": "分享给朋友",
-  "settingsShareMessage": "来看看 Fadocx！\n\n一体化文档查看器：支持 PDF、Office、电子表格、演示文稿、代码文件和 OCR 文本提取，完全离线、无跟踪、开源。\n\nhttps://github.com/anonfaded/Fadocx",
-  "settingsShareVia": "通过以下方式分享...",
-  "settingsShareWhatsApp": "WhatsApp",
-  "settingsWhatsAppNotInstalled": "此设备未安装 WhatsApp",
-  "settingsSecurity": "安全",
-  "settingsFadcamDesc": "注重隐私的 Android 多媒体套件：后台录像、行车记录仪、录屏、直播与远程控制，无广告且开源。",
-  "settingsQuranCliDesc": "你的《古兰经》终端伙伴：阅读、聆听，并为视频剪辑生成字幕！",
-  "settingsFadcryptDesc": "高级且优雅的跨平台应用锁工具，文件、文件夹和应用全部采用军用级 AES-256-GCM 加密保护。开源、完全免费、无遥测！",
-  "settingsFadcatDesc": "轻量、功能丰富、跨平台的 Android logcat 替代工具，无需臃肿的 Android Studio。内置适配架构的 ADB，可运行于 GUI、CLI 或 MCP 服务器模式。",
-  "settingsMacosComingSoon": "macOS 即将推出",
+  "homePressBackExit": "再按一次退出",
+  "homeImportingSamples": "正在导入示例文件…",
+  "homeSamplesImported": "{count, plural, =1{已成功导入 1 个示例文件!} other{已成功导入 {count} 个示例文件!}}",
+  "@homeSamplesImported": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "homeViewFiles": "查看文件",
+  "homeFailedImportSamples": "导入示例文件失败: {error}",
+  "@homeFailedImportSamples": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileMovedToTrash": "{name} 已移至垃圾箱",
+  "@homeFileMovedToTrash": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileInfo": "文件信息",
+  "homeFileName": "名称",
+  "homeFileType": "类型",
+  "homeFileSize": "大小",
+  "homeFileLocation": "位置",
+  "homeFileDateOpened": "打开日期",
+  "homeFileLastModified": "最后修改",
+  "homeFileInTrash": "在回收站中",
+  "homeFileInfoCopied": "文件信息已复制",
+  "homeCopySuffix": "（副本）",
+  "homeCopySuffixCounter": "（副本 {counter}）",
+  "@homeCopySuffixCounter": {
+    "placeholders": {
+      "counter": {
+        "type": "num"
+      }
+    }
+  },
+  "homeDuplicatedAs": "复制为 {name}",
+  "@homeDuplicatedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedDuplicate": "文件复制失败: {error}",
+  "@homeFailedDuplicate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRenameFile": "重命名文件",
+  "homeFileNameLabel": "文件名",
+  "homeFileAlreadyExists": "已存在同名文件",
+  "homeRenamedTo": "已重命名为 {name}",
+  "@homeRenamedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedRename": "重命名失败",
+  "homeExport": "导出",
+  "homeSaveToDownloads": "保存到下载",
+  "homeSaveToDownloadsPath": "下载/Fadocx/{name}",
+  "@homeSaveToDownloadsPath": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeChooseLocation": "选择位置",
+  "homeChooseLocationDesc": "选择自定义保存目录",
+  "homeSavedToDownloads": "已保存至 下载/Fadocx/{name}",
+  "@homeSavedToDownloads": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSavedTo": "已保存至 {path}",
+  "@homeSavedTo": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedExport": "文件导出失败",
+  "homeChooseSaveLocation": "选择保存位置",
+  "homeConvertComingSoon": "转换功能即将推出!",
+  "homeFadDriveComingSoon": "FadDrive 即将推出！",
+  "homePresentationsTooltip": "即将推出",
+  "homeErrorPrefix": "错误: {error}",
+  "@homeErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryTitle": "文库",
+  "librarySearchHint": "搜索文库...",
+  "librarySelected": "已选择 {count} 项",
+  "@librarySelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeleteSelected": "删除所选项？",
+  "libraryDeleteConfirm": "将 {count} 个文件移至垃圾箱？您稍后可以恢复。",
+  "@libraryDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryItemsMovedToTrash": "已将 {count} 项移至垃圾箱",
+  "@libraryItemsMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryErrorLoading": "加载资料库出错：{error}",
+  "@libraryErrorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryItemCount": "{count} 项",
+  "@libraryItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeselectAll": "取消全选",
+  "librarySelectAll": "全选",
+  "libraryNoCategoryFound": "未找到 {category}",
+  "@libraryNoCategoryFound": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryNoDocuments": "暂无文档",
+  "libraryAdjustSearch": "请尝试调整搜索或筛选条件",
+  "libraryDocumentsAppearHere": "您的文档将显示在这里",
   "browseTitle": "导入文档",
   "browseBack": "返回",
   "browseSearchHint": "搜索文档...",
@@ -240,14 +411,71 @@
   "browseOpenSettings": "打开设置",
   "browseAccessStillDisabled": "所有文件访问权限仍未启用。请在设置中启用后继续。",
   "browseNoDirectories": "设备上未找到文档目录",
-  "browseErrorPrefix": "错误：{error}",
+  "browseErrorPrefix": "导入错误: {error}",
+  "@browseErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "browseSortBy": "排序方式",
   "browseImportedFiles": "{count, plural, =1{已导入 1 个文件} other{已导入 {count} 个文件}}",
+  "@browseImportedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashTitle": "回收站",
+  "trashEmpty": "回收站为空",
+  "trashEmptySubtitle": "已删除的文件将显示在此处",
+  "trashErrorLoading": "加载垃圾箱时出错",
+  "trashFilesSelected": "已选择 {count} 个",
+  "@trashFilesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashFilesLabel": "文件",
+  "trashSelect": "选择",
+  "trashFileRestored": "文件已成功恢复",
+  "trashDeletePermanently": "永久删除",
+  "trashDeletePermanentlyConfirm": "永久删除?",
+  "trashDeletePermanentlyMessage": "您即将永久删除 {count} 个文件。此操作无法撤销。",
+  "@trashDeletePermanentlyMessage": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashDeleteTypeConfirm": "输入 DELETE (大写) 以确认:",
+  "trashDeleteHint": "DELETE",
+  "trashFilesPermanentlyDeleted": "{count} 个文件已永久删除",
+  "@trashFilesPermanentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "whatsNewTitle": "最新动态",
   "whatsNewWhatsIncluded": "包含内容",
   "whatsNewPlanned": "计划中",
   "whatsNewReleasedToday": "今天发布",
   "whatsNewReleasedYesterday": "昨天发布",
   "whatsNewReleasedDate": "发布于 {date}",
+  "@whatsNewReleasedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "whatsNewDocAndSheets": "文档与电子表格",
   "whatsNewDocAndSheetsDesc": "查看 PDF、Word 文档、Excel 表格等内容，全部本地处理，保存在你的设备上。",
   "whatsNewOcrAi": "智能 OCR 与本地 AI",
@@ -262,7 +490,7 @@
   "whatsNewFileManagementDesc": "轻松重命名、复制、导出和删除文档。",
   "whatsNewThemes": "浅色与深色主题",
   "whatsNewThemesDesc": "选择适合你的外观：夜晚用深色模式，白天用浅色模式。",
-  "whatsNewFadDrive": "FadDrive",
+  "whatsNewFadDrive": "FadDrive 集成",
   "whatsNewFadDriveDesc": "为你的文档提供云同步，随时随地访问。",
   "whatsNewEditing": "文档编辑",
   "whatsNewEditingDesc": "直接在 Fadocx 中快速编辑你的文档。",
@@ -296,13 +524,469 @@
   "fileActionUploadDesc": "同步到云存储",
   "fileActionFileInfo": "文件信息",
   "fileActionSubtitle": "文件操作与管理",
+  "updateAvailableTitle": "有可用更新",
+  "updateAvailableSubtitle": "Fadocx的新版本已准备好下载",
+  "updateStableRelease": "稳定版",
+  "updateStableDesc": "用于生产环境的稳定且经过测试的版本",
+  "updateBetaRelease": "测试版",
+  "updateBetaDesc": "新功能的早期访问权限，可能包含缺陷",
+  "updateMaybeLater": "稍后再说",
+  "updateCurrent": "当前",
+  "updateNew": "新",
+  "updateVisitGithub": "访问 GitHub",
+  "updateBetaInfo": "Fadocx 测试版是一个独立应用，可以与稳定版同时安装。它不会影响您的稳定版应用或其数据。\n\n安装测试版可在新功能进入稳定版前进行试用。",
+  "updateBannerStable": "稳定更新",
+  "updateBannerBeta": "测试版更新",
+  "settingsAppearance": "外观",
+  "settingsStorage": "存储",
+  "settingsDocumentsSize": "文档大小",
+  "settingsCalculating": "计算中...",
+  "settingsCustomStorage": "自定义存储",
+  "settingsUnknown": "未知",
+  "settingsStorageDetails": "存储",
+  "settingsStoragePdfs": "PDF 文件",
+  "settingsStorageDocs": "文档",
+  "settingsStorageSheets": "表格",
+  "settingsStoragePresentations": "演示文稿",
+  "settingsStorageCode": "代码",
+  "settingsStorageScans": "扫描件",
+  "settingsStorageImages": "图片",
+  "settingsStorageOther": "其他",
+  "settingsStorageInfo": "文档存储在设备上的私有文件夹中，其他应用无法访问",
+  "settingsStoragePrivateFolderInfo": "文档存储在私有文件夹中，对其他应用和文件管理器隐藏。只有 Fadocx 可以访问。",
+  "settingsStorageDeleteInfo": "请在设置中的危险区域删除文档",
+  "settingsStorageEmpty": "没有文档",
+  "settingsStorageFailedLoad": "加载存储数据失败",
+  "settingsUpdates": "更新",
+  "settingsAutoUpdateCheck": "自动检查更新",
+  "settingsReplayOnboarding": "重播引导页",
+  "settingsReplayOnboardingDesc": "在下次启动时显示介绍幻灯片",
+  "settingsEnabled": "已启用",
+  "settingsDisabled": "已禁用",
+  "settingsAppLock": "应用锁",
+  "settingsAbout": "关于",
+  "settingsVersion": "版本",
+  "settingsSourceCode": "源代码",
+  "settingsContact": "联系我们",
+  "settingsJoinCommunity": "加入社区",
+  "settingsPrivacyPolicy": "隐私政策",
+  "settingsMoreFromFadsec": "来自 FadSec Lab 的更多应用",
+  "settingsFadocxDesc": "您的文档查看器",
+  "settingsDangerZone": "危险区域",
+  "settingsTrash": "回收站",
+  "settingsTrashDesc": "查看已删除的文件",
+  "settingsResetSettings": "重置设置",
+  "settingsResetSettingsDesc": "将所有设置恢复为默认值",
+  "settingsResetDone": "设置已重置",
+  "settingsRetry": "重试",
+  "settingsChooseTheme": "选择主题",
+  "settingsSelectLanguage": "选择语言",
+  "settingsCheckForUpdates": "检查更新",
+  "settingsCheckingUpdates": "正在检查更新…",
+  "settingsNoInternet": "无互联网连接。请检查您的网络并重试。",
+  "settingsUpToDate": "您已是最新版本",
+  "settingsUpToDateDesc": "v{version} 是最新版本。",
+  "@settingsUpToDateDesc": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBetaAvailable": "测试版 v{version} 可用",
+  "@settingsBetaAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVersionWithBuild": "版本 {version} (构建 {buildNumber})",
+  "@settingsVersionWithBuild": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedInfo": "已复制到剪贴板",
+  "settingsCopyInfo": "复制信息",
+  "settingsVersionClipboardInfo": "{appName} v{version}（构建 {buildNumber}）\n包名：{packageName}",
+  "@settingsVersionClipboardInfo": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      },
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsShareApp": "分享给朋友",
+  "settingsShareMessage": "来看看 Fadocx！\n\n一体化文档查看器：支持 PDF、Office、电子表格、演示文稿、代码文件和 OCR 文本提取，完全离线、无跟踪、开源。\n\nhttps://github.com/anonfaded/Fadocx",
+  "settingsShareVia": "通过以下方式分享...",
+  "settingsShareWhatsApp": "WhatsApp",
+  "settingsWhatsAppNotInstalled": "此设备未安装 WhatsApp",
+  "settingsPrivacyOffline": "100% 离线",
+  "settingsPrivacyLocalStorage": "仅本地存储",
+  "settingsPrivacyOnDevice": "设备端 AI",
+  "settingsPrivacyOpenSource": "开源",
+  "settingsPrivacyNoAds": "无广告",
+  "settingsPrivacyByDesign": "我们相信隐私保护应从设计开始。",
+  "settingsPrivacyTransparency": "Fadocx 以透明的原则构建。您的文档是您的 – 不是我们的。",
+  "settingsViewSourceCode": "查看源代码",
+  "settingsSecurity": "安全",
+  "settingsStorageFilesSummary": "{size} • {count} 个文件",
+  "@settingsStorageFilesSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "settingsErrorPrefix": "错误: {error}",
+  "@settingsErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedText": "已复制: {text}",
+  "@settingsCopiedText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVisitGithub": "访问 GitHub",
+  "settingsMadeWith": "由…制作",
+  "settingsAt": "在",
+  "settingsIn": "在",
+  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
+  "settingsTypeToConfirm": "输入 \"{text}\" 以确认:",
+  "@settingsTypeToConfirm": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "确认",
+  "settingsPrivacyOfflineDesc": "所有处理都在您的设备上进行。不需要互联网。",
+  "settingsPrivacyLocalStorageDesc": "您的文档保留在您的设备上。不上传任何内容。",
+  "settingsPrivacyOnDeviceDesc": "使用 OpenCV + Tesseract 进行 OCR。AI 在本地运行。",
+  "settingsPrivacyOpenSourceDesc": "代码是公开的。自己在 GitHub 上验证。",
+  "settingsPrivacyNoAdsDesc": "无广告。无跟踪。无分析。无崩溃日志。零遥测。",
+  "settingsFadcamDesc": "注重隐私的 Android 多媒体套件：后台录像、行车记录仪、录屏、直播与远程控制，无广告且开源。",
+  "settingsQuranCliDesc": "你的《古兰经》终端伙伴：阅读、聆听，并为视频剪辑生成字幕！",
+  "settingsFadcryptDesc": "高级且优雅的跨平台应用锁工具，文件、文件夹和应用全部采用军用级 AES-256-GCM 加密保护。开源、完全免费、无遥测！",
+  "settingsFadcatDesc": "轻量、功能丰富、跨平台的 Android logcat 替代工具，无需臃肿的 Android Studio。内置适配架构的 ADB，可运行于 GUI、CLI 或 MCP 服务器模式。",
+  "settingsMacosComingSoon": "macOS 即将推出",
+  "settingsOpenInBrowser": "在浏览器中打开",
+  "viewerFindHint": "查找...",
+  "viewerTypeToFind": "输入以查找",
+  "viewerSidebarPages": "页面",
+  "viewerSidebarSearch": "搜索",
+  "viewerSidebarTOC": "目录",
+  "viewerSidebarNotes": "笔记",
+  "viewerSidebarBookmarks": "书签",
+  "viewerSidebarNotesDesc": "为 PDF 页面添加笔记和批注",
+  "viewerSidebarBookmarksDesc": "保存并整理您喜爱的页面",
+  "viewerCellCopied": "已复制单元格 {value}",
+  "@viewerCellCopied": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerGoToPage": "转到页面",
+  "viewerGoToPageHint": "输入页码 (1-{totalPages})",
+  "@viewerGoToPageHint": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerGo": "转到",
+  "viewerInvalidPage": "请输入 1 到 {totalPages} 之间的数字",
+  "@viewerInvalidPage": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerNoContent": "无内容",
+  "viewerResetZoom": "重置缩放",
+  "viewerCopyTextTitle": "复制文本",
+  "viewerCopyTextChoose": "选择要复制的内容：",
+  "viewerCopyPageOnly": "仅第 {page} 页",
+  "@viewerCopyPageOnly": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyAllPages": "全部 {totalPages} 页",
+  "@viewerCopyAllPages": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerExtractingText": "正在从 {label} 提取文本...",
+  "@viewerExtractingText": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerNoTextFound": "未找到文本内容",
+  "viewerPageLabel": "第 {currentPage} 页",
+  "@viewerPageLabel": {
+    "placeholders": {
+      "currentPage": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLabel": "{totalPages} 页",
+  "@viewerAllPagesLabel": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTextExtracted": "已从 {pageLabel} 提取文本。",
+  "@viewerTextExtracted": {
+    "placeholders": {
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerWordsFound": "找到 {count} 个词",
+  "@viewerWordsFound": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedWords": "已从 {pageLabel} 复制 {count} 个词",
+  "@viewerCopiedWords": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCopyAllTextTitle": "复制所有文本",
+  "viewerCopyAllTextConfirm": "这将从全部 {pageCount} 页提取文本并复制到剪贴板。",
+  "@viewerCopyAllTextConfirm": {
+    "placeholders": {
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedAllPages": "已从 {pageCount} 页复制 {count} 个词",
+  "@viewerCopiedAllPages": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyDocumentText": "这会将整个文档内容复制到剪贴板。",
+  "viewerWordsLines": "{words} 个词，{lines} 行",
+  "@viewerWordsLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerWordsOnly": "{count} 个词",
+  "@viewerWordsOnly": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerLinesOnly": "{lines} 行",
+  "@viewerLinesOnly": {
+    "placeholders": {
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedFromLines": "已从 {lines} 行复制 {words} 个词",
+  "@viewerCopiedFromLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCharactersCount": "{count} 个字符",
+  "@viewerCharactersCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyExtractedTitle": "复制提取的文本",
+  "viewerCopyExtractedDesc": "复制通过 OCR 从此图片提取的文本。",
+  "viewerCopiedWordsChars": "已复制 {words} 个词（{chars} 个字符）",
+  "@viewerCopiedWordsChars": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "chars": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerErrorAccessText": "访问提取文本时出错",
+  "viewerNoTextForImage": "此图片没有可用的提取文本",
+  "viewerExtractingAllPages": "正在从所有页面提取文本...",
+  "viewerTextExtractionUnavailable": "文本提取不可用",
+  "viewerNoPdfText": "此 PDF 中未找到文本",
+  "viewerNoTextAvailable": "没有可用的文本内容",
+  "viewerReadingTime": "阅读 {minutes} 分钟",
+  "@viewerReadingTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeSingle": "阅读 1 分钟",
+  "viewerCopy": "复制",
+  "viewerErrorPrefix": "错误：{error}",
+  "@viewerErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCellValue": "单元格 {cell}",
+  "@viewerCellValue": {
+    "placeholders": {
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerLowerPageLabel": "第 {page} 页",
+  "@viewerLowerPageLabel": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLower": "所有页面",
+  "viewerCopied": "已复制",
+  "viewerCopyValue": "复制值",
+  "viewerToggleFullscreen": "切换全屏",
+  "viewerInvert": "反色",
+  "viewerText": "文本",
+  "viewerSyntax": "语法",
+  "viewerFont": "字体",
+  "viewerFontStyle": "字体样式",
+  "viewerMonospaceCourier": "Monospace (Courier)",
+  "viewerSystemUbuntu": "System (Ubuntu)",
+  "viewerEdit": "编辑",
+  "viewerEditWithEngine": "使用 Fadocx Engine 编辑",
+  "viewerEditWithEngineDesc": "在 Fadocx 渲染引擎中打开此电子表格，以获得包含完整格式、图表和布局保真度的视觉预览。",
+  "viewerEditWithEngineNote": "注意：交互式编辑将在未来更新中推出。",
+  "viewerNotNow": "暂不",
+  "viewerGotIt": "知道了",
+  "viewerErrorLoadingDocument": "加载文档时出错",
+  "viewerGoBack": "返回",
+  "viewerReadingTimeMinutes": "{count, plural, =1{阅读 1 分钟} other{阅读 {count} 分钟}}",
+  "@viewerReadingTimeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeHoursMinutes": "阅读 {hours}小时 {minutes}分钟",
+  "@viewerReadingTimeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "scannerTitle": "文档扫描仪",
+  "scannerCapture": "拍摄",
+  "scannerProcessing": "处理中",
+  "scannerResults": "结果",
   "scannerInitializingCamera": "正在初始化相机...",
   "scannerDocumentDetected": "已检测到文档，请保持稳定",
   "scannerKeepDocumentFlat": "请保持文档平整端正，以获得最佳效果",
   "scannerUpload": "上传",
   "scannerFailedOpenImage": "打开图片失败：{error}",
+  "@scannerFailedOpenImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerFlash": "闪光灯",
   "scannerFailedTorch": "切换手电筒失败：{error}",
+  "@scannerFailedTorch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerStartingCamera": "正在启动相机...",
   "scannerCameraUnavailable": "相机不可用",
   "scannerCameraUnavailableDesc": "无法初始化相机",
@@ -316,264 +1000,141 @@
   "scannerNoTextExtracted": "（未提取到文本）",
   "scannerDetectedLines": "检测到的行",
   "scannerTextCopied": "文本已复制到剪贴板",
-  "appDescription": "Document Viewer",
-  "openFile": "Open File",
-  "openFileTooltip": "Browse and open a document",
-  "pdfFile": "PDF File",
-  "docxFile": "Word Document",
-  "xlsxFile": "Excel Spreadsheet",
-  "csvFile": "CSV File",
-  "unknownFile": "Unknown File",
-  "page": "Page",
-  "pageOf": "of",
-  "jumpToPage": "Jump to page",
-  "sheet": "Sheet",
-  "corruptedFile": "File appears to be corrupted",
-  "appVersion": "App Version",
-  "clearRecentFiles": "Clear recent files",
-  "backButton": "Back",
-  "emptyTitle": "No Documents",
-  "emptyMessage": "Start by opening a document from your device",
-  "startBrowsing": "Start Browsing",
-  "languageChanged": "Language changed to English",
-  "privacyDescription": "Fadocx is a document viewer. Your files are stored locally on your device and are never transmitted to any server.",
-  "aboutDescription": "Fadocx v1.0.0 - Your private document viewer. Built to respect your privacy.",
-  "tableRows": "rows",
-  "tableEmpty": "No data to display",
-  "tableNoContent": "Sheet is empty",
-  "sheetEmpty": "Sheet is empty",
-  "noTableData": "No table data",
-  "noSpreadsheetData": "No spreadsheet data",
-  "rowsSymbol": "rows",
-  "colsSymbol": "cols",
-  "noSlidesFound": "No slides found",
-  "slidesCount": "slides",
-  "pptUnsupported": "PPT file parsed but contains no slides",
-  "odpUnsupported": "ODP file parsed but contains no slides or unreadable content",
-  "noTextContent": "No text content found",
-  "couldNotParse": "Could not parse file",
-  "file": "File",
-  "slides": "Slide",
-  "previewNotSupported": "Preview not yet supported",
-  "openWithSystemApp": "Open with System App",
-  "systemAppNotImplemented": "System app opening not yet implemented",
-  "type": "Type",
-  "fileNotFoundMessage": "File not found",
-  "fileTooLarge": "File size exceeds maximum limit (100MB)",
-  "errorLoadingFile": "Error loading file",
-  "docxPreviewNotSupported": "DOCX preview not yet fully supported",
-  "docParseError": "Could not parse DOC file. Try converting to DOCX.",
-  "xlsxParseError": "Could not parse XLSX file",
-  "xlsParseError": "Could not parse XLS file. Try converting to XLSX.",
-  "csvParseError": "Could not parse CSV file",
-  "odtParseError": "Could not parse ODT file",
-  "odsParseError": "Could not parse ODS file",
-  "odpParseError": "Could not parse ODP file",
-  "pptParseError": "Could not parse PPT file",
-  "rtfParseError": "Could not parse RTF file",
-  "txtFileEmpty": "File is empty",
-  "unsupportedFormat": "File format is not supported yet",
-  "txtLoaded": "TXT",
-  "charactersLoaded": "characters",
-  "becomeAPatron": "Become a Patron",
-  "newBadge": "NEW",
-  "homeDocumentManagement": "文档管理",
-  "homeImportingSamples": "Importing sample files...",
-  "homeSamplesImported": "{count, plural, =1{1 sample file imported successfully!} other{{count} sample files imported successfully!}}",
-  "homeViewFiles": "View Files",
-  "homeFailedImportSamples": "Failed to import sample files: {error}",
-  "homeFileMovedToTrash": "{name} moved to trash",
-  "homeFileInfo": "文件信息",
-  "homeFileName": "名称",
-  "homeFileType": "类型",
-  "homeFileSize": "大小",
-  "homeFileLocation": "位置",
-  "homeFileDateOpened": "打开日期",
-  "homeFileLastModified": "最后修改",
-  "homeFileInTrash": "在回收站中",
-  "homeFileInfoCopied": "文件信息已复制",
-  "homeCopySuffix": " (copy)",
-  "homeCopySuffixCounter": " (copy {counter})",
-  "homeDuplicatedAs": "Duplicated as {name}",
-  "homeFailedDuplicate": "Failed to duplicate file: {error}",
-  "homeRenameFile": "Rename file",
-  "homeFileNameLabel": "File name",
-  "homeFileAlreadyExists": "A file with this name already exists",
-  "homeRenamedTo": "Renamed to {name}",
-  "homeFailedRename": "Failed to rename file",
-  "homeExport": "Export",
-  "homeSaveToDownloads": "Save to Downloads",
-  "homeSaveToDownloadsPath": "Download/Fadocx/{name}",
-  "homeChooseLocation": "Choose location",
-  "homeChooseLocationDesc": "Pick a custom save directory",
-  "homeSavedToDownloads": "Saved to Download/Fadocx/{name}",
-  "homeSavedTo": "Saved to {path}",
-  "homeFailedExport": "Failed to export file",
-  "homeChooseSaveLocation": "Choose save location",
-  "homeConvertComingSoon": "Convert feature coming soon!",
-  "homeFadDriveComingSoon": "FadDrive coming soon!",
-  "homePresentationsTooltip": "Coming Soon",
-  "homeErrorPrefix": "Error: {error}",
-  "librarySelected": "{count} selected",
-  "libraryDeleteSelected": "Delete selected?",
-  "libraryDeleteConfirm": "Move {count} files to trash? You can restore them later.",
-  "libraryItemsMovedToTrash": "{count} items moved to trash",
-  "libraryErrorLoading": "Error loading library: {error}",
-  "libraryItemCount": "{count} items",
-  "libraryDeselectAll": "Deselect all",
-  "librarySelectAll": "Select all",
-  "libraryNoCategoryFound": "No {category} found",
-  "trashErrorLoading": "Error loading trash",
-  "trashFilesSelected": "{count} selected",
-  "trashFilesLabel": "files",
-  "trashFileRestored": "File restored successfully",
-  "trashDeletePermanentlyConfirm": "Delete Permanently?",
-  "trashDeletePermanentlyMessage": "You are about to permanently delete {count} file(s). This action cannot be undone.",
-  "trashDeleteTypeConfirm": "Type DELETE in capital letters to confirm:",
-  "trashDeleteHint": "DELETE",
-  "trashFilesPermanentlyDeleted": "{count} file(s) permanently deleted",
-  "updateAvailableTitle": "可用更新",
-  "updateAvailableSubtitle": "Fadocx的新版本已准备好下载",
-  "updateStableRelease": "稳定版本",
-  "updateStableDesc": "用于生产环境的稳定且经过测试的版本",
-  "updateBetaRelease": "测试版",
-  "updateBetaDesc": "新功能的早期访问权限，可能包含缺陷",
-  "updateMaybeLater": "稍后再说",
-  "updateCurrent": "当前",
-  "updateNew": "新",
-  "updateVisitGithub": "访问 GitHub",
-  "updateBetaInfo": "The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.",
-  "updateBannerStable": "稳定更新",
-  "updateBannerBeta": "测试版更新",
-  "settingsUnknown": "Unknown",
-  "settingsStorageDetails": "存储",
-  "settingsStoragePdfs": "PDF",
-  "settingsStorageDocs": "文档",
-  "settingsStorageSheets": "表格",
-  "settingsStoragePresentations": "演示文稿",
-  "settingsStorageCode": "代码",
-  "settingsStorageScans": "扫描件",
-  "settingsStorageImages": "图片",
-  "settingsStorageOther": "其他",
-  "settingsStorageInfo": "文档存储在设备上的私有文件夹中，其他应用无法访问",
-  "settingsStoragePrivateFolderInfo": "文档存储在私有文件夹中，对其他应用和文件管理器隐藏。只有 Fadocx 可以访问。",
-  "settingsStorageDeleteInfo": "请在设置中的危险区域删除文档",
-  "settingsStorageEmpty": "没有文档",
-  "settingsStorageFailedLoad": "加载存储数据失败",
-  "settingsFadocxDesc": "Your private document viewer",
-  "settingsRetry": "Retry",
-  "settingsCheckingUpdates": "Checking for updates…",
-  "settingsNoInternet": "No internet connection. Check your network and try again.",
-  "settingsUpToDate": "You're up to date",
-  "settingsUpToDateDesc": "v{version} is the latest version.",
-  "settingsBetaAvailable": "Beta v{version} available",
-  "settingsVersionWithBuild": "Version {version} (Build {buildNumber})",
-  "settingsPrivacyOffline": "100% Offline",
-  "settingsPrivacyLocalStorage": "Local Storage Only",
-  "settingsPrivacyOnDevice": "On-Device AI",
-  "settingsPrivacyOpenSource": "Open Source",
-  "settingsPrivacyNoAds": "No Ads",
-  "settingsPrivacyByDesign": "We believe in privacy by design.",
-  "settingsPrivacyTransparency": "Fadocx is built with transparency. Your documents are your business - not ours.",
-  "settingsViewSourceCode": "View Source Code",
-  "settingsStorageFilesSummary": "{size} • {count} files",
-  "settingsErrorPrefix": "Error: {error}",
-  "settingsCopiedText": "Copied: {text}",
-  "settingsVisitGithub": "Visit GitHub",
-  "settingsMadeWith": "Made with",
-  "settingsAt": "at",
-  "settingsIn": "in",
-  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
-  "settingsTypeToConfirm": "Type \"{text}\" to confirm:",
-  "settingsPrivacyOfflineDesc": "All processing happens on your device. No internet required.",
-  "settingsPrivacyLocalStorageDesc": "Your documents stay on your device. Nothing is uploaded.",
-  "settingsPrivacyOnDeviceDesc": "Uses OpenCV + Tesseract for OCR. AI runs locally.",
-  "settingsPrivacyOpenSourceDesc": "Code is public. Audit it yourself on GitHub.",
-  "settingsPrivacyNoAdsDesc": "No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.",
-  "settingsOpenInBrowser": "Open in Browser",
-  "viewerFindHint": "Find...",
-  "viewerTypeToFind": "Type to find",
-  "viewerSidebarPages": "Pages",
-  "viewerSidebarSearch": "Search",
-  "viewerSidebarTOC": "TOC",
-  "viewerSidebarNotes": "Notes",
-  "viewerSidebarBookmarks": "Bookmarks",
-  "viewerSidebarNotesDesc": "Add notes and annotations to PDF pages",
-  "viewerSidebarBookmarksDesc": "Save and organize your favorite pages",
-  "viewerCellCopied": "Cell {value} copied",
-  "viewerGoToPage": "Go to Page",
-  "viewerGoToPageHint": "Enter page number (1-{totalPages})",
-  "viewerGo": "Go",
-  "viewerInvalidPage": "Please enter a number between 1 and {totalPages}",
-  "viewerNoContent": "No content",
-  "viewerResetZoom": "Reset zoom",
-  "viewerCopyTextTitle": "Copy Text",
-  "viewerCopyTextChoose": "Choose what to copy:",
-  "viewerCopyPageOnly": "Page {page} only",
-  "viewerCopyAllPages": "All {totalPages} pages",
-  "viewerExtractingText": "Extracting text from {label}...",
-  "viewerNoTextFound": "No text content found",
-  "viewerPageLabel": "Page {currentPage}",
-  "viewerAllPagesLabel": "{totalPages} pages",
-  "viewerTextExtracted": "Text extracted from {pageLabel}.",
-  "viewerWordsFound": "{count} words found",
-  "viewerCopiedWords": "Copied {count} words from {pageLabel}",
-  "viewerCopyAllTextTitle": "Copy All Text",
-  "viewerCopyAllTextConfirm": "This will extract text from all {pageCount} pages and copy to clipboard.",
-  "viewerCopiedAllPages": "Copied {count} words from {pageCount} pages",
-  "viewerCopyDocumentText": "This will copy the entire document content to clipboard.",
-  "viewerWordsLines": "{words} words, {lines} lines",
-  "viewerWordsOnly": "{count} words",
-  "viewerLinesOnly": "{lines} lines",
-  "viewerCopiedFromLines": "Copied {words} words from {lines} lines",
-  "viewerCharactersCount": "{count} characters",
-  "viewerCopyExtractedTitle": "Copy Extracted Text",
-  "viewerCopyExtractedDesc": "Copy text extracted from this image via OCR.",
-  "viewerCopiedWordsChars": "Copied {words} words ({chars} characters)",
-  "viewerErrorAccessText": "Error accessing extracted text",
-  "viewerNoTextForImage": "No extracted text available for this image",
-  "viewerExtractingAllPages": "Extracting text from all pages...",
-  "viewerTextExtractionUnavailable": "Text extraction not available",
-  "viewerNoPdfText": "No text found in this PDF",
-  "viewerNoTextAvailable": "No text content available",
-  "viewerReadingTime": "{minutes} min read",
-  "viewerReadingTimeSingle": "1 min read",
-  "viewerCopy": "Copy",
-  "viewerErrorPrefix": "Error: {error}",
-  "viewerCellValue": "Cell {cell}",
-  "viewerLowerPageLabel": "page {page}",
-  "viewerAllPagesLower": "all pages",
-  "viewerCopied": "Copied",
-  "viewerCopyValue": "Copy value",
-  "viewerToggleFullscreen": "Toggle fullscreen",
-  "viewerInvert": "Invert",
-  "viewerText": "Text",
-  "viewerSyntax": "Syntax",
-  "viewerFont": "Font",
-  "viewerFontStyle": "Font Style",
-  "viewerMonospaceCourier": "Monospace (Courier)",
-  "viewerSystemUbuntu": "System (Ubuntu)",
-  "viewerEdit": "Edit",
-  "viewerEditWithEngine": "Edit with Fadocx Engine",
-  "viewerEditWithEngineDesc": "Open this spreadsheet in the Fadocx rendering engine for a faithful visual preview with full formatting, charts, and layout fidelity.",
-  "viewerEditWithEngineNote": "Note: Interactive editing is coming in a future update.",
-  "viewerNotNow": "Not Now",
-  "viewerGotIt": "Got It",
-  "viewerErrorLoadingDocument": "Error loading document",
-  "viewerGoBack": "Go Back",
-  "viewerReadingTimeMinutes": "{count, plural, =1{1 minute read} other{{count} minutes read}}",
-  "viewerReadingTimeHoursMinutes": "{hours}h {minutes}m read",
-  "linkTileCopiedToClipboard": "Copied to clipboard",
-  "linkTileCouldNotOpen": "Could not open {value}",
-  "librarySortBy": "Sort by",
-  "librarySortLatest": "Latest",
-  "librarySortOldest": "Oldest",
-  "librarySortLargest": "Largest",
-  "librarySortSmallest": "Smallest",
-  "homeDeleteFile": "Delete file?",
-  "homeDeleteFileConfirm": "Move \"{name}\" to trash? You can restore it later.",
-  "homeCopiedCharactersToClipboard": "Copied {count} characters to clipboard",
+  "scannerCopyAll": "全部复制",
+  "scannerNewScan": "新建扫描",
+  "linkTileCopy": "复制",
+  "linkTileCopiedToClipboard": "已复制到剪贴板",
+  "linkTileSendEmail": "发送邮件",
+  "linkTileOpenInBrowser": "在浏览器中打开",
+  "linkTileCouldNotOpen": "无法打开 {value}",
+  "@linkTileCouldNotOpen": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySortBy": "排序方式",
+  "librarySortLatest": "最新",
+  "librarySortOldest": "最旧",
+  "librarySortLargest": "最大",
+  "librarySortSmallest": "最小",
+  "homeDeleteFile": "删除文件?",
+  "homeDeleteFileConfirm": "将\"{name}\"移至垃圾箱?您可以稍后还原它。",
+  "@homeDeleteFileConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCopiedCharactersToClipboard": "已将 {count} 个字符复制到剪贴板",
+  "@homeCopiedCharactersToClipboard": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "homeFileInTrashDetail": "在回收站中: 是 (删除时间: {date})",
-  "homeUnknown": "unknown",
+  "@homeFileInTrashDetail": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeUnknown": "未知",
+  "routeNotFound": "未找到路由：{path}",
+  "@routeNotFound": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "routeGoHome": "返回主页",
+  "routeInvalidDocumentPath": "无效的文档路径",
+  "pdfCopyTextTitle": "复制PDF文本",
+  "pdfExtractingText": "正在提取文本...",
+  "pdfExtractingTextProgress": "正在提取文本（{current}/{total} 页）...",
+  "@pdfExtractingTextProgress": {
+    "placeholders": {
+      "current": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfErrorExtractingText": "提取文本时出错",
+  "pdfWordCount": "字数：{count}",
+  "@pdfWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfNoTextFound": "PDF中未找到文本",
+  "pdfFullTextCopied": "已将完整PDF文本复制到剪贴板",
+  "pdfPasswordRequired": "需要PDF密码",
+  "pdfPasswordDesc": "此PDF受密码保护，请输入密码以解锁。",
+  "pdfPasswordLabel": "密码",
+  "pdfUnlock": "解锁",
+  "pdfSearchHint": "搜索PDF...",
+  "pdfTextCannotBeExtracted": "无法从此页提取文本",
+  "pdfLoadingPageTexts": "正在加载页面文本...",
+  "pdfPageCopied": "第{page}页文本已复制到剪贴板",
+  "@pdfPageCopied": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTooltipSidebar": "侧边栏",
+  "viewerTooltipFirst": "第一页",
+  "viewerTooltipLast": "最后一页",
+  "viewerTooltipCopyPageText": "复制页面文本",
+  "textDocSearchHint": "搜索文本...",
+  "textDocSearchPrevResult": "上一个结果",
+  "textDocSearchNextResult": "下一个结果",
+  "imageFailedToLoad": "加载图片失败",
+  "mediaLoading": "正在加载媒体...",
+  "mediaFailedToPlay": "播放媒体失败",
+  "mediaPlay": "播放",
+  "audioPlaybackNote": "音频播放需要额外的库。",
+  "sheetNoData": "{sheetName} 中没有数据",
+  "@sheetNoData": {
+    "placeholders": {
+      "sheetName": {
+        "type": "String"
+      }
+    }
+  },
+  "documentNoSheets": "{format} 中未找到工作表",
+  "@documentNoSheets": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerPlaybackSpeed": "播放速度",
+  "urlCopiedToClipboard": "URL 已复制到剪贴板: {url}",
+  "@urlCopiedToClipboard": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "lokitPreparingDoc": "正在准备您的文档...",
+  "lokitWarmingUp": "正在启动 Fadocx 引擎...",
+  "lokitAlmostThere": "即将完成",
+  "lokitJustAMoment": "请稍候",
+  "lokitFailedToRender": "文档渲染失败",
   "drawerFadSecLab": "FadSec 实验室"
 }

@@ -2,6 +2,21 @@
   "@@locale": "fr",
   "@@author": "FadSec Lab",
   "appName": "Fadocx",
+  "appDescription": "Visionneuse de documents",
+  "homeTitle": "Fadocx",
+  "recentFiles": "Fichiers récents",
+  "noRecentFiles": "Aucun fichier récent. Ouvrez un document pour commencer.",
+  "openFile": "Ouvrir un fichier",
+  "openFileTooltip": "Parcourez et ouvrez un document",
+  "pdfFile": "Fichier PDF",
+  "docxFile": "Document Word",
+  "xlsxFile": "Feuille de calcul Excel",
+  "csvFile": "Fichier CSV",
+  "unknownFile": "Fichier inconnu",
+  "page": "Page du document",
+  "pageOf": "de",
+  "jumpToPage": "Aller à la page",
+  "sheet": "Feuille",
   "ok": "OK",
   "cancel": "Annuler",
   "delete": "Supprimer",
@@ -22,10 +37,11 @@
   "error": "Erreur",
   "warning": "Avertissement",
   "success": "Succès",
-  "loadingDocument": "Chargement du document...",
-  "unsupportedFileType": "Format de fichier non pris en charge",
+  "unsupportedFileType": "Type de fichier non pris en charge",
   "fileNotFound": "Fichier introuvable",
   "permissionDenied": "Permission refusée",
+  "corruptedFile": "Le fichier semble être corrompu",
+  "loadingDocument": "Chargement du document...",
   "settingsTitle": "Paramètres",
   "theme": "Thème",
   "themeDark": "Sombre",
@@ -43,146 +59,124 @@
   "languageGerman": "Allemand",
   "languagePortuguese": "Portugais",
   "languageHindi": "Hindi",
+  "appVersion": "App Version",
+  "clearRecentFiles": "Effacer les fichiers récents",
+  "backButton": "Retour",
+  "emptyTitle": "Aucun Document",
+  "emptyMessage": "Commencez en ouvrant un document depuis votre appareil",
+  "startBrowsing": "Commencer à parcourir",
+  "languageChanged": "Langue changée en français",
+  "privacyDescription": "Fadocx est une visionneuse de documents. Vos fichiers sont stockés localement sur votre appareil et ne sont jamais transmis à un serveur.",
+  "aboutDescription": "Fadocx v1.0.0 - Votre visionneuse de documents privée. Construite en respectant votre vie privée.",
+  "tableRows": "Lignes",
+  "tableEmpty": "Aucune donnée à afficher",
+  "tableNoContent": "La feuille est vide",
+  "sheetEmpty": "La feuille est vide",
+  "noTableData": "Aucune donnée de tableau",
+  "noSpreadsheetData": "Aucune donnée de feuille de calcul",
+  "rowsSymbol": "lignes",
+  "colsSymbol": "colonnes",
+  "noSlidesFound": "Aucune diapositive trouvée",
+  "slidesCount": "diapositives",
+  "pptUnsupported": "Le fichier PPT a été analysé mais ne contient aucune diapositive",
+  "odpUnsupported": "Le fichier ODP a été analysé mais ne contient aucune diapositive ni contenu lisible",
+  "noTextContent": "Aucun contenu textuel trouvé",
+  "couldNotParse": "Impossible d’analyser le fichier",
+  "file": "Fichier",
+  "slides": "Diapositive",
+  "previewNotSupported": "Aperçu pas encore pris en charge",
+  "openWithSystemApp": "Ouvrir avec l’application système",
+  "systemAppNotImplemented": "L’ouverture avec l’application système n’est pas encore implémentée",
+  "type": "Type de fichier",
+  "fileNotFoundMessage": "Fichier introuvable",
+  "fileTooLarge": "La taille du fichier dépasse la limite maximale (100 Mo)",
+  "errorLoadingFile": "Erreur lors du chargement du fichier",
+  "docxPreviewNotSupported": "L'aperçu DOCX n'est pas encore totalement pris en charge",
+  "docParseError": "Impossible d'analyser le fichier DOC. Essayez de convertir en DOCX.",
+  "xlsxParseError": "Impossible d’analyser le fichier XLSX",
+  "xlsParseError": "Impossible d’analyser le fichier XLS. Essayez de le convertir en XLSX.",
+  "csvParseError": "Impossible d'analyser le fichier CSV",
+  "odtParseError": "Impossible d’analyser le fichier ODT",
+  "odsParseError": "Impossible d’analyser le fichier ODS",
+  "odpParseError": "Impossible d’analyser le fichier ODP",
+  "pptParseError": "Impossible d’analyser le fichier PPT",
+  "rtfParseError": "Impossible d’analyser le fichier RTF",
+  "txtFileEmpty": "Le fichier est vide",
+  "unsupportedFormat": "Le format de fichier n’est pas encore pris en charge",
+  "txtLoaded": "TXT",
+  "charactersLoaded": "caractères",
+  "copiedToClipboard": "Copié dans le presse-papiers",
   "navHome": "Accueil",
   "navLibrary": "Bibliothèque",
   "navSettings": "Paramètres",
   "navRecents": "Récents",
-  "onboardingSkip": "Passer",
-  "onboardingNext": "Suivant",
-  "onboardingGetStarted": "Commencer",
-  "onboardingSlide1Title": "Bienvenue sur Fadocx",
-  "onboardingSlide1Tagline": "Votre compagnon de documents privé tout-en-un",
-  "onboardingSlide1Bullet1": "Ouvrez n'importe quel format — PDF, Office, images et plus",
-  "onboardingSlide1Bullet2": "Stockage privé, caché de votre galerie et gestionnaire de fichiers",
-  "onboardingSlide1Bullet3": "Gratuit, open source — sans compte ni inscription",
-  "onboardingSlide2Title": "Outils intégrés",
-  "onboardingSlide2Bullet1": "Scannez des documents avec votre caméra — texte extrait instantanément",
-  "onboardingSlide2Bullet2": "Lisez audio et vidéo directement dans l'app, sans extras",
-  "onboardingSlide2Bullet3": "Tout auto-trié par catégories dès l'importation",
-  "onboardingSlide2Bullet4": "Suppression sécurisée — restaurez depuis la corbeille à tout moment",
-  "onboardingSlide3Title": "Confidentialité par conception",
-  "onboardingSlide3Bullet1": "Rien ne quitte jamais votre appareil — pas de cloud, pas de serveurs",
-  "onboardingSlide3Bullet2": "Pas de suivi, pas de pubs, pas d'analyse. Jamais.",
-  "onboardingSlide3Bullet3": "Open source — chaque ligne de code est publique",
-  "homeTitle": "Fadocx",
-  "recentFiles": "Fichiers récents",
-  "noRecentFiles": "Aucun fichier récent. Ouvrez un document pour commencer.",
-  "homeWelcomeTitle": "Bienvenue sur Fadocx",
-  "homeWelcomeSubtitle": "Explorez les fichiers exemples ou importez vos propres documents",
-  "homeExploreSamples": "Explorer les fichiers exemples",
-  "homeScanDocument": "Scanner un document",
-  "homeScanDocumentDesc": "Extraire du texte à partir de documents via OCR",
-  "homeImportDocument": "Importer un document",
-  "homeImportDocumentDesc": "Parcourir et importer des fichiers depuis votre appareil",
-  "homeSeeAll": "Voir tout",
-  "homeNoRecentFiles": "Aucun fichier récent",
-  "homePressBackExit": "Appuyez à nouveau pour quitter",
-  "libraryTitle": "Bibliothèque",
-  "librarySearchHint": "Rechercher dans la bibliothèque...",
-  "libraryNoDocuments": "Aucun document",
-  "libraryAdjustSearch": "Essayez d'ajuster votre recherche ou vos filtres",
-  "libraryDocumentsAppearHere": "Vos documents apparaîtront ici",
   "categoryAll": "Tous",
-  "categoryPdfs": "PDFs",
-  "categoryDocs": "Docs",
+  "categoryPdfs": "Fichiers PDF",
+  "categoryDocs": "Documents",
   "categorySheets": "Tableaux",
   "categorySlides": "Diapositives",
-  "categoryCode": "Code",
-  "categoryScans": "Scans",
+  "categoryCode": "Code source",
+  "categoryScans": "Numérisations",
   "categoryOther": "Autre",
   "categoryPresentations": "Présentations",
-  "settingsAppearance": "Apparence",
-  "settingsStorage": "Stockage",
-  "settingsUpdates": "Mises à jour",
-  "settingsAbout": "À propos",
-  "settingsVersion": "Version",
-  "settingsDangerZone": "Zone de danger",
-  "settingsTrash": "Corbeille",
-  "settingsTrashDesc": "Afficher les fichiers supprimés",
-  "settingsEnabled": "Activé",
-  "settingsDisabled": "Désactivé",
-  "settingsChooseTheme": "Choisir le thème",
-  "settingsSelectLanguage": "Choisir la langue",
-  "settingsReplayOnboarding": "Revoir l'introduction",
-  "settingsReplayOnboardingDesc": "Afficher les diapositives d'introduction au prochain lancement",
-  "settingsResetSettings": "Réinitialiser les paramètres",
-  "settingsResetSettingsDesc": "Restaurer tous les paramètres par défaut",
-  "settingsResetDone": "Paramètres réinitialisés",
-  "settingsAutoUpdateCheck": "Vérification automatique des mises à jour",
-  "settingsCheckForUpdates": "Vérifier les mises à jour",
-  "settingsSourceCode": "Code source",
-  "settingsContact": "Contact",
-  "settingsPrivacyPolicy": "Politique de confidentialité",
-  "trashTitle": "Corbeille",
-  "trashEmpty": "La corbeille est vide",
-  "trashEmptySubtitle": "Les fichiers supprimés apparaîtront ici",
-  "trashDeletePermanently": "Supprimer définitivement",
-  "scannerTitle": "Scanner de documents",
-  "scannerCapture": "Capturer",
-  "scannerProcessing": "Traitement",
-  "scannerResults": "Résultats",
-  "scannerCopyAll": "Tout copier",
-  "scannerNewScan": "Nouveau scan",
-  "whatsNewTitle": "Nouveautés",
-  "linkTileCopy": "Copier",
-  "linkTileSendEmail": "Envoyer un e-mail",
-  "linkTileOpenInBrowser": "Ouvrir dans le navigateur",
-  "confirm": "Confirmer",
-  "openInBrowser": "Ouvrir dans le navigateur",
-  "comingSoon": "Bientôt disponible",
-  "routeNotFound": "Itinéraire introuvable : {path}",
-  "routeGoHome": "Accueil",
-  "routeInvalidDocumentPath": "Chemin de document invalide",
-  "pdfCopyTextTitle": "Copier le texte PDF",
-  "pdfExtractingText": "Extraction du texte...",
-  "pdfExtractingTextProgress": "Extraction du texte... ({current}/{total} pages)",
-  "pdfErrorExtractingText": "Erreur lors de l'extraction du texte",
-  "pdfWordCount": "Nombre de mots : {count}",
-  "pdfNoTextFound": "Aucun texte trouvé dans le PDF",
-  "pdfFullTextCopied": "Texte complet du PDF copié dans le presse-papiers",
-  "pdfPasswordRequired": "Mot de passe PDF requis",
-  "pdfPasswordDesc": "Ce PDF est protégé par un mot de passe. Entrez le mot de passe pour le déverrouiller.",
-  "pdfPasswordLabel": "Mot de passe",
-  "pdfUnlock": "Déverrouiller",
-  "pdfSearchHint": "Rechercher dans le PDF...",
-  "pdfTextCannotBeExtracted": "Le texte ne peut pas être extrait de cette page",
-  "pdfLoadingPageTexts": "Chargement des textes des pages...",
-  "pdfPageCopied": "Texte de la page {page} copié dans le presse-papiers",
-  "viewerTooltipSidebar": "Barre latérale",
-  "viewerTooltipFirst": "Premier",
-  "viewerTooltipLast": "Dernier",
-  "viewerTooltipCopyPageText": "Copier le texte de la page",
-  "textDocSearchHint": "Rechercher du texte...",
-  "textDocSearchPrevResult": "Résultat précédent",
-  "textDocSearchNextResult": "Résultat suivant",
-  "imageFailedToLoad": "Échec du chargement de l'image",
-  "mediaLoading": "Chargement du média...",
-  "mediaFailedToPlay": "Échec de la lecture du média",
-  "mediaPlay": "Lire",
-  "audioPlaybackNote": "La lecture audio nécessite une bibliothèque supplémentaire.",
-  "sheetNoData": "Aucune donnée dans {sheetName}",
-  "documentNoSheets": "Aucune feuille trouvée dans {format}",
-  "viewerPlaybackSpeed": "Vitesse de lecture",
-  "urlCopiedToClipboard": "URL copiée dans le presse-papiers : {url}",
-  "lokitPreparingDoc": "Préparation de votre document...",
-  "lokitWarmingUp": "Démarrage du moteur Fadocx...",
-  "lokitAlmostThere": "Presque prêt",
-  "lokitJustAMoment": "Un instant",
-  "lokitFailedToRender": "Échec du rendu du document",
-  "trashSelect": "Sélectionner",
-  "copiedToClipboard": "Copié dans le presse-papiers",
   "supportDevelopment": "Soutenir le développement",
   "visitPatreon": "Visiter Patreon",
   "copyLink": "Copier le lien",
+  "becomeAPatron": "Devenir Mécène",
   "patreonDescription": "Votre soutien aide Fadocx et FadCam à continuer de grandir. Les abonnés Patreon débloquent des avantages exclusifs, y compris des fonctionnalités premium et un accès anticipé à toutes les applications FadSec Lab.\n\nPour plus d'informations, visitez Patreon via le lien ci-dessous et consultez les niveaux disponibles avec leurs avantages.",
   "discordTitle": "Rejoignez notre Discord",
+  "openInBrowser": "Ouvrir dans le navigateur",
+  "comingSoon": "À venir bientôt",
+  "newBadge": "NOUVEAU",
   "timeAgoJustNow": "À l'instant",
   "timeAgoMinute": "{count, plural, =1{il y a 1 minute} other{il y a {count} minutes}}",
+  "@timeAgoMinute": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoHour": "{count, plural, =1{il y a 1 heure} other{il y a {count} heures}}",
+  "@timeAgoHour": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoDay": "{count, plural, =1{il y a 1 jour} other{il y a {count} jours}}",
+  "@timeAgoDay": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoWeek": "{count, plural, =1{il y a 1 semaine} other{il y a {count} semaines}}",
+  "@timeAgoWeek": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoMonth": "{count, plural, =1{il y a 1 mois} other{il y a {count} mois}}",
+  "@timeAgoMonth": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoYear": "{count, plural, =1{il y a 1 an} other{il y a {count} ans}}",
+  "@timeAgoYear": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "monthJan": "janv.",
   "monthFeb": "févr.",
   "monthMar": "mars",
@@ -195,30 +189,207 @@
   "monthOct": "oct.",
   "monthNov": "nov.",
   "monthDec": "déc.",
-  "homeStatDocuments": "Documents",
+  "homeWelcomeTitle": "Bienvenue sur Fadocx",
+  "homeWelcomeSubtitle": "Explorez les fichiers exemples ou importez vos propres documents",
+  "homeExploreSamples": "Explorer les fichiers exemples",
+  "homeDocumentManagement": "Gestion des documents",
+  "homeSeeAll": "Voir tout",
+  "homeNoRecentFiles": "Aucun fichier récent",
+  "homeScanDocument": "Scanner un document",
+  "homeScanDocumentDesc": "Extraire du texte à partir de documents via OCR",
+  "homeImportDocument": "Importer un document",
+  "homeImportDocumentDesc": "Parcourir et importer des fichiers depuis votre appareil",
+  "onboardingSkip": "Passer",
+  "onboardingNext": "Suivant",
+  "onboardingGetStarted": "Commencer",
+  "onboardingSlide1Title": "Bienvenue dans Fadocx",
+  "onboardingSlide1Tagline": "Votre compagnon de documents privé tout-en-un",
+  "onboardingSlide1Bullet1": "Visionneuse de documents privée",
+  "onboardingSlide1Bullet2": "Aucun suivi ni données",
+  "onboardingSlide1Bullet3": "Code ouvert",
+  "onboardingSlide2Title": "Support des Formats",
+  "onboardingSlide2Bullet1": "PDF, DOCX, XLSX, CSV, PPT",
+  "onboardingSlide2Bullet2": "Reconnaissance de texte, image et OCR",
+  "onboardingSlide2Bullet3": "Importer et comparer",
+  "onboardingSlide2Bullet4": "Support multilingue",
+  "onboardingSlide3Title": "Prêt à commencer?",
+  "onboardingSlide3Bullet1": "Ouvrez un document depuis votre appareil",
+  "onboardingSlide3Bullet2": "Ou sélectionnez des exemples pour tester",
+  "onboardingSlide3Bullet3": "En savoir plus dans les Paramètres",
+  "homeStatDocuments": "Documents locaux",
   "homeStatStorage": "Stockage",
   "homeStatTimeRead": "Temps de lecture",
   "homeStatLastOpened": "Dernière ouverture : ",
-  "settingsDocumentsSize": "Taille des documents",
-  "settingsCalculating": "Calcul en cours...",
-  "settingsCustomStorage": "Stockage personnalisé",
-  "settingsAppLock": "Verrouillage de l'application",
-  "settingsJoinCommunity": "Rejoindre la communauté",
-  "settingsMoreFromFadsec": "Plus de FadSec Lab",
-  "settingsCopiedInfo": "Copié dans le presse-papiers",
-  "settingsCopyInfo": "Copier les infos",
-  "settingsVersionClipboardInfo": "{appName} v{version} (Build {buildNumber})\nPackage : {packageName}",
-  "settingsShareApp": "Partager avec des amis",
-  "settingsShareMessage": "Découvrez Fadocx !\n\nVisionneuse de documents tout-en-un : PDF, Office, feuilles de calcul, présentations, fichiers de code et extraction de texte OCR — entièrement hors ligne, sans suivi et open source.\n\nhttps://github.com/anonfaded/Fadocx",
-  "settingsShareVia": "Partager via...",
-  "settingsShareWhatsApp": "WhatsApp",
-  "settingsWhatsAppNotInstalled": "WhatsApp n'est pas installé sur cet appareil",
-  "settingsSecurity": "Sécurité",
-  "settingsFadcamDesc": "Suite multimédia Android axée sur la confidentialité : enregistrement vidéo en arrière-plan, dashcam, enregistreur d'écran, diffusion en direct et contrôle à distance — sans publicité et open source.",
-  "settingsQuranCliDesc": "Votre compagnon terminal pour le Saint Coran : lisez, écoutez et générez des sous-titres pour le montage vidéo !",
-  "settingsFadcryptDesc": "Verrouilleur d'applications avancé et élégant multiplateforme : fichiers, dossiers et applications protégés par un chiffrement AES-256-GCM de niveau militaire. Open source, totalement gratuit, sans télémétrie !",
-  "settingsFadcatDesc": "Remplaçant Android logcat léger, riche en fonctionnalités et multiplateforme, sans la lourdeur d'Android Studio. Inclut ADB pour les architectures prises en charge et fonctionne en GUI, CLI ou mode serveur MCP.",
-  "settingsMacosComingSoon": "macOS bientôt disponible",
+  "homePressBackExit": "Appuyez à nouveau pour quitter",
+  "homeImportingSamples": "Importation des fichiers d'exemple…",
+  "homeSamplesImported": "{count, plural, =1{1 fichier d'exemple importé avec succès!} other{{count} fichiers d'exemple importés avec succès!}}",
+  "@homeSamplesImported": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "homeViewFiles": "Afficher les fichiers",
+  "homeFailedImportSamples": "Impossible d'importer les fichiers d'exemple: {error}",
+  "@homeFailedImportSamples": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileMovedToTrash": "{name} a été déplacé vers la corbeille",
+  "@homeFileMovedToTrash": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileInfo": "Infos du fichier",
+  "homeFileName": "Nom",
+  "homeFileType": "Type de fichier",
+  "homeFileSize": "Taille",
+  "homeFileLocation": "Emplacement",
+  "homeFileDateOpened": "Date d’ouverture",
+  "homeFileLastModified": "Dernière modification",
+  "homeFileInTrash": "Dans la corbeille",
+  "homeFileInfoCopied": "Infos du fichier copiées",
+  "homeCopySuffix": " (copie)",
+  "homeCopySuffixCounter": " (copie {counter})",
+  "@homeCopySuffixCounter": {
+    "placeholders": {
+      "counter": {
+        "type": "num"
+      }
+    }
+  },
+  "homeDuplicatedAs": "Dupliqué en tant que {name}",
+  "@homeDuplicatedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedDuplicate": "Impossible de dupliquer le fichier: {error}",
+  "@homeFailedDuplicate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRenameFile": "Renommer le fichier",
+  "homeFileNameLabel": "Nom du fichier",
+  "homeFileAlreadyExists": "Un fichier portant ce nom existe déjà",
+  "homeRenamedTo": "Renommé en {name}",
+  "@homeRenamedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedRename": "Échec du renommage",
+  "homeExport": "Exporter",
+  "homeSaveToDownloads": "Enregistrer dans les Téléchargements",
+  "homeSaveToDownloadsPath": "Téléchargements/Fadocx/{name}",
+  "@homeSaveToDownloadsPath": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeChooseLocation": "Choisir l'emplacement",
+  "homeChooseLocationDesc": "Sélectionnez un répertoire d'enregistrement personnalisé",
+  "homeSavedToDownloads": "Enregistré dans Téléchargements/Fadocx/{name}",
+  "@homeSavedToDownloads": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSavedTo": "Enregistré dans {path}",
+  "@homeSavedTo": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedExport": "Échec de l’exportation du fichier",
+  "homeChooseSaveLocation": "Choisir l'emplacement d'enregistrement",
+  "homeConvertComingSoon": "La fonction de conversion arrive bientôt!",
+  "homeFadDriveComingSoon": "FadDrive arrive bientôt !",
+  "homePresentationsTooltip": "À venir bientôt",
+  "homeErrorPrefix": "Erreur : {error}",
+  "@homeErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryTitle": "Bibliothèque",
+  "librarySearchHint": "Rechercher dans la bibliothèque...",
+  "librarySelected": "{count} sélectionné(s)",
+  "@librarySelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeleteSelected": "Supprimer la sélection ?",
+  "libraryDeleteConfirm": "Déplacer {count} fichiers vers la corbeille ? Vous pourrez les restaurer plus tard.",
+  "@libraryDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryItemsMovedToTrash": "{count} éléments déplacés vers la corbeille",
+  "@libraryItemsMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryErrorLoading": "Erreur lors du chargement de la bibliothèque : {error}",
+  "@libraryErrorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryItemCount": "{count} éléments",
+  "@libraryItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeselectAll": "Tout désélectionner",
+  "librarySelectAll": "Tout sélectionner",
+  "libraryNoCategoryFound": "Aucun {category} trouvé",
+  "@libraryNoCategoryFound": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryNoDocuments": "Aucun document",
+  "libraryAdjustSearch": "Essayez d'ajuster votre recherche ou vos filtres",
+  "libraryDocumentsAppearHere": "Vos documents apparaîtront ici",
   "browseTitle": "Importer des documents",
   "browseBack": "Retour",
   "browseSearchHint": "Rechercher des documents...",
@@ -240,14 +411,71 @@
   "browseOpenSettings": "Ouvrir les paramètres",
   "browseAccessStillDisabled": "L'accès à tous les fichiers est toujours désactivé. Veuillez l'activer dans les paramètres pour continuer.",
   "browseNoDirectories": "Aucun répertoire de documents trouvé sur l'appareil",
-  "browseErrorPrefix": "Erreur : {error}",
+  "browseErrorPrefix": "Erreur lors de l'import: {error}",
+  "@browseErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "browseSortBy": "Trier par",
   "browseImportedFiles": "{count, plural, =1{1 fichier importé} other{{count} fichiers importés}}",
+  "@browseImportedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashTitle": "Corbeille",
+  "trashEmpty": "La corbeille est vide",
+  "trashEmptySubtitle": "Les fichiers supprimés apparaîtront ici",
+  "trashErrorLoading": "Erreur lors du chargement de la corbeille",
+  "trashFilesSelected": "{count} sélectionnés",
+  "@trashFilesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashFilesLabel": "Fichiers",
+  "trashSelect": "Sélectionner",
+  "trashFileRestored": "Fichier restauré avec succès",
+  "trashDeletePermanently": "Supprimer définitivement",
+  "trashDeletePermanentlyConfirm": "Supprimer définitivement?",
+  "trashDeletePermanentlyMessage": "Vous êtes sur le point de supprimer définitivement {count} fichier(s). Cette action ne peut pas être annulée.",
+  "@trashDeletePermanentlyMessage": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashDeleteTypeConfirm": "Tapez DELETE en majuscules pour confirmer:",
+  "trashDeleteHint": "DELETE",
+  "trashFilesPermanentlyDeleted": "{count} fichier(s) supprimé(s) définitivement",
+  "@trashFilesPermanentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "whatsNewTitle": "Nouveautés",
   "whatsNewWhatsIncluded": "Ce qui est inclus",
   "whatsNewPlanned": "Prévu",
   "whatsNewReleasedToday": "Publié aujourd'hui",
   "whatsNewReleasedYesterday": "Publié hier",
   "whatsNewReleasedDate": "Publié {date}",
+  "@whatsNewReleasedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "whatsNewDocAndSheets": "Documents et feuilles de calcul",
   "whatsNewDocAndSheetsDesc": "Affichez des PDF, documents Word, feuilles Excel et plus encore, le tout localement sur votre appareil.",
   "whatsNewOcrAi": "OCR intelligent et IA sur l'appareil",
@@ -262,7 +490,7 @@
   "whatsNewFileManagementDesc": "Renommez, dupliquez, exportez et supprimez vos documents facilement.",
   "whatsNewThemes": "Thèmes clair et sombre",
   "whatsNewThemesDesc": "Choisissez l'apparence qui vous convient : mode sombre la nuit, mode clair le jour.",
-  "whatsNewFadDrive": "FadDrive",
+  "whatsNewFadDrive": "Intégration FadDrive",
   "whatsNewFadDriveDesc": "Synchronisation cloud pour vos documents : accédez-y partout, à tout moment.",
   "whatsNewEditing": "Édition de documents",
   "whatsNewEditingDesc": "Effectuez des modifications rapides de vos documents directement dans Fadocx.",
@@ -274,12 +502,12 @@
   "whatsNewAmoledDesc": "Thème noir pur pour les écrans AMOLED — économise la batterie en mode sombre.",
   "whatsNewMoreOcr": "Plus de langues OCR",
   "whatsNewMoreOcrDesc": "Prise en charge de langues OCR supplémentaires et précision de reconnaissance améliorée.",
-  "whatsNewOfflineFirst": "Une visionneuse de documents pensée hors ligne et conçue pour la confidentialité. Pas de comptes, pas de suivi, pas d'internet requis.",
+  "whatsNewOfflineFirst": "Hors Ligne en Premier",
   "whatsNewThankYou": "Merci d'utiliser Fadocx",
   "whatsNewThankYouDesc": "Si vous trouvez Fadocx utile, envisagez de soutenir son développement. Votre contribution nous aide à continuer de créer des outils respectueux de la vie privée.",
   "drawerWhatNew": "Nouveautés",
   "drawerRecentFiles": "Fichiers récents",
-  "drawerVisible": "Visible",
+  "drawerVisible": "Visible maintenant",
   "drawerHidden": "Masqué",
   "drawerUnlockBenefits": "Débloquez des avantages exclusifs",
   "fileActionRename": "Renommer",
@@ -296,13 +524,469 @@
   "fileActionUploadDesc": "Synchroniser avec le stockage cloud",
   "fileActionFileInfo": "Infos du fichier",
   "fileActionSubtitle": "Actions et gestion du fichier",
+  "updateAvailableTitle": "Mise à jour disponible",
+  "updateAvailableSubtitle": "Une nouvelle version de Fadocx est prête à télécharger",
+  "updateStableRelease": "Version Stable",
+  "updateStableDesc": "Version stable et testée pour une utilisation en production",
+  "updateBetaRelease": "Version Bêta",
+  "updateBetaDesc": "Accès anticipé aux nouvelles fonctionnalités, peut contenir des erreurs",
+  "updateMaybeLater": "Peut-être plus tard",
+  "updateCurrent": "Actuel",
+  "updateNew": "Nouveau",
+  "updateVisitGithub": "Visiter GitHub",
+  "updateBetaInfo": "La bêta de Fadocx est une application autonome qui peut être installée à côté de la version stable. Elle n’interférera pas avec votre application stable ni avec ses données.\n\nInstallez la bêta pour tester les nouvelles fonctionnalités avant leur arrivée dans la version stable.",
+  "updateBannerStable": "Mise à jour stable",
+  "updateBannerBeta": "Mise à jour bêta",
+  "settingsAppearance": "Apparence",
+  "settingsStorage": "Stockage",
+  "settingsDocumentsSize": "Taille des documents",
+  "settingsCalculating": "Calcul en cours...",
+  "settingsCustomStorage": "Stockage personnalisé",
+  "settingsUnknown": "Inconnu",
+  "settingsStorageDetails": "Stockage",
+  "settingsStoragePdfs": "Fichiers PDF",
+  "settingsStorageDocs": "Documents",
+  "settingsStorageSheets": "Feuilles",
+  "settingsStoragePresentations": "Présentations",
+  "settingsStorageCode": "Code source",
+  "settingsStorageScans": "Numérisations",
+  "settingsStorageImages": "Images locales",
+  "settingsStorageOther": "Autres",
+  "settingsStorageInfo": "Les documents sont stockés dans un dossier privé sur votre appareil et ne peuvent pas être consultés par d’autres applications",
+  "settingsStoragePrivateFolderInfo": "Les documents sont stockés dans un dossier privé, masqué aux autres applications et gestionnaires de fichiers. Seul Fadocx peut y accéder.",
+  "settingsStorageDeleteInfo": "Supprimez les documents depuis la zone de danger dans les paramètres",
+  "settingsStorageEmpty": "Aucun document",
+  "settingsStorageFailedLoad": "Échec du chargement des données de stockage",
+  "settingsUpdates": "Mises à jour",
+  "settingsAutoUpdateCheck": "Vérification automatique des mises à jour",
+  "settingsReplayOnboarding": "Revoir l'introduction",
+  "settingsReplayOnboardingDesc": "Afficher les diapositives d'introduction au prochain lancement",
+  "settingsEnabled": "Activé",
+  "settingsDisabled": "Désactivé",
+  "settingsAppLock": "Verrouillage de l'application",
+  "settingsAbout": "À propos",
+  "settingsVersion": "Version de l’app",
+  "settingsSourceCode": "Code Source",
+  "settingsContact": "Contact",
+  "settingsJoinCommunity": "Rejoindre la communauté",
+  "settingsPrivacyPolicy": "Politique de confidentialité",
+  "settingsMoreFromFadsec": "Plus de FadSec Lab",
+  "settingsFadocxDesc": "Votre visionneuse de documents",
+  "settingsDangerZone": "Zone de danger",
+  "settingsTrash": "Corbeille",
+  "settingsTrashDesc": "Afficher les fichiers supprimés",
+  "settingsResetSettings": "Réinitialiser les paramètres",
+  "settingsResetSettingsDesc": "Restaurer tous les paramètres par défaut",
+  "settingsResetDone": "Paramètres réinitialisés",
+  "settingsRetry": "Réessayer",
+  "settingsChooseTheme": "Choisir le thème",
+  "settingsSelectLanguage": "Choisir la langue",
+  "settingsCheckForUpdates": "Vérifier les mises à jour",
+  "settingsCheckingUpdates": "Vérification des mises à jour…",
+  "settingsNoInternet": "Pas de connexion Internet. Vérifiez votre réseau et réessayez.",
+  "settingsUpToDate": "Vous êtes à jour",
+  "settingsUpToDateDesc": "v{version} est la dernière version.",
+  "@settingsUpToDateDesc": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBetaAvailable": "Bêta v{version} disponible",
+  "@settingsBetaAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVersionWithBuild": "Version {version} (build {buildNumber})",
+  "@settingsVersionWithBuild": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedInfo": "Copié dans le presse-papiers",
+  "settingsCopyInfo": "Copier les Informations",
+  "settingsVersionClipboardInfo": "{appName} v{version} (Build {buildNumber})\nPackage : {packageName}",
+  "@settingsVersionClipboardInfo": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      },
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsShareApp": "Partager avec des amis",
+  "settingsShareMessage": "Découvrez Fadocx !\n\nVisionneuse de documents tout-en-un : PDF, Office, feuilles de calcul, présentations, fichiers de code et extraction de texte OCR — entièrement hors ligne, sans suivi et open source.\n\nhttps://github.com/anonfaded/Fadocx",
+  "settingsShareVia": "Partager via...",
+  "settingsShareWhatsApp": "WhatsApp",
+  "settingsWhatsAppNotInstalled": "WhatsApp n'est pas installé sur cet appareil",
+  "settingsPrivacyOffline": "100 % hors ligne",
+  "settingsPrivacyLocalStorage": "Stockage local uniquement",
+  "settingsPrivacyOnDevice": "IA sur l’appareil",
+  "settingsPrivacyOpenSource": "Open source",
+  "settingsPrivacyNoAds": "Aucune publicité",
+  "settingsPrivacyByDesign": "Nous croyons à la confidentialité dès la conception.",
+  "settingsPrivacyTransparency": "Fadocx a été construit avec transparence. Vos documents vous appartiennent – pas à nous.",
+  "settingsViewSourceCode": "Voir le code source",
+  "settingsSecurity": "Sécurité",
+  "settingsStorageFilesSummary": "{size} • {count} fichiers",
+  "@settingsStorageFilesSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "settingsErrorPrefix": "Erreur : {error}",
+  "@settingsErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedText": "Copié: {text}",
+  "@settingsCopiedText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVisitGithub": "Visiter GitHub",
+  "settingsMadeWith": "Créé avec",
+  "settingsAt": "à",
+  "settingsIn": "dans",
+  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
+  "settingsTypeToConfirm": "Tapez \"{text}\" pour confirmer:",
+  "@settingsTypeToConfirm": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "Confirmer",
+  "settingsPrivacyOfflineDesc": "Tout le traitement se fait sur votre appareil. Internet non requis.",
+  "settingsPrivacyLocalStorageDesc": "Vos documents restent sur votre appareil. Rien n'est téléchargé.",
+  "settingsPrivacyOnDeviceDesc": "Utilise OpenCV + Tesseract pour l'OCR. L'IA fonctionne localement.",
+  "settingsPrivacyOpenSourceDesc": "Le code est public. Vérifiez-le vous-même sur GitHub.",
+  "settingsPrivacyNoAdsDesc": "Pas de publicités. Pas de suivi. Pas d'analytique. Pas de crash logs. Zéro télémétrie.",
+  "settingsFadcamDesc": "Capture d'écran et Forensique",
+  "settingsQuranCliDesc": "Quran CLI",
+  "settingsFadcryptDesc": "Kit de Cryptographie",
+  "settingsFadcatDesc": "Kit de Dispositifs Android",
+  "settingsMacosComingSoon": "Version macOS à venir",
+  "settingsOpenInBrowser": "Ouvrir dans le navigateur",
+  "viewerFindHint": "Rechercher...",
+  "viewerTypeToFind": "Tapez pour rechercher",
+  "viewerSidebarPages": "Pages du document",
+  "viewerSidebarSearch": "Recherche",
+  "viewerSidebarTOC": "Sommaire",
+  "viewerSidebarNotes": "Notes PDF",
+  "viewerSidebarBookmarks": "Signets",
+  "viewerSidebarNotesDesc": "Ajoutez des notes et annotations aux pages PDF",
+  "viewerSidebarBookmarksDesc": "Enregistrez et organisez vos pages favorites",
+  "viewerCellCopied": "Cellule {value} copiée",
+  "@viewerCellCopied": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerGoToPage": "Aller à la page",
+  "viewerGoToPageHint": "Saisissez le numéro de page (1-{totalPages})",
+  "@viewerGoToPageHint": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerGo": "Aller",
+  "viewerInvalidPage": "Veuillez saisir un nombre entre 1 et {totalPages}",
+  "@viewerInvalidPage": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerNoContent": "Aucun contenu",
+  "viewerResetZoom": "Réinitialiser le zoom",
+  "viewerCopyTextTitle": "Copier le texte",
+  "viewerCopyTextChoose": "Choisissez quoi copier :",
+  "viewerCopyPageOnly": "Page {page} uniquement",
+  "@viewerCopyPageOnly": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyAllPages": "Toutes les {totalPages} pages",
+  "@viewerCopyAllPages": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerExtractingText": "Extraction du texte depuis {label}...",
+  "@viewerExtractingText": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerNoTextFound": "Aucun contenu textuel trouvé",
+  "viewerPageLabel": "Page n° {currentPage}",
+  "@viewerPageLabel": {
+    "placeholders": {
+      "currentPage": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLabel": "{totalPages} pages au total",
+  "@viewerAllPagesLabel": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTextExtracted": "Texte extrait de {pageLabel}.",
+  "@viewerTextExtracted": {
+    "placeholders": {
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerWordsFound": "{count} mots trouvés",
+  "@viewerWordsFound": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedWords": "{count} mots copiés depuis {pageLabel}",
+  "@viewerCopiedWords": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCopyAllTextTitle": "Copier tout le texte",
+  "viewerCopyAllTextConfirm": "Cela extraira le texte des {pageCount} pages et le copiera dans le presse-papiers.",
+  "@viewerCopyAllTextConfirm": {
+    "placeholders": {
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedAllPages": "{count} mots copiés depuis {pageCount} pages",
+  "@viewerCopiedAllPages": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyDocumentText": "Cela copiera tout le contenu du document dans le presse-papiers.",
+  "viewerWordsLines": "{words} mots, {lines} lignes",
+  "@viewerWordsLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerWordsOnly": "{count} mots",
+  "@viewerWordsOnly": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerLinesOnly": "{lines} lignes",
+  "@viewerLinesOnly": {
+    "placeholders": {
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedFromLines": "{words} mots copiés depuis {lines} lignes",
+  "@viewerCopiedFromLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCharactersCount": "{count} caractères",
+  "@viewerCharactersCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyExtractedTitle": "Copier le texte extrait",
+  "viewerCopyExtractedDesc": "Copier le texte extrait de cette image par OCR.",
+  "viewerCopiedWordsChars": "{words} mots copiés ({chars} caractères)",
+  "@viewerCopiedWordsChars": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "chars": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerErrorAccessText": "Erreur d’accès au texte extrait",
+  "viewerNoTextForImage": "Aucun texte extrait disponible pour cette image",
+  "viewerExtractingAllPages": "Extraction du texte de toutes les pages...",
+  "viewerTextExtractionUnavailable": "Extraction de texte non disponible",
+  "viewerNoPdfText": "Aucun texte trouvé dans ce PDF",
+  "viewerNoTextAvailable": "Aucun contenu textuel disponible",
+  "viewerReadingTime": "{minutes} min de lecture",
+  "@viewerReadingTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeSingle": "1 min de lecture",
+  "viewerCopy": "Copier",
+  "viewerErrorPrefix": "Erreur : {error}",
+  "@viewerErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCellValue": "Cellule {cell}",
+  "@viewerCellValue": {
+    "placeholders": {
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerLowerPageLabel": "page n° {page}",
+  "@viewerLowerPageLabel": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLower": "toutes les pages",
+  "viewerCopied": "Copié",
+  "viewerCopyValue": "Copier la valeur",
+  "viewerToggleFullscreen": "Basculer en plein écran",
+  "viewerInvert": "Inverser",
+  "viewerText": "Texte",
+  "viewerSyntax": "Syntaxe",
+  "viewerFont": "Police",
+  "viewerFontStyle": "Style de police",
+  "viewerMonospaceCourier": "Monospace (Courier)",
+  "viewerSystemUbuntu": "System (Ubuntu)",
+  "viewerEdit": "Modifier",
+  "viewerEditWithEngine": "Modifier avec Fadocx Engine",
+  "viewerEditWithEngineDesc": "Ouvrez cette feuille de calcul dans le moteur de rendu Fadocx pour un aperçu visuel fidèle avec mise en forme, graphiques et disposition complets.",
+  "viewerEditWithEngineNote": "Remarque : l’édition interactive arrivera dans une future mise à jour.",
+  "viewerNotNow": "Pas maintenant",
+  "viewerGotIt": "Compris",
+  "viewerErrorLoadingDocument": "Erreur lors du chargement du document",
+  "viewerGoBack": "Retour",
+  "viewerReadingTimeMinutes": "{count, plural, =1{1 minute de lecture} other{{count} minutes de lecture}}",
+  "@viewerReadingTimeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeHoursMinutes": "{hours} h {minutes} min de lecture",
+  "@viewerReadingTimeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "scannerTitle": "Scanner de documents",
+  "scannerCapture": "Capturer",
+  "scannerProcessing": "Traitement",
+  "scannerResults": "Résultats",
   "scannerInitializingCamera": "Initialisation de la caméra...",
   "scannerDocumentDetected": "Document détecté — restez stable",
   "scannerKeepDocumentFlat": "Gardez le document droit et à plat pour de meilleurs résultats",
   "scannerUpload": "Téléverser",
   "scannerFailedOpenImage": "Impossible d'ouvrir l'image : {error}",
-  "scannerFlash": "Flash",
+  "@scannerFailedOpenImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scannerFlash": "Flash appareil",
   "scannerFailedTorch": "Impossible de basculer la lampe : {error}",
+  "@scannerFailedTorch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerStartingCamera": "Démarrage de la caméra...",
   "scannerCameraUnavailable": "Caméra indisponible",
   "scannerCameraUnavailableDesc": "Impossible d'initialiser la caméra",
@@ -316,264 +1000,141 @@
   "scannerNoTextExtracted": "(Aucun texte extrait)",
   "scannerDetectedLines": "Lignes détectées",
   "scannerTextCopied": "Texte copié dans le presse-papiers",
-  "appDescription": "Document Viewer",
-  "openFile": "Open File",
-  "openFileTooltip": "Browse and open a document",
-  "pdfFile": "PDF File",
-  "docxFile": "Word Document",
-  "xlsxFile": "Excel Spreadsheet",
-  "csvFile": "CSV File",
-  "unknownFile": "Unknown File",
-  "page": "Page",
-  "pageOf": "of",
-  "jumpToPage": "Jump to page",
-  "sheet": "Sheet",
-  "corruptedFile": "File appears to be corrupted",
-  "appVersion": "App Version",
-  "clearRecentFiles": "Clear recent files",
-  "backButton": "Back",
-  "emptyTitle": "No Documents",
-  "emptyMessage": "Start by opening a document from your device",
-  "startBrowsing": "Start Browsing",
-  "languageChanged": "Language changed to English",
-  "privacyDescription": "Fadocx is a document viewer. Your files are stored locally on your device and are never transmitted to any server.",
-  "aboutDescription": "Fadocx v1.0.0 - Your private document viewer. Built to respect your privacy.",
-  "tableRows": "rows",
-  "tableEmpty": "No data to display",
-  "tableNoContent": "Sheet is empty",
-  "sheetEmpty": "Sheet is empty",
-  "noTableData": "No table data",
-  "noSpreadsheetData": "No spreadsheet data",
-  "rowsSymbol": "rows",
-  "colsSymbol": "cols",
-  "noSlidesFound": "No slides found",
-  "slidesCount": "slides",
-  "pptUnsupported": "PPT file parsed but contains no slides",
-  "odpUnsupported": "ODP file parsed but contains no slides or unreadable content",
-  "noTextContent": "No text content found",
-  "couldNotParse": "Could not parse file",
-  "file": "File",
-  "slides": "Slide",
-  "previewNotSupported": "Preview not yet supported",
-  "openWithSystemApp": "Open with System App",
-  "systemAppNotImplemented": "System app opening not yet implemented",
-  "type": "Type",
-  "fileNotFoundMessage": "File not found",
-  "fileTooLarge": "File size exceeds maximum limit (100MB)",
-  "errorLoadingFile": "Error loading file",
-  "docxPreviewNotSupported": "DOCX preview not yet fully supported",
-  "docParseError": "Could not parse DOC file. Try converting to DOCX.",
-  "xlsxParseError": "Could not parse XLSX file",
-  "xlsParseError": "Could not parse XLS file. Try converting to XLSX.",
-  "csvParseError": "Could not parse CSV file",
-  "odtParseError": "Could not parse ODT file",
-  "odsParseError": "Could not parse ODS file",
-  "odpParseError": "Could not parse ODP file",
-  "pptParseError": "Could not parse PPT file",
-  "rtfParseError": "Could not parse RTF file",
-  "txtFileEmpty": "File is empty",
-  "unsupportedFormat": "File format is not supported yet",
-  "txtLoaded": "TXT",
-  "charactersLoaded": "characters",
-  "becomeAPatron": "Become a Patron",
-  "newBadge": "NEW",
-  "homeDocumentManagement": "Gestion des documents",
-  "homeImportingSamples": "Importing sample files...",
-  "homeSamplesImported": "{count, plural, =1{1 sample file imported successfully!} other{{count} sample files imported successfully!}}",
-  "homeViewFiles": "View Files",
-  "homeFailedImportSamples": "Failed to import sample files: {error}",
-  "homeFileMovedToTrash": "{name} moved to trash",
-  "homeFileInfo": "Infos du fichier",
-  "homeFileName": "Nom",
-  "homeFileType": "Type",
-  "homeFileSize": "Taille",
-  "homeFileLocation": "Emplacement",
-  "homeFileDateOpened": "Date d’ouverture",
-  "homeFileLastModified": "Dernière modification",
-  "homeFileInTrash": "Dans la corbeille",
-  "homeFileInfoCopied": "Infos du fichier copiées",
-  "homeCopySuffix": " (copy)",
-  "homeCopySuffixCounter": " (copy {counter})",
-  "homeDuplicatedAs": "Duplicated as {name}",
-  "homeFailedDuplicate": "Failed to duplicate file: {error}",
-  "homeRenameFile": "Rename file",
-  "homeFileNameLabel": "File name",
-  "homeFileAlreadyExists": "A file with this name already exists",
-  "homeRenamedTo": "Renamed to {name}",
-  "homeFailedRename": "Failed to rename file",
-  "homeExport": "Export",
-  "homeSaveToDownloads": "Save to Downloads",
-  "homeSaveToDownloadsPath": "Download/Fadocx/{name}",
-  "homeChooseLocation": "Choose location",
-  "homeChooseLocationDesc": "Pick a custom save directory",
-  "homeSavedToDownloads": "Saved to Download/Fadocx/{name}",
-  "homeSavedTo": "Saved to {path}",
-  "homeFailedExport": "Failed to export file",
-  "homeChooseSaveLocation": "Choose save location",
-  "homeConvertComingSoon": "Convert feature coming soon!",
-  "homeFadDriveComingSoon": "FadDrive coming soon!",
-  "homePresentationsTooltip": "Coming Soon",
-  "homeErrorPrefix": "Error: {error}",
-  "librarySelected": "{count} selected",
-  "libraryDeleteSelected": "Delete selected?",
-  "libraryDeleteConfirm": "Move {count} files to trash? You can restore them later.",
-  "libraryItemsMovedToTrash": "{count} items moved to trash",
-  "libraryErrorLoading": "Error loading library: {error}",
-  "libraryItemCount": "{count} items",
-  "libraryDeselectAll": "Deselect all",
-  "librarySelectAll": "Select all",
-  "libraryNoCategoryFound": "No {category} found",
-  "trashErrorLoading": "Error loading trash",
-  "trashFilesSelected": "{count} selected",
-  "trashFilesLabel": "files",
-  "trashFileRestored": "File restored successfully",
-  "trashDeletePermanentlyConfirm": "Delete Permanently?",
-  "trashDeletePermanentlyMessage": "You are about to permanently delete {count} file(s). This action cannot be undone.",
-  "trashDeleteTypeConfirm": "Type DELETE in capital letters to confirm:",
-  "trashDeleteHint": "DELETE",
-  "trashFilesPermanentlyDeleted": "{count} file(s) permanently deleted",
-  "updateAvailableTitle": "Mise à jour disponible",
-  "updateAvailableSubtitle": "Une nouvelle version de Fadocx est prête à télécharger",
-  "updateStableRelease": "Version stable",
-  "updateStableDesc": "Version stable et testée pour une utilisation en production",
-  "updateBetaRelease": "Version bêta",
-  "updateBetaDesc": "Accès anticipé aux nouvelles fonctionnalités, peut contenir des erreurs",
-  "updateMaybeLater": "Peut-être plus tard",
-  "updateCurrent": "Actuel",
-  "updateNew": "Nouveau",
-  "updateVisitGithub": "Visiter GitHub",
-  "updateBetaInfo": "The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.",
-  "updateBannerStable": "Mise à jour stable",
-  "updateBannerBeta": "Mise à jour bêta",
-  "settingsUnknown": "Unknown",
-  "settingsStorageDetails": "Stockage",
-  "settingsStoragePdfs": "PDF",
-  "settingsStorageDocs": "Documents",
-  "settingsStorageSheets": "Feuilles",
-  "settingsStoragePresentations": "Présentations",
-  "settingsStorageCode": "Code",
-  "settingsStorageScans": "Numérisations",
-  "settingsStorageImages": "Images",
-  "settingsStorageOther": "Autres",
-  "settingsStorageInfo": "Les documents sont stockés dans un dossier privé sur votre appareil et ne peuvent pas être consultés par d’autres applications",
-  "settingsStoragePrivateFolderInfo": "Les documents sont stockés dans un dossier privé, masqué aux autres applications et gestionnaires de fichiers. Seul Fadocx peut y accéder.",
-  "settingsStorageDeleteInfo": "Supprimez les documents depuis la zone de danger dans les paramètres",
-  "settingsStorageEmpty": "Aucun document",
-  "settingsStorageFailedLoad": "Échec du chargement des données de stockage",
-  "settingsFadocxDesc": "Your private document viewer",
-  "settingsRetry": "Retry",
-  "settingsCheckingUpdates": "Checking for updates…",
-  "settingsNoInternet": "No internet connection. Check your network and try again.",
-  "settingsUpToDate": "You're up to date",
-  "settingsUpToDateDesc": "v{version} is the latest version.",
-  "settingsBetaAvailable": "Beta v{version} available",
-  "settingsVersionWithBuild": "Version {version} (Build {buildNumber})",
-  "settingsPrivacyOffline": "100% Offline",
-  "settingsPrivacyLocalStorage": "Local Storage Only",
-  "settingsPrivacyOnDevice": "On-Device AI",
-  "settingsPrivacyOpenSource": "Open Source",
-  "settingsPrivacyNoAds": "No Ads",
-  "settingsPrivacyByDesign": "We believe in privacy by design.",
-  "settingsPrivacyTransparency": "Fadocx is built with transparency. Your documents are your business - not ours.",
-  "settingsViewSourceCode": "View Source Code",
-  "settingsStorageFilesSummary": "{size} • {count} files",
-  "settingsErrorPrefix": "Error: {error}",
-  "settingsCopiedText": "Copied: {text}",
-  "settingsVisitGithub": "Visit GitHub",
-  "settingsMadeWith": "Made with",
-  "settingsAt": "at",
-  "settingsIn": "in",
-  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
-  "settingsTypeToConfirm": "Type \"{text}\" to confirm:",
-  "settingsPrivacyOfflineDesc": "All processing happens on your device. No internet required.",
-  "settingsPrivacyLocalStorageDesc": "Your documents stay on your device. Nothing is uploaded.",
-  "settingsPrivacyOnDeviceDesc": "Uses OpenCV + Tesseract for OCR. AI runs locally.",
-  "settingsPrivacyOpenSourceDesc": "Code is public. Audit it yourself on GitHub.",
-  "settingsPrivacyNoAdsDesc": "No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.",
-  "settingsOpenInBrowser": "Open in Browser",
-  "viewerFindHint": "Find...",
-  "viewerTypeToFind": "Type to find",
-  "viewerSidebarPages": "Pages",
-  "viewerSidebarSearch": "Search",
-  "viewerSidebarTOC": "TOC",
-  "viewerSidebarNotes": "Notes",
-  "viewerSidebarBookmarks": "Bookmarks",
-  "viewerSidebarNotesDesc": "Add notes and annotations to PDF pages",
-  "viewerSidebarBookmarksDesc": "Save and organize your favorite pages",
-  "viewerCellCopied": "Cell {value} copied",
-  "viewerGoToPage": "Go to Page",
-  "viewerGoToPageHint": "Enter page number (1-{totalPages})",
-  "viewerGo": "Go",
-  "viewerInvalidPage": "Please enter a number between 1 and {totalPages}",
-  "viewerNoContent": "No content",
-  "viewerResetZoom": "Reset zoom",
-  "viewerCopyTextTitle": "Copy Text",
-  "viewerCopyTextChoose": "Choose what to copy:",
-  "viewerCopyPageOnly": "Page {page} only",
-  "viewerCopyAllPages": "All {totalPages} pages",
-  "viewerExtractingText": "Extracting text from {label}...",
-  "viewerNoTextFound": "No text content found",
-  "viewerPageLabel": "Page {currentPage}",
-  "viewerAllPagesLabel": "{totalPages} pages",
-  "viewerTextExtracted": "Text extracted from {pageLabel}.",
-  "viewerWordsFound": "{count} words found",
-  "viewerCopiedWords": "Copied {count} words from {pageLabel}",
-  "viewerCopyAllTextTitle": "Copy All Text",
-  "viewerCopyAllTextConfirm": "This will extract text from all {pageCount} pages and copy to clipboard.",
-  "viewerCopiedAllPages": "Copied {count} words from {pageCount} pages",
-  "viewerCopyDocumentText": "This will copy the entire document content to clipboard.",
-  "viewerWordsLines": "{words} words, {lines} lines",
-  "viewerWordsOnly": "{count} words",
-  "viewerLinesOnly": "{lines} lines",
-  "viewerCopiedFromLines": "Copied {words} words from {lines} lines",
-  "viewerCharactersCount": "{count} characters",
-  "viewerCopyExtractedTitle": "Copy Extracted Text",
-  "viewerCopyExtractedDesc": "Copy text extracted from this image via OCR.",
-  "viewerCopiedWordsChars": "Copied {words} words ({chars} characters)",
-  "viewerErrorAccessText": "Error accessing extracted text",
-  "viewerNoTextForImage": "No extracted text available for this image",
-  "viewerExtractingAllPages": "Extracting text from all pages...",
-  "viewerTextExtractionUnavailable": "Text extraction not available",
-  "viewerNoPdfText": "No text found in this PDF",
-  "viewerNoTextAvailable": "No text content available",
-  "viewerReadingTime": "{minutes} min read",
-  "viewerReadingTimeSingle": "1 min read",
-  "viewerCopy": "Copy",
-  "viewerErrorPrefix": "Error: {error}",
-  "viewerCellValue": "Cell {cell}",
-  "viewerLowerPageLabel": "page {page}",
-  "viewerAllPagesLower": "all pages",
-  "viewerCopied": "Copied",
-  "viewerCopyValue": "Copy value",
-  "viewerToggleFullscreen": "Toggle fullscreen",
-  "viewerInvert": "Invert",
-  "viewerText": "Text",
-  "viewerSyntax": "Syntax",
-  "viewerFont": "Font",
-  "viewerFontStyle": "Font Style",
-  "viewerMonospaceCourier": "Monospace (Courier)",
-  "viewerSystemUbuntu": "System (Ubuntu)",
-  "viewerEdit": "Edit",
-  "viewerEditWithEngine": "Edit with Fadocx Engine",
-  "viewerEditWithEngineDesc": "Open this spreadsheet in the Fadocx rendering engine for a faithful visual preview with full formatting, charts, and layout fidelity.",
-  "viewerEditWithEngineNote": "Note: Interactive editing is coming in a future update.",
-  "viewerNotNow": "Not Now",
-  "viewerGotIt": "Got It",
-  "viewerErrorLoadingDocument": "Error loading document",
-  "viewerGoBack": "Go Back",
-  "viewerReadingTimeMinutes": "{count, plural, =1{1 minute read} other{{count} minutes read}}",
-  "viewerReadingTimeHoursMinutes": "{hours}h {minutes}m read",
-  "linkTileCopiedToClipboard": "Copied to clipboard",
-  "linkTileCouldNotOpen": "Could not open {value}",
-  "librarySortBy": "Sort by",
-  "librarySortLatest": "Latest",
-  "librarySortOldest": "Oldest",
-  "librarySortLargest": "Largest",
-  "librarySortSmallest": "Smallest",
-  "homeDeleteFile": "Delete file?",
-  "homeDeleteFileConfirm": "Move \"{name}\" to trash? You can restore it later.",
-  "homeCopiedCharactersToClipboard": "Copied {count} characters to clipboard",
+  "scannerCopyAll": "Tout copier",
+  "scannerNewScan": "Nouveau scan",
+  "linkTileCopy": "Copier",
+  "linkTileCopiedToClipboard": "Copié dans le presse-papiers",
+  "linkTileSendEmail": "Envoyer un e-mail",
+  "linkTileOpenInBrowser": "Ouvrir dans le navigateur",
+  "linkTileCouldNotOpen": "Impossible d’ouvrir {value}",
+  "@linkTileCouldNotOpen": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySortBy": "Trier par",
+  "librarySortLatest": "Plus récents",
+  "librarySortOldest": "Plus anciens",
+  "librarySortLargest": "Plus grands",
+  "librarySortSmallest": "Plus petits",
+  "homeDeleteFile": "Supprimer le fichier?",
+  "homeDeleteFileConfirm": "Déplacer \"{name}\" vers la corbeille? Vous pouvez le restaurer ultérieurement.",
+  "@homeDeleteFileConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCopiedCharactersToClipboard": "{count} caractères copiés dans le presse-papiers",
+  "@homeCopiedCharactersToClipboard": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "homeFileInTrashDetail": "Dans la corbeille : oui (supprimé le : {date})",
-  "homeUnknown": "unknown",
+  "@homeFileInTrashDetail": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeUnknown": "inconnu",
+  "routeNotFound": "Itinéraire introuvable : {path}",
+  "@routeNotFound": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "routeGoHome": "Accueil",
+  "routeInvalidDocumentPath": "Chemin de document invalide",
+  "pdfCopyTextTitle": "Copier le texte PDF",
+  "pdfExtractingText": "Extraction du texte...",
+  "pdfExtractingTextProgress": "Extraction du texte... ({current}/{total} pages)",
+  "@pdfExtractingTextProgress": {
+    "placeholders": {
+      "current": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfErrorExtractingText": "Erreur lors de l'extraction du texte",
+  "pdfWordCount": "Nombre de mots : {count}",
+  "@pdfWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfNoTextFound": "Aucun texte trouvé dans le PDF",
+  "pdfFullTextCopied": "Texte complet du PDF copié dans le presse-papiers",
+  "pdfPasswordRequired": "Mot de passe PDF requis",
+  "pdfPasswordDesc": "Ce PDF est protégé par un mot de passe. Entrez le mot de passe pour le déverrouiller.",
+  "pdfPasswordLabel": "Mot de passe",
+  "pdfUnlock": "Déverrouiller",
+  "pdfSearchHint": "Rechercher dans le PDF...",
+  "pdfTextCannotBeExtracted": "Le texte ne peut pas être extrait de cette page",
+  "pdfLoadingPageTexts": "Chargement des textes des pages...",
+  "pdfPageCopied": "Texte de la page {page} copié dans le presse-papiers",
+  "@pdfPageCopied": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTooltipSidebar": "Barre latérale",
+  "viewerTooltipFirst": "Premier",
+  "viewerTooltipLast": "Dernier",
+  "viewerTooltipCopyPageText": "Copier le texte de la page",
+  "textDocSearchHint": "Rechercher du texte...",
+  "textDocSearchPrevResult": "Résultat précédent",
+  "textDocSearchNextResult": "Résultat suivant",
+  "imageFailedToLoad": "Échec du chargement de l'image",
+  "mediaLoading": "Chargement du média...",
+  "mediaFailedToPlay": "Échec de la lecture du média",
+  "mediaPlay": "Lire",
+  "audioPlaybackNote": "La lecture audio nécessite une bibliothèque supplémentaire.",
+  "sheetNoData": "Aucune donnée dans {sheetName}",
+  "@sheetNoData": {
+    "placeholders": {
+      "sheetName": {
+        "type": "String"
+      }
+    }
+  },
+  "documentNoSheets": "Aucune feuille trouvée dans {format}",
+  "@documentNoSheets": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerPlaybackSpeed": "Vitesse de lecture",
+  "urlCopiedToClipboard": "URL copiée dans le presse-papiers: {url}",
+  "@urlCopiedToClipboard": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "lokitPreparingDoc": "Préparation de votre document...",
+  "lokitWarmingUp": "Démarrage du moteur Fadocx...",
+  "lokitAlmostThere": "Presque prêt",
+  "lokitJustAMoment": "Un instant",
+  "lokitFailedToRender": "Échec du rendu du document",
   "drawerFadSecLab": "FadSec Lab"
 }

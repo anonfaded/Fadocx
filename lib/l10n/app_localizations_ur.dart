@@ -36,7 +36,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get docxFile => 'Word دستاویز';
 
   @override
-  String get xlsxFile => 'Excel سپریڈ شیٹ';
+  String get xlsxFile => 'Excel اسپریڈشیٹ';
 
   @override
   String get csvFile => 'CSV فائل';
@@ -339,7 +339,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get categoryAll => 'سب';
 
   @override
-  String get categoryPdfs => 'PDFs';
+  String get categoryPdfs => 'PDF فائلیں';
 
   @override
   String get categoryDocs => 'ڈاکز';
@@ -707,7 +707,7 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get homeFailedExport => 'فائل ایکسپورٹ کرنے میں ناکامی';
+  String get homeFailedExport => 'فائل ایکسپورٹ کرنے میں ناکام';
 
   @override
   String get homeChooseSaveLocation => 'سیو کا مقام منتخب کریں';
@@ -1135,7 +1135,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsStorageDetails => 'سٹوریج';
 
   @override
-  String get settingsStoragePdfs => 'PDFs';
+  String get settingsStoragePdfs => 'PDF فائلیں';
 
   @override
   String get settingsStorageDocs => 'ڈاکز';

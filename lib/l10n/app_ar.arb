@@ -2,6 +2,21 @@
   "@@locale": "ar",
   "@@author": "FadSec Lab",
   "appName": "Fadocx",
+  "appDescription": "عارض المستندات",
+  "homeTitle": "Fadocx",
+  "recentFiles": "الملفات الأخيرة",
+  "noRecentFiles": "لا توجد ملفات أخيرة. افتح مستنداً للبدء.",
+  "openFile": "فتح ملف",
+  "openFileTooltip": "تصفح وفتح مستند",
+  "pdfFile": "ملف PDF",
+  "docxFile": "مستند Word",
+  "xlsxFile": "جدول بيانات Excel",
+  "csvFile": "ملف CSV",
+  "unknownFile": "ملف غير معروف",
+  "page": "صفحة",
+  "pageOf": "من",
+  "jumpToPage": "الانتقال إلى صفحة",
+  "sheet": "ورقة",
   "ok": "موافق",
   "cancel": "إلغاء",
   "delete": "حذف",
@@ -22,10 +37,11 @@
   "error": "خطأ",
   "warning": "تحذير",
   "success": "نجاح",
-  "loadingDocument": "جارٍ تحميل المستند...",
   "unsupportedFileType": "نوع الملف غير مدعوم",
   "fileNotFound": "الملف غير موجود",
   "permissionDenied": "الإذن مرفوض",
+  "corruptedFile": "يبدو أن الملف تالف",
+  "loadingDocument": "جارٍ تحميل المستند...",
   "settingsTitle": "الإعدادات",
   "theme": "المظهر",
   "themeDark": "داكن",
@@ -43,146 +59,124 @@
   "languageGerman": "الألمانية",
   "languagePortuguese": "البرتغالية",
   "languageHindi": "الهندية",
+  "appVersion": "App Version",
+  "clearRecentFiles": "مسح الملفات الأخيرة",
+  "backButton": "رجوع",
+  "emptyTitle": "لا توجد مستندات",
+  "emptyMessage": "ابدأ بفتح مستند من جهازك",
+  "startBrowsing": "ابدأ التصفح",
+  "languageChanged": "تم تغيير اللغة إلى العربية",
+  "privacyDescription": "Fadocx عارض مستندات. تُحفظ ملفاتك محلياً على جهازك ولا تُرسل أبداً إلى أي خادم.",
+  "aboutDescription": "Fadocx v1.0.0 - عارض مستندات خاص بك. بناؤه باحترام خصوصيتك.",
+  "tableRows": "صفوف",
+  "tableEmpty": "لا توجد بيانات للعرض",
+  "tableNoContent": "الورقة فارغة",
+  "sheetEmpty": "الورقة فارغة",
+  "noTableData": "لا توجد بيانات جدول",
+  "noSpreadsheetData": "لا توجد بيانات جدول بيانات",
+  "rowsSymbol": "صفوف",
+  "colsSymbol": "أعمدة",
+  "noSlidesFound": "لم يتم العثور على شرائح",
+  "slidesCount": "شرائح",
+  "pptUnsupported": "تم تحليل ملف PPT لكنه لا يحتوي على شرائح",
+  "odpUnsupported": "تم تحليل ملف ODP لكنه لا يحتوي على شرائح أو محتوى قابل للقراءة",
+  "noTextContent": "لم يتم العثور على محتوى نصي",
+  "couldNotParse": "تعذر تحليل الملف",
+  "file": "ملف",
+  "slides": "شريحة",
+  "previewNotSupported": "المعاينة غير مدعومة بعد",
+  "openWithSystemApp": "فتح بتطبيق النظام",
+  "systemAppNotImplemented": "فتح تطبيق النظام غير مطبق بعد",
+  "type": "النوع",
+  "fileNotFoundMessage": "الملف غير موجود",
+  "fileTooLarge": "حجم الملف يتجاوز الحد الأقصى (100 ميجابايت)",
+  "errorLoadingFile": "خطأ في تحميل الملف",
+  "docxPreviewNotSupported": "معاينة DOCX غير مدعومة بالكامل حالياً",
+  "docParseError": "فشل في تحليل ملف DOC. حاول تحويله إلى DOCX.",
+  "xlsxParseError": "تعذر تحليل ملف XLSX",
+  "xlsParseError": "تعذر تحليل ملف XLS. حاول تحويله إلى XLSX.",
+  "csvParseError": "فشل في تحليل ملف CSV",
+  "odtParseError": "تعذر تحليل ملف ODT",
+  "odsParseError": "تعذر تحليل ملف ODS",
+  "odpParseError": "تعذر تحليل ملف ODP",
+  "pptParseError": "تعذر تحليل ملف PPT",
+  "rtfParseError": "تعذر تحليل ملف RTF",
+  "txtFileEmpty": "الملف فارغ",
+  "unsupportedFormat": "تنسيق الملف غير مدعوم بعد",
+  "txtLoaded": "TXT",
+  "charactersLoaded": "أحرف",
+  "copiedToClipboard": "تم النسخ إلى الحافظة",
   "navHome": "الرئيسية",
   "navLibrary": "المكتبة",
   "navSettings": "الإعدادات",
   "navRecents": "الأخيرة",
-  "onboardingSkip": "تخطي",
-  "onboardingNext": "التالي",
-  "onboardingGetStarted": "ابدأ",
-  "onboardingSlide1Title": "مرحباً بك في Fadocx",
-  "onboardingSlide1Tagline": "رفيقك الخاص الشامل للمستندات",
-  "onboardingSlide1Bullet1": "افتح أي تنسيق — ملفات PDF وOffice والصور والمزيد",
-  "onboardingSlide1Bullet2": "تخزين خاص، مخفي عن معرض الصور ومدير الملفات",
-  "onboardingSlide1Bullet3": "مجاني ومفتوح المصدر — لا حساب ولا تسجيل مطلوب",
-  "onboardingSlide2Title": "أدوات مدمجة قوية",
-  "onboardingSlide2Bullet1": "امسح المستندات الورقية بالكاميرا — استخراج النص فوري",
-  "onboardingSlide2Bullet2": "تشغيل الصوت والفيديو مباشرة في التطبيق بدون برامج إضافية",
-  "onboardingSlide2Bullet3": "كل شيء يُرتَّب تلقائياً في فئات عند الاستيراد",
-  "onboardingSlide2Bullet4": "حذف آمن — استعد أي شيء من سلة المهملات في أي وقت",
-  "onboardingSlide3Title": "الخصوصية بالتصميم",
-  "onboardingSlide3Bullet1": "لا شيء يغادر جهازك — لا سحابة، لا خوادم",
-  "onboardingSlide3Bullet2": "لا تتبع، لا إعلانات، لا تحليلات. أبداً.",
-  "onboardingSlide3Bullet3": "مفتوح المصدر — كل سطر من الكود علني",
-  "homeTitle": "Fadocx",
-  "recentFiles": "الملفات الأخيرة",
-  "noRecentFiles": "لا توجد ملفات أخيرة. افتح مستنداً للبدء.",
-  "homeWelcomeTitle": "مرحباً بك في Fadocx",
-  "homeWelcomeSubtitle": "استكشف ملفات الأمثلة أو استورد مستنداتك الخاصة للبدء",
-  "homeExploreSamples": "استكشاف ملفات الأمثلة",
-  "homeScanDocument": "مسح مستند",
-  "homeScanDocumentDesc": "استخراج النص من المستندات باستخدام OCR",
-  "homeImportDocument": "استيراد مستند",
-  "homeImportDocumentDesc": "تصفح واستيراد الملفات من جهازك",
-  "homeSeeAll": "عرض الكل",
-  "homeNoRecentFiles": "لا توجد ملفات أخيرة",
-  "homePressBackExit": "اضغط مرة أخرى للخروج",
-  "libraryTitle": "المكتبة",
-  "librarySearchHint": "البحث في المكتبة...",
-  "libraryNoDocuments": "لا توجد مستندات",
-  "libraryAdjustSearch": "حاول تعديل البحث أو المرشحات",
-  "libraryDocumentsAppearHere": "ستظهر مستنداتك هنا",
   "categoryAll": "الكل",
-  "categoryPdfs": "PDF",
-  "categoryDocs": "مستندات",
+  "categoryPdfs": "ملفات PDF",
+  "categoryDocs": "الوثائق",
   "categorySheets": "جداول",
-  "categorySlides": "شرائح",
-  "categoryCode": "كود",
-  "categoryScans": "مسح",
+  "categorySlides": "الشرائح",
+  "categoryCode": "الكود",
+  "categoryScans": "مسحات ضوئية",
   "categoryOther": "أخرى",
   "categoryPresentations": "عروض تقديمية",
-  "settingsAppearance": "المظهر",
-  "settingsStorage": "التخزين",
-  "settingsUpdates": "التحديثات",
-  "settingsAbout": "حول التطبيق",
-  "settingsVersion": "الإصدار",
-  "settingsDangerZone": "منطقة الخطر",
-  "settingsTrash": "سلة المهملات",
-  "settingsTrashDesc": "عرض الملفات المحذوفة",
-  "settingsEnabled": "مُفعَّل",
-  "settingsDisabled": "مُعطَّل",
-  "settingsChooseTheme": "اختر المظهر",
-  "settingsSelectLanguage": "اختر اللغة",
-  "settingsReplayOnboarding": "إعادة تشغيل المقدمة",
-  "settingsReplayOnboardingDesc": "عرض شرائح المقدمة عند التشغيل التالي",
-  "settingsResetSettings": "إعادة تعيين الإعدادات",
-  "settingsResetSettingsDesc": "استعادة جميع الإعدادات إلى الافتراضية",
-  "settingsResetDone": "تمت إعادة تعيين الإعدادات",
-  "settingsAutoUpdateCheck": "التحقق التلقائي من التحديثات",
-  "settingsCheckForUpdates": "التحقق من التحديثات",
-  "settingsSourceCode": "الكود المصدري",
-  "settingsContact": "التواصل",
-  "settingsPrivacyPolicy": "سياسة الخصوصية",
-  "trashTitle": "سلة المهملات",
-  "trashEmpty": "سلة المهملات فارغة",
-  "trashEmptySubtitle": "الملفات المحذوفة ستظهر هنا",
-  "trashDeletePermanently": "حذف نهائي",
-  "scannerTitle": "ماسح المستندات",
-  "scannerCapture": "التقاط",
-  "scannerProcessing": "معالجة",
-  "scannerResults": "النتائج",
-  "scannerCopyAll": "نسخ الكل",
-  "scannerNewScan": "فحص جديد",
-  "whatsNewTitle": "ما الجديد",
-  "linkTileCopy": "نسخ",
-  "linkTileSendEmail": "إرسال بريد إلكتروني",
-  "linkTileOpenInBrowser": "فتح في المتصفح",
-  "confirm": "تأكيد",
-  "openInBrowser": "فتح في المتصفح",
-  "comingSoon": "قريباً",
-  "routeNotFound": "المسار غير موجود: {path}",
-  "routeGoHome": "العودة للرئيسية",
-  "routeInvalidDocumentPath": "مسار المستند غير صالح",
-  "pdfCopyTextTitle": "نسخ نص PDF",
-  "pdfExtractingText": "جارٍ استخراج النص...",
-  "pdfExtractingTextProgress": "جارٍ استخراج النص... ({current}/{total} صفحات)",
-  "pdfErrorExtractingText": "خطأ في استخراج النص",
-  "pdfWordCount": "عدد الكلمات: {count}",
-  "pdfNoTextFound": "لم يُعثر على نص في PDF",
-  "pdfFullTextCopied": "تم نسخ نص PDF الكامل إلى الحافظة",
-  "pdfPasswordRequired": "مطلوب كلمة مرور PDF",
-  "pdfPasswordDesc": "هذا الـ PDF محمي بكلمة مرور. أدخل كلمة المرور لفتحه.",
-  "pdfPasswordLabel": "كلمة المرور",
-  "pdfUnlock": "إلغاء القفل",
-  "pdfSearchHint": "البحث في PDF...",
-  "pdfTextCannotBeExtracted": "لا يمكن استخراج النص من هذه الصفحة",
-  "pdfLoadingPageTexts": "جارٍ تحميل نصوص الصفحات...",
-  "pdfPageCopied": "تم نسخ نص الصفحة {page}",
-  "viewerTooltipSidebar": "الشريط الجانبي",
-  "viewerTooltipFirst": "الأول",
-  "viewerTooltipLast": "الأخير",
-  "viewerTooltipCopyPageText": "نسخ نص الصفحة",
-  "textDocSearchHint": "البحث في النص...",
-  "textDocSearchPrevResult": "النتيجة السابقة",
-  "textDocSearchNextResult": "النتيجة التالية",
-  "imageFailedToLoad": "فشل تحميل الصورة",
-  "mediaLoading": "جارٍ تحميل الوسائط...",
-  "mediaFailedToPlay": "فشل تشغيل الوسائط",
-  "mediaPlay": "تشغيل",
-  "audioPlaybackNote": "تشغيل الصوت يتطلب مكتبة إضافية.",
-  "sheetNoData": "لا توجد بيانات في {sheetName}",
-  "documentNoSheets": "لم يُعثر على أوراق في {format}",
-  "viewerPlaybackSpeed": "سرعة التشغيل",
-  "urlCopiedToClipboard": "تم نسخ الرابط إلى الحافظة: {url}",
-  "lokitPreparingDoc": "جارٍ تحضير مستندك...",
-  "lokitWarmingUp": "جارٍ تشغيل محرك Fadocx...",
-  "lokitAlmostThere": "على وشك الانتهاء",
-  "lokitJustAMoment": "لحظة من فضلك",
-  "lokitFailedToRender": "فشل في عرض المستند",
-  "trashSelect": "تحديد",
-  "copiedToClipboard": "تم النسخ إلى الحافظة",
   "supportDevelopment": "ادعم التطوير",
   "visitPatreon": "زيارة Patreon",
   "copyLink": "نسخ الرابط",
+  "becomeAPatron": "كن راعياً",
   "patreonDescription": "دعمك يساعد Fadocx وFadCam على الاستمرار في النمو. مشتركو Patreon يحصلون على مزايا حصرية تشمل ميزات مميزة ووصولاً مبكراً عبر جميع تطبيقات FadSec Lab.\n\nلمزيد من المعلومات، زر Patreon من الرابط أدناه واطلع على الباقات المتاحة ومزاياها.",
   "discordTitle": "انضم إلى Discord الخاص بنا",
+  "openInBrowser": "فتح في المتصفح",
+  "comingSoon": "قريباً",
+  "newBadge": "جديد",
   "timeAgoJustNow": "الآن",
   "timeAgoMinute": "{count, plural, =1{قبل دقيقة واحدة} other{قبل {count} دقائق}}",
+  "@timeAgoMinute": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoHour": "{count, plural, =1{قبل ساعة واحدة} other{قبل {count} ساعات}}",
+  "@timeAgoHour": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoDay": "{count, plural, =1{قبل يوم واحد} other{قبل {count} أيام}}",
+  "@timeAgoDay": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoWeek": "{count, plural, =1{قبل أسبوع واحد} other{قبل {count} أسابيع}}",
+  "@timeAgoWeek": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoMonth": "{count, plural, =1{قبل شهر واحد} other{قبل {count} أشهر}}",
+  "@timeAgoMonth": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "timeAgoYear": "{count, plural, =1{قبل سنة واحدة} other{قبل {count} سنوات}}",
+  "@timeAgoYear": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "monthJan": "ينا",
   "monthFeb": "فبر",
   "monthMar": "مار",
@@ -195,30 +189,207 @@
   "monthOct": "أكت",
   "monthNov": "نوف",
   "monthDec": "ديس",
+  "homeWelcomeTitle": "مرحباً بك في Fadocx",
+  "homeWelcomeSubtitle": "استكشف ملفات الأمثلة أو استورد مستنداتك الخاصة للبدء",
+  "homeExploreSamples": "استكشاف ملفات الأمثلة",
+  "homeDocumentManagement": "إدارة المستندات",
+  "homeSeeAll": "عرض الكل",
+  "homeNoRecentFiles": "لا توجد ملفات أخيرة",
+  "homeScanDocument": "مسح مستند",
+  "homeScanDocumentDesc": "استخراج النص من المستندات باستخدام OCR",
+  "homeImportDocument": "استيراد مستند",
+  "homeImportDocumentDesc": "تصفح واستيراد الملفات من جهازك",
+  "onboardingSkip": "تخطي",
+  "onboardingNext": "التالي",
+  "onboardingGetStarted": "ابدأ",
+  "onboardingSlide1Title": "مرحبا في Fadocx",
+  "onboardingSlide1Tagline": "رفيقك الخاص الشامل للمستندات",
+  "onboardingSlide1Bullet1": "عارض مستندات خاص",
+  "onboardingSlide1Bullet2": "لا تتبع ولا بيانات",
+  "onboardingSlide1Bullet3": "كود مفتوح المصدر",
+  "onboardingSlide2Title": "دعم الصيغ",
+  "onboardingSlide2Bullet1": "PDF، DOCX، XLSX، CSV، PPT",
+  "onboardingSlide2Bullet2": "التعرف على النص والصور و OCR",
+  "onboardingSlide2Bullet3": "استيراد ومقارنة",
+  "onboardingSlide2Bullet4": "دعم متعدد اللغات",
+  "onboardingSlide3Title": "هل أنت جاهز للبدء؟",
+  "onboardingSlide3Bullet1": "فتح مستند من جهازك",
+  "onboardingSlide3Bullet2": "أو حدد أمثلة للاختبار",
+  "onboardingSlide3Bullet3": "تعرف على المزيد في الإعدادات",
   "homeStatDocuments": "المستندات",
   "homeStatStorage": "التخزين",
   "homeStatTimeRead": "وقت القراءة",
   "homeStatLastOpened": "آخر فتح: ",
-  "settingsDocumentsSize": "حجم المستندات",
-  "settingsCalculating": "جارٍ الحساب...",
-  "settingsCustomStorage": "تخزين مخصص",
-  "settingsAppLock": "قفل التطبيق",
-  "settingsJoinCommunity": "انضم إلى المجتمع",
-  "settingsMoreFromFadsec": "المزيد من FadSec Lab",
-  "settingsCopiedInfo": "تم النسخ إلى الحافظة",
-  "settingsCopyInfo": "نسخ المعلومات",
-  "settingsVersionClipboardInfo": "{appName} v{version} (الإصدار {buildNumber})\nالحزمة: {packageName}",
-  "settingsShareApp": "شارك مع الأصدقاء",
-  "settingsShareMessage": "جرّب Fadocx!\n\nعارض مستندات متكامل: PDF وملفات Office والجداول والعروض التقديمية وملفات البرمجة واستخراج النص عبر OCR، بالكامل دون اتصال، بدون تتبع، ومفتوح المصدر.\n\nhttps://github.com/anonfaded/Fadocx",
-  "settingsShareVia": "مشاركة عبر...",
-  "settingsShareWhatsApp": "واتساب",
-  "settingsWhatsAppNotInstalled": "واتساب غير مثبت على هذا الجهاز",
-  "settingsSecurity": "الأمان",
-  "settingsFadcamDesc": "حزمة وسائط متعددة خاصة لأندرويد: تسجيل فيديو في الخلفية، كاميرا سيارة، تسجيل الشاشة، بث مباشر وتحكم عن بعد، بدون إعلانات ومفتوحة المصدر.",
-  "settingsQuranCliDesc": "رفيقك الطرفي للقرآن الكريم: اقرأ، استمع، وأنشئ ترجمات لتحرير الفيديو!",
-  "settingsFadcryptDesc": "تطبيق قفل متقدم وأنيق متعدد المنصات يحمي الملفات والمجلدات والتطبيقات بتشفير AES-256-GCM العسكري. مفتوح المصدر ومجاني تماماً وبدون تتبع!",
-  "settingsFadcatDesc": "بديل Android logcat خفيف وغني بالميزات ومتعدد المنصات، بدون ثقل Android Studio. يتضمن ADB للبنى المدعومة ويعمل بواجهة رسومية أو سطر أوامر أو وضع خادم MCP.",
-  "settingsMacosComingSoon": "macOS قريباً",
+  "homePressBackExit": "اضغط مرة أخرى للخروج",
+  "homeImportingSamples": "جارٍ استيراد ملفات الأمثلة…",
+  "homeSamplesImported": "{count, plural, =1{تم استيراد 1 ملف أمثلة بنجاح!} other{تم استيراد {count} ملفات أمثلة بنجاح!}}",
+  "@homeSamplesImported": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "homeViewFiles": "عرض الملفات",
+  "homeFailedImportSamples": "فشل استيراد ملفات الأمثلة: {error}",
+  "@homeFailedImportSamples": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileMovedToTrash": "تم نقل {name} إلى سلة المهملات",
+  "@homeFileMovedToTrash": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFileInfo": "معلومات الملف",
+  "homeFileName": "الاسم",
+  "homeFileType": "النوع",
+  "homeFileSize": "الحجم",
+  "homeFileLocation": "الموقع",
+  "homeFileDateOpened": "تاريخ الفتح",
+  "homeFileLastModified": "آخر تعديل",
+  "homeFileInTrash": "في سلة المهملات",
+  "homeFileInfoCopied": "تم نسخ معلومات الملف",
+  "homeCopySuffix": " (نسخة)",
+  "homeCopySuffixCounter": " (نسخة {counter})",
+  "@homeCopySuffixCounter": {
+    "placeholders": {
+      "counter": {
+        "type": "num"
+      }
+    }
+  },
+  "homeDuplicatedAs": "مكرر باسم {name}",
+  "@homeDuplicatedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedDuplicate": "فشل تكرار الملف: {error}",
+  "@homeFailedDuplicate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRenameFile": "إعادة تسمية الملف",
+  "homeFileNameLabel": "اسم الملف",
+  "homeFileAlreadyExists": "ملف بهذا الاسم موجود بالفعل",
+  "homeRenamedTo": "تمت إعادة التسمية إلى {name}",
+  "@homeRenamedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedRename": "فشل إعادة التسمية",
+  "homeExport": "تصدير",
+  "homeSaveToDownloads": "الحفظ في التنزيلات",
+  "homeSaveToDownloadsPath": "التنزيلات/Fadocx/{name}",
+  "@homeSaveToDownloadsPath": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeChooseLocation": "اختر الموقع",
+  "homeChooseLocationDesc": "اختر مجلد حفظ مخصص",
+  "homeSavedToDownloads": "تم الحفظ في التنزيلات/Fadocx/{name}",
+  "@homeSavedToDownloads": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSavedTo": "تم الحفظ في {path}",
+  "@homeSavedTo": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFailedExport": "فشل تصدير الملف",
+  "homeChooseSaveLocation": "اختر موقع الحفظ",
+  "homeConvertComingSoon": "ستأتي ميزة التحويل قريباً!",
+  "homeFadDriveComingSoon": "FadDrive قريباً!",
+  "homePresentationsTooltip": "قريباً",
+  "homeErrorPrefix": "خطأ: {error}",
+  "@homeErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryTitle": "المكتبة",
+  "librarySearchHint": "البحث في المكتبة...",
+  "librarySelected": "تم تحديد {count}",
+  "@librarySelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeleteSelected": "حذف المحدد؟",
+  "libraryDeleteConfirm": "نقل {count} ملفاً إلى سلة المهملات؟ يمكنك استعادتها لاحقاً.",
+  "@libraryDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryItemsMovedToTrash": "تم نقل {count} عنصر إلى سلة المهملات",
+  "@libraryItemsMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryErrorLoading": "خطأ في تحميل المكتبة: {error}",
+  "@libraryErrorLoading": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryItemCount": "{count} عناصر",
+  "@libraryItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "libraryDeselectAll": "إلغاء تحديد الكل",
+  "librarySelectAll": "تحديد الكل",
+  "libraryNoCategoryFound": "لم يتم العثور على {category}",
+  "@libraryNoCategoryFound": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryNoDocuments": "لا توجد مستندات",
+  "libraryAdjustSearch": "حاول تعديل البحث أو المرشحات",
+  "libraryDocumentsAppearHere": "ستظهر مستنداتك هنا",
   "browseTitle": "استيراد المستندات",
   "browseBack": "رجوع",
   "browseSearchHint": "ابحث في المستندات...",
@@ -240,14 +411,71 @@
   "browseOpenSettings": "فتح الإعدادات",
   "browseAccessStillDisabled": "ما زال الوصول إلى جميع الملفات معطلاً. يرجى تفعيله من الإعدادات للمتابعة.",
   "browseNoDirectories": "لم يتم العثور على مجلدات مستندات على الجهاز",
-  "browseErrorPrefix": "خطأ: {error}",
+  "browseErrorPrefix": "خطأ في الاستيراد: {error}",
+  "@browseErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "browseSortBy": "ترتيب حسب",
   "browseImportedFiles": "{count, plural, =1{تم استيراد ملف واحد} other{تم استيراد {count} ملفات}}",
+  "@browseImportedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashTitle": "سلة المهملات",
+  "trashEmpty": "سلة المهملات فارغة",
+  "trashEmptySubtitle": "الملفات المحذوفة ستظهر هنا",
+  "trashErrorLoading": "خطأ في تحميل سلة المهملات",
+  "trashFilesSelected": "{count} مختار",
+  "@trashFilesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashFilesLabel": "ملفات",
+  "trashSelect": "تحديد",
+  "trashFileRestored": "تم استعادة الملف بنجاح",
+  "trashDeletePermanently": "حذف نهائي",
+  "trashDeletePermanentlyConfirm": "حذف نهائياً؟",
+  "trashDeletePermanentlyMessage": "أنت على وشك حذف {count} ملف(ات) نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+  "@trashDeletePermanentlyMessage": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "trashDeleteTypeConfirm": "اكتب DELETE بأحرف كبيرة للتأكيد:",
+  "trashDeleteHint": "DELETE",
+  "trashFilesPermanentlyDeleted": "تم حذف {count} ملف(ات) نهائياً",
+  "@trashFilesPermanentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "whatsNewTitle": "ما الجديد",
   "whatsNewWhatsIncluded": "ما المضمن",
   "whatsNewPlanned": "مخطط له",
   "whatsNewReleasedToday": "صدر اليوم",
   "whatsNewReleasedYesterday": "صدر أمس",
   "whatsNewReleasedDate": "صدر {date}",
+  "@whatsNewReleasedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "whatsNewDocAndSheets": "المستندات والجداول",
   "whatsNewDocAndSheetsDesc": "اعرض ملفات PDF ومستندات Word وجداول Excel والمزيد، كل ذلك محلياً على جهازك.",
   "whatsNewOcrAi": "OCR ذكي وذكاء اصطناعي على الجهاز",
@@ -262,7 +490,7 @@
   "whatsNewFileManagementDesc": "أعد التسمية وكرر وصدّر واحذف مستنداتك بسهولة.",
   "whatsNewThemes": "الوضع الفاتح والداكن",
   "whatsNewThemesDesc": "اختر المظهر الذي يناسبك، الوضع الداكن لليل والفاتح للنهار.",
-  "whatsNewFadDrive": "FadDrive",
+  "whatsNewFadDrive": "دمج FadDrive",
   "whatsNewFadDriveDesc": "مزامنة سحابية لمستنداتك للوصول إليها من أي مكان وفي أي وقت.",
   "whatsNewEditing": "تحرير المستندات",
   "whatsNewEditingDesc": "أجرِ تعديلات سريعة على مستنداتك داخل Fadocx.",
@@ -296,13 +524,469 @@
   "fileActionUploadDesc": "مزامنة إلى التخزين السحابي",
   "fileActionFileInfo": "معلومات الملف",
   "fileActionSubtitle": "إجراءات الملف وإدارته",
+  "updateAvailableTitle": "تحديث متاح",
+  "updateAvailableSubtitle": "نسخة جديدة من Fadocx جاهزة للتنزيل",
+  "updateStableRelease": "إصدار مستقر",
+  "updateStableDesc": "إصدار مستقر واختبار للاستخدام في الإنتاج",
+  "updateBetaRelease": "إصدار بيتا",
+  "updateBetaDesc": "وصول مبكر إلى الميزات الجديدة، قد تحتوي على أخطاء",
+  "updateMaybeLater": "ربما لاحقاً",
+  "updateCurrent": "الحالي",
+  "updateNew": "جديد",
+  "updateVisitGithub": "زيارة GitHub",
+  "updateBetaInfo": "تطبيق Fadocx بيتا مستقل ويمكن تثبيته بجانب الإصدار المستقر. لن يتداخل مع التطبيق المستقر أو بياناته.\n\nثبّت البيتا لاختبار الميزات الجديدة قبل وصولها إلى الإصدار المستقر.",
+  "updateBannerStable": "تحديث مستقر",
+  "updateBannerBeta": "تحديث بيتا",
+  "settingsAppearance": "المظهر",
+  "settingsStorage": "التخزين",
+  "settingsDocumentsSize": "حجم المستندات",
+  "settingsCalculating": "جارٍ الحساب...",
+  "settingsCustomStorage": "تخزين مخصص",
+  "settingsUnknown": "غير معروف",
+  "settingsStorageDetails": "التخزين",
+  "settingsStoragePdfs": "ملفات PDF",
+  "settingsStorageDocs": "المستندات",
+  "settingsStorageSheets": "الجداول",
+  "settingsStoragePresentations": "العروض التقديمية",
+  "settingsStorageCode": "الكود",
+  "settingsStorageScans": "المسحات الضوئية",
+  "settingsStorageImages": "الصور",
+  "settingsStorageOther": "أخرى",
+  "settingsStorageInfo": "تُخزَّن المستندات في مجلد خاص على جهازك ولا يمكن للتطبيقات الأخرى الوصول إليها",
+  "settingsStoragePrivateFolderInfo": "تُخزَّن المستندات في مجلد خاص مخفي عن التطبيقات الأخرى ومديري الملفات. لا يمكن الوصول إليها إلا من خلال Fadocx.",
+  "settingsStorageDeleteInfo": "احذف المستندات من منطقة الخطر في الإعدادات",
+  "settingsStorageEmpty": "لا توجد مستندات",
+  "settingsStorageFailedLoad": "فشل تحميل بيانات التخزين",
+  "settingsUpdates": "التحديثات",
+  "settingsAutoUpdateCheck": "التحقق التلقائي من التحديثات",
+  "settingsReplayOnboarding": "إعادة تشغيل المقدمة",
+  "settingsReplayOnboardingDesc": "عرض شرائح المقدمة عند التشغيل التالي",
+  "settingsEnabled": "مُفعَّل",
+  "settingsDisabled": "مُعطَّل",
+  "settingsAppLock": "قفل التطبيق",
+  "settingsAbout": "حول التطبيق",
+  "settingsVersion": "الإصدار",
+  "settingsSourceCode": "الكود المصدري",
+  "settingsContact": "التواصل",
+  "settingsJoinCommunity": "انضم إلى المجتمع",
+  "settingsPrivacyPolicy": "سياسة الخصوصية",
+  "settingsMoreFromFadsec": "المزيد من FadSec Lab",
+  "settingsFadocxDesc": "عارض المستندات الخاص بك",
+  "settingsDangerZone": "منطقة الخطر",
+  "settingsTrash": "سلة المهملات",
+  "settingsTrashDesc": "عرض الملفات المحذوفة",
+  "settingsResetSettings": "إعادة تعيين الإعدادات",
+  "settingsResetSettingsDesc": "استعادة جميع الإعدادات إلى الافتراضية",
+  "settingsResetDone": "تمت إعادة تعيين الإعدادات",
+  "settingsRetry": "إعادة المحاولة",
+  "settingsChooseTheme": "اختر المظهر",
+  "settingsSelectLanguage": "اختر اللغة",
+  "settingsCheckForUpdates": "التحقق من التحديثات",
+  "settingsCheckingUpdates": "جارٍ التحقق من التحديثات…",
+  "settingsNoInternet": "لا توجد اتصالية بالإنترنت. تحقق من شبكتك وحاول مرة أخرى.",
+  "settingsUpToDate": "أنت محدث",
+  "settingsUpToDateDesc": "v{version} هي أحدث نسخة.",
+  "@settingsUpToDateDesc": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBetaAvailable": "بيتا v{version} متاح",
+  "@settingsBetaAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVersionWithBuild": "الإصدار {version} (البناء {buildNumber})",
+  "@settingsVersionWithBuild": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedInfo": "تم النسخ إلى الحافظة",
+  "settingsCopyInfo": "نسخ المعلومات",
+  "settingsVersionClipboardInfo": "{appName} v{version} (الإصدار {buildNumber})\nالحزمة: {packageName}",
+  "@settingsVersionClipboardInfo": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      },
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsShareApp": "شارك مع الأصدقاء",
+  "settingsShareMessage": "جرّب Fadocx!\n\nعارض مستندات متكامل: PDF وملفات Office والجداول والعروض التقديمية وملفات البرمجة واستخراج النص عبر OCR، بالكامل دون اتصال، بدون تتبع، ومفتوح المصدر.\n\nhttps://github.com/anonfaded/Fadocx",
+  "settingsShareVia": "مشاركة عبر...",
+  "settingsShareWhatsApp": "واتساب",
+  "settingsWhatsAppNotInstalled": "واتساب غير مثبت على هذا الجهاز",
+  "settingsPrivacyOffline": "100% دون اتصال",
+  "settingsPrivacyLocalStorage": "تخزين محلي فقط",
+  "settingsPrivacyOnDevice": "ذكاء اصطناعي على الجهاز",
+  "settingsPrivacyOpenSource": "مفتوح المصدر",
+  "settingsPrivacyNoAds": "بدون إعلانات",
+  "settingsPrivacyByDesign": "نؤمن بالخصوصية حسب التصميم.",
+  "settingsPrivacyTransparency": "تم بناء Fadocx بشفافية. مستنداتك هي شأنك الخاص - وليس شأننا.",
+  "settingsViewSourceCode": "عرض الكود المصدري",
+  "settingsSecurity": "الأمان",
+  "settingsStorageFilesSummary": "{size} • {count} ملفات",
+  "@settingsStorageFilesSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "settingsErrorPrefix": "خطأ: {error}",
+  "@settingsErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCopiedText": "تم النسخ: {text}",
+  "@settingsCopiedText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsVisitGithub": "زيارة GitHub",
+  "settingsMadeWith": "صنع مع",
+  "settingsAt": "في",
+  "settingsIn": "في",
+  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
+  "settingsTypeToConfirm": "اكتب \"{text}\" للتأكيد:",
+  "@settingsTypeToConfirm": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "تأكيد",
+  "settingsPrivacyOfflineDesc": "كل المعالجة تحدث على جهازك. لا إنترنت مطلوب.",
+  "settingsPrivacyLocalStorageDesc": "مستنداتك تبقى على جهازك. لا شيء يتم تحميله.",
+  "settingsPrivacyOnDeviceDesc": "يستخدم OpenCV + Tesseract للـ OCR. الذكاء الاصطناعي يعمل محلياً.",
+  "settingsPrivacyOpenSourceDesc": "الكود عام. اختبره بنفسك على GitHub.",
+  "settingsPrivacyNoAdsDesc": "بدون إعلانات. بدون تتبع. بدون تحليلات. بدون سجلات أعطال. صفر تلميترية.",
+  "settingsFadcamDesc": "حزمة وسائط متعددة خاصة لأندرويد: تسجيل فيديو في الخلفية، كاميرا سيارة، تسجيل الشاشة، بث مباشر وتحكم عن بعد، بدون إعلانات ومفتوحة المصدر.",
+  "settingsQuranCliDesc": "رفيقك الطرفي للقرآن الكريم: اقرأ، استمع، وأنشئ ترجمات لتحرير الفيديو!",
+  "settingsFadcryptDesc": "تطبيق قفل متقدم وأنيق متعدد المنصات يحمي الملفات والمجلدات والتطبيقات بتشفير AES-256-GCM العسكري. مفتوح المصدر ومجاني تماماً وبدون تتبع!",
+  "settingsFadcatDesc": "بديل Android logcat خفيف وغني بالميزات ومتعدد المنصات، بدون ثقل Android Studio. يتضمن ADB للبنى المدعومة ويعمل بواجهة رسومية أو سطر أوامر أو وضع خادم MCP.",
+  "settingsMacosComingSoon": "macOS قريباً",
+  "settingsOpenInBrowser": "فتح في المتصفح",
+  "viewerFindHint": "بحث...",
+  "viewerTypeToFind": "اكتب للبحث",
+  "viewerSidebarPages": "الصفحات",
+  "viewerSidebarSearch": "بحث",
+  "viewerSidebarTOC": "الفهرس",
+  "viewerSidebarNotes": "ملاحظات",
+  "viewerSidebarBookmarks": "إشارات مرجعية",
+  "viewerSidebarNotesDesc": "أضف ملاحظات وتعليقات توضيحية إلى صفحات PDF",
+  "viewerSidebarBookmarksDesc": "احفظ ونظّم صفحاتك المفضلة",
+  "viewerCellCopied": "تم نسخ الخلية {value}",
+  "@viewerCellCopied": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerGoToPage": "انتقل إلى الصفحة",
+  "viewerGoToPageHint": "أدخل رقم الصفحة (1-{totalPages})",
+  "@viewerGoToPageHint": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerGo": "انتقال",
+  "viewerInvalidPage": "يرجى إدخال رقم بين 1 و {totalPages}",
+  "@viewerInvalidPage": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerNoContent": "لا يوجد محتوى",
+  "viewerResetZoom": "إعادة ضبط التكبير",
+  "viewerCopyTextTitle": "نسخ النص",
+  "viewerCopyTextChoose": "اختر ما تريد نسخه:",
+  "viewerCopyPageOnly": "الصفحة {page} فقط",
+  "@viewerCopyPageOnly": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyAllPages": "كل الصفحات {totalPages}",
+  "@viewerCopyAllPages": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerExtractingText": "جارٍ استخراج النص من {label}...",
+  "@viewerExtractingText": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerNoTextFound": "لم يتم العثور على محتوى نصي",
+  "viewerPageLabel": "الصفحة {currentPage}",
+  "@viewerPageLabel": {
+    "placeholders": {
+      "currentPage": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLabel": "{totalPages} صفحات",
+  "@viewerAllPagesLabel": {
+    "placeholders": {
+      "totalPages": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTextExtracted": "تم استخراج النص من {pageLabel}.",
+  "@viewerTextExtracted": {
+    "placeholders": {
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerWordsFound": "تم العثور على {count} كلمة",
+  "@viewerWordsFound": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedWords": "تم نسخ {count} كلمة من {pageLabel}",
+  "@viewerCopiedWords": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCopyAllTextTitle": "نسخ كل النص",
+  "viewerCopyAllTextConfirm": "سيتم استخراج النص من كل الصفحات {pageCount} ونسخه إلى الحافظة.",
+  "@viewerCopyAllTextConfirm": {
+    "placeholders": {
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedAllPages": "تم نسخ {count} كلمة من {pageCount} صفحة",
+  "@viewerCopiedAllPages": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "pageCount": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyDocumentText": "سيتم نسخ محتوى المستند بالكامل إلى الحافظة.",
+  "viewerWordsLines": "{words} كلمات، {lines} أسطر",
+  "@viewerWordsLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerWordsOnly": "{count} كلمة",
+  "@viewerWordsOnly": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerLinesOnly": "{lines} أسطر",
+  "@viewerLinesOnly": {
+    "placeholders": {
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopiedFromLines": "تم نسخ {words} كلمة من {lines} أسطر",
+  "@viewerCopiedFromLines": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "lines": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCharactersCount": "{count} حرف",
+  "@viewerCharactersCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerCopyExtractedTitle": "نسخ النص المستخرج",
+  "viewerCopyExtractedDesc": "انسخ النص المستخرج من هذه الصورة عبر OCR.",
+  "viewerCopiedWordsChars": "تم نسخ {words} كلمة ({chars} حرفاً)",
+  "@viewerCopiedWordsChars": {
+    "placeholders": {
+      "words": {
+        "type": "num"
+      },
+      "chars": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerErrorAccessText": "خطأ في الوصول إلى النص المستخرج",
+  "viewerNoTextForImage": "لا يوجد نص مستخرج متاح لهذه الصورة",
+  "viewerExtractingAllPages": "جارٍ استخراج النص من كل الصفحات...",
+  "viewerTextExtractionUnavailable": "استخراج النص غير متاح",
+  "viewerNoPdfText": "لم يتم العثور على نص في ملف PDF هذا",
+  "viewerNoTextAvailable": "لا يوجد محتوى نصي متاح",
+  "viewerReadingTime": "قراءة {minutes} د",
+  "@viewerReadingTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeSingle": "قراءة دقيقة واحدة",
+  "viewerCopy": "نسخ",
+  "viewerErrorPrefix": "خطأ: {error}",
+  "@viewerErrorPrefix": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerCellValue": "الخلية {cell}",
+  "@viewerCellValue": {
+    "placeholders": {
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerLowerPageLabel": "الصفحة {page}",
+  "@viewerLowerPageLabel": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerAllPagesLower": "كل الصفحات",
+  "viewerCopied": "تم النسخ",
+  "viewerCopyValue": "نسخ القيمة",
+  "viewerToggleFullscreen": "تبديل ملء الشاشة",
+  "viewerInvert": "عكس",
+  "viewerText": "نص",
+  "viewerSyntax": "الصياغة",
+  "viewerFont": "الخط",
+  "viewerFontStyle": "نمط الخط",
+  "viewerMonospaceCourier": "Monospace (Courier)",
+  "viewerSystemUbuntu": "System (Ubuntu)",
+  "viewerEdit": "تحرير",
+  "viewerEditWithEngine": "تحرير بمحرك Fadocx",
+  "viewerEditWithEngineDesc": "افتح جدول البيانات هذا في محرك عرض Fadocx لمعاينة مرئية دقيقة بكامل التنسيق والرسوم والتخطيط.",
+  "viewerEditWithEngineNote": "ملاحظة: التحرير التفاعلي قادم في تحديث مستقبلي.",
+  "viewerNotNow": "ليس الآن",
+  "viewerGotIt": "فهمت",
+  "viewerErrorLoadingDocument": "خطأ في تحميل المستند",
+  "viewerGoBack": "رجوع",
+  "viewerReadingTimeMinutes": "{count, plural, =1{قراءة دقيقة واحدة} other{قراءة {count} دقائق}}",
+  "@viewerReadingTimeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerReadingTimeHoursMinutes": "قراءة {hours}س {minutes}د",
+  "@viewerReadingTimeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "scannerTitle": "ماسح المستندات",
+  "scannerCapture": "التقاط",
+  "scannerProcessing": "معالجة",
+  "scannerResults": "النتائج",
   "scannerInitializingCamera": "جارٍ تهيئة الكاميرا...",
   "scannerDocumentDetected": "تم اكتشاف المستند - أثبته",
   "scannerKeepDocumentFlat": "أبقِ المستند مستقيماً ومسطحاً للحصول على أفضل النتائج",
   "scannerUpload": "رفع",
   "scannerFailedOpenImage": "فشل فتح الصورة: {error}",
+  "@scannerFailedOpenImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerFlash": "الفلاش",
   "scannerFailedTorch": "فشل تبديل المصباح: {error}",
+  "@scannerFailedTorch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "scannerStartingCamera": "جارٍ بدء الكاميرا...",
   "scannerCameraUnavailable": "الكاميرا غير متاحة",
   "scannerCameraUnavailableDesc": "تعذر تهيئة الكاميرا",
@@ -316,264 +1000,141 @@
   "scannerNoTextExtracted": "(لم يتم استخراج نص)",
   "scannerDetectedLines": "الأسطر المكتشفة",
   "scannerTextCopied": "تم نسخ النص إلى الحافظة",
-  "appDescription": "Document Viewer",
-  "openFile": "Open File",
-  "openFileTooltip": "Browse and open a document",
-  "pdfFile": "PDF File",
-  "docxFile": "Word Document",
-  "xlsxFile": "Excel Spreadsheet",
-  "csvFile": "CSV File",
-  "unknownFile": "Unknown File",
-  "page": "Page",
-  "pageOf": "of",
-  "jumpToPage": "Jump to page",
-  "sheet": "Sheet",
-  "corruptedFile": "File appears to be corrupted",
-  "appVersion": "App Version",
-  "clearRecentFiles": "Clear recent files",
-  "backButton": "Back",
-  "emptyTitle": "No Documents",
-  "emptyMessage": "Start by opening a document from your device",
-  "startBrowsing": "Start Browsing",
-  "languageChanged": "Language changed to English",
-  "privacyDescription": "Fadocx is a document viewer. Your files are stored locally on your device and are never transmitted to any server.",
-  "aboutDescription": "Fadocx v1.0.0 - Your private document viewer. Built to respect your privacy.",
-  "tableRows": "rows",
-  "tableEmpty": "No data to display",
-  "tableNoContent": "Sheet is empty",
-  "sheetEmpty": "Sheet is empty",
-  "noTableData": "No table data",
-  "noSpreadsheetData": "No spreadsheet data",
-  "rowsSymbol": "rows",
-  "colsSymbol": "cols",
-  "noSlidesFound": "No slides found",
-  "slidesCount": "slides",
-  "pptUnsupported": "PPT file parsed but contains no slides",
-  "odpUnsupported": "ODP file parsed but contains no slides or unreadable content",
-  "noTextContent": "No text content found",
-  "couldNotParse": "Could not parse file",
-  "file": "File",
-  "slides": "Slide",
-  "previewNotSupported": "Preview not yet supported",
-  "openWithSystemApp": "Open with System App",
-  "systemAppNotImplemented": "System app opening not yet implemented",
-  "type": "Type",
-  "fileNotFoundMessage": "File not found",
-  "fileTooLarge": "File size exceeds maximum limit (100MB)",
-  "errorLoadingFile": "Error loading file",
-  "docxPreviewNotSupported": "DOCX preview not yet fully supported",
-  "docParseError": "Could not parse DOC file. Try converting to DOCX.",
-  "xlsxParseError": "Could not parse XLSX file",
-  "xlsParseError": "Could not parse XLS file. Try converting to XLSX.",
-  "csvParseError": "Could not parse CSV file",
-  "odtParseError": "Could not parse ODT file",
-  "odsParseError": "Could not parse ODS file",
-  "odpParseError": "Could not parse ODP file",
-  "pptParseError": "Could not parse PPT file",
-  "rtfParseError": "Could not parse RTF file",
-  "txtFileEmpty": "File is empty",
-  "unsupportedFormat": "File format is not supported yet",
-  "txtLoaded": "TXT",
-  "charactersLoaded": "characters",
-  "becomeAPatron": "Become a Patron",
-  "newBadge": "NEW",
-  "homeDocumentManagement": "إدارة المستندات",
-  "homeImportingSamples": "Importing sample files...",
-  "homeSamplesImported": "{count, plural, =1{1 sample file imported successfully!} other{{count} sample files imported successfully!}}",
-  "homeViewFiles": "View Files",
-  "homeFailedImportSamples": "Failed to import sample files: {error}",
-  "homeFileMovedToTrash": "{name} moved to trash",
-  "homeFileInfo": "معلومات الملف",
-  "homeFileName": "الاسم",
-  "homeFileType": "النوع",
-  "homeFileSize": "الحجم",
-  "homeFileLocation": "الموقع",
-  "homeFileDateOpened": "تاريخ الفتح",
-  "homeFileLastModified": "آخر تعديل",
-  "homeFileInTrash": "في سلة المهملات",
-  "homeFileInfoCopied": "تم نسخ معلومات الملف",
-  "homeCopySuffix": " (copy)",
-  "homeCopySuffixCounter": " (copy {counter})",
-  "homeDuplicatedAs": "Duplicated as {name}",
-  "homeFailedDuplicate": "Failed to duplicate file: {error}",
-  "homeRenameFile": "Rename file",
-  "homeFileNameLabel": "File name",
-  "homeFileAlreadyExists": "A file with this name already exists",
-  "homeRenamedTo": "Renamed to {name}",
-  "homeFailedRename": "Failed to rename file",
-  "homeExport": "Export",
-  "homeSaveToDownloads": "Save to Downloads",
-  "homeSaveToDownloadsPath": "Download/Fadocx/{name}",
-  "homeChooseLocation": "Choose location",
-  "homeChooseLocationDesc": "Pick a custom save directory",
-  "homeSavedToDownloads": "Saved to Download/Fadocx/{name}",
-  "homeSavedTo": "Saved to {path}",
-  "homeFailedExport": "Failed to export file",
-  "homeChooseSaveLocation": "Choose save location",
-  "homeConvertComingSoon": "Convert feature coming soon!",
-  "homeFadDriveComingSoon": "FadDrive coming soon!",
-  "homePresentationsTooltip": "Coming Soon",
-  "homeErrorPrefix": "Error: {error}",
-  "librarySelected": "{count} selected",
-  "libraryDeleteSelected": "Delete selected?",
-  "libraryDeleteConfirm": "Move {count} files to trash? You can restore them later.",
-  "libraryItemsMovedToTrash": "{count} items moved to trash",
-  "libraryErrorLoading": "Error loading library: {error}",
-  "libraryItemCount": "{count} items",
-  "libraryDeselectAll": "Deselect all",
-  "librarySelectAll": "Select all",
-  "libraryNoCategoryFound": "No {category} found",
-  "trashErrorLoading": "Error loading trash",
-  "trashFilesSelected": "{count} selected",
-  "trashFilesLabel": "files",
-  "trashFileRestored": "File restored successfully",
-  "trashDeletePermanentlyConfirm": "Delete Permanently?",
-  "trashDeletePermanentlyMessage": "You are about to permanently delete {count} file(s). This action cannot be undone.",
-  "trashDeleteTypeConfirm": "Type DELETE in capital letters to confirm:",
-  "trashDeleteHint": "DELETE",
-  "trashFilesPermanentlyDeleted": "{count} file(s) permanently deleted",
-  "updateAvailableTitle": "تحديث متاح",
-  "updateAvailableSubtitle": "نسخة جديدة من Fadocx جاهزة للتنزيل",
-  "updateStableRelease": "إصدار مستقر",
-  "updateStableDesc": "إصدار مستقر واختبار للاستخدام في الإنتاج",
-  "updateBetaRelease": "إصدار بيتا",
-  "updateBetaDesc": "وصول مبكر إلى الميزات الجديدة، قد تحتوي على أخطاء",
-  "updateMaybeLater": "ربما لاحقاً",
-  "updateCurrent": "الحالي",
-  "updateNew": "جديد",
-  "updateVisitGithub": "زيارة GitHub",
-  "updateBetaInfo": "The Fadocx beta is a standalone app that can be installed alongside the stable version. It will not interfere with your stable app or its data.\n\nInstall the beta to test new features before they reach the stable release.",
-  "updateBannerStable": "تحديث مستقر",
-  "updateBannerBeta": "تحديث بيتا",
-  "settingsUnknown": "Unknown",
-  "settingsStorageDetails": "التخزين",
-  "settingsStoragePdfs": "ملفات PDF",
-  "settingsStorageDocs": "المستندات",
-  "settingsStorageSheets": "الجداول",
-  "settingsStoragePresentations": "العروض التقديمية",
-  "settingsStorageCode": "الشفرة",
-  "settingsStorageScans": "الممسوحات",
-  "settingsStorageImages": "الصور",
-  "settingsStorageOther": "أخرى",
-  "settingsStorageInfo": "تُخزَّن المستندات في مجلد خاص على جهازك ولا يمكن للتطبيقات الأخرى الوصول إليها",
-  "settingsStoragePrivateFolderInfo": "تُخزَّن المستندات في مجلد خاص مخفي عن التطبيقات الأخرى ومديري الملفات. لا يمكن الوصول إليها إلا من خلال Fadocx.",
-  "settingsStorageDeleteInfo": "احذف المستندات من منطقة الخطر في الإعدادات",
-  "settingsStorageEmpty": "لا توجد مستندات",
-  "settingsStorageFailedLoad": "فشل تحميل بيانات التخزين",
-  "settingsFadocxDesc": "Your private document viewer",
-  "settingsRetry": "Retry",
-  "settingsCheckingUpdates": "Checking for updates…",
-  "settingsNoInternet": "No internet connection. Check your network and try again.",
-  "settingsUpToDate": "You're up to date",
-  "settingsUpToDateDesc": "v{version} is the latest version.",
-  "settingsBetaAvailable": "Beta v{version} available",
-  "settingsVersionWithBuild": "Version {version} (Build {buildNumber})",
-  "settingsPrivacyOffline": "100% Offline",
-  "settingsPrivacyLocalStorage": "Local Storage Only",
-  "settingsPrivacyOnDevice": "On-Device AI",
-  "settingsPrivacyOpenSource": "Open Source",
-  "settingsPrivacyNoAds": "No Ads",
-  "settingsPrivacyByDesign": "We believe in privacy by design.",
-  "settingsPrivacyTransparency": "Fadocx is built with transparency. Your documents are your business - not ours.",
-  "settingsViewSourceCode": "View Source Code",
-  "settingsStorageFilesSummary": "{size} • {count} files",
-  "settingsErrorPrefix": "Error: {error}",
-  "settingsCopiedText": "Copied: {text}",
-  "settingsVisitGithub": "Visit GitHub",
-  "settingsMadeWith": "Made with",
-  "settingsAt": "at",
-  "settingsIn": "in",
-  "settingsCopyright": "© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com",
-  "settingsTypeToConfirm": "Type \"{text}\" to confirm:",
-  "settingsPrivacyOfflineDesc": "All processing happens on your device. No internet required.",
-  "settingsPrivacyLocalStorageDesc": "Your documents stay on your device. Nothing is uploaded.",
-  "settingsPrivacyOnDeviceDesc": "Uses OpenCV + Tesseract for OCR. AI runs locally.",
-  "settingsPrivacyOpenSourceDesc": "Code is public. Audit it yourself on GitHub.",
-  "settingsPrivacyNoAdsDesc": "No advertisements. No tracking. No analytics. No crash logs. Zero telemetry.",
-  "settingsOpenInBrowser": "Open in Browser",
-  "viewerFindHint": "Find...",
-  "viewerTypeToFind": "Type to find",
-  "viewerSidebarPages": "Pages",
-  "viewerSidebarSearch": "Search",
-  "viewerSidebarTOC": "TOC",
-  "viewerSidebarNotes": "Notes",
-  "viewerSidebarBookmarks": "Bookmarks",
-  "viewerSidebarNotesDesc": "Add notes and annotations to PDF pages",
-  "viewerSidebarBookmarksDesc": "Save and organize your favorite pages",
-  "viewerCellCopied": "Cell {value} copied",
-  "viewerGoToPage": "Go to Page",
-  "viewerGoToPageHint": "Enter page number (1-{totalPages})",
-  "viewerGo": "Go",
-  "viewerInvalidPage": "Please enter a number between 1 and {totalPages}",
-  "viewerNoContent": "No content",
-  "viewerResetZoom": "Reset zoom",
-  "viewerCopyTextTitle": "Copy Text",
-  "viewerCopyTextChoose": "Choose what to copy:",
-  "viewerCopyPageOnly": "Page {page} only",
-  "viewerCopyAllPages": "All {totalPages} pages",
-  "viewerExtractingText": "Extracting text from {label}...",
-  "viewerNoTextFound": "No text content found",
-  "viewerPageLabel": "Page {currentPage}",
-  "viewerAllPagesLabel": "{totalPages} pages",
-  "viewerTextExtracted": "Text extracted from {pageLabel}.",
-  "viewerWordsFound": "{count} words found",
-  "viewerCopiedWords": "Copied {count} words from {pageLabel}",
-  "viewerCopyAllTextTitle": "Copy All Text",
-  "viewerCopyAllTextConfirm": "This will extract text from all {pageCount} pages and copy to clipboard.",
-  "viewerCopiedAllPages": "Copied {count} words from {pageCount} pages",
-  "viewerCopyDocumentText": "This will copy the entire document content to clipboard.",
-  "viewerWordsLines": "{words} words, {lines} lines",
-  "viewerWordsOnly": "{count} words",
-  "viewerLinesOnly": "{lines} lines",
-  "viewerCopiedFromLines": "Copied {words} words from {lines} lines",
-  "viewerCharactersCount": "{count} characters",
-  "viewerCopyExtractedTitle": "Copy Extracted Text",
-  "viewerCopyExtractedDesc": "Copy text extracted from this image via OCR.",
-  "viewerCopiedWordsChars": "Copied {words} words ({chars} characters)",
-  "viewerErrorAccessText": "Error accessing extracted text",
-  "viewerNoTextForImage": "No extracted text available for this image",
-  "viewerExtractingAllPages": "Extracting text from all pages...",
-  "viewerTextExtractionUnavailable": "Text extraction not available",
-  "viewerNoPdfText": "No text found in this PDF",
-  "viewerNoTextAvailable": "No text content available",
-  "viewerReadingTime": "{minutes} min read",
-  "viewerReadingTimeSingle": "1 min read",
-  "viewerCopy": "Copy",
-  "viewerErrorPrefix": "Error: {error}",
-  "viewerCellValue": "Cell {cell}",
-  "viewerLowerPageLabel": "page {page}",
-  "viewerAllPagesLower": "all pages",
-  "viewerCopied": "Copied",
-  "viewerCopyValue": "Copy value",
-  "viewerToggleFullscreen": "Toggle fullscreen",
-  "viewerInvert": "Invert",
-  "viewerText": "Text",
-  "viewerSyntax": "Syntax",
-  "viewerFont": "Font",
-  "viewerFontStyle": "Font Style",
-  "viewerMonospaceCourier": "Monospace (Courier)",
-  "viewerSystemUbuntu": "System (Ubuntu)",
-  "viewerEdit": "Edit",
-  "viewerEditWithEngine": "Edit with Fadocx Engine",
-  "viewerEditWithEngineDesc": "Open this spreadsheet in the Fadocx rendering engine for a faithful visual preview with full formatting, charts, and layout fidelity.",
-  "viewerEditWithEngineNote": "Note: Interactive editing is coming in a future update.",
-  "viewerNotNow": "Not Now",
-  "viewerGotIt": "Got It",
-  "viewerErrorLoadingDocument": "Error loading document",
-  "viewerGoBack": "Go Back",
-  "viewerReadingTimeMinutes": "{count, plural, =1{1 minute read} other{{count} minutes read}}",
-  "viewerReadingTimeHoursMinutes": "{hours}h {minutes}m read",
-  "linkTileCopiedToClipboard": "Copied to clipboard",
-  "linkTileCouldNotOpen": "Could not open {value}",
-  "librarySortBy": "Sort by",
-  "librarySortLatest": "Latest",
-  "librarySortOldest": "Oldest",
-  "librarySortLargest": "Largest",
-  "librarySortSmallest": "Smallest",
-  "homeDeleteFile": "Delete file?",
-  "homeDeleteFileConfirm": "Move \"{name}\" to trash? You can restore it later.",
-  "homeCopiedCharactersToClipboard": "Copied {count} characters to clipboard",
+  "scannerCopyAll": "نسخ الكل",
+  "scannerNewScan": "فحص جديد",
+  "linkTileCopy": "نسخ",
+  "linkTileCopiedToClipboard": "تم النسخ إلى الحافظة",
+  "linkTileSendEmail": "إرسال بريد إلكتروني",
+  "linkTileOpenInBrowser": "فتح في المتصفح",
+  "linkTileCouldNotOpen": "تعذر فتح {value}",
+  "@linkTileCouldNotOpen": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySortBy": "ترتيب حسب",
+  "librarySortLatest": "الأحدث",
+  "librarySortOldest": "الأقدم",
+  "librarySortLargest": "الأكبر",
+  "librarySortSmallest": "الأصغر",
+  "homeDeleteFile": "حذف الملف؟",
+  "homeDeleteFileConfirm": "نقل \"{name}\" إلى سلة المهملات؟ يمكنك استعادته لاحقاً.",
+  "@homeDeleteFileConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCopiedCharactersToClipboard": "تم نسخ {count} حرف إلى الحافظة",
+  "@homeCopiedCharactersToClipboard": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "homeFileInTrashDetail": "في سلة المهملات: نعم (تاريخ الحذف: {date})",
-  "homeUnknown": "unknown",
+  "@homeFileInTrashDetail": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeUnknown": "غير معروف",
+  "routeNotFound": "المسار غير موجود: {path}",
+  "@routeNotFound": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "routeGoHome": "العودة للرئيسية",
+  "routeInvalidDocumentPath": "مسار المستند غير صالح",
+  "pdfCopyTextTitle": "نسخ نص PDF",
+  "pdfExtractingText": "جارٍ استخراج النص...",
+  "pdfExtractingTextProgress": "جارٍ استخراج النص... ({current}/{total} صفحات)",
+  "@pdfExtractingTextProgress": {
+    "placeholders": {
+      "current": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfErrorExtractingText": "خطأ في استخراج النص",
+  "pdfWordCount": "عدد الكلمات: {count}",
+  "@pdfWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "pdfNoTextFound": "لم يُعثر على نص في PDF",
+  "pdfFullTextCopied": "تم نسخ نص PDF الكامل إلى الحافظة",
+  "pdfPasswordRequired": "مطلوب كلمة مرور PDF",
+  "pdfPasswordDesc": "هذا الـ PDF محمي بكلمة مرور. أدخل كلمة المرور لفتحه.",
+  "pdfPasswordLabel": "كلمة المرور",
+  "pdfUnlock": "إلغاء القفل",
+  "pdfSearchHint": "البحث في PDF...",
+  "pdfTextCannotBeExtracted": "لا يمكن استخراج النص من هذه الصفحة",
+  "pdfLoadingPageTexts": "جارٍ تحميل نصوص الصفحات...",
+  "pdfPageCopied": "تم نسخ نص الصفحة {page}",
+  "@pdfPageCopied": {
+    "placeholders": {
+      "page": {
+        "type": "num"
+      }
+    }
+  },
+  "viewerTooltipSidebar": "الشريط الجانبي",
+  "viewerTooltipFirst": "الأول",
+  "viewerTooltipLast": "الأخير",
+  "viewerTooltipCopyPageText": "نسخ نص الصفحة",
+  "textDocSearchHint": "البحث في النص...",
+  "textDocSearchPrevResult": "النتيجة السابقة",
+  "textDocSearchNextResult": "النتيجة التالية",
+  "imageFailedToLoad": "فشل تحميل الصورة",
+  "mediaLoading": "جارٍ تحميل الوسائط...",
+  "mediaFailedToPlay": "فشل تشغيل الوسائط",
+  "mediaPlay": "تشغيل",
+  "audioPlaybackNote": "تشغيل الصوت يتطلب مكتبة إضافية.",
+  "sheetNoData": "لا توجد بيانات في {sheetName}",
+  "@sheetNoData": {
+    "placeholders": {
+      "sheetName": {
+        "type": "String"
+      }
+    }
+  },
+  "documentNoSheets": "لم يُعثر على أوراق في {format}",
+  "@documentNoSheets": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerPlaybackSpeed": "سرعة التشغيل",
+  "urlCopiedToClipboard": "تم نسخ الرابط إلى الحافظة: {url}",
+  "@urlCopiedToClipboard": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "lokitPreparingDoc": "جارٍ تحضير مستندك...",
+  "lokitWarmingUp": "جارٍ تشغيل محرك Fadocx...",
+  "lokitAlmostThere": "على وشك الانتهاء",
+  "lokitJustAMoment": "لحظة من فضلك",
+  "lokitFailedToRender": "فشل في عرض المستند",
   "drawerFadSecLab": "فادسيك لاب"
 }
