@@ -80,7 +80,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
         curve: const Interval(0.2, 1.0, curve: Curves.easeIn),
       ),
     );
-
   }
 
   @override
@@ -142,14 +141,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     }
   }
 
-  void _finish() {
+  Future<void> _finish() async {
     if (_exiting) return;
     setState(() => _exiting = true);
     _revealTimer?.cancel();
 
     final mutator = ref.read(settingsMutatorProvider);
-    mutator.updateHasDismissedWelcome(true);
-    mutator.updateShowOnboardingNextLaunch(false);
+    await mutator.completeOnboarding();
 
     _exitController.forward().then((_) {
       if (mounted) context.go(RouteNames.home);
@@ -230,7 +228,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                         !_iconController.isAnimating &&
                         _revealedCount == 0) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) _startFirstSlide(currentSlide.bullets.length);
+                        if (mounted) {
+                          _startFirstSlide(currentSlide.bullets.length);
+                        }
                       });
                     }
                     return Padding(
@@ -312,8 +312,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                           const SizedBox(height: 24),
 
                           // Bullets
-                          _buildBullets(context, currentSlide.bullets,
-                              _currentPage,
+                          _buildBullets(
+                              context, currentSlide.bullets, _currentPage,
                               bulletIcons: currentSlide.bulletIcons),
                         ],
                       ),
@@ -395,9 +395,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     child: Text(
                       allBullets[i],
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                             height: 1.45,
                           ),
                     ),
@@ -436,10 +435,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
       // Slide 2 — power tools: squircle icon tile
       case 1:
-        final icon =
-            bulletIcons != null && bulletIndex < bulletIcons.length
-                ? bulletIcons[bulletIndex]
-                : Icons.star_outline_rounded;
+        final icon = bulletIcons != null && bulletIndex < bulletIcons.length
+            ? bulletIcons[bulletIndex]
+            : Icons.star_outline_rounded;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           width: 36,
@@ -447,17 +445,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           margin: const EdgeInsets.only(right: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: isRevealed ? primary.withValues(alpha: 0.12) : Colors.transparent,
+            color: isRevealed
+                ? primary.withValues(alpha: 0.12)
+                : Colors.transparent,
           ),
           child: isRevealed ? Icon(icon, size: 18, color: primary) : null,
         );
 
       // Slide 3 — privacy: circle icon
       default:
-        final icon =
-            bulletIcons != null && bulletIndex < bulletIcons.length
-                ? bulletIcons[bulletIndex]
-                : Icons.shield_outlined;
+        final icon = bulletIcons != null && bulletIndex < bulletIcons.length
+            ? bulletIcons[bulletIndex]
+            : Icons.shield_outlined;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           width: 34,
@@ -465,7 +464,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           margin: const EdgeInsets.only(right: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
-            color: isRevealed ? primary.withValues(alpha: 0.12) : Colors.transparent,
+            color: isRevealed
+                ? primary.withValues(alpha: 0.12)
+                : Colors.transparent,
           ),
           child: isRevealed ? Icon(icon, size: 17, color: primary) : null,
         );

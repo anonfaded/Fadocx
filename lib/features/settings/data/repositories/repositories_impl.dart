@@ -120,7 +120,8 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       log.i('Updated hasImportedSampleFiles to: $hasImported');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to update hasImportedSampleFiles', error: e, stackTrace: st);
+      log.e('Failed to update hasImportedSampleFiles',
+          error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to update hasImportedSampleFiles'));
     }
@@ -164,9 +165,33 @@ class AppSettingsRepositoryImpl implements AppSettingsRepository {
       log.i('Updated showOnboardingNextLaunch to: $show');
       return const ResultSuccess(null);
     } catch (e, st) {
-      log.e('Failed to update showOnboardingNextLaunch', error: e, stackTrace: st);
+      log.e('Failed to update showOnboardingNextLaunch',
+          error: e, stackTrace: st);
       return ResultFailure(
           UnknownFailure(message: 'Failed to update showOnboardingNextLaunch'));
+    }
+  }
+
+  @override
+  Future<Result<void>> completeOnboarding() async {
+    try {
+      var settings = await _datasource.getSettings();
+      settings ??= HiveAppSettings();
+
+      final updated = settings.copyWith(
+        hasDismissedWelcome: true,
+        showOnboardingNextLaunch: false,
+        syncStatus: 'pending',
+        updatedAt: DateTime.now(),
+      );
+
+      await _datasource.saveSettings(updated);
+      log.i('Onboarding completed and replay flag cleared');
+      return const ResultSuccess(null);
+    } catch (e, st) {
+      log.e('Failed to complete onboarding', error: e, stackTrace: st);
+      return ResultFailure(
+          UnknownFailure(message: 'Failed to complete onboarding'));
     }
   }
 
@@ -322,7 +347,8 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
     try {
       // Get file by path from recent files
       final recentFiles = await _datasource.getRecentFiles();
-      final existing = recentFiles.where((f) => f.filePath == filePath).firstOrNull;
+      final existing =
+          recentFiles.where((f) => f.filePath == filePath).firstOrNull;
       if (existing != null) {
         final updated = existing.copyWith(dateOpened: DateTime.now());
         await _datasource.updateRecentFile(updated);
@@ -393,10 +419,10 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
           log.w('Could not move file to trash, may already be deleted: $e');
           rethrow;
         }
-        
+
         // Update database with NEW trash path and mark as deleted
         final deleted = existing.copyWith(
-          filePath: movedFile.path,  // Update to trash path so restore works
+          filePath: movedFile.path, // Update to trash path so restore works
           isDeleted: true,
           deletedAt: DateTime.now(),
         );
@@ -416,8 +442,9 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       final existing = await _datasource.getRecentFile(fileId);
       if (existing != null && existing.isDeleted) {
         // Move file back from trash to original category
-        final restoredFile = await StorageService.restoreFromTrash(existing.filePath);
-        
+        final restoredFile =
+            await StorageService.restoreFromTrash(existing.filePath);
+
         // Update database with new file path and restored status
         final restored = existing.copyWith(
           filePath: restoredFile.path,
@@ -447,7 +474,7 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
           log.w('Could not delete file from disk, may already be deleted: $e');
         }
       }
-      
+
       // Remove from database
       await _datasource.deleteRecentFile(fileId);
       log.i('Permanently deleted file: $fileId');
@@ -479,10 +506,13 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   Future<Result<void>> startViewingSession(String filePath) async {
     try {
       final recentFiles = await _datasource.getRecentFiles();
-      final existing = recentFiles.where((f) => f.filePath == filePath).firstOrNull;
-      log.i('startViewingSession: Searching for "$filePath" in ${recentFiles.length} files');
+      final existing =
+          recentFiles.where((f) => f.filePath == filePath).firstOrNull;
+      log.i(
+          'startViewingSession: Searching for "$filePath" in ${recentFiles.length} files');
       if (existing != null) {
-        log.i('FOUND file in recentFiles, current time: ${existing.totalTimeSpentMs}ms');
+        log.i(
+            'FOUND file in recentFiles, current time: ${existing.totalTimeSpentMs}ms');
         final updated = existing.copyWith(sessionStartTime: DateTime.now());
         await _datasource.updateRecentFile(updated);
         log.i('Started viewing session: $filePath');
@@ -512,19 +542,22 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
   Future<Result<void>> endViewingSession(String filePath) async {
     try {
       final recentFiles = await _datasource.getRecentFiles();
-      final existing = recentFiles.where((f) => f.filePath == filePath).firstOrNull;
+      final existing =
+          recentFiles.where((f) => f.filePath == filePath).firstOrNull;
       if (existing != null) {
         final startTime = existing.sessionStartTime;
         if (startTime != null) {
           final duration = DateTime.now().difference(startTime).inMilliseconds;
-          log.i('endViewingSession: session was ${duration}ms, previous total: ${existing.totalTimeSpentMs}ms');
+          log.i(
+              'endViewingSession: session was ${duration}ms, previous total: ${existing.totalTimeSpentMs}ms');
           final newTotal = existing.totalTimeSpentMs + duration;
           final updated = existing.copyWith(
             totalTimeSpentMs: newTotal,
             sessionStartTime: null,
           );
           await _datasource.updateRecentFile(updated);
-          log.i('Ended viewing session: $filePath, added ${duration}ms, new total: ${newTotal}ms');
+          log.i(
+              'Ended viewing session: $filePath, added ${duration}ms, new total: ${newTotal}ms');
         } else {
           log.w('No active session start time found');
           // Just clear session start time
@@ -547,13 +580,13 @@ class RecentFilesRepositoryImpl implements RecentFilesRepository {
       // Load data on background isolate without yielding empty list first
       // This prevents the "No Library Items" flicker
       log.d('watchRecentFiles: loading files...');
-      
+
       // Open box and load data on background thread - doesn't block UI
       final box = await _datasource.getRecentFilesBox();
       final hiveFiles = box.values.toList();
       final initialDomainFiles = await compute(_processRecentFiles, hiveFiles);
       log.d('watchRecentFiles: yielding ${initialDomainFiles.length} files');
-      
+
       // Yield directly with data - no flicker
       yield ResultSuccess(initialDomainFiles);
 
@@ -620,7 +653,9 @@ List<RecentFile> _processRecentFiles(List<HiveRecentFile> hiveFiles) {
     ..sort((a, b) => b.dateOpened.compareTo(a.dateOpened));
 
   // 1b. Debug sort order
-  final sortOrder = sorted.map((f) => '${f.fileName}@${f.dateOpened.toIso8601String()}').join(' > ');
+  final sortOrder = sorted
+      .map((f) => '${f.fileName}@${f.dateOpened.toIso8601String()}')
+      .join(' > ');
   log.d('Sorted recent files: $sortOrder');
   // 2. Filter out soft-deleted files
   final notDeleted = sorted.where((file) => !file.isDeleted).toList();

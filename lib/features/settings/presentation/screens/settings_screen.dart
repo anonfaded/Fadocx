@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,221 +91,241 @@ class SettingsScreen extends ConsumerWidget {
                       _divider(context),
                       _SettingsRow(
                         icon: Icons.settings_backup_restore,
+                        title: l10n.settingsCustomStorage,
+                        value: l10n.comingSoon,
+                        isComingSoon: true,
+                        onTap: null,
+                      ),
+                    ]),
+                    data: (files) {
+                      final activeFiles =
+                          files.where((f) => !f.isDeleted).toList();
+                      final totalBytes = activeFiles.fold<int>(
+                          0, (sum, f) => sum + f.fileSizeBytes);
+                      final totalCount = activeFiles.length;
+                      final value = l10n.settingsStorageFilesSummary(
+                        StorageService.formatBytes(totalBytes),
+                        totalCount,
+                      );
+                      return Column(children: [
+                        _SettingsRow(
+                          icon: Icons.folder_outlined,
+                          title: l10n.settingsDocumentsSize,
+                          value: value,
+                          onTap: () => _showStorageInfo(context),
+                        ),
+                        _divider(context),
+                        _SettingsRow(
+                          icon: Icons.settings_backup_restore,
                           title: l10n.settingsCustomStorage,
                           value: l10n.comingSoon,
                           isComingSoon: true,
                           onTap: null,
                         ),
-                      ]),
-                      data: (files) {
-                        final activeFiles = files.where((f) => !f.isDeleted).toList();
-                        final totalBytes = activeFiles.fold<int>(0, (sum, f) => sum + f.fileSizeBytes);
-                        final totalCount = activeFiles.length;
-                        final value = l10n.settingsStorageFilesSummary(
-                          StorageService.formatBytes(totalBytes),
-                          totalCount,
-                        );
-                        return Column(children: [
-                          _SettingsRow(
-                            icon: Icons.folder_outlined,
-                            title: l10n.settingsDocumentsSize,
-                            value: value,
-                            onTap: () => _showStorageInfo(context),
-                          ),
-                          _divider(context),
-                          _SettingsRow(
-                            icon: Icons.settings_backup_restore,
-                            title: l10n.settingsCustomStorage,
-                            value: l10n.comingSoon,
-                            isComingSoon: true,
-                            onTap: null,
-                          ),
-                        ]);
-                      },
-                    );
-                  },
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, l10n.settingsUpdates),
-              _buildSettingsGroup(context, [
-                Consumer(
-                  builder: (context, ref, _) {
-                    final settings = ref.watch(appSettingsProvider);
-                    final enabled = settings.when(
-                      data: (s) => s?.autoUpdateCheck ?? true,
-                      loading: () => true,
-                      error: (_, __) => true,
-                    );
-
-                    return _buildAutoUpdateRow(context, ref, enabled);
-                  },
-                ),
-                _divider(context),
-                Consumer(
-                  builder: (context, ref, _) {
-                    final settings = ref.watch(appSettingsProvider);
-                    final show = settings.when(
-                      data: (s) => s?.showOnboardingNextLaunch ?? false,
-                      loading: () => false,
-                      error: (_, __) => false,
-                    );
-                    return _buildOnboardingReplayRow(context, ref, show);
-                  },
-                ),
-                _divider(context),
-                _buildCheckUpdatesRow(context, ref),
-              ]),
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, l10n.settingsSecurity),
-              _buildSettingsGroup(context, [
-                _SettingsRow(
-                  icon: Icons.lock_outline,
-                  title: l10n.settingsAppLock,
-                  value: l10n.comingSoon,
-                  isComingSoon: true,
-                  onTap: null,
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, l10n.settingsAbout),
-              _buildSettingsGroup(context, [
-                _SettingsRow(
-                  icon: Icons.info_outline,
-                  title: l10n.settingsVersion,
-                  value: packageInfoAsync.when(
-                    data: (info) => 'v${info.version}+${info.buildNumber}',
-                    loading: () => '...',
-                    error: (_, __) => l10n.settingsUnknown,
-                  ),
-                  onTap: () => packageInfoAsync.whenData(
-                    (info) => _showVersionInfo(context, info),
-                  ),
-                ),
-                _divider(context),
-                _SettingsRow(
-                  icon: Icons.share,
-                  title: l10n.settingsShareApp,
-                  onTap: () => _showShareOptions(context),
-                ),
-                _divider(context),
-                LinkTile.url(
-                  icon: SimpleIcons.github,
-                  title: l10n.settingsSourceCode,
-                  value: 'https://github.com/anonfaded/Fadocx',
-                ),
-                _divider(context),
-                LinkTile.email(
-                  icon: Icons.email_outlined,
-                  title: l10n.settingsContact,
-                  value: 'contact@fadseclab.com',
-                ),
-                _divider(context),
-                LinkTile.url(
-                  icon: SimpleIcons.discord,
-                  title: l10n.settingsJoinCommunity,
-                  value: 'https://discord.gg/kvAZvdkuuN',
-                ),
-                _divider(context),
-                _SettingsRow(
-                  icon: Icons.shield_outlined,
-                  title: l10n.settingsPrivacyPolicy,
-                  onTap: () => _showPrivacyPolicy(context),
-                ),
-                _divider(context),
-                _patreonRow(context),
-              ]),
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, l10n.settingsMoreFromFadsec),
-              _buildSettingsGroup(context, [
-                _otherAppCard(
-                  context,
-                  imageAsset: 'assets/other_apps/fadcam.png',
-                  name: 'FadCam',
-                  description: l10n.settingsFadcamDesc,
-                  platformIcons: [SimpleIcons.android],
-                  url: 'https://github.com/anonfaded/FadCam',
-                ),
-                _divider(context),
-                _otherAppCard(
-                  context,
-                  imageAsset: 'assets/other_apps/qurancli.png',
-                  name: 'QuranCLI',
-                  description: l10n.settingsQuranCliDesc,
-                  platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
-                  url: 'https://github.com/anonfaded/QuranCLI',
-                  platformNote: l10n.settingsMacosComingSoon,
-                ),
-                _divider(context),
-                _otherAppCard(
-                  context,
-                  imageAsset: 'assets/other_apps/fadcrypt.png',
-                  name: 'FadCrypt',
-                  description: l10n.settingsFadcryptDesc,
-                  platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
-                  url: 'https://github.com/anonfaded/FadCrypt',
-                  platformNote: l10n.settingsMacosComingSoon,
-                ),
-                _divider(context),
-                _otherAppCard(
-                  context,
-                  imageAsset: 'assets/other_apps/fadcat.png',
-                  name: 'FadCat',
-                  description: l10n.settingsFadcatDesc,
-                  platformIcons: [Icons.window, SimpleIcons.linux, SimpleIcons.apple],
-                  url: 'https://github.com/anonfaded/FadCat',
-                  iconBgColor: Colors.black.withValues(alpha: 0.2),
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, l10n.settingsDangerZone, color: Colors.red),
-              _buildDangerGroup(context, [
-                _DangerRow(
-                  icon: Icons.delete_outline,
-                  title: l10n.settingsTrash,
-                  subtitle: l10n.settingsTrashDesc,
-                  confirmText: '',
-                  onConfirm: () {
-                    context.push(RouteNames.trash);
-                  },
-                ),
-                _divider(context),
-                _DangerRow(
-                  icon: Icons.restore,
-                  title: l10n.settingsResetSettings,
-                  subtitle: l10n.settingsResetSettingsDesc,
-                  confirmText: 'RESET',
-                  onConfirm: () {
-                    ref.read(settingsMutatorProvider).clearSettings();
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.settingsResetDone)),
-                    );
-                  },
-                ),
-              ]),
-              const SizedBox(height: 32),
-              _buildFooter(context),
-              const SizedBox(height: 48),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(l10n.settingsErrorPrefix(e.toString())),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(appSettingsProvider),
-                child: Text(l10n.settingsRetry),
+                      ]);
+                    },
+                  );
+                },
               ),
-            ],
-          ),              // Close Column
-        ),                // Close Center
+            ]),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, l10n.settingsUpdates),
+            _buildSettingsGroup(context, [
+              Consumer(
+                builder: (context, ref, _) {
+                  final settings = ref.watch(appSettingsProvider);
+                  final enabled = settings.when(
+                    data: (s) => s?.autoUpdateCheck ?? true,
+                    loading: () => true,
+                    error: (_, __) => true,
+                  );
+
+                  return _buildAutoUpdateRow(context, ref, enabled);
+                },
+              ),
+              _divider(context),
+              Consumer(
+                builder: (context, ref, _) {
+                  final settings = ref.watch(appSettingsProvider);
+                  final show = settings.when(
+                    data: (s) => s?.showOnboardingNextLaunch ?? false,
+                    loading: () => false,
+                    error: (_, __) => false,
+                  );
+                  return _buildOnboardingReplayRow(context, ref, show);
+                },
+              ),
+              _divider(context),
+              _buildCheckUpdatesRow(context, ref),
+            ]),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, l10n.settingsSecurity),
+            _buildSettingsGroup(context, [
+              _SettingsRow(
+                icon: Icons.lock_outline,
+                title: l10n.settingsAppLock,
+                value: l10n.comingSoon,
+                isComingSoon: true,
+                onTap: null,
+              ),
+            ]),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, l10n.settingsAbout),
+            _buildSettingsGroup(context, [
+              _SettingsRow(
+                icon: Icons.info_outline,
+                title: l10n.settingsVersion,
+                value: packageInfoAsync.when(
+                  data: (info) => 'v${info.version}+${info.buildNumber}',
+                  loading: () => '...',
+                  error: (_, __) => l10n.settingsUnknown,
+                ),
+                onTap: () => packageInfoAsync.whenData(
+                  (info) => _showVersionInfo(context, info),
+                ),
+              ),
+              _divider(context),
+              _SettingsRow(
+                icon: Icons.share,
+                title: l10n.settingsShareApp,
+                onTap: () => _showShareOptions(context),
+              ),
+              _divider(context),
+              LinkTile.url(
+                icon: SimpleIcons.github,
+                title: l10n.settingsSourceCode,
+                value: 'https://github.com/anonfaded/Fadocx',
+              ),
+              _divider(context),
+              LinkTile.email(
+                icon: Icons.email_outlined,
+                title: l10n.settingsContact,
+                value: 'contact@fadseclab.com',
+              ),
+              _divider(context),
+              LinkTile.url(
+                icon: SimpleIcons.discord,
+                title: l10n.settingsJoinCommunity,
+                value: 'https://discord.gg/kvAZvdkuuN',
+              ),
+              _divider(context),
+              _SettingsRow(
+                icon: Icons.shield_outlined,
+                title: l10n.settingsPrivacyPolicy,
+                onTap: () => _showPrivacyPolicy(context),
+              ),
+              _divider(context),
+              _patreonRow(context),
+            ]),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, l10n.settingsMoreFromFadsec),
+            _buildSettingsGroup(context, [
+              _otherAppCard(
+                context,
+                imageAsset: 'assets/other_apps/fadcam.png',
+                name: 'FadCam',
+                description: l10n.settingsFadcamDesc,
+                platformIcons: [SimpleIcons.android],
+                url: 'https://github.com/anonfaded/FadCam',
+              ),
+              _divider(context),
+              _otherAppCard(
+                context,
+                imageAsset: 'assets/other_apps/qurancli.png',
+                name: 'QuranCLI',
+                description: l10n.settingsQuranCliDesc,
+                platformIcons: [
+                  Icons.window,
+                  SimpleIcons.linux,
+                  SimpleIcons.apple
+                ],
+                url: 'https://github.com/anonfaded/QuranCLI',
+                platformNote: l10n.settingsMacosComingSoon,
+              ),
+              _divider(context),
+              _otherAppCard(
+                context,
+                imageAsset: 'assets/other_apps/fadcrypt.png',
+                name: 'FadCrypt',
+                description: l10n.settingsFadcryptDesc,
+                platformIcons: [
+                  Icons.window,
+                  SimpleIcons.linux,
+                  SimpleIcons.apple
+                ],
+                url: 'https://github.com/anonfaded/FadCrypt',
+                platformNote: l10n.settingsMacosComingSoon,
+              ),
+              _divider(context),
+              _otherAppCard(
+                context,
+                imageAsset: 'assets/other_apps/fadcat.png',
+                name: 'FadCat',
+                description: l10n.settingsFadcatDesc,
+                platformIcons: [
+                  Icons.window,
+                  SimpleIcons.linux,
+                  SimpleIcons.apple
+                ],
+                url: 'https://github.com/anonfaded/FadCat',
+                iconBgColor: Colors.black.withValues(alpha: 0.2),
+              ),
+            ]),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, l10n.settingsDangerZone,
+                color: Colors.red),
+            _buildDangerGroup(context, [
+              _DangerRow(
+                icon: Icons.delete_outline,
+                title: l10n.settingsTrash,
+                subtitle: l10n.settingsTrashDesc,
+                confirmText: '',
+                onConfirm: () {
+                  context.push(RouteNames.trash);
+                },
+              ),
+              _divider(context),
+              _DangerRow(
+                icon: Icons.restore,
+                title: l10n.settingsResetSettings,
+                subtitle: l10n.settingsResetSettingsDesc,
+                confirmText: 'RESET',
+                onConfirm: () async {
+                  await ref.read(settingsMutatorProvider).clearSettings();
+                  if (!context.mounted) return;
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeModeFromString('dark');
+                  ref.read(localeProvider.notifier).setLocale('en');
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.settingsResetDone)),
+                  );
+                },
+              ),
+            ]),
+            const SizedBox(height: 32),
+            _buildFooter(context),
+            const SizedBox(height: 48),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(l10n.settingsErrorPrefix(e.toString())),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => ref.invalidate(appSettingsProvider),
+              child: Text(l10n.settingsRetry),
+            ),
+          ],
+        ), // Close Column
+      ), // Close Center
     );
     if (tabMode) return settingsBody;
     return FloatingDockScaffold(
@@ -387,17 +409,28 @@ class SettingsScreen extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
     final l10n = AppLocalizations.of(context)!;
     switch (locale.languageCode) {
-      case 'ur': return l10n.languageUrdu;
-      case 'ru': return l10n.languageRussian;
-      case 'zh': return l10n.languageChinese;
-      case 'ja': return l10n.languageJapanese;
-      case 'fr': return l10n.languageFrench;
-      case 'ar': return l10n.languageArabic;
-      case 'es': return l10n.languageSpanish;
-      case 'de': return l10n.languageGerman;
-      case 'pt': return l10n.languagePortuguese;
-      case 'hi': return l10n.languageHindi;
-      default:   return l10n.languageEnglish;
+      case 'ur':
+        return l10n.languageUrdu;
+      case 'ru':
+        return l10n.languageRussian;
+      case 'zh':
+        return l10n.languageChinese;
+      case 'ja':
+        return l10n.languageJapanese;
+      case 'fr':
+        return l10n.languageFrench;
+      case 'ar':
+        return l10n.languageArabic;
+      case 'es':
+        return l10n.languageSpanish;
+      case 'de':
+        return l10n.languageGerman;
+      case 'pt':
+        return l10n.languagePortuguese;
+      case 'hi':
+        return l10n.languageHindi;
+      default:
+        return l10n.languageEnglish;
     }
   }
 
@@ -406,7 +439,8 @@ class SettingsScreen extends ConsumerWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text(l10n.settingsCopiedText(text)), duration: const Duration(seconds: 2)),
+          content: Text(l10n.settingsCopiedText(text)),
+          duration: const Duration(seconds: 2)),
     );
   }
 
@@ -442,14 +476,31 @@ class SettingsScreen extends ConsumerWidget {
                     const SizedBox(height: 20),
                     Column(
                       children: [
-                        SizedBox(height: 140, child: Center(child: CircularProgressIndicator())),
+                        SizedBox(
+                            height: 140,
+                            child: Center(child: CircularProgressIndicator())),
                         const SizedBox(height: 12),
                         Row(children: [
-                          Expanded(child: _storageChip(Icons.picture_as_pdf, l10n.settingsStoragePdfs, l10n.settingsCalculating, Colors.red)),
+                          Expanded(
+                              child: _storageChip(
+                                  Icons.picture_as_pdf,
+                                  l10n.settingsStoragePdfs,
+                                  l10n.settingsCalculating,
+                                  Colors.red)),
                           const SizedBox(width: 8),
-                          Expanded(child: _storageChip(Icons.table_chart, l10n.settingsStorageSheets, l10n.settingsCalculating, Colors.green)),
+                          Expanded(
+                              child: _storageChip(
+                                  Icons.table_chart,
+                                  l10n.settingsStorageSheets,
+                                  l10n.settingsCalculating,
+                                  Colors.green)),
                           const SizedBox(width: 8),
-                          Expanded(child: _storageChip(Icons.description, l10n.settingsStorageDocs, l10n.settingsCalculating, Colors.blue)),
+                          Expanded(
+                              child: _storageChip(
+                                  Icons.description,
+                                  l10n.settingsStorageDocs,
+                                  l10n.settingsCalculating,
+                                  Colors.blue)),
                         ]),
                       ],
                     ),
@@ -467,12 +518,12 @@ class SettingsScreen extends ConsumerWidget {
                               .titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold)),
                     ),
-                     const SizedBox(height: 20),
-                     Center(
-                       child: Text(l10n.settingsStorageFailedLoad,
-                           style: Theme.of(context).textTheme.bodyMedium),
-                     ),
-                   ],
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Text(l10n.settingsStorageFailedLoad,
+                          style: Theme.of(context).textTheme.bodyMedium),
+                    ),
+                  ],
                 ),
                 data: (files) {
                   final stats = _computeCategoryStats(files);
@@ -481,45 +532,111 @@ class SettingsScreen extends ConsumerWidget {
                     children: [
                       Center(child: _handle(context)),
                       const SizedBox(height: 8),
-                       Center(
-                         child: Text(l10n.settingsStorageDetails,
-                             style: Theme.of(context)
-                                 .textTheme
-                                 .titleLarge
+                      Center(
+                        child: Text(l10n.settingsStorageDetails,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
                                 ?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(height: 20),
-                       Builder(
-                         builder: (context) {
-                           final slices = <String, int>{};
-                           for (final entry in stats.entries) {
-                             slices[_labelForFolder(context, entry.key)] = entry.value['bytes'] ?? 0;
-                           }
-                           return Column(
-                             children: [
-                               SizedBox(height: 140, child: _storageChartFromMap(context, slices)),
-                               const SizedBox(height: 12),
-                               Row(children: [
-                                 Expanded(child: _storageChip(Icons.picture_as_pdf, l10n.settingsStoragePdfs, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['PDFs']?['bytes'] ?? 0), stats['PDFs']?['count'] ?? 0), Colors.red)),
-                                 const SizedBox(width: 8),
-                                 Expanded(child: _storageChip(Icons.table_chart, l10n.settingsStorageSheets, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Spreadsheets']?['bytes'] ?? 0), stats['Spreadsheets']?['count'] ?? 0), Colors.green)),
-                                 const SizedBox(width: 8),
-                                 Expanded(child: _storageChip(Icons.description, l10n.settingsStorageDocs, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Documents']?['bytes'] ?? 0), stats['Documents']?['count'] ?? 0), Colors.blue)),
-                               ]),
-                               const SizedBox(height: 12),
-                               Row(children: [
-                                 Expanded(child: _storageChip(Icons.slideshow, l10n.settingsStoragePresentations, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Presentations']?['bytes'] ?? 0), stats['Presentations']?['count'] ?? 0), Colors.orange)),
-                                 const SizedBox(width: 8),
-                                 Expanded(child: _storageChip(Icons.code, l10n.settingsStorageCode, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Code']?['bytes'] ?? 0), stats['Code']?['count'] ?? 0), Colors.purple)),
-                                 const SizedBox(width: 8),
-                                 Expanded(child: _storageChip(Icons.document_scanner, l10n.settingsStorageScans, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Scans']?['bytes'] ?? 0), stats['Scans']?['count'] ?? 0), Colors.cyan)),
-                               ]),
-                               const SizedBox(height: 12),
-                               Row(children: [
-                                 Expanded(child: _storageChip(Icons.insert_drive_file, l10n.settingsStorageOther, l10n.settingsStorageFilesSummary(StorageService.formatBytes(stats['Other']?['bytes'] ?? 0), stats['Other']?['count'] ?? 0), Colors.teal)),
-                               ]),
-                             ],
-                           );
+                      Builder(
+                        builder: (context) {
+                          final slices = <String, int>{};
+                          for (final entry in stats.entries) {
+                            slices[_labelForFolder(context, entry.key)] =
+                                entry.value['bytes'] ?? 0;
+                          }
+                          return Column(
+                            children: [
+                              SizedBox(
+                                  height: 140,
+                                  child: _storageChartFromMap(context, slices)),
+                              const SizedBox(height: 12),
+                              Row(children: [
+                                Expanded(
+                                    child: _storageChip(
+                                        Icons.picture_as_pdf,
+                                        l10n.settingsStoragePdfs,
+                                        l10n.settingsStorageFilesSummary(
+                                            StorageService.formatBytes(
+                                                stats['PDFs']?['bytes'] ?? 0),
+                                            stats['PDFs']?['count'] ?? 0),
+                                        Colors.red)),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                    child: _storageChip(
+                                        Icons.table_chart,
+                                        l10n.settingsStorageSheets,
+                                        l10n.settingsStorageFilesSummary(
+                                            StorageService.formatBytes(
+                                                stats['Spreadsheets']
+                                                        ?['bytes'] ??
+                                                    0),
+                                            stats['Spreadsheets']?['count'] ??
+                                                0),
+                                        Colors.green)),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                    child: _storageChip(
+                                        Icons.description,
+                                        l10n.settingsStorageDocs,
+                                        l10n.settingsStorageFilesSummary(
+                                            StorageService.formatBytes(
+                                                stats['Documents']?['bytes'] ??
+                                                    0),
+                                            stats['Documents']?['count'] ?? 0),
+                                        Colors.blue)),
+                              ]),
+                              const SizedBox(height: 12),
+                              Row(children: [
+                                Expanded(
+                                    child: _storageChip(
+                                        Icons.slideshow,
+                                        l10n.settingsStoragePresentations,
+                                        l10n.settingsStorageFilesSummary(
+                                            StorageService.formatBytes(
+                                                stats['Presentations']
+                                                        ?['bytes'] ??
+                                                    0),
+                                            stats['Presentations']?['count'] ??
+                                                0),
+                                        Colors.orange)),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                    child: _storageChip(
+                                        Icons.code,
+                                        l10n.settingsStorageCode,
+                                        l10n.settingsStorageFilesSummary(
+                                            StorageService.formatBytes(
+                                                stats['Code']?['bytes'] ?? 0),
+                                            stats['Code']?['count'] ?? 0),
+                                        Colors.purple)),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                    child: _storageChip(
+                                        Icons.document_scanner,
+                                        l10n.settingsStorageScans,
+                                        l10n.settingsStorageFilesSummary(
+                                            StorageService.formatBytes(
+                                                stats['Scans']?['bytes'] ?? 0),
+                                            stats['Scans']?['count'] ?? 0),
+                                        Colors.cyan)),
+                              ]),
+                              const SizedBox(height: 12),
+                              Row(children: [
+                                Expanded(
+                                    child: _storageChip(
+                                        Icons.insert_drive_file,
+                                        l10n.settingsStorageOther,
+                                        l10n.settingsStorageFilesSummary(
+                                            StorageService.formatBytes(
+                                                stats['Other']?['bytes'] ?? 0),
+                                            stats['Other']?['count'] ?? 0),
+                                        Colors.teal)),
+                              ]),
+                            ],
+                          );
                         },
                       ),
                       const SizedBox(height: 20),
@@ -551,13 +668,16 @@ class SettingsScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           children: [
                             Icon(Icons.info_outline,
-                                size: 20, color: Theme.of(context).colorScheme.primary),
+                                size: 20,
+                                color: Theme.of(context).colorScheme.primary),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -583,7 +703,9 @@ class SettingsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final total = slices.values.fold<int>(0, (p, e) => p + e);
     if (total == 0) {
-      return Center(child: Text(l10n.settingsStorageEmpty, style: Theme.of(context).textTheme.bodySmall));
+      return Center(
+          child: Text(l10n.settingsStorageEmpty,
+              style: Theme.of(context).textTheme.bodySmall));
     }
 
     final sections = <PieChartSectionData>[];
@@ -595,10 +717,12 @@ class SettingsScreen extends ConsumerWidget {
         color: color,
         value: value.toDouble(),
         title: '${percent.toStringAsFixed(percent >= 10 ? 0 : 1)}%',
-        titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+        titleStyle: const TextStyle(
+            fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
         radius: 45,
         showTitle: percent >= 0.1, // hide extremely tiny labels
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
+        borderSide:
+            BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
       ));
       idx++;
     });
@@ -611,14 +735,23 @@ class SettingsScreen extends ConsumerWidget {
         opacity: value,
         child: Transform.scale(
           scale: 0.8 + (0.2 * value),
-          child: PieChart(PieChartData(sectionsSpace: 2, centerSpaceRadius: 35, sections: sections)),
+          child: PieChart(PieChartData(
+              sectionsSpace: 2, centerSpaceRadius: 35, sections: sections)),
         ),
       ),
     );
   }
 
   Color _colorForIndex(int idx) {
-    const palette = [Colors.red, Colors.green, Colors.blue, Colors.orange, Colors.purple, Colors.teal, Colors.grey];
+    const palette = [
+      Colors.red,
+      Colors.green,
+      Colors.blue,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.grey
+    ];
     return palette[idx % palette.length];
   }
 
@@ -638,8 +771,10 @@ class SettingsScreen extends ConsumerWidget {
     for (final file in files) {
       if (file.isDeleted) continue;
       final category = _categoryForFileType(file.fileType);
-      stats[category]?['bytes'] = ((stats[category]?['bytes'] ?? 0) + file.fileSizeBytes).toInt();
-      stats[category]?['count'] = ((stats[category]?['count'] ?? 0) + 1).toInt();
+      stats[category]?['bytes'] =
+          ((stats[category]?['bytes'] ?? 0) + file.fileSizeBytes).toInt();
+      stats[category]?['count'] =
+          ((stats[category]?['count'] ?? 0) + 1).toInt();
     }
 
     return stats;
@@ -729,7 +864,8 @@ class SettingsScreen extends ConsumerWidget {
         ]),
       );
 
-  Widget _buildAutoUpdateRow(BuildContext context, WidgetRef ref, bool enabled) {
+  Widget _buildAutoUpdateRow(
+      BuildContext context, WidgetRef ref, bool enabled) {
     final l10n = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
@@ -767,7 +903,8 @@ class SettingsScreen extends ConsumerWidget {
                     Text(
                       enabled ? l10n.settingsEnabled : l10n.settingsDisabled,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ],
@@ -778,7 +915,9 @@ class SettingsScreen extends ConsumerWidget {
                 child: Switch(
                   value: enabled,
                   onChanged: (value) {
-                    ref.read(settingsMutatorProvider).updateAutoUpdateCheck(value);
+                    ref
+                        .read(settingsMutatorProvider)
+                        .updateAutoUpdateCheck(value);
                   },
                 ),
               ),
@@ -789,7 +928,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildOnboardingReplayRow(BuildContext context, WidgetRef ref, bool show) {
+  Widget _buildOnboardingReplayRow(
+      BuildContext context, WidgetRef ref, bool show) {
     final l10n = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
@@ -827,7 +967,8 @@ class SettingsScreen extends ConsumerWidget {
                     Text(
                       show ? l10n.settingsEnabled : l10n.settingsDisabled,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ],
@@ -838,7 +979,9 @@ class SettingsScreen extends ConsumerWidget {
                 child: Switch(
                   value: show,
                   onChanged: (value) {
-                    ref.read(settingsMutatorProvider).updateShowOnboardingNextLaunch(value);
+                    ref
+                        .read(settingsMutatorProvider)
+                        .updateShowOnboardingNextLaunch(value);
                   },
                 ),
               ),
@@ -849,7 +992,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showThemePicker(BuildContext context, WidgetRef ref, ThemeMode current) {
+  void _showThemePicker(
+      BuildContext context, WidgetRef ref, ThemeMode current) {
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
@@ -969,7 +1113,10 @@ class SettingsScreen extends ConsumerWidget {
                         isSelected: currentCode == 'ar',
                         onTap: () => pickLang('ar'),
                       ),
-                      Divider(height: 1, indent: 16, endIndent: 16,
+                      Divider(
+                          height: 1,
+                          indent: 16,
+                          endIndent: 16,
                           color: Theme.of(context).colorScheme.outlineVariant),
                       _LanguageOption(
                         flag: '🇨🇳',
@@ -1145,9 +1292,11 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  void _showUpToDateDialog(BuildContext context, String version, String? betaVersion) {
+  void _showUpToDateDialog(
+      BuildContext context, String version, String? betaVersion) {
     final l10n = AppLocalizations.of(context)!;
-    final hasNewerBeta = betaVersion != null && UpdateCheckService.isNewerThan(version, betaVersion);
+    final hasNewerBeta = betaVersion != null &&
+        UpdateCheckService.isNewerThan(version, betaVersion);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -1161,7 +1310,8 @@ class SettingsScreen extends ConsumerWidget {
                 color: Colors.green.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle, size: 32, color: Colors.green),
+              child:
+                  const Icon(Icons.check_circle, size: 32, color: Colors.green),
             ),
             const SizedBox(height: 16),
             Text(
@@ -1180,15 +1330,21 @@ class SettingsScreen extends ConsumerWidget {
             if (hasNewerBeta) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .tertiaryContainer
+                      .withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.science_outlined, size: 16, color: Theme.of(context).colorScheme.tertiary),
+                    Icon(Icons.science_outlined,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.tertiary),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -1279,7 +1435,10 @@ class SettingsScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.3),
                     blurRadius: 15,
                     spreadRadius: 2,
                   ),
@@ -1304,8 +1463,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(20),
@@ -1554,7 +1712,8 @@ class SettingsScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              _buildPolicyLink(context,
+              _buildPolicyLink(
+                context,
                 icon: SimpleIcons.github,
                 label: l10n.settingsViewSourceCode,
                 url: 'https://github.com/anonfaded/Fadocx',
@@ -1566,7 +1725,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPolicyLink(BuildContext context, {required IconData icon, required String label, required String url}) {
+  Widget _buildPolicyLink(BuildContext context,
+      {required IconData icon, required String label, required String url}) {
     final theme = Theme.of(context);
     return SizedBox(
       width: double.infinity,
@@ -1591,7 +1751,8 @@ class SettingsScreen extends ConsumerWidget {
         },
         style: OutlinedButton.styleFrom(
           foregroundColor: theme.colorScheme.primary,
-          side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+          side: BorderSide(
+              color: theme.colorScheme.primary.withValues(alpha: 0.5)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -1687,21 +1848,25 @@ class SettingsScreen extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(l10n.settingsMadeWith, style: TextStyle(color: muted, fontSize: 13)),
+              Text(l10n.settingsMadeWith,
+                  style: TextStyle(color: muted, fontSize: 13)),
               const SizedBox(width: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(3),
                 child: Image.asset(
                   'assets/other_apps/palestine.png',
-                  width: 18, height: 18,
+                  width: 18,
+                  height: 18,
                   fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(width: 6),
-              Text(l10n.settingsAt, style: TextStyle(color: muted, fontSize: 13)),
+              Text(l10n.settingsAt,
+                  style: TextStyle(color: muted, fontSize: 13)),
               const SizedBox(width: 6),
               SizedBox(
-                width: 40, height: 18,
+                width: 40,
+                height: 18,
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(3),
@@ -1717,20 +1882,23 @@ class SettingsScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(3),
                     child: Image.asset(
                       'assets/other_apps/fadseclab.png',
-                      width: 40, height: 18,
+                      width: 40,
+                      height: 18,
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 6),
-              Text(l10n.settingsIn, style: TextStyle(color: muted, fontSize: 13)),
+              Text(l10n.settingsIn,
+                  style: TextStyle(color: muted, fontSize: 13)),
               const SizedBox(width: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(3),
                 child: Image.asset(
                   'assets/other_apps/pakistan.png',
-                  width: 18, height: 18,
+                  width: 18,
+                  height: 18,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -1794,9 +1962,10 @@ class SettingsScreen extends ConsumerWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: iconBgColor ?? (isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.04)),
+              color: iconBgColor ??
+                  (isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.04)),
               borderRadius: BorderRadius.circular(8),
             ),
             child: ClipRRect(
@@ -1831,16 +2000,19 @@ class SettingsScreen extends ConsumerWidget {
                 Row(
                   children: [
                     ...platformIcons.map((icon) => Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
-                    )),
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Icon(icon,
+                              size: 16,
+                              color: theme.colorScheme.onSurfaceVariant),
+                        )),
                     if (platformNote != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
                         child: Text(
                           platformNote,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurfaceVariant
+                                .withValues(alpha: 0.6),
                             fontSize: 10,
                           ),
                         ),
@@ -1934,7 +2106,8 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
               child: Column(
                 children: [
-                  Icon(SimpleIcons.patreon, size: 40, color: const Color(0xFFD4A017)),
+                  Icon(SimpleIcons.patreon,
+                      size: 40, color: const Color(0xFFD4A017)),
                   const SizedBox(height: 12),
                   Text(
                     l10n.supportDevelopment,
@@ -1956,7 +2129,8 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             // Visit Patreon
-            _sheetAction(context,
+            _sheetAction(
+              context,
               icon: SimpleIcons.patreon,
               label: l10n.visitPatreon,
               onTap: () {
@@ -1966,7 +2140,8 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             // Copy link
-            _sheetAction(context,
+            _sheetAction(
+              context,
               icon: Icons.content_copy,
               label: l10n.copyLink,
               onTap: () {
@@ -1989,9 +2164,8 @@ class SettingsScreen extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     final brightness = Theme.of(context).brightness;
-    final bgColor = brightness == Brightness.dark
-        ? const Color(0xFF2C2C2E)
-        : Colors.white;
+    final bgColor =
+        brightness == Brightness.dark ? const Color(0xFF2C2C2E) : Colors.white;
     final textColor = Theme.of(context).colorScheme.primary;
 
     return Padding(
@@ -2014,9 +2188,9 @@ class SettingsScreen extends ConsumerWidget {
                     Text(
                       label,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: textColor,
-                        fontWeight: FontWeight.w500,
-                      ),
+                            color: textColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                   ],
                 ),
@@ -2148,7 +2322,9 @@ class _SettingsRow extends StatelessWidget {
                       Text(
                         value!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                     ],
@@ -2163,11 +2339,11 @@ class _SettingsRow extends StatelessWidget {
                     color: Theme.of(context).colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                   child: Text(
-                     l10n.comingSoon,
-                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                           color:
-                               Theme.of(context).colorScheme.onTertiaryContainer,
+                  child: Text(
+                    l10n.comingSoon,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color:
+                              Theme.of(context).colorScheme.onTertiaryContainer,
                         ),
                   ),
                 ),
@@ -2193,7 +2369,7 @@ class _DangerRow extends StatefulWidget {
   final String title;
   final String subtitle;
   final String confirmText;
-  final VoidCallback onConfirm;
+  final FutureOr<void> Function() onConfirm;
 
   const _DangerRow({
     required this.icon,
@@ -2274,7 +2450,7 @@ class _DangerRowState extends State<_DangerRow> {
     final l10n = AppLocalizations.of(context)!;
     // If confirmText is empty, just directly navigate (like Trash)
     if (widget.confirmText.isEmpty) {
-      widget.onConfirm();
+      unawaited(Future.sync(widget.onConfirm));
       return;
     }
 
@@ -2301,8 +2477,8 @@ class _DangerRowState extends State<_DangerRow> {
                     border: const OutlineInputBorder(),
                     hintText: widget.confirmText,
                   ),
-                  onChanged: (v) => dialogSetState(() =>
-                      _confirmed = v.trim().toUpperCase() == widget.confirmText),
+                  onChanged: (v) => dialogSetState(() => _confirmed =
+                      v.trim().toUpperCase() == widget.confirmText),
                 ),
               ],
             ),
@@ -2312,7 +2488,9 @@ class _DangerRowState extends State<_DangerRow> {
                 child: Text(l10n.cancel),
               ),
               FilledButton(
-                onPressed: _confirmed ? widget.onConfirm : null,
+                onPressed: _confirmed
+                    ? () => unawaited(Future.sync(widget.onConfirm))
+                    : null,
                 style: FilledButton.styleFrom(backgroundColor: Colors.red),
                 child: Text(l10n.confirm),
               ),
@@ -2494,9 +2672,8 @@ class _SheetAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final bgColor = brightness == Brightness.dark
-        ? const Color(0xFF2C2C2E)
-        : Colors.white;
+    final bgColor =
+        brightness == Brightness.dark ? const Color(0xFF2C2C2E) : Colors.white;
     final textColor = Theme.of(context).colorScheme.primary;
 
     return Padding(
