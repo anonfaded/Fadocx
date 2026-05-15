@@ -235,7 +235,6 @@ class ThumbnailGenerationService {
       final image = frame.image;
 
       try {
-        // Calculate word count from extracted text
         final wordCount = extractedText != null
             ? extractedText.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length
             : 0;
@@ -252,50 +251,46 @@ class ThumbnailGenerationService {
           canvas.drawRRect(cardRect, ui.Paint()..color = cardBg);
 
           final headerHeight = _compactHeaderHeight;
-          
-          // Draw image first (fills entire card area)
-          final imageAreaRect = ui.Rect.fromLTWH(
-            0,
-            headerHeight,
-            size.width,
-            size.height - headerHeight,
-          );
-          
-          // Calculate scale to fit image in the card
-          final scale = imageAreaRect.width / image.width;
-          final scaledHeight = image.height * scale;
-          
-          // If image is taller than card, crop from top; otherwise center
-          final sourceHeight = scaledHeight > imageAreaRect.height
-              ? (imageAreaRect.height / scale).clamp(1.0, image.height.toDouble())
-              : image.height.toDouble();
-          
-          final sourceRect = ui.Rect.fromLTWH(
-            0,
-            0,
-            image.width.toDouble(),
-            sourceHeight,
-          );
-          
-          // Draw image with rounded corners clipping
+          final imageAreaRect = ui.Rect.fromLTWH(0, 0, size.width, size.height);
+          final sourceAspect = image.width / image.height;
+          final targetAspect = imageAreaRect.width / imageAreaRect.height;
+
+          late ui.Rect sourceRect;
+          if (sourceAspect > targetAspect) {
+            final visibleWidth =
+                (image.height * targetAspect).clamp(1.0, image.width.toDouble());
+            final left = ((image.width.toDouble() - visibleWidth) / 2).clamp(
+              0.0,
+              image.width.toDouble() - visibleWidth,
+            );
+              sourceRect = ui.Rect.fromLTWH(
+              left,
+              0,
+              visibleWidth,
+              image.height.toDouble(),
+            );
+          } else {
+            final visibleHeight = (image.width / targetAspect)
+                .clamp(1.0, image.height.toDouble());
+            final top = 0.0;
+            sourceRect = ui.Rect.fromLTWH(
+              0,
+              top,
+              image.width.toDouble(),
+              visibleHeight,
+            );
+          }
+
           canvas.save();
-          canvas.clipRRect(
-            ui.RRect.fromRectAndRadius(
-              imageAreaRect,
-              const ui.Radius.circular(22),
-            ),
-          );
-          
+          canvas.clipRRect(cardRect);
           canvas.drawImageRect(
             image,
             sourceRect,
             imageAreaRect,
             ui.Paint()..filterQuality = FilterQuality.high,
           );
-          
           canvas.restore();
 
-          // Draw header banner on top of image
           final headerRect = ui.RRect.fromRectAndRadius(
             ui.Rect.fromLTWH(0, 0, size.width, headerHeight),
             ui.Radius.zero,
@@ -437,17 +432,8 @@ class ThumbnailGenerationService {
       final mediaBg = brightness == ui.Brightness.dark ? _darkPlaceholderBg : _lightPlaceholderBg;
       canvas.drawRRect(cardRect, ui.Paint()..color = mediaBg);
 
-      // Draw header banner (format type + metadata)
-      final headerRect = ui.Rect.fromLTWH(0, 0, size.width, _compactHeaderHeight);
-      _paintPreviewHeader(
-        canvas,
-        rect: headerRect,
-        color: _uiColor(accent),
-        text: label.toUpperCase(),
-      );
-
-      // Draw large circle accent background (content area)
-      final centerY = _compactHeaderHeight + (size.height - _compactHeaderHeight) / 2;
+      // Draw content full-bleed under the dock header.
+      final centerY = size.height / 2;
       final accentPaint = ui.Paint()..color = _uiColor(accent, alpha: 80);
       canvas.drawCircle(ui.Offset(size.width / 2, centerY), 65, accentPaint);
 
@@ -466,6 +452,15 @@ class ThumbnailGenerationService {
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, ui.Offset(size.width / 2 - tp.width / 2, centerY - tp.height / 2));
+
+      // Docked header overlay
+      final headerRect = ui.Rect.fromLTWH(0, 0, size.width, _compactHeaderHeight);
+      _paintPreviewHeader(
+        canvas,
+        rect: headerRect,
+        color: _uiColor(accent),
+        text: label.toUpperCase(),
+      );
     });
   }
 
@@ -490,13 +485,8 @@ class ThumbnailGenerationService {
         final mediaBg = brightness == ui.Brightness.dark ? _darkPlaceholderBg : _lightPlaceholderBg;
         canvas.drawRRect(cardRect, ui.Paint()..color = mediaBg);
 
-        // Draw video frame scaled to content area (below header)
-        final contentAreaRect = ui.Rect.fromLTWH(
-          0,
-          _compactHeaderHeight,
-          size.width,
-          size.height - _compactHeaderHeight,
-        );
+        // Draw video frame full-bleed under the header dock
+        final contentAreaRect = ui.Rect.fromLTWH(0, 0, size.width, size.height);
 
         // Scale frame to fill content area while maintaining aspect ratio
         final sourceAspect = image.width / image.height;
@@ -506,7 +496,7 @@ class ThumbnailGenerationService {
         late ui.Rect destRect;
 
         if (sourceAspect > targetAspect) {
-          // Frame is wider, fit by height
+          // Frame is wider, crop the sides and keep the top visible
           final scaledWidth = contentAreaRect.height * sourceAspect;
           final offsetX = (scaledWidth - contentAreaRect.width) / 2;
           sourceRect = ui.Rect.fromLTWH(
@@ -538,7 +528,7 @@ class ThumbnailGenerationService {
           ui.Paint()..color = ui.Color.fromARGB(40, 0, 0, 0),
         );
 
-        // Draw header banner on top
+        // Draw header banner as a docked top overlay
         final headerRect = ui.Rect.fromLTWH(0, 0, size.width, _compactHeaderHeight);
         _paintPreviewHeader(
           canvas,
@@ -724,24 +714,8 @@ class ThumbnailGenerationService {
         canvas.drawRRect(
             cardRect, ui.Paint()..color = pdfCardBg);
 
-        final headerHeight = _compactHeaderHeight;
-        final headerRect = ui.RRect.fromRectAndRadius(
-          ui.Rect.fromLTWH(0, 0, size.width, headerHeight),
-          ui.Radius.zero,
-        );
-        _paintPreviewHeader(
-          canvas,
-          rect: headerRect.outerRect,
-          color: _uiColor(ThumbnailColors.pdfRed),
-          text: _buildPdfPreviewStats(
-            pageCount,
-            wordCount: wordCount,
-            lineCount: lineCount,
-          ),
-        );
-
-        final imageTop = 0.0 + headerHeight;
-        final imageAreaHeight = size.height - headerHeight;
+        final imageTop = 0.0;
+        final imageAreaHeight = size.height;
         final imageAreaWidth = size.width;
 
         final scale = imageAreaWidth / pageImage.width;
@@ -763,6 +737,17 @@ class ThumbnailGenerationService {
           sourceRect,
           ui.Rect.fromLTWH(drawLeft, drawTop, drawWidth, drawHeight),
           ui.Paint()..filterQuality = FilterQuality.high,
+        );
+
+        _paintPreviewHeader(
+          canvas,
+          rect: ui.Rect.fromLTWH(0, 0, size.width, _compactHeaderHeight),
+          color: _uiColor(ThumbnailColors.pdfRed),
+          text: _buildPdfPreviewStats(
+            pageCount,
+            wordCount: wordCount,
+            lineCount: lineCount,
+          ),
         );
       });
     } finally {

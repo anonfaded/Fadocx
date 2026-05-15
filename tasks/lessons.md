@@ -39,3 +39,8 @@
 - Device import/browse screens should classify by extension, not by the Library folder contract. The browse screen is a source scanner, not a managed-storage view.
 - For browse screens, code-like extensions such as `html`, `json`, `xml`, `sh`, `py`, and `java` should stay in the `Code` bucket even when they are plain text files.
 - If chip order feels random, sort the visible chips by count instead of hard-coding the order. Static category rows age badly once file mixes change.
+- For thumbnail cards, prefer top-anchored width-fit rendering when the content should keep its proportions. `BoxFit.cover` can make page previews look squeezed even when it is technically correct.
+- When fixing a thumbnail artifact, keep unrelated preview chrome intact unless the chrome is the actual bug. Cache invalidation and render correctness are separate changes.
+- If a preview has a header dock, layer it over the image instead of reserving space for it unless the design explicitly wants a split card.
+- Video preview compositors should match the image compositor when the UX is meant to be consistent. Divergent header treatment reads as two different systems.
+- Spreadsheet previews are the exception to overlay headers because the header row belongs to the content. Keep the sheet title band separate so the grid remains readable.

@@ -1006,7 +1006,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                 ),
                                 child: Image.memory(
                                   bytes,
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.fitWidth,
                                   alignment: Alignment.topCenter,
                                   width: double.infinity,
                                   height: double.infinity,
@@ -1297,7 +1297,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                 bytes,
                                 width: 55,
                                 height: 76,
-                                fit: BoxFit.cover,
+                                fit: BoxFit.fitWidth,
                                 alignment: Alignment.topCenter,
                                 filterQuality: FilterQuality.high,
                               ),

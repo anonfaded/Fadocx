@@ -95,6 +95,10 @@ Replace ALL hardcoded English strings across the app with AppLocalizations keys,
 - Code-like extensions were still being routed into `Documents` at save time, so the Library code chip stayed undercounted until `StorageService` learned the full code extension set.
 - Browse/import screen should stay extension-based; code-like extensions were landing in `Docs`, so the browse classifier now maps them to `Code` instead of following the Library folder contract.
 - Browse chips are now count-sorted so the busiest categories float left instead of being locked to a fixed visual order.
+- Library thumbnails now use top-anchored width-fit rendering so the preview image keeps its proportions instead of looking squeezed inside the card.
+- Image thumbnails in the renderer now keep the image full-frame with the metadata dock layered on top instead of pushing the image below the banner.
+- Video preview thumbnails now use the same docked header overlay treatment as image previews, instead of reserving a separate top band.
+- Generic media placeholders and PDF previews now also use the docked header overlay; spreadsheet previews stay on their separate header band so the grid stays readable.
 
 ## Naming Convention for .arb keys
 - Common/shared: camelCase (e.g., `cancel`, `delete`, `copy`)
