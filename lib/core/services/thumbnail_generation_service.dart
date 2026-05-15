@@ -163,6 +163,16 @@ class ThumbnailGenerationService {
             extractedText: extractedText,
             brightness: brightness,
           ),
+        'mp4' || 'mkv' || 'avi' || 'mov' || 'webm' || 'flv' || 'wmv' || 'mxf' || '3gp' => _generateVideoThumbnail(
+            filePath,
+            normalizedType,
+            brightness: brightness,
+          ),
+        'mp3' || 'm4a' || 'aac' || 'flac' || 'wav' || 'wma' || 'ogg' || 'opus' || 'aiff' => _generateAudioThumbnail(
+            filePath,
+            normalizedType,
+            brightness: brightness,
+          ),
         _ => _createPlaceholderThumbnail(
             label: normalizedType.toUpperCase(),
             accent: ThumbnailColors.gray,
@@ -312,6 +322,245 @@ class ThumbnailGenerationService {
     }
   }
 
+  static Future<Uint8List?> _generateVideoThumbnail(
+    String filePath,
+    String fileType, {
+    ui.Brightness brightness = ui.Brightness.light,
+  }) async {
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        _log.w('Video thumbnail skipped, file missing: $filePath');
+        return _createMediaPlaceholder(
+          label: fileType.toUpperCase(),
+          accent: ThumbnailColors.videoPurple,
+          icon: Icons.videocam,
+          brightness: brightness,
+        );
+      }
+
+      // Try to extract first video frame (async, non-blocking)
+      final frameBytes = await _extractVideoFrameSafe(filePath);
+      if (frameBytes != null) {
+        return _createVideoPreviewThumbnail(
+          frameBytes: frameBytes,
+          label: fileType.toUpperCase(),
+          accent: ThumbnailColors.videoPurple,
+          brightness: brightness,
+        );
+      }
+
+      // Fallback to icon placeholder if frame extraction fails
+      return _createMediaPlaceholder(
+        label: fileType.toUpperCase(),
+        accent: ThumbnailColors.videoPurple,
+        icon: Icons.videocam,
+        brightness: brightness,
+      );
+    } catch (e, st) {
+      _log.e('Video thumbnail generation failed for $filePath',
+          error: e, stackTrace: st);
+      return _createMediaPlaceholder(
+        label: fileType.toUpperCase(),
+        accent: ThumbnailColors.videoPurple,
+        icon: Icons.videocam,
+        brightness: brightness,
+      );
+    }
+  }
+
+  /// Safely extract video frame, catching any platform-specific errors
+  static Future<Uint8List?> _extractVideoFrameSafe(String filePath) async {
+    try {
+      const platform = MethodChannel('com.fadseclab.fadocx/video');
+      final result = await platform
+          .invokeMethod<Uint8List?>(
+            'extractVideoFrame',
+            {'filePath': filePath, 'timeUs': 0},
+          )
+          .timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => null,
+          );
+      return result;
+    } catch (e) {
+      _log.w('Failed to extract video frame: $e');
+      return null;
+    }
+  }
+
+  static Future<Uint8List?> _generateAudioThumbnail(
+    String filePath,
+    String fileType, {
+    ui.Brightness brightness = ui.Brightness.light,
+  }) async {
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        _log.w('Audio thumbnail skipped, file missing: $filePath');
+        return _createMediaPlaceholder(
+          label: fileType.toUpperCase(),
+          accent: ThumbnailColors.audioMagenta,
+          icon: Icons.music_note,
+          brightness: brightness,
+        );
+      }
+      return _createMediaPlaceholder(
+        label: fileType.toUpperCase(),
+        accent: ThumbnailColors.audioMagenta,
+        icon: Icons.music_note,
+        brightness: brightness,
+      );
+    } catch (e, st) {
+      _log.e('Audio thumbnail generation failed for $filePath',
+          error: e, stackTrace: st);
+      return _createMediaPlaceholder(
+        label: fileType.toUpperCase(),
+        accent: ThumbnailColors.audioMagenta,
+        icon: Icons.music_note,
+        brightness: brightness,
+      );
+    }
+  }
+
+  static Future<Uint8List> _createMediaPlaceholder({
+    required String label,
+    required ColorRgb accent,
+    required IconData icon,
+    ui.Brightness brightness = ui.Brightness.light,
+  }) {
+    return _renderCanvas((canvas, size) {
+      final cardRect = ui.RRect.fromRectAndRadius(
+        ui.Rect.fromLTWH(0, 0, size.width, size.height),
+        ui.Radius.zero,
+      );
+      final mediaBg = brightness == ui.Brightness.dark ? _darkPlaceholderBg : _lightPlaceholderBg;
+      canvas.drawRRect(cardRect, ui.Paint()..color = mediaBg);
+
+      // Draw header banner (format type + metadata)
+      final headerRect = ui.Rect.fromLTWH(0, 0, size.width, _compactHeaderHeight);
+      _paintPreviewHeader(
+        canvas,
+        rect: headerRect,
+        color: _uiColor(accent),
+        text: label.toUpperCase(),
+      );
+
+      // Draw large circle accent background (content area)
+      final centerY = _compactHeaderHeight + (size.height - _compactHeaderHeight) / 2;
+      final accentPaint = ui.Paint()..color = _uiColor(accent, alpha: 80);
+      canvas.drawCircle(ui.Offset(size.width / 2, centerY), 65, accentPaint);
+
+      // Draw icon centered in circle
+      final tp = TextPainter(
+        text: TextSpan(
+          text: String.fromCharCode(icon.codePoint),
+          style: TextStyle(
+            color: ui.Color.fromARGB(255, 255, 255, 255),
+            fontSize: 48,
+            fontWeight: FontWeight.w400,
+            fontFamily: icon.fontFamily,
+            package: icon.fontPackage,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, ui.Offset(size.width / 2 - tp.width / 2, centerY - tp.height / 2));
+    });
+  }
+
+  /// Create video thumbnail with actual first frame as preview
+  static Future<Uint8List> _createVideoPreviewThumbnail({
+    required Uint8List frameBytes,
+    required String label,
+    required ColorRgb accent,
+    ui.Brightness brightness = ui.Brightness.light,
+  }) async {
+    try {
+      // Decode frame image
+      final codec = await ui.instantiateImageCodec(frameBytes);
+      final frame = await codec.getNextFrame();
+      final image = frame.image;
+
+      return _renderCanvas((canvas, size) {
+        final cardRect = ui.RRect.fromRectAndRadius(
+          ui.Rect.fromLTWH(0, 0, size.width, size.height),
+          ui.Radius.zero,
+        );
+        final mediaBg = brightness == ui.Brightness.dark ? _darkPlaceholderBg : _lightPlaceholderBg;
+        canvas.drawRRect(cardRect, ui.Paint()..color = mediaBg);
+
+        // Draw video frame scaled to content area (below header)
+        final contentAreaRect = ui.Rect.fromLTWH(
+          0,
+          _compactHeaderHeight,
+          size.width,
+          size.height - _compactHeaderHeight,
+        );
+
+        // Scale frame to fill content area while maintaining aspect ratio
+        final sourceAspect = image.width / image.height;
+        final targetAspect = contentAreaRect.width / contentAreaRect.height;
+
+        late ui.Rect sourceRect;
+        late ui.Rect destRect;
+
+        if (sourceAspect > targetAspect) {
+          // Frame is wider, fit by height
+          final scaledWidth = contentAreaRect.height * sourceAspect;
+          final offsetX = (scaledWidth - contentAreaRect.width) / 2;
+          sourceRect = ui.Rect.fromLTWH(
+            (offsetX / scaledWidth * image.width).toInt().toDouble(),
+            0,
+            (contentAreaRect.width / scaledWidth * image.width).toInt().toDouble(),
+            image.height.toDouble(),
+          );
+          destRect = contentAreaRect;
+        } else {
+          // Frame is taller, fit by width
+          final scaledHeight = contentAreaRect.width / sourceAspect;
+          final offsetY = (scaledHeight - contentAreaRect.height) / 2;
+          sourceRect = ui.Rect.fromLTWH(
+            0,
+            (offsetY / scaledHeight * image.height).toInt().toDouble(),
+            image.width.toDouble(),
+            (contentAreaRect.height / scaledHeight * image.height).toInt().toDouble(),
+          );
+          destRect = contentAreaRect;
+        }
+
+        // Draw frame with high quality
+        canvas.drawImageRect(image, sourceRect, destRect, ui.Paint()..filterQuality = FilterQuality.high);
+
+        // Draw semi-transparent overlay (improves header contrast)
+        canvas.drawRect(
+          destRect,
+          ui.Paint()..color = ui.Color.fromARGB(40, 0, 0, 0),
+        );
+
+        // Draw header banner on top
+        final headerRect = ui.Rect.fromLTWH(0, 0, size.width, _compactHeaderHeight);
+        _paintPreviewHeader(
+          canvas,
+          rect: headerRect,
+          color: _uiColor(accent),
+          text: label,
+        );
+
+        image.dispose();
+      });
+    } catch (e, st) {
+      _log.e('Failed to create video preview thumbnail', error: e, stackTrace: st);
+      // Fallback to placeholder
+      return _createMediaPlaceholder(
+        label: label,
+        accent: accent,
+        icon: Icons.videocam,
+        brightness: brightness,
+      );
+    }
+  }
+
   static Future<Uint8List?> _createSlideThumbnailCard({
     required ColorRgb accent,
     required String label,
@@ -341,37 +590,38 @@ class ThumbnailGenerationService {
       final centerX = 0.0 + contentWidth / 2;
       final centerY = contentTop + contentHeight / 2;
 
+      // Draw larger circle background
       canvas.drawCircle(
         Offset(centerX, centerY),
-        40,
-        ui.Paint()..color = _uiColor(accent, alpha: 30),
+        55,
+        ui.Paint()..color = _uiColor(accent, alpha: 40),
       );
 
       _paintCenteredText(
         canvas,
         text: String.fromCharCode(Icons.slideshow.codePoint),
-        top: centerY - 18,
+        top: centerY - 28,
         maxWidth: 72,
         left: centerX - 36,
         style: TextStyle(
-          fontSize: 36,
+          fontSize: 40,
           fontFamily: Icons.slideshow.fontFamily,
           package: Icons.slideshow.fontPackage,
-          color: _uiColor(accent, alpha: 180),
+          color: _uiColor(accent, alpha: 200),
         ),
       );
 
       _paintCenteredText(
         canvas,
         text: label,
-        top: centerY + 30,
-        maxWidth: contentWidth,
-        left: 0,
+        top: centerY + 22,
+        maxWidth: contentWidth - 20,
+        left: 10,
         style: TextStyle(
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           fontFamily: 'Ubuntu',
-          color: _uiColor(accent, alpha: 150),
+          color: _uiColor(accent),
         ),
       );
     });
@@ -1345,6 +1595,9 @@ class ThumbnailGenerationService {
       'doc' || 'docx' || 'odt' || 'rtf' || 'txt' => ThumbnailColors.docBlue,
       'xls' || 'xlsx' || 'csv' || 'ods' => ThumbnailColors.sheetGreen,
       'ppt' || 'pptx' || 'odp' || 'epub' || 'ods' => ThumbnailColors.pptOrange,
+      'png' || 'jpg' || 'jpeg' || 'gif' || 'webp' || 'bmp' => ThumbnailColors.imageAmber,
+      'mp4' || 'mkv' || 'avi' || 'mov' || 'webm' || 'flv' || 'wmv' || 'mxf' || '3gp' => ThumbnailColors.videoPurple,
+      'mp3' || 'm4a' || 'aac' || 'flac' || 'wav' || 'wma' || 'ogg' || 'opus' || 'aiff' => ThumbnailColors.audioMagenta,
       _ => ThumbnailColors.gray,
     };
   }
@@ -1363,6 +1616,9 @@ class ThumbnailColors {
   static const docBlue = ColorRgb(44, 104, 184);
   static const sheetGreen = ColorRgb(43, 142, 92);
   static const pptOrange = ColorRgb(208, 117, 43);
+  static const imageAmber = ColorRgb(251, 140, 0);
   static const scanCyan = ColorRgb(0, 188, 212);
+  static const videoPurple = ColorRgb(156, 39, 176);
+  static const audioMagenta = ColorRgb(233, 30, 99);
   static const gray = ColorRgb(116, 124, 130);
 }

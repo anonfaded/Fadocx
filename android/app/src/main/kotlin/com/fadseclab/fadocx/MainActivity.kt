@@ -278,6 +278,53 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.fadseclab.fadocx/video")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "extractVideoFrame" -> Thread {
+                        try {
+                            val filePath = call.argument<String>("filePath")
+                            // Handle both Int and Long from Flutter (small ints come as Int)
+                            val timeUs = (call.argument<Any>("timeUs") as? Number)?.toLong() ?: 0L
+                            
+                            if (filePath == null) {
+                                runOnUiThread { result.error("INVALID_PATH", "File path is required", null) }
+                                return@Thread
+                            }
+
+                            val bitmap = extractFirstVideoFrame(filePath, timeUs)
+                            if (bitmap != null) {
+                                val stream = ByteArrayOutputStream()
+                                bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
+                                val frameBytes = stream.toByteArray()
+                                stream.close()
+                                bitmap.recycle()
+                                runOnUiThread { result.success(frameBytes) }
+                            } else {
+                                runOnUiThread { result.error("EXTRACTION_FAILED", "Failed to extract video frame", null) }
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Video frame extraction failed", e)
+                            runOnUiThread { result.error("EXTRACTION_ERROR", e.message, null) }
+                        }
+                    }.start()
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    private fun extractFirstVideoFrame(filePath: String, timeUs: Long = 0L): Bitmap? {
+        return try {
+            val retriever = android.media.MediaMetadataRetriever()
+            retriever.setDataSource(filePath)
+            val bitmap = retriever.getFrameAtTime(timeUs, android.media.MediaMetadataRetriever.OPTION_CLOSEST)
+            retriever.release()
+            bitmap
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to extract video frame from $filePath", e)
+            null
+        }
     }
 
     override fun onDestroy() {

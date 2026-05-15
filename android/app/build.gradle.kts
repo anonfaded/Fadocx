@@ -9,7 +9,7 @@ import java.io.FileInputStream
 import java.util.Properties
 
 // ── Versioning (manual control) ──
-val appVersionCode = 2
+val appVersionCode = 3
 val appVersionName = "1.0.0"
 
 // ── Release keystore signing ──
@@ -81,7 +81,7 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".beta"
             manifestPlaceholders["appName"] = "Fadocx Beta"
-            versionName = "${appVersionName}-beta1"
+            versionName = "${appVersionName}-beta1" // Increment the suffix for each beta release (e.g., -beta2, -beta3, etc.)
         }
         create("prod") {
             dimension = "environment"
