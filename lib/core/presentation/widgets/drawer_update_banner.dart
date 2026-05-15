@@ -30,13 +30,15 @@ class DrawerUpdateBanner extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 12, bottom: 8),
-          child: Text(
-            AppLocalizations.of(context)!.updatesAvailableTitle(updateCount),
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Center(
+            child: Text(
+              AppLocalizations.of(context)!.updatesAvailableTitle(updateCount),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
           ),
         ),
         Material(
