@@ -94,7 +94,13 @@
 - Extract English text from images via Tesseract OCR + OpenCV preprocessing
 - Dual PSM modes and automatic rotation correction for accurate results
 - All AI runs **entirely on-device** — no cloud, no uploads, complete privacy
-- More languages planned for future releases
+- More OCR languages planned for future releases
+</details>
+
+<details>
+<summary><strong>🌍 Localization</strong></summary>
+
+- Fadocx is translated into 11 languages: 🇬🇧 English, 🇵🇰 Urdu, 🇸🇦 Arabic, 🇩🇪 German, 🇪🇸 Spanish, 🇫🇷 French, 🇮🇳 Hindi, 🇯🇵 Japanese, 🇵🇹 Portuguese, 🇷🇺 Russian, and 🇨🇳 Chinese
 </details>
 
 <details>

@@ -9,7 +9,7 @@ import 'package:fadocx/l10n/app_localizations.dart';
 class WhatsNewScreen extends StatelessWidget {
   const WhatsNewScreen({super.key});
 
-  static final releaseDate = DateTime(2026, 5, 4);
+  static final releaseDate = DateTime(2026, 5, 15);
 
   String _timeAgo(BuildContext context, DateTime dateTime) {
     final l10n = AppLocalizations.of(context)!;
@@ -86,7 +86,8 @@ class WhatsNewScreen extends StatelessWidget {
                       ),
                       border: Border(
                         bottom: BorderSide(
-                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                          color:
+                              theme.colorScheme.outline.withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -133,12 +134,15 @@ class WhatsNewScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           _buildReleaseCard(context),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           Text(
-            AppLocalizations.of(context)!.whatsNewWhatsIncluded,
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            AppLocalizations.of(context)!.whatsNewHighlights,
+            style: theme.textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
+          _buildLanguageSupportCard(context),
+          const SizedBox(height: 24),
           _buildSection(
             context,
             icon: Icons.picture_as_pdf,
@@ -191,15 +195,18 @@ class WhatsNewScreen extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
+                  color:
+                      theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.rocket_launch, size: 14, color: theme.colorScheme.primary),
+                    Icon(Icons.rocket_launch,
+                        size: 14, color: theme.colorScheme.primary),
                     const SizedBox(width: 6),
                     Text(
                       AppLocalizations.of(context)!.whatsNewPlanned,
@@ -290,7 +297,8 @@ class WhatsNewScreen extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
                   color: theme.colorScheme.primary,
@@ -320,6 +328,82 @@ class WhatsNewScreen extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
               height: 1.5,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageSupportCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final languages = _supportedLanguageLabels(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.surfaceContainerLow.withValues(alpha: 0.72),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.22),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.55),
+                ),
+                child: Icon(
+                  Icons.language,
+                  size: 18,
+                  color: colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context)!.whatsNewSupportedLanguages,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final language in languages)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.7,
+                    ),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Text(
+                    language,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -386,9 +470,11 @@ class WhatsNewScreen extends StatelessWidget {
           height: 32,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.5),
           ),
-          child: Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+          child:
+              Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -418,19 +504,32 @@ class WhatsNewScreen extends StatelessWidget {
   String _monthName(BuildContext context, int month) {
     final l10n = AppLocalizations.of(context)!;
     switch (month) {
-      case 1: return l10n.monthJan;
-      case 2: return l10n.monthFeb;
-      case 3: return l10n.monthMar;
-      case 4: return l10n.monthApr;
-      case 5: return l10n.monthMay;
-      case 6: return l10n.monthJun;
-      case 7: return l10n.monthJul;
-      case 8: return l10n.monthAug;
-      case 9: return l10n.monthSep;
-      case 10: return l10n.monthOct;
-      case 11: return l10n.monthNov;
-      case 12: return l10n.monthDec;
-      default: return '';
+      case 1:
+        return l10n.monthJan;
+      case 2:
+        return l10n.monthFeb;
+      case 3:
+        return l10n.monthMar;
+      case 4:
+        return l10n.monthApr;
+      case 5:
+        return l10n.monthMay;
+      case 6:
+        return l10n.monthJun;
+      case 7:
+        return l10n.monthJul;
+      case 8:
+        return l10n.monthAug;
+      case 9:
+        return l10n.monthSep;
+      case 10:
+        return l10n.monthOct;
+      case 11:
+        return l10n.monthNov;
+      case 12:
+        return l10n.monthDec;
+      default:
+        return '';
     }
   }
 
@@ -487,6 +586,23 @@ class WhatsNewScreen extends StatelessWidget {
     );
   }
 
+  List<String> _supportedLanguageLabels(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      '🇬🇧 ${l10n.languageEnglish}',
+      '🇵🇰 ${l10n.languageUrdu}',
+      '🇸🇦 ${l10n.languageArabic}',
+      '🇩🇪 ${l10n.languageGerman}',
+      '🇪🇸 ${l10n.languageSpanish}',
+      '🇫🇷 ${l10n.languageFrench}',
+      '🇮🇳 ${l10n.languageHindi}',
+      '🇯🇵 ${l10n.languageJapanese}',
+      '🇵🇹 ${l10n.languagePortuguese}',
+      '🇷🇺 ${l10n.languageRussian}',
+      '🇨🇳 ${l10n.languageChinese}',
+    ];
+  }
+
   void _showPatreonSheet(BuildContext context) {
     const patreonUrl = 'https://patreon.com/c/fadedx';
     final brightness = Theme.of(context).brightness;
@@ -523,7 +639,8 @@ class WhatsNewScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
               child: Column(
                 children: [
-                  const Icon(SimpleIcons.patreon, size: 40, color: Color(0xFFD4A017)),
+                  const Icon(SimpleIcons.patreon,
+                      size: 40, color: Color(0xFFD4A017)),
                   const SizedBox(height: 12),
                   Text(
                     AppLocalizations.of(context)!.supportDevelopment,
@@ -561,7 +678,9 @@ class WhatsNewScreen extends StatelessWidget {
                 Clipboard.setData(ClipboardData(text: patreonUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
+                  SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context)!.copiedToClipboard)),
                 );
               },
             ),
@@ -579,9 +698,8 @@ class WhatsNewScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final brightness = Theme.of(context).brightness;
-    final bgColor = brightness == Brightness.dark
-        ? const Color(0xFF2C2C2E)
-        : Colors.white;
+    final bgColor =
+        brightness == Brightness.dark ? const Color(0xFF2C2C2E) : Colors.white;
     final textColor = Theme.of(context).colorScheme.primary;
 
     return Padding(
@@ -698,14 +816,16 @@ class _GoldPatreonButtonState extends State<_GoldPatreonButton>
                       ));
                     },
                     blendMode: BlendMode.srcIn,
-                    child: Container(color: Colors.white.withValues(alpha: 0.25)),
+                    child:
+                        Container(color: Colors.white.withValues(alpha: 0.25)),
                   ),
                 ),
                 Positioned.fill(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(SimpleIcons.patreon, size: 18, color: Colors.white),
+                      const Icon(SimpleIcons.patreon,
+                          size: 18, color: Colors.white),
                       const SizedBox(width: 8),
                       Text(
                         AppLocalizations.of(context)!.becomeAPatron,

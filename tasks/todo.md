@@ -56,6 +56,26 @@ Replace ALL hardcoded English strings across the app with AppLocalizations keys,
 - Update banner subtitle now shows current version in red, separator in neutral gray, and latest version in green.
 - Update banner title is plural-aware so it switches to singular when only one update card is present.
 - Update banner rows were flattened so the section uses one outer shell and plain rows inside instead of nested cards.
+- Whats New release date now uses 15 May 2026, and the page includes a localized supported-languages block with chips for all 11 UI locales.
+- README now includes a dedicated localization section listing the supported UI languages.
+- Settings theme/language bottom sheets need to move from `ListTile` layout to the same card rows used in Settings, including an AMOLED coming-soon row.
+- Shared file/info/action bottom sheets need the same card palette and flatter row structure as Settings to avoid mismatched nested surfaces.
+- Whats New language chips should show flags alongside the language names.
+- RELEASE.md needs the localization/support-languages note and the release date should match the May 15 release target.
+- Settings theme and language sheets now use the same flat card rows as the rest of Settings, and AMOLED is visible as coming soon.
+- Home/Documents file info dialogs now use a card-based bottom sheet instead of AlertDialog.
+- File action and link bottom sheets were moved closer to the Settings card palette.
+- Shared bottom sheets now use one connected shell with dividers and row padding, matching the Settings group layout instead of spaced mini-cards.
+- The settings picker helpers that were left behind after the refactor were removed once the shared shell widget landed.
+- Export choosers in Home and Library now use the same connected shell pattern as Settings instead of a separate card stack.
+- File-info sheets now sit on a lighter sheet surface than the inner rows, and the copy row uses action copy instead of a success-state subtitle.
+- Whats New now uses a Highlights heading, with the supported-languages card moved under that section.
+- File action and export sheets now use the same outer sheet contrast as the Settings bottom sheets, so the sheet shell reads separately from the row group.
+- Settings link rows now use the same lighter neutral chip surface as the rest of the Settings cards instead of a darker tinted container.
+- README.md and RELEASE.md now describe localization in user-facing language with flags only, without the extra RTL/scan notes in that section.
+- Home drawer main group and row chips now use lower light-mode alpha so the drawer cards do not wash out on bright themes.
+- Home drawer needed a lower base surface tier, not just lower alpha, to stay distinct in light mode.
+- Home drawer and update banner now use the same neutral gray shell family as Settings instead of a white/light base layer.
 
 ## Naming Convention for .arb keys
 - Common/shared: camelCase (e.g., `cancel`, `delete`, `copy`)

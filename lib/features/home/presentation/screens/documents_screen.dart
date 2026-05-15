@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fadocx/core/presentation/widgets/connected_sheet_group.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/features/settings/domain/entities/app_settings.dart';
 import 'package:fadocx/features/settings/presentation/providers/settings_providers.dart';
@@ -1647,58 +1648,58 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border.all(
+            color: Theme.of(context)
+                .colorScheme
+                .outlineVariant
+                .withValues(alpha: 0.22),
+          ),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _sheetHandle(context),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                  child: Text(AppLocalizations.of(context)!.homeExport,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w600)),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(AppLocalizations.of(context)!.homeExport,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600)),
-              ),
-              _buildExportActionRow(
-                icon: Icons.download,
-                title: AppLocalizations.of(context)!.homeSaveToDownloads,
-                iconColor: Colors.green,
-                subtitle: AppLocalizations.of(context)!
-                    .homeSaveToDownloadsPath(file.fileName),
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  await _saveToDownloads(file);
-                },
-              ),
-              _buildExportActionRow(
-                icon: Icons.folder_open,
-                title: AppLocalizations.of(context)!.homeChooseLocation,
-                iconColor: Colors.blue,
-                subtitle: AppLocalizations.of(context)!.homeChooseLocationDesc,
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  await _saveToCustomLocation(file);
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
+                ConnectedSheetGroup(
+                  children: [
+                    _buildExportActionRow(
+                      icon: Icons.download,
+                      title: AppLocalizations.of(context)!.homeSaveToDownloads,
+                      iconColor: Colors.green,
+                      subtitle: AppLocalizations.of(context)!
+                          .homeSaveToDownloadsPath(file.fileName),
+                      onTap: () async {
+                        Navigator.pop(ctx);
+                        await _saveToDownloads(file);
+                      },
+                    ),
+                    _buildExportActionRow(
+                      icon: Icons.folder_open,
+                      title: AppLocalizations.of(context)!.homeChooseLocation,
+                      iconColor: Colors.blue,
+                      subtitle:
+                          AppLocalizations.of(context)!.homeChooseLocationDesc,
+                      onTap: () async {
+                        Navigator.pop(ctx);
+                        await _saveToCustomLocation(file);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
@@ -1712,60 +1713,16 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     String? subtitle,
     required VoidCallback onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerLow
-                  .withValues(alpha: 0.5),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, size: 18, color: iconColor),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                      if (subtitle != null)
-                        Text(subtitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                )),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    return ConnectedSheetRow(
+      leading: SheetIconChip.icon(
+        icon: icon,
+        color: iconColor,
+        backgroundColor: iconColor.withValues(alpha: 0.14),
       ),
+      title: title,
+      detail: subtitle == null ? null : Text(subtitle),
+      detailColor: Theme.of(context).colorScheme.onSurfaceVariant,
+      onTap: onTap,
     );
   }
 
@@ -1896,60 +1853,121 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   void _showFileInfoDialog(BuildContext context, RecentFile file) {
-    showDialog(
+    final l = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showModalBottomSheet(
       context: context,
-      builder: (context) {
-        final l = AppLocalizations.of(context)!;
-        return AlertDialog(
-          title: Text(l.homeFileInfo),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('${l.homeFileName}: ${file.fileName}'),
-                const SizedBox(height: 8),
-                Text('${l.homeFileType}: ${file.fileType.toUpperCase()}'),
-                const SizedBox(height: 8),
-                Text('${l.homeFileSize}: ${file.formattedSize}'),
-                const SizedBox(height: 8),
-                SelectableText('${l.homeFileLocation}: ${file.filePath}'),
-                const SizedBox(height: 8),
-                Text(
-                    '${l.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}'),
-                const SizedBox(height: 8),
-                Text(
-                    '${l.homeFileLastModified}: ${_formatDateTime(file.dateModified)}'),
-                if (file.isDeleted) ...[
-                  const SizedBox(height: 8),
-                  Text(l.homeFileInTrashDetail(file.deletedAt != null
-                      ? _formatDateTime(file.deletedAt!)
-                      : l.homeUnknown)),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLowest,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.only(
+          top: 6,
+          bottom: MediaQuery.of(context).padding.bottom + 6,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _sheetHandle(context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Text(
+                  l.homeFileInfo,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              ConnectedSheetGroup(
+                children: [
+                  _infoCard(
+                    context,
+                    icon: Icons.description_outlined,
+                    title: l.homeFileName,
+                    value: file.fileName,
+                  ),
+                  _infoCard(
+                    context,
+                    icon: Icons.data_object,
+                    title: l.homeFileType,
+                    value: file.fileType.toUpperCase(),
+                  ),
+                  _infoCard(
+                    context,
+                    icon: Icons.storage_outlined,
+                    title: l.homeFileSize,
+                    value: file.formattedSize,
+                  ),
+                  _infoCard(
+                    context,
+                    icon: Icons.folder_open,
+                    title: l.homeFileLocation,
+                    value: file.filePath,
+                    selectable: true,
+                  ),
+                  _infoCard(
+                    context,
+                    icon: Icons.schedule,
+                    title: l.homeFileDateOpened,
+                    value: _formatDateTime(file.dateOpened),
+                  ),
+                  _infoCard(
+                    context,
+                    icon: Icons.update,
+                    title: l.homeFileLastModified,
+                    value: _formatDateTime(file.dateModified),
+                  ),
+                  if (file.isDeleted)
+                    _infoCard(
+                      context,
+                      icon: Icons.delete_outline,
+                      title: l.homeFileInTrashDetail(file.deletedAt != null
+                          ? _formatDateTime(file.deletedAt!)
+                          : l.homeUnknown),
+                      value: '',
+                      hideValue: true,
+                    ),
                 ],
-              ],
-            ),
+              ),
+              const SizedBox(height: 10),
+              ConnectedSheetGroup(
+                children: [
+                  _sheetActionCard(
+                    context,
+                    icon: Icons.content_copy,
+                    title: l.copy,
+                    subtitle: l.homeCopyFileInfoPrompt,
+                    iconColor: colorScheme.primary,
+                    onTap: () async {
+                      final text = _buildFileInfoText(context, file);
+                      final navigator = Navigator.of(ctx);
+                      final messenger = ScaffoldMessenger.of(context);
+                      await Clipboard.setData(ClipboardData(text: text));
+                      navigator.pop();
+                      messenger.showSnackBar(
+                        SnackBar(content: Text(l.homeFileInfoCopied)),
+                      );
+                    },
+                  ),
+                  _sheetActionCard(
+                    context,
+                    icon: Icons.close,
+                    title: l.close,
+                    iconColor: colorScheme.onSurfaceVariant,
+                    onTap: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                final text = _buildFileInfoText(context, file);
-                final navigator = Navigator.of(context);
-                final messenger = ScaffoldMessenger.of(context);
-                await Clipboard.setData(ClipboardData(text: text));
-                navigator.pop();
-                messenger.showSnackBar(
-                  SnackBar(content: Text(l.homeFileInfoCopied)),
-                );
-              },
-              child: Text(l.copy),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l.close),
-            ),
-          ],
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -1967,6 +1985,76 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     final datePart = DateFormat('MMMM yyyy').format(dt);
     final timePart = DateFormat('h:mm a').format(dt);
     return '$day$suffix $datePart, $timePart';
+  }
+
+  Widget _sheetHandle(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _infoCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+    bool selectable = false,
+    bool hideValue = false,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return ConnectedSheetRow(
+      leading: SheetIconChip.icon(
+        icon: icon,
+        color: colorScheme.primary,
+        backgroundColor: colorScheme.primary.withValues(alpha: 0.14),
+      ),
+      title: title,
+      detail: hideValue
+          ? null
+          : selectable
+              ? SelectableText(
+                  value,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                )
+              : Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                ),
+    );
+  }
+
+  Widget _sheetActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return ConnectedSheetRow(
+      leading: SheetIconChip.icon(
+        icon: icon,
+        color: iconColor,
+        backgroundColor: iconColor.withValues(alpha: 0.14),
+      ),
+      title: title,
+      detail: subtitle == null ? null : Text(subtitle),
+      detailColor: colorScheme.onSurfaceVariant,
+      onTap: onTap,
+    );
   }
 
   String _buildFileInfoText(BuildContext context, RecentFile file) {

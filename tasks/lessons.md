@@ -12,3 +12,13 @@
 - When promoting a banner into a section, give it a localized title and tune the light-mode alpha separately from dark mode. A card that looks fine in dark mode can be too bright once it sits near a light drawer surface.
 - When showing version comparisons, do not flatten them into a single subtitle string. Use colored spans so the current value and target value stay visually distinct.
 - When a section already has an outer shell, do not add another decorated container around each row. Keep the rows flat and use padding/dividers for separation.
+- When documenting supported locales, keep the README list and in-app localized chips sourced from the same supported language set so they don’t drift apart later.
+- When restyling bottom sheets, switch the sheet type first if the old dialog shape is the mismatch. A card skin on top of an AlertDialog still reads like the old system.
+- When multiple sheets need the same connected-row look, create one shared shell/row widget and reuse it everywhere. Piecemeal restyles drift back into nested-card layouts.
+- When a sheet contains action choices, the subtitle must describe the action, not the result state. A success message in a pre-action row reads wrong even if the color is correct.
+- When a sheet surface and its rows use the same container tone, raise the sheet contrast first. The hierarchy needs to read at a glance before any row styling matters.
+- For grouped action sheets, use `surfaceContainerLowest` for the shell and `surfaceContainerLow`/`High` for rows and chips. If every layer uses the same surface tone, the sheet stops reading as a sheet.
+- In Settings rows that open links, keep the leading chip on the same neutral elevated surface as other rows. Dark tinted chips stand out as a different system even when the text styling matches.
+- For drawer cards, tone down only the light-mode shell alpha first. If the main group is too bright, matching row chips alone will not fix the hierarchy.
+- When a drawer still reads too bright after alpha tuning, move the shell to a lower surface tier (`surfaceContainerLowest`) instead of continuing to shave opacity off the same layer.
+- If the user wants the drawer to match Settings, keep the drawer shell on the same gray family as Settings rather than switching it to a white base layer. Surface identity matters more than raw contrast tweaks.

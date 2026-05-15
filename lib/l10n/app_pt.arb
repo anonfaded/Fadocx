@@ -257,6 +257,7 @@
   "homeFileLastModified": "Última modificação",
   "homeFileInTrash": "Na lixeira",
   "homeFileInfoCopied": "Informações do arquivo copiadas",
+  "homeCopyFileInfoPrompt": "Copiar informações do arquivo",
   "homeCopySuffix": " (cópia)",
   "homeCopySuffixCounter": " (cópia {counter})",
   "@homeCopySuffixCounter": {
@@ -465,7 +466,7 @@
     }
   },
   "whatsNewTitle": "Novidades",
-  "whatsNewWhatsIncluded": "O que está incluído",
+  "whatsNewHighlights": "Destaques",
   "whatsNewPlanned": "Planejado",
   "whatsNewReleasedToday": "Lançado hoje",
   "whatsNewReleasedYesterday": "Lançado ontem",
@@ -477,6 +478,7 @@
       }
     }
   },
+  "whatsNewSupportedLanguages": "Idiomas suportados",
   "whatsNewDocAndSheets": "Documentos e planilhas",
   "whatsNewDocAndSheetsDesc": "Veja PDFs, documentos do Word, planilhas do Excel e muito mais, tudo localmente no seu dispositivo.",
   "whatsNewOcrAi": "OCR inteligente e IA no dispositivo",

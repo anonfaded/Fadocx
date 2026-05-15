@@ -257,6 +257,7 @@
   "homeFileLastModified": "آخری ترمیم",
   "homeFileInTrash": "ٹراش میں",
   "homeFileInfoCopied": "فائل کی معلومات کاپی ہو گئیں",
+  "homeCopyFileInfoPrompt": "فائل معلومات کاپی کریں",
   "homeCopySuffix": " (کاپی)",
   "homeCopySuffixCounter": " (کاپی {counter})",
   "@homeCopySuffixCounter": {
@@ -465,7 +466,7 @@
     }
   },
   "whatsNewTitle": "نیا کیا ہے",
-  "whatsNewWhatsIncluded": "کیا شامل ہے",
+  "whatsNewHighlights": "نمایاں باتیں",
   "whatsNewPlanned": "منصوبہ بند",
   "whatsNewReleasedToday": "آج جاری",
   "whatsNewReleasedYesterday": "کل جاری",
@@ -477,6 +478,7 @@
       }
     }
   },
+  "whatsNewSupportedLanguages": "معاون زبانیں",
   "whatsNewDocAndSheets": "دستاویزات اور اسپریڈ شیٹس",
   "whatsNewDocAndSheetsDesc": "PDFs، Word دستاویزات، Excel اسپریڈ شیٹس اور مزید دیکھیں — سب آپ کی ڈیوائس پر مقامی طور پر۔",
   "whatsNewOcrAi": "ذہین OCR اور آن-ڈیوائس AI",

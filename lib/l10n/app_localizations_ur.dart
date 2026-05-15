@@ -21,7 +21,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get recentFiles => 'حالیہ فائلیں';
 
   @override
-  String get noRecentFiles => 'کوئی حالیہ فائل نہیں۔ شروع کرنے کے لیے ایک دستاویز کھولیں۔';
+  String get noRecentFiles =>
+      'کوئی حالیہ فائل نہیں۔ شروع کرنے کے لیے ایک دستاویز کھولیں۔';
 
   @override
   String get openFile => 'فائل کھولیں';
@@ -204,10 +205,12 @@ class AppLocalizationsUr extends AppLocalizations {
   String get languageChanged => 'زبان اردو میں تبدیل ہو گئی';
 
   @override
-  String get privacyDescription => 'Fadocx ایک دستاویز ویور ہے۔ آپ کی فائلیں آپ کی ڈیوائس پر مقامی طور پر محفوظ ہیں اور کسی سرور کو ہرگز منتقل نہیں کی جاتی۔';
+  String get privacyDescription =>
+      'Fadocx ایک دستاویز ویور ہے۔ آپ کی فائلیں آپ کی ڈیوائس پر مقامی طور پر محفوظ ہیں اور کسی سرور کو ہرگز منتقل نہیں کی جاتی۔';
 
   @override
-  String get aboutDescription => 'Fadocx v1.0.0 - آپ کا نجی دستاویز ویور۔ آپ کی رازداری کو احترام دینے کے لیے بنایا گیا۔';
+  String get aboutDescription =>
+      'Fadocx v1.0.0 - آپ کا نجی دستاویز ویور۔ آپ کی رازداری کو احترام دینے کے لیے بنایا گیا۔';
 
   @override
   String get tableRows => 'قطاریں';
@@ -240,10 +243,12 @@ class AppLocalizationsUr extends AppLocalizations {
   String get slidesCount => 'سلائڈز';
 
   @override
-  String get pptUnsupported => 'PPT فائل پارس ہوئی لیکن اس میں کوئی سلائڈز نہیں ہیں';
+  String get pptUnsupported =>
+      'PPT فائل پارس ہوئی لیکن اس میں کوئی سلائڈز نہیں ہیں';
 
   @override
-  String get odpUnsupported => 'ODP فائل پارس ہوئی لیکن اس میں کوئی سلائڈز یا قابلِ فہم مواد نہیں ہے';
+  String get odpUnsupported =>
+      'ODP فائل پارس ہوئی لیکن اس میں کوئی سلائڈز یا قابلِ فہم مواد نہیں ہے';
 
   @override
   String get noTextContent => 'کوئی متن مواد نہیں ملا';
@@ -264,7 +269,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get openWithSystemApp => 'سسٹم ایپ کے ساتھ کھولیں';
 
   @override
-  String get systemAppNotImplemented => 'سسٹم ایپ کھولنا ابھی لاگو نہیں کیا گیا ہے';
+  String get systemAppNotImplemented =>
+      'سسٹم ایپ کھولنا ابھی لاگو نہیں کیا گیا ہے';
 
   @override
   String get type => 'قسم';
@@ -273,22 +279,26 @@ class AppLocalizationsUr extends AppLocalizations {
   String get fileNotFoundMessage => 'فائل نہیں ملی';
 
   @override
-  String get fileTooLarge => 'فائل کی سائز زیادہ سے زیادہ حد (100MB) سے تجاوز کر گئی ہے';
+  String get fileTooLarge =>
+      'فائل کی سائز زیادہ سے زیادہ حد (100MB) سے تجاوز کر گئی ہے';
 
   @override
   String get errorLoadingFile => 'فائل لوڈ کرنے میں خرابی';
 
   @override
-  String get docxPreviewNotSupported => 'DOCX معائنہ ابھی مکمل طور پر معاون نہیں ہے';
+  String get docxPreviewNotSupported =>
+      'DOCX معائنہ ابھی مکمل طور پر معاون نہیں ہے';
 
   @override
-  String get docParseError => 'DOC فائل پارس نہیں ہو سکی۔ DOCX میں تبدیل کرنے کی کوشش کریں۔';
+  String get docParseError =>
+      'DOC فائل پارس نہیں ہو سکی۔ DOCX میں تبدیل کرنے کی کوشش کریں۔';
 
   @override
   String get xlsxParseError => 'XLSX فائل پارس نہیں ہو سکی';
 
   @override
-  String get xlsParseError => 'XLS فائل پارس نہیں ہو سکی۔ XLSX میں تبدیل کرنے کی کوشش کریں۔';
+  String get xlsParseError =>
+      'XLS فائل پارس نہیں ہو سکی۔ XLSX میں تبدیل کرنے کی کوشش کریں۔';
 
   @override
   String get csvParseError => 'CSV فائل پارس نہیں ہو سکی';
@@ -386,7 +396,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get becomeAPatron => 'پیٹرن بنیں';
 
   @override
-  String get patreonDescription => 'آپ کی سپورٹ Fadocx اور FadCam کو بڑھنے میں مدد دیتی ہے۔ Patreon سبسکرائبرز کو خصوصی فوائد ملتے ہیں جن میں پریمیم فیچرز اور FadSec Lab کی تمام ایپس میں جلد رسائی شامل ہے۔\n\nمزید معلومات کے لیے نیچے دیے گئے لنک سے Patreon وزٹ کریں اور دستیاب tiers اور ان کے فوائد دیکھیں۔';
+  String get patreonDescription =>
+      'آپ کی سپورٹ Fadocx اور FadCam کو بڑھنے میں مدد دیتی ہے۔ Patreon سبسکرائبرز کو خصوصی فوائد ملتے ہیں جن میں پریمیم فیچرز اور FadSec Lab کی تمام ایپس میں جلد رسائی شامل ہے۔\n\nمزید معلومات کے لیے نیچے دیے گئے لنک سے Patreon وزٹ کریں اور دستیاب tiers اور ان کے فوائد دیکھیں۔';
 
   @override
   String get discordTitle => 'ہماری ڈسکورڈ میں شامل ہوں';
@@ -509,7 +520,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get homeWelcomeTitle => 'Fadocx میں خوش آمدید';
 
   @override
-  String get homeWelcomeSubtitle => 'نمونہ فائلیں دیکھیں یا اپنی دستاویزات درآمد کریں';
+  String get homeWelcomeSubtitle =>
+      'نمونہ فائلیں دیکھیں یا اپنی دستاویزات درآمد کریں';
 
   @override
   String get homeExploreSamples => 'نمونہ فائلیں دیکھیں';
@@ -533,7 +545,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get homeImportDocument => 'دستاویز درآمد کریں';
 
   @override
-  String get homeImportDocumentDesc => 'اپنی ڈیوائس سے فائلیں براؤز اور درآمد کریں';
+  String get homeImportDocumentDesc =>
+      'اپنی ڈیوائس سے فائلیں براؤز اور درآمد کریں';
 
   @override
   String get onboardingSkip => 'چھوڑیں';
@@ -548,40 +561,50 @@ class AppLocalizationsUr extends AppLocalizations {
   String get onboardingSlide1Title => 'Fadocx میں خوش آمدید';
 
   @override
-  String get onboardingSlide1Tagline => 'آپ کا آل-ان-ون پرائیویٹ دستاویزی ساتھی';
+  String get onboardingSlide1Tagline =>
+      'آپ کا آل-ان-ون پرائیویٹ دستاویزی ساتھی';
 
   @override
-  String get onboardingSlide1Bullet1 => 'ہر فارمیٹ کھولیں — PDFs، آفس فائلیں، تصاویر اور مزید';
+  String get onboardingSlide1Bullet1 =>
+      'ہر فارمیٹ کھولیں — PDFs، آفس فائلیں، تصاویر اور مزید';
 
   @override
-  String get onboardingSlide1Bullet2 => 'پرائیویٹ اسٹوریج، گیلری اور فائل منیجر سے پوشیدہ';
+  String get onboardingSlide1Bullet2 =>
+      'پرائیویٹ اسٹوریج، گیلری اور فائل منیجر سے پوشیدہ';
 
   @override
-  String get onboardingSlide1Bullet3 => 'مفت، اوپن سورس — کوئی اکاؤنٹ یا سائن اپ نہیں';
+  String get onboardingSlide1Bullet3 =>
+      'مفت، اوپن سورس — کوئی اکاؤنٹ یا سائن اپ نہیں';
 
   @override
   String get onboardingSlide2Title => 'بلٹ این پاور ٹولز';
 
   @override
-  String get onboardingSlide2Bullet1 => 'کیمرے سے کاغذی دستاویزات اسکین کریں — متن فوری نکلے';
+  String get onboardingSlide2Bullet1 =>
+      'کیمرے سے کاغذی دستاویزات اسکین کریں — متن فوری نکلے';
 
   @override
-  String get onboardingSlide2Bullet2 => 'ایپ میں ہی آڈیو اور ویڈیو چلائیں، کوئی اضافی ایپ نہیں';
+  String get onboardingSlide2Bullet2 =>
+      'ایپ میں ہی آڈیو اور ویڈیو چلائیں، کوئی اضافی ایپ نہیں';
 
   @override
-  String get onboardingSlide2Bullet3 => 'درآمد پر سب خودبخود زمروں میں ترتیب پاتا ہے';
+  String get onboardingSlide2Bullet3 =>
+      'درآمد پر سب خودبخود زمروں میں ترتیب پاتا ہے';
 
   @override
-  String get onboardingSlide2Bullet4 => 'محفوظ حذف — ٹریش سے کسی بھی وقت بحال کریں';
+  String get onboardingSlide2Bullet4 =>
+      'محفوظ حذف — ٹریش سے کسی بھی وقت بحال کریں';
 
   @override
   String get onboardingSlide3Title => 'پرائیویسی بہ ڈیزائن';
 
   @override
-  String get onboardingSlide3Bullet1 => 'کچھ بھی آپ کے ڈیوائس سے نہیں جاتا — کوئی کلاؤڈ نہیں';
+  String get onboardingSlide3Bullet1 =>
+      'کچھ بھی آپ کے ڈیوائس سے نہیں جاتا — کوئی کلاؤڈ نہیں';
 
   @override
-  String get onboardingSlide3Bullet2 => 'کوئی ٹریکنگ نہیں، کوئی اشتہار نہیں، کوئی اینالیٹکس نہیں۔ کبھی نہیں۔';
+  String get onboardingSlide3Bullet2 =>
+      'کوئی ٹریکنگ نہیں، کوئی اشتہار نہیں، کوئی اینالیٹکس نہیں۔ کبھی نہیں۔';
 
   @override
   String get onboardingSlide3Bullet3 => 'اوپن سورس — کوڈ کی ہر لائن عوامی ہے';
@@ -654,6 +677,9 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get homeFileInfoCopied => 'فائل کی معلومات کاپی ہو گئیں';
+
+  @override
+  String get homeCopyFileInfoPrompt => 'فائل معلومات کاپی کریں';
 
   @override
   String get homeCopySuffix => ' (کاپی)';
@@ -825,7 +851,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get browseNoDocumentsFound => 'کوئی دستاویزات نہیں ملے';
 
   @override
-  String get browseNoDocumentsMatch => 'کوئی دستاویز آپ کی تلاش سے مطابقت نہیں رکھتی';
+  String get browseNoDocumentsMatch =>
+      'کوئی دستاویز آپ کی تلاش سے مطابقت نہیں رکھتی';
 
   @override
   String get browseAdjustSearch => 'تلاش یا فلٹرز ایڈجسٹ کرنے کی کوشش کریں';
@@ -837,22 +864,26 @@ class AppLocalizationsUr extends AppLocalizations {
   String get browseImport => 'درآمد';
 
   @override
-  String get browseAllFilesAccessRequired => 'آپ کی ڈیوائس پر دستاویزات براؤز کرنے کے لیے تمام فائلز تک رسائی کی اجازت ضروری ہے';
+  String get browseAllFilesAccessRequired =>
+      'آپ کی ڈیوائس پر دستاویزات براؤز کرنے کے لیے تمام فائلز تک رسائی کی اجازت ضروری ہے';
 
   @override
   String get browsePermissionRequired => 'اجازت ضروری';
 
   @override
-  String get browseAllFilesAccessDenied => 'دستاویزات براؤز اور پڑھنے کے لیے تمام فائلز تک رسائی کی اجازت ضروری ہے۔ براہ کرم جاری رکھنے کے لیے یہ اجازت دیں۔';
+  String get browseAllFilesAccessDenied =>
+      'دستاویزات براؤز اور پڑھنے کے لیے تمام فائلز تک رسائی کی اجازت ضروری ہے۔ براہ کرم جاری رکھنے کے لیے یہ اجازت دیں۔';
 
   @override
   String get browseOpenSettings => 'ترتیبات کھولیں';
 
   @override
-  String get browseAccessStillDisabled => 'تمام فائلز تک رسائی ابھی بند ہے۔ براہ کرم جاری رکھنے کے لیے ترتیبات میں فعال کریں۔';
+  String get browseAccessStillDisabled =>
+      'تمام فائلز تک رسائی ابھی بند ہے۔ براہ کرم جاری رکھنے کے لیے ترتیبات میں فعال کریں۔';
 
   @override
-  String get browseNoDirectories => 'ڈیوائس پر کوئی دستاویز ڈائریکٹریز نہیں ملیں';
+  String get browseNoDirectories =>
+      'ڈیوائس پر کوئی دستاویز ڈائریکٹریز نہیں ملیں';
 
   @override
   String browseErrorPrefix(String error) {
@@ -911,7 +942,8 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get trashDeleteTypeConfirm => 'تصدیق کے لیے بڑے حروف میں DELETE ٹائپ کریں:';
+  String get trashDeleteTypeConfirm =>
+      'تصدیق کے لیے بڑے حروف میں DELETE ٹائپ کریں:';
 
   @override
   String get trashDeleteHint => 'DELETE';
@@ -925,7 +957,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get whatsNewTitle => 'نیا کیا ہے';
 
   @override
-  String get whatsNewWhatsIncluded => 'کیا شامل ہے';
+  String get whatsNewHighlights => 'نمایاں باتیں';
 
   @override
   String get whatsNewPlanned => 'منصوبہ بند';
@@ -942,91 +974,109 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
+  String get whatsNewSupportedLanguages => 'معاون زبانیں';
+
+  @override
   String get whatsNewDocAndSheets => 'دستاویزات اور اسپریڈ شیٹس';
 
   @override
-  String get whatsNewDocAndSheetsDesc => 'PDFs، Word دستاویزات، Excel اسپریڈ شیٹس اور مزید دیکھیں — سب آپ کی ڈیوائس پر مقامی طور پر۔';
+  String get whatsNewDocAndSheetsDesc =>
+      'PDFs، Word دستاویزات، Excel اسپریڈ شیٹس اور مزید دیکھیں — سب آپ کی ڈیوائس پر مقامی طور پر۔';
 
   @override
   String get whatsNewOcrAi => 'ذہین OCR اور آن-ڈیوائس AI';
 
   @override
-  String get whatsNewOcrAiDesc => 'اعلیٰ آن-ڈیوائس OCR کے ذریعے تصاویر سے متن نکالیں۔ متعدد زبانوں کی سپورٹ دستیاب ہے۔';
+  String get whatsNewOcrAiDesc =>
+      'اعلیٰ آن-ڈیوائس OCR کے ذریعے تصاویر سے متن نکالیں۔ متعدد زبانوں کی سپورٹ دستیاب ہے۔';
 
   @override
   String get whatsNewSyntaxHighlighting => 'سینٹیکس ہائی لائٹنگ';
 
   @override
-  String get whatsNewSyntaxHighlightingDesc => '50+ پروگرامینگ زبانوں کے لیے خوبصورت کوڈ ہائی لائٹنگ۔';
+  String get whatsNewSyntaxHighlightingDesc =>
+      '50+ پروگرامینگ زبانوں کے لیے خوبصورت کوڈ ہائی لائٹنگ۔';
 
   @override
   String get whatsNewReadingStats => 'پڑھنے کے اعداد و شمار ڈیش بورڈ';
 
   @override
-  String get whatsNewReadingStatsDesc => 'تفصیلی اعداد و شمار اور وقت ٹریکنگ کے ساتھ اپنی پڑھنے کی پیشرفت ٹریک کریں۔';
+  String get whatsNewReadingStatsDesc =>
+      'تفصیلی اعداد و شمار اور وقت ٹریکنگ کے ساتھ اپنی پڑھنے کی پیشرفت ٹریک کریں۔';
 
   @override
   String get whatsNewLibraryCategories => 'کیٹگوری فولڈرز کے ساتھ لائبریری';
 
   @override
-  String get whatsNewLibraryCategoriesDesc => 'سمارٹ خودکار درجہ بندی کے ساتھ اپنی دستاویزات کو قسم کے مطابق منظم کریں۔';
+  String get whatsNewLibraryCategoriesDesc =>
+      'سمارٹ خودکار درجہ بندی کے ساتھ اپنی دستاویزات کو قسم کے مطابق منظم کریں۔';
 
   @override
   String get whatsNewFileManagement => 'فائل مینجمنٹ';
 
   @override
-  String get whatsNewFileManagementDesc => 'آسانی سے اپنی دستاویزات کا نام تبدیل کریں، ڈپلیکیٹ کریں، ایکسپورٹ کریں اور حذف کریں۔';
+  String get whatsNewFileManagementDesc =>
+      'آسانی سے اپنی دستاویزات کا نام تبدیل کریں، ڈپلیکیٹ کریں، ایکسپورٹ کریں اور حذف کریں۔';
 
   @override
   String get whatsNewThemes => 'روشن اور تاریک تھیمز';
 
   @override
-  String get whatsNewThemesDesc => 'وہ نظر منتخب کریں جو آپ کو موافق ہو — رات کے لیے ڈارک موڈ، دن کے لیے لائٹ موڈ۔';
+  String get whatsNewThemesDesc =>
+      'وہ نظر منتخب کریں جو آپ کو موافق ہو — رات کے لیے ڈارک موڈ، دن کے لیے لائٹ موڈ۔';
 
   @override
   String get whatsNewFadDrive => 'FadDrive';
 
   @override
-  String get whatsNewFadDriveDesc => 'آپ کی دستاویزات کے لیے کلاؤڈ سنک — کہیں بھی، کسی بھی وقت رسائی حاصل کریں۔';
+  String get whatsNewFadDriveDesc =>
+      'آپ کی دستاویزات کے لیے کلاؤڈ سنک — کہیں بھی، کسی بھی وقت رسائی حاصل کریں۔';
 
   @override
   String get whatsNewEditing => 'دستاویز ایڈیٹنگ';
 
   @override
-  String get whatsNewEditingDesc => 'Fadocx میں ہی اپنی دستاویزات میں جلد ترمیم کریں۔';
+  String get whatsNewEditingDesc =>
+      'Fadocx میں ہی اپنی دستاویزات میں جلد ترمیم کریں۔';
 
   @override
   String get whatsNewBookmarks => 'بک مارکس اور تشریحات';
 
   @override
-  String get whatsNewBookmarksDesc => 'اہم صفحات نشان زد کریں اور بعد میں حوالہ کے لیے تشریحات شامل کریں۔';
+  String get whatsNewBookmarksDesc =>
+      'اہم صفحات نشان زد کریں اور بعد میں حوالہ کے لیے تشریحات شامل کریں۔';
 
   @override
   String get whatsNewConversion => 'دستاویز کنورژن';
 
   @override
-  String get whatsNewConversionDesc => 'PDF، DOCX اور مزید جیسے فارمیٹس کے درمیان تبدیل کریں۔';
+  String get whatsNewConversionDesc =>
+      'PDF، DOCX اور مزید جیسے فارمیٹس کے درمیان تبدیل کریں۔';
 
   @override
   String get whatsNewAmoled => 'AMOLED بلیک تھیم';
 
   @override
-  String get whatsNewAmoledDesc => 'AMOLED ڈسپلے کے لیے خالص کالا تھیم — ڈارک موڈ میں بیٹری بچائیں۔';
+  String get whatsNewAmoledDesc =>
+      'AMOLED ڈسپلے کے لیے خالص کالا تھیم — ڈارک موڈ میں بیٹری بچائیں۔';
 
   @override
   String get whatsNewMoreOcr => 'مزید OCR زبانیں';
 
   @override
-  String get whatsNewMoreOcrDesc => 'اضافی OCR زبانوں کی سپورٹ اور بہتر شناخت کی درستگی۔';
+  String get whatsNewMoreOcrDesc =>
+      'اضافی OCR زبانوں کی سپورٹ اور بہتر شناخت کی درستگی۔';
 
   @override
-  String get whatsNewOfflineFirst => 'ایک آف لائن پر مبنی دستاویز ویور جو رازداری کے لیے بنایا گیا۔ کوئی اکاؤنٹس نہیں، کوئی ٹریکنگ نہیں، کوئی انٹرنیٹ درکار نہیں۔';
+  String get whatsNewOfflineFirst =>
+      'ایک آف لائن پر مبنی دستاویز ویور جو رازداری کے لیے بنایا گیا۔ کوئی اکاؤنٹس نہیں، کوئی ٹریکنگ نہیں، کوئی انٹرنیٹ درکار نہیں۔';
 
   @override
   String get whatsNewThankYou => 'Fadocx استعمال کرنے کے لیے شکریہ';
 
   @override
-  String get whatsNewThankYouDesc => 'اگر آپ کو Fadocx مفید لگتا ہے، تو اس کی ڈویلپمنٹ سپورٹ کرنے پر غور کریں۔ آپ کا تعاون ہمیں رازداری پر مبنی اوزار بناتے رکھنے میں مدد کرتا ہے۔';
+  String get whatsNewThankYouDesc =>
+      'اگر آپ کو Fadocx مفید لگتا ہے، تو اس کی ڈویلپمنٹ سپورٹ کرنے پر غور کریں۔ آپ کا تعاون ہمیں رازداری پر مبنی اوزار بناتے رکھنے میں مدد کرتا ہے۔';
 
   @override
   String get drawerWhatNew => 'نیا کیا ہے';
@@ -1116,7 +1166,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get updateVisitGithub => 'GitHub وزٹ کریں';
 
   @override
-  String get updateBetaInfo => 'Fadocx بیٹا ایک اسٹینڈ-alone ایپ ہے جسے اسٹیبل ورژن کے ساتھ انسٹال کیا جا سکتا ہے۔ یہ آپ کے اسٹیبل ایپ یا اس کے ڈیٹا میں مداخلت نہیں کرے گا۔\n\nنئی خصوصیات کو اسٹیبل ریلیز سے پہلے ٹیسٹ کرنے کے لیے بیٹا انسٹال کریں۔';
+  String get updateBetaInfo =>
+      'Fadocx بیٹا ایک اسٹینڈ-alone ایپ ہے جسے اسٹیبل ورژن کے ساتھ انسٹال کیا جا سکتا ہے۔ یہ آپ کے اسٹیبل ایپ یا اس کے ڈیٹا میں مداخلت نہیں کرے گا۔\n\nنئی خصوصیات کو اسٹیبل ریلیز سے پہلے ٹیسٹ کرنے کے لیے بیٹا انسٹال کریں۔';
 
   @override
   String get updateBannerStable => 'مستحکم اپ ڈیٹ';
@@ -1170,13 +1221,16 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsStorageOther => 'دیگر';
 
   @override
-  String get settingsStorageInfo => 'دستاویزات آپ کی ڈیوائس پر ایک نجی فولڈر میں محفوظ ہیں اور دوسری ایپس ان تک رسائی نہیں رکھتیں۔';
+  String get settingsStorageInfo =>
+      'دستاویزات آپ کی ڈیوائس پر ایک نجی فولڈر میں محفوظ ہیں اور دوسری ایپس ان تک رسائی نہیں رکھتیں۔';
 
   @override
-  String get settingsStoragePrivateFolderInfo => 'دستاویزات ایک نجی فولڈر میں محفوظ ہیں، دوسری ایپس اور فائل مینیجرز سے پوشیدہ۔ صرف Fadocx ہی ان تک رسائی حاصل کر سکتا ہے۔';
+  String get settingsStoragePrivateFolderInfo =>
+      'دستاویزات ایک نجی فولڈر میں محفوظ ہیں، دوسری ایپس اور فائل مینیجرز سے پوشیدہ۔ صرف Fadocx ہی ان تک رسائی حاصل کر سکتا ہے۔';
 
   @override
-  String get settingsStorageDeleteInfo => 'ترتیبات میں خطرہ زون سے دستاویزات حذف کریں';
+  String get settingsStorageDeleteInfo =>
+      'ترتیبات میں خطرہ زون سے دستاویزات حذف کریں';
 
   @override
   String get settingsStorageEmpty => 'کوئی دستاویزات نہیں';
@@ -1197,7 +1251,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsReplayOnboarding => 'آن بورڈنگ دوبارہ دکھائیں';
 
   @override
-  String get settingsReplayOnboardingDesc => 'اگلی ایپ لانچ پر آن بورڈنگ سلائیڈز دکھائیں';
+  String get settingsReplayOnboardingDesc =>
+      'اگلی ایپ لانچ پر آن بورڈنگ سلائیڈز دکھائیں';
 
   @override
   String get settingsEnabled => 'فعال';
@@ -1266,7 +1321,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsCheckingUpdates => 'اپ ڈیٹس چیک ہو رہی ہیں…';
 
   @override
-  String get settingsNoInternet => 'انٹرنیٹ کنکشن نہیں۔ اپنا نیٹ ورک چیک کریں اور دوبارہ کوشش کریں۔';
+  String get settingsNoInternet =>
+      'انٹرنیٹ کنکشن نہیں۔ اپنا نیٹ ورک چیک کریں اور دوبارہ کوشش کریں۔';
 
   @override
   String get settingsUpToDate => 'آپ اپ ٹو ڈیٹ ہیں';
@@ -1293,7 +1349,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsCopyInfo => 'معلومات کاپی';
 
   @override
-  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
+  String settingsVersionClipboardInfo(
+      String appName, String version, String buildNumber, String packageName) {
     return '$appName v$version (بلڈ $buildNumber)\nپیکیج: $packageName';
   }
 
@@ -1301,7 +1358,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsShareApp => 'دوستوں کے ساتھ شیئر کریں';
 
   @override
-  String get settingsShareMessage => 'Fadocx دیکھیں!\n\nایک آل اِن ون دستاویز ویور: PDF، Office، اسپریڈشیٹس، پریزنٹیشنز، کوڈ فائلیں اور OCR ٹیکسٹ استخراج — مکمل آف لائن، بغیر ٹریکنگ، اوپن سورس۔\n\nhttps://github.com/anonfaded/Fadocx';
+  String get settingsShareMessage =>
+      'Fadocx دیکھیں!\n\nایک آل اِن ون دستاویز ویور: PDF، Office، اسپریڈشیٹس، پریزنٹیشنز، کوڈ فائلیں اور OCR ٹیکسٹ استخراج — مکمل آف لائن، بغیر ٹریکنگ، اوپن سورس۔\n\nhttps://github.com/anonfaded/Fadocx';
 
   @override
   String get settingsShareVia => 'شیئر کریں...';
@@ -1310,7 +1368,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsShareWhatsApp => 'واٹس ایپ';
 
   @override
-  String get settingsWhatsAppNotInstalled => 'اس ڈیوائس پر واٹس ایپ انسٹال نہیں ہے';
+  String get settingsWhatsAppNotInstalled =>
+      'اس ڈیوائس پر واٹس ایپ انسٹال نہیں ہے';
 
   @override
   String get settingsPrivacyOffline => '100% آف لائن';
@@ -1331,7 +1390,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsPrivacyByDesign => 'ہم رازداری کو ڈیزائن سے مانتے ہیں۔';
 
   @override
-  String get settingsPrivacyTransparency => 'Fadocx شفافیت کے ساتھ بنایا گیا ہے۔ آپ کی دستاویزات آپ کا معاملہ ہیں - ہمارا نہیں۔';
+  String get settingsPrivacyTransparency =>
+      'Fadocx شفافیت کے ساتھ بنایا گیا ہے۔ آپ کی دستاویزات آپ کا معاملہ ہیں - ہمارا نہیں۔';
 
   @override
   String get settingsViewSourceCode => 'سورس کوڈ دیکھیں';
@@ -1367,7 +1427,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsIn => 'میں';
 
   @override
-  String get settingsCopyright => '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
+  String get settingsCopyright =>
+      '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
 
   @override
   String settingsTypeToConfirm(String text) {
@@ -1378,31 +1439,40 @@ class AppLocalizationsUr extends AppLocalizations {
   String get confirm => 'تصدیق';
 
   @override
-  String get settingsPrivacyOfflineDesc => 'تمام پراسیسنگ آپ کی ڈیوائس پر ہوتی ہے۔ انٹرنیٹ درکار نہیں۔';
+  String get settingsPrivacyOfflineDesc =>
+      'تمام پراسیسنگ آپ کی ڈیوائس پر ہوتی ہے۔ انٹرنیٹ درکار نہیں۔';
 
   @override
-  String get settingsPrivacyLocalStorageDesc => 'آپ کی دستاویزات آپ کی ڈیوائس پر رہتی ہیں۔ کچھ بھی اپ لوڈ نہیں ہوتا۔';
+  String get settingsPrivacyLocalStorageDesc =>
+      'آپ کی دستاویزات آپ کی ڈیوائس پر رہتی ہیں۔ کچھ بھی اپ لوڈ نہیں ہوتا۔';
 
   @override
-  String get settingsPrivacyOnDeviceDesc => 'OCR کے لیے OpenCV + Tesseract استعمال ہوتا ہے۔ AI مقامی طور پر چلتی ہے۔';
+  String get settingsPrivacyOnDeviceDesc =>
+      'OCR کے لیے OpenCV + Tesseract استعمال ہوتا ہے۔ AI مقامی طور پر چلتی ہے۔';
 
   @override
-  String get settingsPrivacyOpenSourceDesc => 'کوڈ عوامی ہے۔ GitHub پر خود آڈٹ کریں۔';
+  String get settingsPrivacyOpenSourceDesc =>
+      'کوڈ عوامی ہے۔ GitHub پر خود آڈٹ کریں۔';
 
   @override
-  String get settingsPrivacyNoAdsDesc => 'کوئی اشتہارات نہیں۔ کوئی ٹریکنگ نہیں۔ کوئی اینالیٹکس نہیں۔ کوئی کریش لاگز نہیں۔ زیرو ٹیلیمیٹری۔';
+  String get settingsPrivacyNoAdsDesc =>
+      'کوئی اشتہارات نہیں۔ کوئی ٹریکنگ نہیں۔ کوئی اینالیٹکس نہیں۔ کوئی کریش لاگز نہیں۔ زیرو ٹیلیمیٹری۔';
 
   @override
-  String get settingsFadcamDesc => 'رازداری پر مبنی اینڈرائیڈ ملٹی میڈیا سوٹ: بیک گراؤنڈ ویڈیو ریکارڈنگ، ڈیش کیم، اسکرین ریکارڈر، لائیو اسٹریمنگ اور ریموٹ کنٹرول — بغیر اشتہارات اور اوپن سورس۔';
+  String get settingsFadcamDesc =>
+      'رازداری پر مبنی اینڈرائیڈ ملٹی میڈیا سوٹ: بیک گراؤنڈ ویڈیو ریکارڈنگ، ڈیش کیم، اسکرین ریکارڈر، لائیو اسٹریمنگ اور ریموٹ کنٹرول — بغیر اشتہارات اور اوپن سورس۔';
 
   @override
-  String get settingsQuranCliDesc => 'قرآن مجید کے لیے آپ کا ٹرمینل ساتھی: پڑھیں، سنیں اور ویڈیو ایڈیٹنگ کے لیے سب ٹائٹلز بنائیں!';
+  String get settingsQuranCliDesc =>
+      'قرآن مجید کے لیے آپ کا ٹرمینل ساتھی: پڑھیں، سنیں اور ویڈیو ایڈیٹنگ کے لیے سب ٹائٹلز بنائیں!';
 
   @override
-  String get settingsFadcryptDesc => 'اعلیٰ اور خوبصورت کراس پلیٹ فارم ایپ لاکر — فائلیں، فولڈرز اور ایپلیکیشنز سب AES-256-GCM انکرپشن سے محفوظ۔ اوپن سورس، مکمل مفت، کوئی ٹیلیمیٹری نہیں!';
+  String get settingsFadcryptDesc =>
+      'اعلیٰ اور خوبصورت کراس پلیٹ فارم ایپ لاکر — فائلیں، فولڈرز اور ایپلیکیشنز سب AES-256-GCM انکرپشن سے محفوظ۔ اوپن سورس، مکمل مفت، کوئی ٹیلیمیٹری نہیں!';
 
   @override
-  String get settingsFadcatDesc => 'ہلکا پھلکا، فیچر سے بھرپور، کراس پلیٹ فارم اینڈرائیڈ لاگ کیٹ متبادل — Android Studio کی غیر ضروری بھاری پن کے بغیر۔ ADB شامل ہے، GUI، CLI یا MCP سرور موڈ میں چلتا ہے۔';
+  String get settingsFadcatDesc =>
+      'ہلکا پھلکا، فیچر سے بھرپور، کراس پلیٹ فارم اینڈرائیڈ لاگ کیٹ متبادل — Android Studio کی غیر ضروری بھاری پن کے بغیر۔ ADB شامل ہے، GUI، CLI یا MCP سرور موڈ میں چلتا ہے۔';
 
   @override
   String get settingsMacosComingSoon => 'macOS جلد آ رہا ہے';
@@ -1432,10 +1502,12 @@ class AppLocalizationsUr extends AppLocalizations {
   String get viewerSidebarBookmarks => 'نشانات';
 
   @override
-  String get viewerSidebarNotesDesc => 'PDF صفحات میں نوٹس اور تشریحات شامل کریں';
+  String get viewerSidebarNotesDesc =>
+      'PDF صفحات میں نوٹس اور تشریحات شامل کریں';
 
   @override
-  String get viewerSidebarBookmarksDesc => 'اہم صفحات کو محفوظ کریں اور منظم کریں';
+  String get viewerSidebarBookmarksDesc =>
+      'اہم صفحات کو محفوظ کریں اور منظم کریں';
 
   @override
   String viewerCellCopied(String value) {
@@ -1527,7 +1599,8 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get viewerCopyDocumentText => 'یہ پوری دستاویز کا مواد کلیپ بورڈ پر کاپی کرے گا۔';
+  String get viewerCopyDocumentText =>
+      'یہ پوری دستاویز کا مواد کلیپ بورڈ پر کاپی کرے گا۔';
 
   @override
   String viewerWordsLines(num words, num lines) {
@@ -1558,7 +1631,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get viewerCopyExtractedTitle => 'نکالا ہوا متن کاپی کریں';
 
   @override
-  String get viewerCopyExtractedDesc => 'OCR کے ذریعے اس تصویر سے نکالا ہوا متن کاپی کریں۔';
+  String get viewerCopyExtractedDesc =>
+      'OCR کے ذریعے اس تصویر سے نکالا ہوا متن کاپی کریں۔';
 
   @override
   String viewerCopiedWordsChars(num words, num chars) {
@@ -1569,7 +1643,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get viewerErrorAccessText => 'نکالا ہوا متن تک رسائی میں خرابی';
 
   @override
-  String get viewerNoTextForImage => 'اس تصویر کے لیے کوئی نکالا ہوا متن دستیاب نہیں';
+  String get viewerNoTextForImage =>
+      'اس تصویر کے لیے کوئی نکالا ہوا متن دستیاب نہیں';
 
   @override
   String get viewerExtractingAllPages => 'تمام صفحات سے متن نکالا جا رہا ہے...';
@@ -1652,10 +1727,12 @@ class AppLocalizationsUr extends AppLocalizations {
   String get viewerEditWithEngine => 'Fadocx Engine سے کھولیں';
 
   @override
-  String get viewerEditWithEngineDesc => 'اس اسپریڈشیٹ کو Fadocx rendering engine میں کھولیں تاکہ مکمل فارمیٹنگ، چارٹس اور لے آؤٹ کی درستگی کے ساتھ درست بصری پیش منظر مل سکے۔';
+  String get viewerEditWithEngineDesc =>
+      'اس اسپریڈشیٹ کو Fadocx rendering engine میں کھولیں تاکہ مکمل فارمیٹنگ، چارٹس اور لے آؤٹ کی درستگی کے ساتھ درست بصری پیش منظر مل سکے۔';
 
   @override
-  String get viewerEditWithEngineNote => 'نوٹ: interactive editing مستقبل کی اپ ڈیٹ میں آئے گی۔';
+  String get viewerEditWithEngineNote =>
+      'نوٹ: interactive editing مستقبل کی اپ ڈیٹ میں آئے گی۔';
 
   @override
   String get viewerNotNow => 'ابھی نہیں';
@@ -1704,7 +1781,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get scannerDocumentDetected => 'دستاویز ملی — پکا رکھیں';
 
   @override
-  String get scannerKeepDocumentFlat => 'بہترین نتائج کے لیے دستاویز سیدھی اور ہموار رکھیں';
+  String get scannerKeepDocumentFlat =>
+      'بہترین نتائج کے لیے دستاویز سیدھی اور ہموار رکھیں';
 
   @override
   String get scannerUpload => 'اپ لوڈ';
@@ -1747,7 +1825,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get scannerNoScansYet => 'ابھی کوئی اسکین نہیں';
 
   @override
-  String get scannerNoScansDesc => 'نکالا ہوا متن یہاں دیکھنے کے لیے دستاویز کیپچر کریں';
+  String get scannerNoScansDesc =>
+      'نکالا ہوا متن یہاں دیکھنے کے لیے دستاویز کیپچر کریں';
 
   @override
   String get scannerExtractedText => 'نکالا ہوا متن';
@@ -1860,7 +1939,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get pdfPasswordRequired => 'PDF پاس ورڈ درکار ہے';
 
   @override
-  String get pdfPasswordDesc => 'یہ PDF پاس ورڈ سے محفوظ ہے۔ کھولنے کے لیے پاس ورڈ درج کریں۔';
+  String get pdfPasswordDesc =>
+      'یہ PDF پاس ورڈ سے محفوظ ہے۔ کھولنے کے لیے پاس ورڈ درج کریں۔';
 
   @override
   String get pdfPasswordLabel => 'پاس ورڈ';
@@ -1938,7 +2018,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get mediaPlay => 'چلائیں';
 
   @override
-  String get audioPlaybackNote => 'آڈیو پلے بیک کے لیے ایک اضافی لائبریری درکار ہے۔';
+  String get audioPlaybackNote =>
+      'آڈیو پلے بیک کے لیے ایک اضافی لائبریری درکار ہے۔';
 
   @override
   String sheetNoData(String sheetName) {

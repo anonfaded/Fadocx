@@ -257,6 +257,7 @@
   "homeFileLastModified": "آخر تعديل",
   "homeFileInTrash": "في سلة المهملات",
   "homeFileInfoCopied": "تم نسخ معلومات الملف",
+  "homeCopyFileInfoPrompt": "نسخ معلومات الملف",
   "homeCopySuffix": " (نسخة)",
   "homeCopySuffixCounter": " (نسخة {counter})",
   "@homeCopySuffixCounter": {
@@ -465,7 +466,7 @@
     }
   },
   "whatsNewTitle": "ما الجديد",
-  "whatsNewWhatsIncluded": "ما المضمن",
+  "whatsNewHighlights": "أبرز الميزات",
   "whatsNewPlanned": "مخطط له",
   "whatsNewReleasedToday": "صدر اليوم",
   "whatsNewReleasedYesterday": "صدر أمس",
@@ -477,6 +478,7 @@
       }
     }
   },
+  "whatsNewSupportedLanguages": "اللغات المدعومة",
   "whatsNewDocAndSheets": "المستندات والجداول",
   "whatsNewDocAndSheetsDesc": "اعرض ملفات PDF ومستندات Word وجداول Excel والمزيد، كل ذلك محلياً على جهازك.",
   "whatsNewOcrAi": "OCR ذكي وذكاء اصطناعي على الجهاز",

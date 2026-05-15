@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
+import 'package:fadocx/core/presentation/widgets/connected_sheet_group.dart';
 
 /// Settings tile for displaying a URL or email.
 /// Shows the value and a chevron, tapping opens a bottom sheet
@@ -43,8 +44,8 @@ class LinkTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Theme.of(context)
                       .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.5),
+                      .surfaceContainerHigh
+                      .withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -65,7 +66,8 @@ class LinkTile extends StatelessWidget {
                     Text(
                       value,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ],
@@ -92,10 +94,9 @@ class LinkTile extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
-          color: brightness == Brightness.dark
-              ? const Color(0xFF1C1C1E)
-              : const Color(0xFFF2F2F7),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+          color: theme.colorScheme.surfaceContainerLow
+              .withValues(alpha: brightness == Brightness.dark ? 0.96 : 0.92),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: EdgeInsets.only(
           top: 6,
@@ -118,7 +119,7 @@ class LinkTile extends StatelessWidget {
             ),
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Text(
                 title,
                 style: theme.textTheme.titleMedium?.copyWith(
@@ -128,7 +129,7 @@ class LinkTile extends StatelessWidget {
             ),
             // Value preview
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 value,
                 textAlign: TextAlign.center,
@@ -138,78 +139,59 @@ class LinkTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Action: Copy
-            _sheetAction(
-              context,
-              icon: Icons.content_copy,
-              label: AppLocalizations.of(context)!.linkTileCopy,
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: value));
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.linkTileCopiedToClipboard)),
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-            // Action: Open
-            _sheetAction(
-              context,
-              icon: type == LinkType.email ? Icons.email_outlined : Icons.open_in_browser,
-              label: type == LinkType.email ? AppLocalizations.of(context)!.linkTileSendEmail : AppLocalizations.of(context)!.linkTileOpenInBrowser,
-              onTap: () {
-                Navigator.pop(ctx);
-                _openLink(context);
-              },
+            ConnectedSheetGroup(
+              children: [
+                ConnectedSheetRow(
+                  leading: SheetIconChip.icon(
+                    icon: Icons.content_copy,
+                    color: theme.colorScheme.primary,
+                    backgroundColor: theme.colorScheme.primary.withValues(
+                      alpha: brightness == Brightness.dark ? 0.18 : 0.14,
+                    ),
+                  ),
+                  title: AppLocalizations.of(context)!.linkTileCopy,
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: value));
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(AppLocalizations.of(context)!
+                              .linkTileCopiedToClipboard)),
+                    );
+                  },
+                ),
+                ConnectedSheetRow(
+                  leading: SheetIconChip.icon(
+                    icon: type == LinkType.email
+                        ? Icons.email_outlined
+                        : Icons.open_in_browser,
+                    color: theme.colorScheme.primary,
+                    backgroundColor: theme.colorScheme.primary.withValues(
+                      alpha: brightness == Brightness.dark ? 0.18 : 0.14,
+                    ),
+                  ),
+                  title: type == LinkType.email
+                      ? AppLocalizations.of(context)!.linkTileSendEmail
+                      : AppLocalizations.of(context)!.linkTileOpenInBrowser,
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _openLink(context);
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 12),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _sheetAction(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    final brightness = Theme.of(context).brightness;
-    final bgColor = brightness == Brightness.dark
-        ? const Color(0xFF2C2C2E)
-        : Colors.white;
-    final textColor = Theme.of(context).colorScheme.primary;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          color: bgColor,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(icon, size: 20, color: textColor),
-                    const SizedBox(width: 10),
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: textColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ),
       ),
     );
@@ -224,7 +206,9 @@ class LinkTile extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.linkTileCouldNotOpen(value))),
+          SnackBar(
+              content: Text(
+                  AppLocalizations.of(context)!.linkTileCouldNotOpen(value))),
         );
       }
     }

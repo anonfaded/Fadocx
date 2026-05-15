@@ -42,8 +42,9 @@ class DrawerUpdateBanner extends ConsumerWidget {
           ),
         ),
         Material(
-          color: colorScheme.surfaceContainerLow
-              .withValues(alpha: isDark ? 0.94 : 0.88),
+          color: isDark
+              ? colorScheme.surfaceContainerLow.withValues(alpha: 0.94)
+              : Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(12),
           clipBehavior: Clip.antiAlias,
           child: Column(
