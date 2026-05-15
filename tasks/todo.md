@@ -34,6 +34,9 @@ Replace ALL hardcoded English strings across the app with AppLocalizations keys,
 - Regenerated Flutter localizations successfully with `flutter gen-l10n`.
 - Fixed a surfaced analyzer type mismatch in `lib/features/settings/presentation/screens/settings_screen.dart` by converting the async error object to `String` before passing it to the localized error message.
 - Verification result: `flutter analyze` reports `No issues found!`.
+- Mirrored the document thumbnail tilt in both Home recent files and Library list items by flipping the rotation sign from `Directionality`; loading skeleton now matches the final RTL/LTR tilt too.
+- Analyzer verification after the tilt change: `flutter analyze` reports `No issues found!`.
+- Library selection mode now exposes an explicit batch delete action next to select-all, single-file delete now confirms before trashing, and the shared file-action sheet is dismissible by outside tap again.
 
 ## Naming Convention for .arb keys
 - Common/shared: camelCase (e.g., `cancel`, `delete`, `copy`)

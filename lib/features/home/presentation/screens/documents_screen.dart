@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +20,10 @@ import 'package:fadocx/l10n/app_localizations.dart';
 
 final log = Logger();
 
+double _tiltAngleForDirection(BuildContext context) {
+  return Directionality.of(context) == ui.TextDirection.rtl ? 0.15 : -0.15;
+}
+
 /// Shared search query for the library tab.
 class LibrarySearchNotifier extends Notifier<String> {
   @override
@@ -28,8 +33,8 @@ class LibrarySearchNotifier extends Notifier<String> {
   void clear() => state = '';
 }
 
-final librarySearchProvider =
-    NotifierProvider<LibrarySearchNotifier, String>(() => LibrarySearchNotifier());
+final librarySearchProvider = NotifierProvider<LibrarySearchNotifier, String>(
+    () => LibrarySearchNotifier());
 
 class DocumentsScreen extends ConsumerStatefulWidget {
   final bool tabMode;
@@ -50,7 +55,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   final Set<String> _selectedFiles = {};
   bool _isSelecting = false;
   String _sortBy = 'latest';
-  
+
   // For scroll-aware shader (industry standard pattern)
   final ScrollController _chipsScrollController = ScrollController();
   late ValueNotifier<double> _leftFadeOpacity;
@@ -64,30 +69,31 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       duration: const Duration(milliseconds: 250),
       vsync: this,
     );
-    
+
     // Initialize ValueNotifiers for scroll-aware fades (industry standard)
     _leftFadeOpacity = ValueNotifier(0.0);
     _rightFadeOpacity = ValueNotifier(1.0);
-    
+
     // Listen to chips scroll - NO setState, just update ValueNotifiers
     _chipsScrollController.addListener(_updateChipsFadeOpacity);
   }
-  
+
   void _updateChipsFadeOpacity() {
     final position = _chipsScrollController.position;
     final hasScroll = position.maxScrollExtent > 0;
-    
+
     if (!hasScroll) {
       // No scrolling needed - hide both fades
       _leftFadeOpacity.value = 0.0;
       _rightFadeOpacity.value = 0.0;
       return;
     }
-    
+
     // Smooth fade based on scroll distance (60px fade zone)
     final leftFade = (position.pixels / 60).clamp(0.0, 1.0);
-    final rightFade = ((position.maxScrollExtent - position.pixels) / 60).clamp(0.0, 1.0);
-    
+    final rightFade =
+        ((position.maxScrollExtent - position.pixels) / 60).clamp(0.0, 1.0);
+
     _leftFadeOpacity.value = leftFade;
     _rightFadeOpacity.value = rightFade;
   }
@@ -136,8 +142,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   Widget _buildNormalAppBar(BuildContext context) {
     return Row(
       children: [
-        if (!_isSearching)
-          const SizedBox(width: 40),
+        if (!_isSearching) const SizedBox(width: 40),
         Expanded(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
@@ -149,15 +154,16 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                         icon: const Icon(Icons.arrow_back, size: 20),
                         onPressed: _exitSearchMode,
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                            minWidth: 36, minHeight: 36),
+                        constraints:
+                            const BoxConstraints(minWidth: 36, minHeight: 36),
                       ),
                       Expanded(
                         child: TextField(
                           controller: _searchController,
                           autofocus: true,
                           decoration: InputDecoration(
-                            hintText: AppLocalizations.of(context)!.librarySearchHint,
+                            hintText:
+                                AppLocalizations.of(context)!.librarySearchHint,
                             border: InputBorder.none,
                             isDense: true,
                             contentPadding:
@@ -166,8 +172,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                           style: Theme.of(context).textTheme.bodyMedium,
                           onChanged: (v) {
                             _debounce?.cancel();
-                            _debounce = Timer(const Duration(milliseconds: 200), () {
-                              ref.read(librarySearchProvider.notifier).update(v);
+                            _debounce =
+                                Timer(const Duration(milliseconds: 200), () {
+                              ref
+                                  .read(librarySearchProvider.notifier)
+                                  .update(v);
                             });
                           },
                         ),
@@ -180,8 +189,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                             ref.read(librarySearchProvider.notifier).clear();
                           },
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                              minWidth: 36, minHeight: 36),
+                          constraints:
+                              const BoxConstraints(minWidth: 36, minHeight: 36),
                         ),
                     ],
                   )
@@ -202,8 +211,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             icon: const Icon(Icons.search, size: 20),
             onPressed: _enterSearchMode,
             padding: EdgeInsets.zero,
-            constraints:
-                const BoxConstraints(minWidth: 36, minHeight: 36),
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
           ),
       ],
     );
@@ -228,9 +236,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         const Spacer(),
         IconButton(
           icon: const Icon(Icons.delete_outline, size: 20),
-          onPressed: _selectedFiles.isNotEmpty
-              ? () => _deleteSelectedFiles()
-              : null,
+          onPressed:
+              _selectedFiles.isNotEmpty ? () => _deleteSelectedFiles() : null,
+          color: _selectedFiles.isNotEmpty
+              ? Theme.of(context).colorScheme.error
+              : Theme.of(context).colorScheme.onSurfaceVariant,
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
         ),
@@ -297,7 +307,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.libraryDeleteSelected),
-        content: Text(AppLocalizations.of(context)!.libraryDeleteConfirm(count)),
+        content:
+            Text(AppLocalizations.of(context)!.libraryDeleteConfirm(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -320,7 +331,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.libraryItemsMovedToTrash(count)),
+          content: Text(
+              AppLocalizations.of(context)!.libraryItemsMovedToTrash(count)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -340,7 +352,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          child: Icon(icon,
+              size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ),
     );
@@ -381,7 +394,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text(AppLocalizations.of(context)!.libraryErrorLoading(error.toString())),
+              Text(AppLocalizations.of(context)!
+                  .libraryErrorLoading(error.toString())),
             ],
           ),
         ),
@@ -410,9 +424,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       case 'oldest':
         filteredFiles.sort((a, b) => a.dateOpened.compareTo(b.dateOpened));
       case 'largest':
-        filteredFiles.sort((a, b) => b.fileSizeBytes.compareTo(a.fileSizeBytes));
+        filteredFiles
+            .sort((a, b) => b.fileSizeBytes.compareTo(a.fileSizeBytes));
       case 'smallest':
-        filteredFiles.sort((a, b) => a.fileSizeBytes.compareTo(b.fileSizeBytes));
+        filteredFiles
+            .sort((a, b) => a.fileSizeBytes.compareTo(b.fileSizeBytes));
     }
 
     // Build category counts for dynamic sorting
@@ -445,15 +461,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     children: [
-                      _buildCategoryChip(context, 'all', AppLocalizations.of(context)!.categoryAll, categoryCounts['all'] ?? 0),
+                      _buildCategoryChip(
+                          context,
+                          'all',
+                          AppLocalizations.of(context)!.categoryAll,
+                          categoryCounts['all'] ?? 0),
                       ...sortedCategories.map((category) {
                         final label = _getCategoryLabel(context, category);
                         final count = categoryCounts[category] ?? 0;
-                        return _buildCategoryChip(context, category, label, count);
+                        return _buildCategoryChip(
+                            context, category, label, count);
                       }),
                     ],
                   ),
-                  
+
                   // Left fade gradient (appears on scroll)
                   ValueListenableBuilder<double>(
                     valueListenable: _leftFadeOpacity,
@@ -470,8 +491,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                                 colors: [
-                                  Theme.of(context).colorScheme.surface.withValues(alpha: opacity),
-                                  Theme.of(context).colorScheme.surface.withValues(alpha: 0),
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .surface
+                                      .withValues(alpha: opacity),
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .surface
+                                      .withValues(alpha: 0),
                                 ],
                               ),
                             ),
@@ -480,7 +507,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                       );
                     },
                   ),
-                  
+
                   // Right fade gradient (appears on scroll)
                   ValueListenableBuilder<double>(
                     valueListenable: _rightFadeOpacity,
@@ -497,8 +524,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                 begin: Alignment.centerRight,
                                 end: Alignment.centerLeft,
                                 colors: [
-                                  Theme.of(context).colorScheme.surface.withValues(alpha: opacity),
-                                  Theme.of(context).colorScheme.surface.withValues(alpha: 0),
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .surface
+                                      .withValues(alpha: opacity),
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .surface
+                                      .withValues(alpha: 0),
                                 ],
                               ),
                             ),
@@ -520,7 +553,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             children: [
               Expanded(
                 child: Text(
-                  AppLocalizations.of(context)!.libraryItemCount(filteredFiles.length),
+                  AppLocalizations.of(context)!
+                      .libraryItemCount(filteredFiles.length),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,
@@ -543,10 +577,26 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                     ),
                   ),
                 ),
+              if (_isSelecting && _selectedFiles.isNotEmpty)
+                IconButton(
+                  tooltip: AppLocalizations.of(context)!.libraryDeleteSelected,
+                  icon: Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  onPressed: _deleteSelectedFiles,
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 36, minHeight: 36),
+                ),
               // iOS-style pill for sort and grid toggle
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -560,7 +610,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                     Container(
                       width: 1,
                       height: 20,
-                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
                     ),
                     _buildPillButton(
                       context,
@@ -593,43 +646,69 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               await ref.read(recentFilesProvider.future);
             },
             child: filteredFiles.isEmpty
-                    ? CustomScrollView(
-                        slivers: [
-                          SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.inbox_outlined,
-                              size: 48,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              searchQuery.isNotEmpty
-                              ? AppLocalizations.of(context)!.libraryNoCategoryFound(_selectedCategory == 'all' ? AppLocalizations.of(context)!.categoryAll.toLowerCase() : _getCategoryLabel(context, _selectedCategory))
-                              : AppLocalizations.of(context)!.libraryNoDocuments,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ? CustomScrollView(
+                    slivers: [
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                searchQuery.isNotEmpty
+                                    ? Icons.search_off_rounded
+                                    : Icons.inbox_outlined,
+                                size: 48,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withValues(alpha: 0.4),
                               ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          searchQuery.isNotEmpty
-                              ? AppLocalizations.of(context)!.libraryAdjustSearch
-                              : AppLocalizations.of(context)!.libraryDocumentsAppearHere,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                              const SizedBox(height: 12),
+                              Text(
+                                searchQuery.isNotEmpty
+                                    ? AppLocalizations.of(context)!
+                                        .libraryNoCategoryFound(
+                                            _selectedCategory == 'all'
+                                                ? AppLocalizations.of(context)!
+                                                    .categoryAll
+                                                    .toLowerCase()
+                                                : _getCategoryLabel(
+                                                    context, _selectedCategory))
+                                    : AppLocalizations.of(context)!
+                                        .libraryNoDocuments,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                               ),
-                        ),
-                      ],
-                    ),
+                              const SizedBox(height: 4),
+                              Text(
+                                searchQuery.isNotEmpty
+                                    ? AppLocalizations.of(context)!
+                                        .libraryAdjustSearch
+                                    : AppLocalizations.of(context)!
+                                        .libraryDocumentsAppearHere,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withValues(alpha: 0.6),
+                                    ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    )
+                      ),
+                    ],
+                  )
                 : isGridView
                     ? CustomScrollView(
                         slivers: [
@@ -644,8 +723,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                 childAspectRatio: 0.714,
                               ),
                               delegate: SliverChildBuilderDelegate(
-                                (context, index) =>
-                                    _buildFileGridItem(context, filteredFiles[index]),
+                                (context, index) => _buildFileGridItem(
+                                    context, filteredFiles[index]),
                                 childCount: filteredFiles.length,
                               ),
                             ),
@@ -658,8 +737,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                             padding: const EdgeInsets.fromLTRB(12, 0, 12, 100),
                             sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
-                                (context, index) =>
-                                    _buildFileListItem(context, filteredFiles[index]),
+                                (context, index) => _buildFileListItem(
+                                    context, filteredFiles[index]),
                                 childCount: filteredFiles.length,
                               ),
                             ),
@@ -761,7 +840,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       BuildContext context, String category, String label, int count) {
     final isActive = _selectedCategory == category;
     final icon = _getCategoryIcon(category);
-    
+
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Material(
@@ -775,12 +854,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             decoration: BoxDecoration(
               color: isActive
                   ? Theme.of(context).colorScheme.primaryContainer
-                  : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  : Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(20),
               border: isActive
                   ? null
                   : Border.all(
-                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
                       width: 0.5,
                     ),
             ),
@@ -808,11 +893,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                 ),
                 const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.15)
-                        : Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                        ? Theme.of(context)
+                            .colorScheme
+                            .onPrimaryContainer
+                            .withValues(alpha: 0.15)
+                        : Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -855,11 +947,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             border: Border.all(
               color: isSelected
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                  : Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.2),
               width: isSelected ? 2.0 : 1.0,
             ),
             color: isSelected
-                ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.15)
+                ? Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.15)
                 : Theme.of(context).colorScheme.surface,
           ),
           child: Column(
@@ -941,9 +1039,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                 ? Icon(
                                     Icons.check,
                                     size: 14,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
                                   )
                                 : null,
                           ),
@@ -954,7 +1051,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                         top: 6,
                         left: 6,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.green.shade600,
                             borderRadius: BorderRadius.circular(8),
@@ -997,7 +1095,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              Icon(Icons.sd_card_outlined, size: 9, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
+                              Icon(Icons.sd_card_outlined,
+                                  size: 9,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withValues(alpha: 0.7)),
                               const SizedBox(width: 2),
                               Text(
                                 file.formattedSize,
@@ -1016,7 +1119,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              Icon(Icons.schedule_outlined, size: 9, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
+                              Icon(Icons.schedule_outlined,
+                                  size: 9,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withValues(alpha: 0.7)),
                               const SizedBox(width: 2),
                               Text(
                                 _getTimeAgo(context, file.dateOpened),
@@ -1037,8 +1145,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                     ),
                     if (!_isSelecting)
                       GestureDetector(
-                        onTap: () =>
-                            _showFileActionBottomSheet(context, file),
+                        onTap: () => _showFileActionBottomSheet(context, file),
                         child: Container(
                           width: 28,
                           height: 28,
@@ -1050,11 +1157,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                                 .withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                           child: Icon(Icons.more_vert,
-                               size: 18,
-                               color: Theme.of(context)
-                                   .colorScheme
-                                   .onSurfaceVariant),
+                          child: Icon(Icons.more_vert,
+                              size: 18,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
                         ),
                       ),
                   ],
@@ -1097,12 +1204,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                 width: isSelected ? 2.0 : 1.0,
               ),
               color: isSelected
-                  ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.15)
+                  ? Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.15)
                   : Theme.of(context).colorScheme.surface,
             ),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
                   if (_isSelecting)
@@ -1129,9 +1238,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                               ? Icon(
                                   Icons.check,
                                   size: 14,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimary,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
                                 )
                               : null,
                         ),
@@ -1154,88 +1262,90 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                         ),
                       ));
 
-                       return thumbnail.when(
-                         data: (bytes) {
-                           if (bytes != null) {
-                             return _buildRotatedStackedThumbnail(
-                               Image.memory(
-                                 bytes,
-                                 width: 55,
-                                 height: 76,
-                                 fit: BoxFit.cover,
-                                 alignment: Alignment.topCenter,
-                                 filterQuality: FilterQuality.high,
-                               ),
-                             );
-                           }
-                           return _buildListThumbnailPlaceholder(context, file);
-                         },
-                         loading: () =>
-                             _buildListThumbnailPlaceholder(context, file),
-                         error: (err, st) =>
-                             _buildListThumbnailPlaceholder(context, file),
-                       );
+                      return thumbnail.when(
+                        data: (bytes) {
+                          if (bytes != null) {
+                            return _buildRotatedStackedThumbnail(
+                              Image.memory(
+                                bytes,
+                                width: 55,
+                                height: 76,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                                filterQuality: FilterQuality.high,
+                              ),
+                            );
+                          }
+                          return _buildListThumbnailPlaceholder(context, file);
+                        },
+                        loading: () =>
+                            _buildListThumbnailPlaceholder(context, file),
+                        error: (err, st) =>
+                            _buildListThumbnailPlaceholder(context, file),
+                      );
                     },
                   ),
-                   const SizedBox(width: 8),
-                   Expanded(
-                     child: Column(
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                       mainAxisSize: MainAxisSize.min,
-                       children: [
-                         Text(
-                           file.fileName,
-                           maxLines: 1,
-                           overflow: TextOverflow.ellipsis,
-                           style: Theme.of(context)
-                               .textTheme
-                               .labelSmall
-                               ?.copyWith(
-                                 fontWeight: FontWeight.w500,
-                               ),
-                         ),
-                         const SizedBox(height: 2),
-                         Row(
-                           children: [
-                             Icon(
-                               Icons.sd_card_outlined,
-                               size: 10,
-                               color: Theme.of(context).colorScheme.onSurfaceVariant,
-                             ),
-                             const SizedBox(width: 2),
-                             Text(
-                               file.formattedSize,
-                               style: Theme.of(context)
-                                   .textTheme
-                                   .labelSmall
-                                   ?.copyWith(
-                                     color: Theme.of(context)
-                                         .colorScheme
-                                         .onSurfaceVariant,
-                                     fontSize: 10,
-                                   ),
-                             ),
-                             const SizedBox(width: 8),
-                             Icon(
-                               Icons.schedule_outlined,
-                               size: 10,
-                               color: Theme.of(context).colorScheme.onSurfaceVariant,
-                             ),
-                             const SizedBox(width: 2),
-                             Text(
-                               _getTimeAgo(context, file.dateOpened),
-                               style: Theme.of(context)
-                                   .textTheme
-                                   .labelSmall
-                                   ?.copyWith(
-                                     color: Theme.of(context)
-                                         .colorScheme
-                                         .onSurfaceVariant,
-                                     fontSize: 10,
-                                   ),
-                             ),
-                           ],
-                         ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          file.fileName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.sd_card_outlined,
+                              size: 10,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              file.formattedSize,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontSize: 10,
+                                  ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.schedule_outlined,
+                              size: 10,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              _getTimeAgo(context, file.dateOpened),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontSize: 10,
+                                  ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -1286,8 +1396,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
   /// Build rotated stacked thumbnail for library list items
   Widget _buildRotatedStackedThumbnail(Widget child) {
-    // Flat rotation to LEFT (negative angle) — no 3D layers, no shadows
-    const double rotationAngle = -0.15; // ≈ -8.6 degrees (left tilt)
     const double thumbnailWidth = 55.0;
     const double thumbnailHeight = 76.0;
 
@@ -1295,7 +1403,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       width: thumbnailWidth,
       height: thumbnailHeight,
       child: Transform.rotate(
-        angle: rotationAngle,
+        angle: _tiltAngleForDirection(context),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(6),
           child: child,
@@ -1408,8 +1516,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     }
     final encodedPath = Uri.encodeComponent(file.filePath);
     final encodedName = Uri.encodeComponent(file.fileName);
-    context.push(
-        '${RouteNames.viewer}?path=$encodedPath&name=$encodedName');
+    context.push('${RouteNames.viewer}?path=$encodedPath&name=$encodedName');
   }
 
   void _showFileActionBottomSheet(BuildContext context, RecentFile file) {
@@ -1425,12 +1532,16 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             : null,
         onConvert: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.homeConvertComingSoon)),
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.homeConvertComingSoon)),
           );
         },
         onUpload: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.homeFadDriveComingSoon)),
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.homeFadDriveComingSoon)),
           );
         },
         onFileInfo: () => _showFileInfoDialog(context, file),
@@ -1472,7 +1583,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       ),
     );
 
-    if (newName == null || newName.trim().isEmpty || newName.trim() == baseName) return;
+    if (newName == null ||
+        newName.trim().isEmpty ||
+        newName.trim() == baseName) {
+      return;
+    }
 
     final fullNewName = '${newName.trim()}$extension';
     final sourceFile = File(file.filePath);
@@ -1482,7 +1597,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     if (await File(newPath).exists()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.homeFileAlreadyExists)),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.homeFileAlreadyExists)),
         );
       }
       return;
@@ -1508,14 +1625,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.homeRenamedTo(fullNewName))),
+          SnackBar(
+              content: Text(
+                  AppLocalizations.of(context)!.homeRenamedTo(fullNewName))),
         );
       }
     } catch (e) {
       log.e('Failed to rename file', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.homeFailedRename)),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.homeFailedRename)),
         );
       }
     }
@@ -1532,46 +1652,54 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         ),
         child: SingleChildScrollView(
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(AppLocalizations.of(context)!.homeExport, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-            ),
-            _buildExportActionRow(
-              icon: Icons.download,
-              title: AppLocalizations.of(context)!.homeSaveToDownloads,
-              iconColor: Colors.green,
-              subtitle: AppLocalizations.of(context)!.homeSaveToDownloadsPath(file.fileName),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _saveToDownloads(file);
-              },
-            ),
-            _buildExportActionRow(
-              icon: Icons.folder_open,
-              title: AppLocalizations.of(context)!.homeChooseLocation,
-              iconColor: Colors.blue,
-              subtitle: AppLocalizations.of(context)!.homeChooseLocationDesc,
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _saveToCustomLocation(file);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(AppLocalizations.of(context)!.homeExport,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+              ),
+              _buildExportActionRow(
+                icon: Icons.download,
+                title: AppLocalizations.of(context)!.homeSaveToDownloads,
+                iconColor: Colors.green,
+                subtitle: AppLocalizations.of(context)!
+                    .homeSaveToDownloadsPath(file.fileName),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await _saveToDownloads(file);
+                },
+              ),
+              _buildExportActionRow(
+                icon: Icons.folder_open,
+                title: AppLocalizations.of(context)!.homeChooseLocation,
+                iconColor: Colors.blue,
+                subtitle: AppLocalizations.of(context)!.homeChooseLocationDesc,
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await _saveToCustomLocation(file);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -1595,7 +1723,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Theme.of(context).colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerLow
+                  .withValues(alpha: 0.5),
             ),
             child: Row(
               children: [
@@ -1612,13 +1743,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      )),
+                      Text(title,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  )),
                       if (subtitle != null)
-                        Text(subtitle, style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        )),
+                        Text(subtitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                )),
                     ],
                   ),
                 ),
@@ -1658,14 +1797,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       await source.copy(finalDest);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.homeSavedToDownloads(finalDest.split('/').last))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .homeSavedToDownloads(finalDest.split('/').last))),
         );
       }
     } catch (e) {
       log.e('Failed to export file', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.homeFailedExport)),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.homeFailedExport)),
         );
       }
     }
@@ -1691,19 +1833,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       await source.copy(dest);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.homeSavedTo(dest.split('/').last))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .homeSavedTo(dest.split('/').last))),
         );
       }
     } catch (e) {
       log.e('Failed to export file to custom location', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.homeFailedExport)),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.homeFailedExport)),
         );
       }
     }
   }
-
 
   void _copyExtractedText(RecentFile file) {
     final text = file.extractedText;
@@ -1711,7 +1855,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context)!.homeCopiedCharactersToClipboard(text.length)),
+        content: Text(AppLocalizations.of(context)!
+            .homeCopiedCharactersToClipboard(text.length)),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -1723,7 +1868,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.homeDeleteFile),
-        content: Text(AppLocalizations.of(context)!.homeDeleteFileConfirm(file.fileName)),
+        content: Text(
+            AppLocalizations.of(context)!.homeDeleteFileConfirm(file.fileName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -1735,7 +1881,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(AppLocalizations.of(context)!.homeFileMovedToTrash(file.fileName)),
+                  content: Text(AppLocalizations.of(context)!
+                      .homeFileMovedToTrash(file.fileName)),
                   duration: const Duration(seconds: 2),
                 ),
               );
@@ -1768,13 +1915,16 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                 const SizedBox(height: 8),
                 SelectableText('${l.homeFileLocation}: ${file.filePath}'),
                 const SizedBox(height: 8),
-                Text('${l.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}'),
+                Text(
+                    '${l.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}'),
                 const SizedBox(height: 8),
-                Text('${l.homeFileLastModified}: ${_formatDateTime(file.dateModified)}'),
+                Text(
+                    '${l.homeFileLastModified}: ${_formatDateTime(file.dateModified)}'),
                 if (file.isDeleted) ...[
                   const SizedBox(height: 8),
-                  Text(
-                      l.homeFileInTrashDetail(file.deletedAt != null ? _formatDateTime(file.deletedAt!) : l.homeUnknown)),
+                  Text(l.homeFileInTrashDetail(file.deletedAt != null
+                      ? _formatDateTime(file.deletedAt!)
+                      : l.homeUnknown)),
                 ],
               ],
             ),
@@ -1826,11 +1976,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     buffer.writeln('${l.homeFileType}: ${file.fileType.toUpperCase()}');
     buffer.writeln('${l.homeFileSize}: ${file.formattedSize}');
     buffer.writeln('${l.homeFileLocation}: ${file.filePath}');
-    buffer.writeln('${l.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}');
-    buffer.writeln('${l.homeFileLastModified}: ${_formatDateTime(file.dateModified)}');
+    buffer.writeln(
+        '${l.homeFileDateOpened}: ${_formatDateTime(file.dateOpened)}');
+    buffer.writeln(
+        '${l.homeFileLastModified}: ${_formatDateTime(file.dateModified)}');
     if (file.isDeleted) {
-      buffer.writeln(
-          l.homeFileInTrashDetail(file.deletedAt != null ? _formatDateTime(file.deletedAt!) : l.homeUnknown));
+      buffer.writeln(l.homeFileInTrashDetail(file.deletedAt != null
+          ? _formatDateTime(file.deletedAt!)
+          : l.homeUnknown));
     }
     return buffer.toString();
   }
@@ -1903,40 +2056,61 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         ),
         child: SingleChildScrollView(
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(AppLocalizations.of(ctx)!.librarySortBy, style: Theme.of(ctx).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-            ),
-            _buildSortOption(ctx, 'latest', Icons.schedule, AppLocalizations.of(ctx)!.librarySortLatest),
-            _buildSortOption(ctx, 'oldest', Icons.history, AppLocalizations.of(ctx)!.librarySortOldest),
-            _buildSortOption(ctx, 'largest', Icons.file_download, AppLocalizations.of(ctx)!.librarySortLargest),
-            _buildSortOption(ctx, 'smallest', Icons.file_upload, AppLocalizations.of(ctx)!.librarySortSmallest),
-            const SizedBox(height: 16),
-          ],
-        ),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(ctx)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    )),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(AppLocalizations.of(ctx)!.librarySortBy,
+                    style: Theme.of(ctx)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+              ),
+              _buildSortOption(ctx, 'latest', Icons.schedule,
+                  AppLocalizations.of(ctx)!.librarySortLatest),
+              _buildSortOption(ctx, 'oldest', Icons.history,
+                  AppLocalizations.of(ctx)!.librarySortOldest),
+              _buildSortOption(ctx, 'largest', Icons.file_download,
+                  AppLocalizations.of(ctx)!.librarySortLargest),
+              _buildSortOption(ctx, 'smallest', Icons.file_upload,
+                  AppLocalizations.of(ctx)!.librarySortSmallest),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSortOption(BuildContext context, String value, IconData icon, String label) {
+  Widget _buildSortOption(
+      BuildContext context, String value, IconData icon, String label) {
     final isActive = _sortBy == value;
     return ListTile(
-      leading: Icon(icon, size: 20, color: isActive ? Theme.of(context).colorScheme.primary : null),
-      title: Text(label, style: TextStyle(
-        fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-        color: isActive ? Theme.of(context).colorScheme.primary : null,
-      )),
-      trailing: isActive ? Icon(Icons.check, size: 18, color: Theme.of(context).colorScheme.primary) : null,
+      leading: Icon(icon,
+          size: 20,
+          color: isActive ? Theme.of(context).colorScheme.primary : null),
+      title: Text(label,
+          style: TextStyle(
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+            color: isActive ? Theme.of(context).colorScheme.primary : null,
+          )),
+      trailing: isActive
+          ? Icon(Icons.check,
+              size: 18, color: Theme.of(context).colorScheme.primary)
+          : null,
       onTap: () {
         setState(() => _sortBy = value);
         Navigator.pop(context);
@@ -2022,8 +2196,7 @@ class _ThumbnailPlaceholderState extends ConsumerState<_ThumbnailPlaceholder> {
                 Text(
                   widget.file.fileType.toUpperCase(),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],

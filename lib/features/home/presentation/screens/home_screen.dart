@@ -25,6 +25,10 @@ import 'package:fadocx/l10n/app_localizations.dart';
 
 final log = Logger();
 
+double _tiltAngleForDirection(BuildContext context) {
+  return Directionality.of(context) == ui.TextDirection.rtl ? 0.15 : -0.15;
+}
+
 /// Home screen - displays recent files and quick actions
 class HomeScreen extends ConsumerStatefulWidget {
   final bool tabMode;
@@ -1394,12 +1398,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   void _softDeleteRecentFile(RecentFile file) {
-    ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.homeDeleteFile),
         content: Text(
-            AppLocalizations.of(context)!.homeFileMovedToTrash(file.fileName)),
-        duration: const Duration(seconds: 2),
+            AppLocalizations.of(context)!.homeDeleteFileConfirm(file.fileName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(recentFilesMutatorProvider).softDeleteFile(file.id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!
+                      .homeFileMovedToTrash(file.fileName)),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(AppLocalizations.of(context)!.delete),
+          ),
+        ],
       ),
     );
   }
@@ -2048,7 +2073,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
     final Color borderColor =
         isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
-    const double rotationAngle = -0.15;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -2064,7 +2088,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         children: [
           // Thumbnail skeleton - single rotated rectangle matching the shape
           Transform.rotate(
-            angle: rotationAngle,
+            angle: _tiltAngleForDirection(context),
             child: Container(
               width: 70,
               height: 96,
@@ -2373,8 +2397,6 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
   }
 
   Widget _buildIsometricThumbnail(Widget child) {
-    // Flat rotation to LEFT (negative angle) — no 3D layers, no shadows
-    const double rotationAngle = -0.15; // ≈ -8.6 degrees (left tilt)
     const double thumbnailWidth = 70.0;
     const double thumbnailHeight = 96.0;
 
@@ -2382,7 +2404,7 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
       width: thumbnailWidth,
       height: thumbnailHeight,
       child: Transform.rotate(
-        angle: rotationAngle,
+        angle: _tiltAngleForDirection(context),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: child,
