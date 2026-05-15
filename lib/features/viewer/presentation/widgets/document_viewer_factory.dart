@@ -25,51 +25,82 @@ class DocumentViewerFactory {
     double sheetZoom = 1.0,
   }) {
     return switch (document.format.toUpperCase()) {
-      'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(document, onSheetSelectionChanged, sheetViewerKey, zoom: sheetZoom),
+      'XLSX' || 'XLS' || 'CSV' || 'ODS' => _buildSpreadsheetViewer(
+          document, onSheetSelectionChanged, sheetViewerKey,
+          zoom: sheetZoom),
       'PDF' => _buildPdfViewer(filePath, fileName, invertColors, textMode,
           onInvertToggle, onTextModeToggle, onTap, onPageChanged),
-      'PNG' || 'JPG' || 'JPEG' || 'GIF' || 'WEBP' || 'BMP' || 'SVG'
-      || 'ICO' || 'PSD' =>
+      'PNG' ||
+      'JPG' ||
+      'JPEG' ||
+      'GIF' ||
+      'WEBP' ||
+      'BMP' ||
+      'SVG' ||
+      'ICO' ||
+      'PSD' =>
         _buildImageViewer(filePath, onTap),
       'TXT' => _buildTextViewer(document, onTap: onTap),
       _ => _buildUnsupportedViewer(document.format),
     };
   }
 
-  static Widget _buildSpreadsheetViewer(ParsedDocumentEntity document, void Function(String?, String)? onSelectionChanged, Key? sheetViewerKey, {double zoom = 1.0}) {
+  static Widget _buildSpreadsheetViewer(ParsedDocumentEntity document,
+      void Function(String?, String)? onSelectionChanged, Key? sheetViewerKey,
+      {double zoom = 1.0}) {
     if (document.sheets.isEmpty) {
       return Center(
-        child: Builder(builder: (ctx) => Text(AppLocalizations.of(ctx)!.documentNoSheets(document.format))),
+        child: Builder(
+            builder: (ctx) => Text(
+                AppLocalizations.of(ctx)!.documentNoSheets(document.format))),
       );
     }
 
-    if (document.sheetCount == 1) {
-      return _buildSheetTable(document.sheets.first, onSelectionChanged, sheetViewerKey, zoom: zoom);
-    }
-
-    return DefaultTabController(
-      length: document.sheetCount,
-      child: Column(
-        children: [
-          TabBar(
-            isScrollable: true,
-            tabs:
-                document.sheets.map((sheet) => Tab(text: sheet.name)).toList(),
-          ),
-          Expanded(
-            child: TabBarView(
-              children: document.sheets.map((s) => _buildSheetTable(s, onSelectionChanged, sheetViewerKey, zoom: zoom)).toList(),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: document.sheetCount == 1
+          ? _buildSheetTable(
+              document.sheets.first,
+              onSelectionChanged,
+              sheetViewerKey,
+              zoom: zoom,
+            )
+          : DefaultTabController(
+              length: document.sheetCount,
+              child: Column(
+                children: [
+                  TabBar(
+                    isScrollable: true,
+                    tabs: document.sheets
+                        .map((sheet) => Tab(text: sheet.name))
+                        .toList(),
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: document.sheets
+                          .map((s) => _buildSheetTable(
+                                s,
+                                onSelectionChanged,
+                                sheetViewerKey,
+                                zoom: zoom,
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
     );
   }
 
-  static Widget _buildSheetTable(SheetEntity sheet, void Function(String?, String)? onSelectionChanged, Key? sheetViewerKey, {double zoom = 1.0}) {
+  static Widget _buildSheetTable(SheetEntity sheet,
+      void Function(String?, String)? onSelectionChanged, Key? sheetViewerKey,
+      {double zoom = 1.0}) {
     if (sheet.rows.isEmpty) {
       return Center(
-        child: Builder(builder: (ctx) => Text(AppLocalizations.of(ctx)!.sheetNoData(sheet.name))),
+        child: Builder(
+            builder: (ctx) =>
+                Text(AppLocalizations.of(ctx)!.sheetNoData(sheet.name))),
       );
     }
 
@@ -141,4 +172,3 @@ class DocumentViewerFactory {
     );
   }
 }
-

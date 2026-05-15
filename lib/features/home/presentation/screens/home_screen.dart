@@ -434,71 +434,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       child: widget.tabMode
           ? _buildBody()
           : Scaffold(
-        key: _scaffoldKey,
-        body: Stack(
-          children: [
-            FloatingDockScaffold(
-              appBarContent: _buildAppBarContent(context),
-              currentRoute: RouteNames.home,
-              body: _buildBody(),
-            ),
+              key: _scaffoldKey,
+              body: Stack(
+                children: [
+                  FloatingDockScaffold(
+                    appBarContent: _buildAppBarContent(context),
+                    currentRoute: RouteNames.home,
+                    body: _buildBody(),
+                  ),
 
-            // Scrim overlay with dimming and tap/swipe-to-close
-            Positioned.fill(
-              child: IgnorePointer(
-                ignoring: !_sidebarOpen,
-                child: AnimatedBuilder(
-                  animation: _sidebarController,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _sidebarController.value,
-                      child: GestureDetector(
-                        onTap: _closeSidebar,
-                        onHorizontalDragUpdate: (details) =>
-                            _handleSidebarDragUpdate(details, context),
-                        onHorizontalDragEnd: _handleSidebarDragEnd,
-                        behavior: HitTestBehavior.opaque,
-                        child: Container(
-                          color: Colors.black.withValues(alpha: 0.45),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-
-            // Sidebar with slide-in animation and drag support
-            AnimatedBuilder(
-              animation: _sidebarController,
-              builder: (context, child) {
-                final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
-                return Positioned(
-                  top: _kSidebarTopOffset - _kSidebarRadius,
-                  bottom: _kSidebarBottomOffset - _kSidebarRadius,
-                  left: isRTL ? null : 0,
-                  right: isRTL ? 0 : null,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: isRTL
-                          ? const Offset(1.0, 0.0)
-                          : const Offset(-1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: _sidebarController,
-                      curve: Curves.easeOutCubic,
-                    )),
+                  // Scrim overlay with dimming and tap/swipe-to-close
+                  Positioned.fill(
                     child: IgnorePointer(
                       ignoring: !_sidebarOpen,
-                      child: _buildSidebarDrawer(context, isDark),
+                      child: AnimatedBuilder(
+                        animation: _sidebarController,
+                        builder: (context, child) {
+                          return Opacity(
+                            opacity: _sidebarController.value,
+                            child: GestureDetector(
+                              onTap: _closeSidebar,
+                              onHorizontalDragUpdate: (details) =>
+                                  _handleSidebarDragUpdate(details, context),
+                              onHorizontalDragEnd: _handleSidebarDragEnd,
+                              behavior: HitTestBehavior.opaque,
+                              child: Container(
+                                color: Colors.black.withValues(alpha: 0.45),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                );
-              },
+
+                  // Sidebar with slide-in animation and drag support
+                  AnimatedBuilder(
+                    animation: _sidebarController,
+                    builder: (context, child) {
+                      final isRTL =
+                          Directionality.of(context) == ui.TextDirection.rtl;
+                      return Positioned(
+                        top: _kSidebarTopOffset - _kSidebarRadius,
+                        bottom: _kSidebarBottomOffset - _kSidebarRadius,
+                        left: isRTL ? null : 0,
+                        right: isRTL ? 0 : null,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: isRTL
+                                ? const Offset(1.0, 0.0)
+                                : const Offset(-1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(CurvedAnimation(
+                            parent: _sidebarController,
+                            curve: Curves.easeOutCubic,
+                          )),
+                          child: IgnorePointer(
+                            ignoring: !_sidebarOpen,
+                            child: _buildSidebarDrawer(context, isDark),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -610,38 +611,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: _buildActionCard(
-                      context,
-                      title: AppLocalizations.of(context)!.homeScanDocument,
-                      description:
-                          AppLocalizations.of(context)!.homeScanDocumentDesc,
-                      icon: Icons.document_scanner,
-                      cardType: 'scan',
-                      onTap: () {
-                        log.i('Navigating to scanner');
-                        context.push(RouteNames.scanner);
-                      },
+                  children: [
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
+                        title: AppLocalizations.of(context)!.homeScanDocument,
+                        description:
+                            AppLocalizations.of(context)!.homeScanDocumentDesc,
+                        icon: Icons.document_scanner,
+                        cardType: 'scan',
+                        onTap: () {
+                          log.i('Navigating to scanner');
+                          context.push(RouteNames.scanner);
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildActionCard(
-                      context,
-                      title: AppLocalizations.of(context)!.homeImportDocument,
-                      description:
-                          AppLocalizations.of(context)!.homeImportDocumentDesc,
-                      icon: Icons.folder_open,
-                      cardType: 'import',
-                      onTap: () {
-                        log.i('Navigating to browse');
-                        context.push(RouteNames.browse);
-                      },
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
+                        title: AppLocalizations.of(context)!.homeImportDocument,
+                        description: AppLocalizations.of(context)!
+                            .homeImportDocumentDesc,
+                        icon: Icons.folder_open,
+                        cardType: 'import',
+                        onTap: () {
+                          log.i('Navigating to browse');
+                          context.push(RouteNames.browse);
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1590,7 +1591,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       },
     );
 
-    if (newName == null || newName.trim().isEmpty || newName.trim() == baseName) {
+    if (newName == null ||
+        newName.trim().isEmpty ||
+        newName.trim() == baseName) {
       return;
     }
 
@@ -2505,6 +2508,8 @@ class _ModernActionCardState extends State<_ModernActionCard>
   @override
   Widget build(BuildContext context) {
     final isScanning = widget.cardType == 'scan';
+    final textDirection = Directionality.of(context);
+    final isRTL = textDirection == ui.TextDirection.rtl;
 
     // Use theme colors with better contrast and visual appeal
     final gradientColors = isScanning
@@ -2550,8 +2555,8 @@ class _ModernActionCardState extends State<_ModernActionCard>
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: AlignmentDirectional.topStart,
+                    end: AlignmentDirectional.bottomEnd,
                     colors: gradientColors,
                   ),
                   boxShadow: [
@@ -2566,7 +2571,7 @@ class _ModernActionCardState extends State<_ModernActionCard>
                   borderRadius: BorderRadius.circular(16),
                   child: Stack(
                     children: [
-                      // Animation background (bottom layer) - small black section on right
+                      // Animation background (bottom layer) - small black section on trailing side
                       if (isScanning)
                         Positioned.fill(
                           child: IgnorePointer(
@@ -2574,7 +2579,7 @@ class _ModernActionCardState extends State<_ModernActionCard>
                             child: CustomPaint(
                               painter: _BinaryDigitsPainter(
                                 progress: _binaryAnimation.value,
-                                textDirection: Directionality.of(context),
+                                textDirection: textDirection,
                               ),
                             ),
                           ),
@@ -2587,78 +2592,75 @@ class _ModernActionCardState extends State<_ModernActionCard>
                               painter: _IconAnimationPainter(
                                 progress: _binaryAnimation.value,
                                 preserveIdentity: true,
-                                textDirection: Directionality.of(context),
+                                textDirection: textDirection,
                               ),
                             ),
                           ),
                         ),
 
-                      // Main content (top layer) - left aligned, overlaid on animation
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 12, 56, 12),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            12, 12, 56, 12),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color:
-                                      Colors.white.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  widget.icon,
-                                  size: 20,
-                                  color: Colors.white,
-                                ),
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              const SizedBox(height: 8),
-                              // Title — allow wrap, 2 lines max
-                              Text(
-                                widget.title,
-                                textAlign: TextAlign.left,
-                                softWrap: true,
-                                maxLines: 2,
-                                overflow: TextOverflow.visible,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                      height: 1.2,
-                                    ),
+                              child: Icon(
+                                widget.icon,
+                                size: 20,
+                                color: Colors.white,
                               ),
-                              const SizedBox(height: 4),
-                              // Description — allow full wrap
-                              Text(
-                                widget.description,
-                                textAlign: TextAlign.left,
-                                softWrap: true,
-                                maxLines: 3,
-                                overflow: TextOverflow.visible,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                      color: Colors.white
-                                          .withValues(alpha: 0.85),
-                                      fontSize: 11,
-                                      height: 1.3,
-                                    ),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.title,
+                              textAlign: TextAlign.start,
+                              softWrap: true,
+                              maxLines: 2,
+                              overflow: TextOverflow.visible,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    height: 1.2,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.description,
+                              textAlign: TextAlign.start,
+                              softWrap: true,
+                              maxLines: 3,
+                              overflow: TextOverflow.visible,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    fontSize: 11,
+                                    height: 1.3,
+                                  ),
+                            ),
+                          ],
                         ),
+                      ),
 
-                      // Chevron arrow (top right)
-                      Positioned(
+                      PositionedDirectional(
                         top: 8,
-                        right: 10,
+                        end: 10,
                         child: Icon(
-                          Icons.chevron_right,
+                          isRTL
+                              ? _kChevronLeftNoMirror
+                              : _kChevronRightNoMirror,
                           size: 20,
                           color: Colors.white.withValues(alpha: 0.7),
                         ),
@@ -2675,7 +2677,7 @@ class _ModernActionCardState extends State<_ModernActionCard>
   }
 }
 
-// Binary digits painter for extraction card - shows animated 0s and 1s on pitch black background (diagonal right)
+// Binary digits painter for extraction card - shows animated 0s and 1s on pitch black trailing wedge.
 class _BinaryDigitsPainter extends CustomPainter {
   final double progress;
   final ui.TextDirection textDirection;
@@ -2687,13 +2689,14 @@ class _BinaryDigitsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Diagonal cut path - small black area (top-right to bottom-left)
+    final isRTL = textDirection == ui.TextDirection.rtl;
+    double x(double logicalX) => isRTL ? size.width - logicalX : logicalX;
+
     final diagRect = Path();
-    diagRect.moveTo(size.width, 0);
-    diagRect.lineTo(size.width * 0.85, 0); // Consistent with import card
-    diagRect.lineTo(
-        size.width * 0.65, size.height); // Consistent with import card
-    diagRect.lineTo(size.width, size.height);
+    diagRect.moveTo(x(size.width), 0);
+    diagRect.lineTo(x(size.width * 0.85), 0);
+    diagRect.lineTo(x(size.width * 0.65), size.height);
+    diagRect.lineTo(x(size.width), size.height);
     diagRect.close();
 
     final blackPaint = Paint()
@@ -2740,7 +2743,7 @@ class _BinaryDigitsPainter extends CustomPainter {
         // Y position moves downward smoothly with wrapping
         double yPos = (row * spacing + colOffset + scrollOffset) % totalHeight;
 
-        final xPos = (size.width * 0.82) + (col * colWidth);
+        final xPos = x((size.width * 0.82) + (col * colWidth));
 
         // Fade in/out at edges for seamless effect
         final distanceFromCenter = (yPos - size.height / 2).abs();
@@ -2766,10 +2769,11 @@ class _BinaryDigitsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BinaryDigitsPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.progress != progress ||
+      oldDelegate.textDirection != textDirection;
 }
 
-// Icon animation painter for import card - shows animated Material document icons on black background (diagonal right)
+// Icon animation painter for import card - shows animated Material document icons on black trailing wedge.
 class _IconAnimationPainter extends CustomPainter {
   final double progress;
   final bool preserveIdentity;
@@ -2783,12 +2787,14 @@ class _IconAnimationPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Diagonal cut path - small black area (top-right to bottom-left)
+    final isRTL = textDirection == ui.TextDirection.rtl;
+    double x(double logicalX) => isRTL ? size.width - logicalX : logicalX;
+
     final diagRect = Path();
-    diagRect.moveTo(size.width, 0);
-    diagRect.lineTo(size.width * 0.85, 0); // Even smaller
-    diagRect.lineTo(size.width * 0.65, size.height); // Much smaller
-    diagRect.lineTo(size.width, size.height);
+    diagRect.moveTo(x(size.width), 0);
+    diagRect.lineTo(x(size.width * 0.85), 0);
+    diagRect.lineTo(x(size.width * 0.65), size.height);
+    diagRect.lineTo(x(size.width), size.height);
     diagRect.close();
 
     final blackPaint = Paint()
@@ -2837,7 +2843,7 @@ class _IconAnimationPainter extends CustomPainter {
             (i * iconSpacing + colOffset + scrollOffset) % totalHeight;
         if (yPos < -iconSpacing) yPos += totalHeight;
 
-        final xPos = (size.width * 0.80) + (col * colWidth);
+        final xPos = x((size.width * 0.80) + (col * colWidth));
 
         // Fade in/out at edges for seamless effect
         final distanceFromCenter = (yPos - size.height / 2).abs();
@@ -2886,7 +2892,8 @@ class _IconAnimationPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_IconAnimationPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.progress != progress ||
+      oldDelegate.textDirection != textDirection;
 }
 
 class _HomeDrawerContent extends ConsumerWidget {
@@ -2899,6 +2906,16 @@ class _HomeDrawerContent extends ConsumerWidget {
     return HomeDrawer(onClose: onClose);
   }
 }
+
+const IconData _kChevronLeftNoMirror = IconData(
+  0xe15e,
+  fontFamily: 'MaterialIcons',
+);
+
+const IconData _kChevronRightNoMirror = IconData(
+  0xe15f,
+  fontFamily: 'MaterialIcons',
+);
 
 class _InvertedCornerSidebarPainter extends CustomPainter {
   final Color color;
@@ -2936,9 +2953,12 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
       // Inner body edge: x=sidebarWidth in LTR, x=w-sidebarWidth in RTL
       path.moveTo(_x(0, size), 0);
       path.cubicTo(
-        _x(0, size), radius * 0.4,
-        _x(radius * 0.1, size), radius,
-        _x(radius, size), radius,
+        _x(0, size),
+        radius * 0.4,
+        _x(radius * 0.1, size),
+        radius,
+        _x(radius, size),
+        radius,
       );
       path.lineTo(_x(sidebarWidth - 16, size), radius);
       path.arcToPoint(
@@ -2954,9 +2974,12 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
       );
       path.lineTo(_x(radius, size), size.height - radius);
       path.cubicTo(
-        _x(radius * 0.1, size), size.height - radius,
-        _x(0, size), size.height - radius * 0.4,
-        _x(0, size), size.height,
+        _x(radius * 0.1, size),
+        size.height - radius,
+        _x(0, size),
+        size.height - radius * 0.4,
+        _x(0, size),
+        size.height,
       );
       path.lineTo(_x(0, size), 0);
       path.close();
@@ -3000,9 +3023,12 @@ class _SidebarClipper extends CustomClipper<Path> {
 
     path.moveTo(_x(0, size), 0);
     path.cubicTo(
-      _x(0, size), radius * 0.4,
-      _x(radius * 0.1, size), radius,
-      _x(radius, size), radius,
+      _x(0, size),
+      radius * 0.4,
+      _x(radius * 0.1, size),
+      radius,
+      _x(radius, size),
+      radius,
     );
     path.lineTo(_x(sidebarWidth - 16, size), radius);
     path.arcToPoint(
@@ -3018,9 +3044,12 @@ class _SidebarClipper extends CustomClipper<Path> {
     );
     path.lineTo(_x(radius, size), size.height - radius);
     path.cubicTo(
-      _x(radius * 0.1, size), size.height - radius,
-      _x(0, size), size.height - radius * 0.4,
-      _x(0, size), size.height,
+      _x(radius * 0.1, size),
+      size.height - radius,
+      _x(0, size),
+      size.height - radius * 0.4,
+      _x(0, size),
+      size.height,
     );
     path.lineTo(_x(0, size), 0);
     path.close();
