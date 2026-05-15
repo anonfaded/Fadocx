@@ -119,6 +119,7 @@
   "categoryScans": "Escaneos",
   "categoryOther": "Otro",
   "categoryPresentations": "Presentaciones",
+  "updatesAvailableTitle": "{count, plural, =1{Actualización disponible} other{Actualizaciones disponibles}}",
   "supportDevelopment": "Apoyar el desarrollo",
   "visitPatreon": "Visitar Patreon",
   "copyLink": "Copiar enlace",

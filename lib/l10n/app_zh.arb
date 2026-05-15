@@ -119,6 +119,7 @@
   "categoryScans": "扫描",
   "categoryOther": "其他",
   "categoryPresentations": "演示文稿",
+  "updatesAvailableTitle": "{count, plural, =1{可用更新} other{可用更新}}",
   "supportDevelopment": "支持开发",
   "visitPatreon": "访问 Patreon",
   "copyLink": "复制链接",

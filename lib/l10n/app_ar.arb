@@ -119,6 +119,7 @@
   "categoryScans": "مسحات ضوئية",
   "categoryOther": "أخرى",
   "categoryPresentations": "عروض تقديمية",
+  "updatesAvailableTitle": "{count, plural, =1{التحديث المتاح} other{التحديثات المتاحة}}",
   "supportDevelopment": "ادعم التطوير",
   "visitPatreon": "زيارة Patreon",
   "copyLink": "نسخ الرابط",

@@ -388,6 +388,7 @@ class _MainShellState extends ConsumerState<MainShell>
 
   Widget _buildTabBody() {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity == null) return;
         final isRTL = Directionality.of(context) == TextDirection.rtl;
@@ -405,13 +406,15 @@ class _MainShellState extends ConsumerState<MainShell>
           }
         }
       },
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        child: switch (_currentPage) {
-          0 => HomeScreen(key: const ValueKey(0), tabMode: true),
-          1 => DocumentsScreen(key: const ValueKey(1), tabMode: true),
-          _ => SettingsScreen(key: const ValueKey(2), tabMode: true),
-        },
+      child: SizedBox.expand(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: switch (_currentPage) {
+            0 => HomeScreen(key: const ValueKey(0), tabMode: true),
+            1 => DocumentsScreen(key: const ValueKey(1), tabMode: true),
+            _ => SettingsScreen(key: const ValueKey(2), tabMode: true),
+          },
+        ),
       ),
     );
   }

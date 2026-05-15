@@ -40,6 +40,22 @@ Replace ALL hardcoded English strings across the app with AppLocalizations keys,
 - Settings updates section now uses descriptive subtitles, and the replay onboarding toggle moved into About with consistent icon/background styling.
 - Added `settingsAutoUpdateCheckDesc` across all supported locales and regenerated Flutter localizations successfully.
 - Settings screen now uses distinct gray layers for section groups and row cards so the hierarchy reads better against the page background.
+- Drawer update cards and drawer action cards now share the same neutral gray card language as Settings.
+- Scan action card now animates individual binary digits instead of whole synchronized columns, and drawer main actions now share one connected container shell.
+- Drawer rows now use clipped Material cards for rounded ripples, and the Patreon card is back on the gold treatment with wrapped title/subtitle text.
+- Drawer Whats New stays in the connected group; Patreon keeps the same row format with gold styling and `drawerUnlockBenefits` subtitle.
+- Restored the connected drawer grouping; only row styling changed, not the layout structure.
+- Patreon now uses the same card shell color as Settings; only the accent colors remain gold.
+- Drawer row surfaces now match the Settings card palette: one outer group shell, flat rows inside, and gold Patreon shimmer kept separate.
+- Home tab now expands to full screen in tab mode even when recent files are hidden, so the swipe-to-open drawer still hits the full gesture area.
+- Patreon drawer card now uses the larger title style again and its trailing chevron matches the drawer row arrow treatment more closely.
+- Main shell tab swipe detector is now opaque and wrapped in a full-size box so Home tab swipes still work when the recent-files section is hidden.
+- Patreon drawer card spacing now matches the other drawer rows by removing the extra outer wrapper padding and normalizing its internal padding.
+- Update available banner now has a localized "Updates Available" section title and uses the same grouped card language as the rest of the drawer.
+- Light-mode contrast for update cards is lowered so the banner reads clearly without washing out the drawer surface.
+- Update banner subtitle now shows current version in red, separator in neutral gray, and latest version in green.
+- Update banner title is plural-aware so it switches to singular when only one update card is present.
+- Update banner rows were flattened so the section uses one outer shell and plain rows inside instead of nested cards.
 
 ## Naming Convention for .arb keys
 - Common/shared: camelCase (e.g., `cancel`, `delete`, `copy`)

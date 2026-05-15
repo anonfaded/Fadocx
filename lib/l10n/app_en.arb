@@ -119,6 +119,7 @@
   "categoryScans": "Scans",
   "categoryOther": "Other",
   "categoryPresentations": "Presentations",
+  "updatesAvailableTitle": "{count, plural, =1{Update Available} other{Updates Available}}",
   "supportDevelopment": "Support Development",
   "visitPatreon": "Visit Patreon",
   "copyLink": "Copy Link",

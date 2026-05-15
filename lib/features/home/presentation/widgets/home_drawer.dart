@@ -67,7 +67,7 @@ class _AnimatedHamburgerIconState extends State<AnimatedHamburgerIcon>
   Widget build(BuildContext context) {
     final iconColor = widget.color ?? Theme.of(context).colorScheme.onSurface;
     final isRTL = Directionality.of(context) == TextDirection.rtl;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -134,7 +134,8 @@ class HamburgerPainter extends CustomPainter {
       // In RTL, we want it to grow leftward: right point stays at size.width, left point moves
       canvas.drawLine(
         Offset(size.width, lineSpacing + yOffset),
-        Offset(size.width * (1.0 - bottomLineFactor * 1.07), lineSpacing + yOffset),
+        Offset(size.width * (1.0 - bottomLineFactor * 1.07),
+            lineSpacing + yOffset),
         paint,
       );
     } else {
@@ -165,7 +166,7 @@ class HamburgerPainter extends CustomPainter {
 /// Side drawer widget
 class HomeDrawer extends ConsumerStatefulWidget {
   final VoidCallback? onClose;
-  
+
   const HomeDrawer({super.key, this.onClose});
 
   @override
@@ -175,6 +176,7 @@ class HomeDrawer extends ConsumerStatefulWidget {
 class _HomeDrawerState extends ConsumerState<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         // Header
@@ -217,27 +219,34 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             children: [
-              // What's New
-              _buildDrawerCard(
-                context,
-                icon: Icons.auto_awesome,
-                title: AppLocalizations.of(context)!.drawerWhatNew,
-                onTap: () {
-                  widget.onClose?.call();
-                  context.push(RouteNames.whatsNew);
-                },
-              ),
-
               // Update available banner (auto-hides when no update)
               const DrawerUpdateBanner(),
               const SizedBox(height: 12),
 
-              // Recent Files visibility toggle
-              _buildRecentFilesToggle(context),
-
-              // Donation card with gold shimmer
-              const SizedBox(height: 8),
-              _buildDonateCard(context),
+              // Main drawer group
+              Material(
+                color: colorScheme.surfaceContainerLow.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(12),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    _buildDrawerCard(
+                      context,
+                      icon: Icons.auto_awesome,
+                      title: AppLocalizations.of(context)!.drawerWhatNew,
+                      onTap: () {
+                        widget.onClose?.call();
+                        context.push(RouteNames.whatsNew);
+                      },
+                    ),
+                    _drawerDivider(context),
+                    _buildRecentFilesToggle(context),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              _GoldDonateCard(onTap: () => _showPatreonSheet(context)),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -263,15 +272,17 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                         children: [
                           TextSpan(
                             text: 'fadseclab.com',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.redAccent,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.redAccent,
+                                    ),
                           ),
                           TextSpan(
                             text: ' 2024 \u2013 2026',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.redAccent,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.redAccent,
+                                    ),
                           ),
                         ],
                       ),
@@ -306,113 +317,136 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
     BuildContext context, {
     required IconData icon,
     required String title,
+    String? subtitle,
     required VoidCallback onTap,
+    Color? iconColor,
+    Color? titleColor,
+    Color? subtitleColor,
+    Color? trailingColor,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(10),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
+              child: Icon(
+                icon,
                 size: 20,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: iconColor ?? colorScheme.primary,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: titleColor,
+                        ),
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                subtitleColor ?? colorScheme.onSurfaceVariant,
+                          ),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: trailingColor ?? colorScheme.onSurfaceVariant,
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildRecentFilesToggle(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Consumer(
       builder: (context, ref, _) {
         final showRecentFiles = ref.watch(showRecentFilesProvider);
 
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              ref.read(showRecentFilesProvider.notifier).toggle();
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      showRecentFiles ? Icons.visibility : Icons.visibility_off,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+        return InkWell(
+          onTap: () {
+            ref.read(showRecentFilesProvider.notifier).toggle();
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color:
+                        colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.drawerRecentFiles,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        Text(
-                          showRecentFiles ? AppLocalizations.of(context)!.drawerVisible : AppLocalizations.of(context)!.drawerHidden,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ),
+                  child: Icon(
+                    showRecentFiles ? Icons.visibility : Icons.visibility_off,
+                    size: 20,
+                    color: colorScheme.primary,
                   ),
-                  SizedBox(
-                    width: 48,
-                    child: Switch(
-                      value: showRecentFiles,
-                      onChanged: (value) {
-                        ref.read(showRecentFilesProvider.notifier).setShowRecentFiles(value);
-                      },
-                    ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.drawerRecentFiles,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        softWrap: true,
+                      ),
+                      Text(
+                        showRecentFiles
+                            ? AppLocalizations.of(context)!.drawerVisible
+                            : AppLocalizations.of(context)!.drawerHidden,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                        softWrap: true,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                SizedBox(
+                  width: 48,
+                  child: Switch(
+                    value: showRecentFiles,
+                    onChanged: (value) {
+                      ref
+                          .read(showRecentFilesProvider.notifier)
+                          .setShowRecentFiles(value);
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -420,8 +454,13 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
     );
   }
 
-  Widget _buildDonateCard(BuildContext context) {
-    return _GoldDonateCard(onTap: () => _showPatreonSheet(context));
+  Widget _drawerDivider(BuildContext context) {
+    return Divider(
+      height: 1,
+      indent: 56,
+      color:
+          Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.48),
+    );
   }
 
   void _showPatreonSheet(BuildContext context) {
@@ -463,7 +502,8 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
               child: Column(
                 children: [
-                  const Icon(SimpleIcons.patreon, size: 40, color: Color(0xFFD4A017)),
+                  const Icon(SimpleIcons.patreon,
+                      size: 40, color: Color(0xFFD4A017)),
                   const SizedBox(height: 12),
                   Text(
                     AppLocalizations.of(context)!.supportDevelopment,
@@ -504,7 +544,9 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                 Clipboard.setData(ClipboardData(text: patreonUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
+                  SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context)!.copiedToClipboard)),
                 );
               },
             ),
@@ -522,9 +564,8 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
     required VoidCallback onTap,
   }) {
     final brightness = Theme.of(context).brightness;
-    final bgColor = brightness == Brightness.dark
-        ? const Color(0xFF2C2C2E)
-        : Colors.white;
+    final bgColor =
+        brightness == Brightness.dark ? const Color(0xFF2C2C2E) : Colors.white;
     final textColor = Theme.of(context).colorScheme.primary;
 
     return Padding(
@@ -631,7 +672,9 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                 Clipboard.setData(ClipboardData(text: discordUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
+                  SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context)!.copiedToClipboard)),
                 );
               },
             ),
@@ -712,7 +755,9 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                 Clipboard.setData(ClipboardData(text: fadsecLabUrl));
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
+                  SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context)!.copiedToClipboard)),
                 );
               },
             ),
@@ -765,97 +810,100 @@ class _GoldDonateCardState extends State<_GoldDonateCard>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const goldColor = Color(0xFFD4A017);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return GestureDetector(
-            onTap: () => widget.onTap(),
-            child: ShaderMask(
-              shaderCallback: (bounds) {
-                const cycle = 300.0;
-                final offset = (_controller.value * cycle) % cycle;
-                return const LinearGradient(
-                  tileMode: TileMode.repeated,
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFFC9A214),
-                    Color(0xFFDAB125),
-                    Color(0xFFF5D547),
-                    Color(0xFFFFE873),
-                    Color(0xFFF5D547),
-                    Color(0xFFDAB125),
-                    Color(0xFFC9A214),
-                  ],
-                  stops: [0.00, 0.18, 0.36, 0.50, 0.64, 0.82, 1.00],
-                ).createShader(Rect.fromLTWH(
-                  bounds.left - offset,
-                  bounds.top,
-                  cycle,
-                  bounds.height,
-                ));
-              },
-              blendMode: BlendMode.srcIn,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: goldColor.withValues(alpha: isDark ? 0.1 : 0.07),
-                  border: Border.all(
-                    color: goldColor.withValues(alpha: isDark ? 0.25 : 0.2),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: goldColor.withValues(alpha: isDark ? 0.18 : 0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        SimpleIcons.patreon,
-                        size: 16,
-                        color: Color(0xFFD4A017),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.supportDevelopment,
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: goldColor,
-                                ),
-                          ),
-                          Text(
-                            AppLocalizations.of(context)!.drawerUnlockBenefits,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: goldColor.withValues(alpha: 0.7),
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 18,
-                      color: goldColor.withValues(alpha: 0.38),
-                    ),
-                  ],
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return GestureDetector(
+          onTap: () => widget.onTap(),
+          child: ShaderMask(
+            shaderCallback: (bounds) {
+              const cycle = 300.0;
+              final offset = (_controller.value * cycle) % cycle;
+              return const LinearGradient(
+                tileMode: TileMode.repeated,
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0xFFC9A214),
+                  Color(0xFFDAB125),
+                  Color(0xFFF5D547),
+                  Color(0xFFFFE873),
+                  Color(0xFFF5D547),
+                  Color(0xFFDAB125),
+                  Color(0xFFC9A214),
+                ],
+                stops: [0.00, 0.18, 0.36, 0.50, 0.64, 0.82, 1.00],
+              ).createShader(Rect.fromLTWH(
+                bounds.left - offset,
+                bounds.top,
+                cycle,
+                bounds.height,
+              ));
+            },
+            blendMode: BlendMode.srcIn,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: goldColor.withValues(alpha: isDark ? 0.1 : 0.16),
+                border: Border.all(
+                  color: goldColor.withValues(alpha: isDark ? 0.25 : 0.32),
                 ),
               ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: goldColor.withValues(alpha: isDark ? 0.18 : 0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      SimpleIcons.patreon,
+                      size: 18,
+                      color: Color(0xFFD4A017),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.supportDevelopment,
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: goldColor,
+                                  ),
+                          softWrap: true,
+                          overflow: TextOverflow.visible,
+                        ),
+                        Text(
+                          AppLocalizations.of(context)!.drawerUnlockBenefits,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: goldColor.withValues(alpha: 0.7),
+                                  ),
+                          softWrap: true,
+                          overflow: TextOverflow.visible,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
