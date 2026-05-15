@@ -2824,50 +2824,46 @@ class _BinaryDigitsPainter extends CustomPainter {
 
     final textPainter = TextPainter(textDirection: textDirection);
 
-    const rows = 16;
+    const rows = 18;
     const cols = 2;
-    const rowSpacing = 13.0;
-    const colSpacing = 14.0;
-    const leftBase = 0.74;
+    const rowSpacing = 12.5;
+    const colSpacing = 12.0;
     const topBase = 10.0;
-    const switchSpeed = 1.8;
+    const switchSpeed = 10.0;
     const digits = ['0', '1'];
 
     int cellSeed(int row, int col) => (row * 31) + (col * 17);
     double cellPhase(int row, int col) {
       final seed = cellSeed(row, col);
-      return ((seed % 100) / 100.0) * 0.85;
+      return ((seed % 100) / 100.0);
     }
-
     String digitFor(int row, int col, int step) {
       return digits[(row + col + step + cellSeed(row, col)) % 2];
     }
 
-    final cycle = progress * switchSpeed;
+    final scrollOffset = progress * (rows * rowSpacing);
 
-    for (int row = 0; row < rows; row++) {
-      for (int col = 0; col < cols; col++) {
-        final phase = cellPhase(row, col);
-        final cellProgress = cycle + phase;
-        final swapStep = cellProgress.floor();
-        final swapT = cellProgress - swapStep.toDouble();
-        final nextStep = swapStep + 1;
-        final currentDigit = digitFor(row, col, swapStep);
-        final nextDigit = digitFor(row, col, nextStep);
+    for (int col = 0; col < cols; col++) {
+      final colOffset = col == 0 ? 0.0 : rowSpacing / 2;
+      for (int row = 0; row < rows; row++) {
+        final rawY = (row * rowSpacing + colOffset + scrollOffset) % (rows * rowSpacing);
+        final yPos = topBase + rawY;
 
-        final xPos = x((size.width * leftBase) + (col * colSpacing));
-        final yPos = topBase + (row * rowSpacing);
+        final cellProgress = (progress * switchSpeed) + cellPhase(row, col);
+        final currentDigit = digitFor(row, col, cellProgress.floor());
 
-        final fade = ((yPos - size.height / 2).abs() / (size.height / 2))
-            .clamp(0.0, 1.0);
-        final baseOpacity = (1 - fade).clamp(0.0, 1.0);
+        final xPos = x((size.width * 0.86) + (col * colSpacing));
 
-        void paintDigit(String digit, double localOffset, double opacity) {
-          if (opacity <= 0) return;
+        final distanceFromCenter = (yPos - size.height / 2).abs();
+        final opacity =
+            (1 - (distanceFromCenter / (size.height / 2))).clamp(0.0, 1.0);
+
+        void paintDigit(String digit, double alpha) {
+          if (alpha <= 0) return;
           textPainter.text = TextSpan(
             text: digit,
             style: textStyle.copyWith(
-              color: Colors.white.withValues(alpha: opacity * 0.78),
+              color: Colors.white.withValues(alpha: alpha * 0.82),
             ),
           );
           textPainter.layout();
@@ -2875,14 +2871,12 @@ class _BinaryDigitsPainter extends CustomPainter {
             canvas,
             Offset(
               xPos - textPainter.width / 2,
-              yPos - textPainter.height / 2 + localOffset,
+              yPos - textPainter.height / 2,
             ),
           );
         }
 
-        final move = Curves.easeInOut.transform(swapT);
-        paintDigit(currentDigit, -move * 2.5, baseOpacity * (1 - move));
-        paintDigit(nextDigit, (1 - move) * 2.5, baseOpacity * move);
+        paintDigit(currentDigit, opacity);
       }
     }
 
