@@ -418,6 +418,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
           .toList();
     }
 
+    // Filter by category
+    if (_selectedCategory != 'all') {
+      final categoryFileTypes = _getFileTypesForCategory(_selectedCategory);
+      filteredFiles = filteredFiles
+          .where((f) => categoryFileTypes.contains(f.fileType.toLowerCase()))
+          .toList();
+    }
+
     // Sort files
     switch (_sortBy) {
       case 'latest':
@@ -764,6 +772,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         return Icons.table_chart;
       case 'presentations':
         return Icons.slideshow;
+      case 'images':
+        return Icons.image;
+      case 'video':
+        return Icons.videocam;
+      case 'audio':
+        return Icons.music_note;
       case 'code':
         return Icons.code;
       case 'scans':
@@ -784,6 +798,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         return l.categorySheets;
       case 'presentations':
         return l.categorySlides;
+      case 'images':
+        return 'Images';
+      case 'video':
+        return 'Videos';
+      case 'audio':
+        return 'Audio';
       case 'code':
         return l.categoryCode;
       case 'scans':
@@ -802,6 +822,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       'documents': 0,
       'spreadsheets': 0,
       'presentations': 0,
+      'images': 0,
+      'video': 0,
+      'audio': 0,
       'code': 0,
       'scans': 0,
       'other': 0,
@@ -821,6 +844,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       'documents',
       'spreadsheets',
       'presentations',
+      'images',
+      'video',
+      'audio',
       'code',
       'scans',
       'other',
@@ -1432,6 +1458,33 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       case 'pptx':
       case 'odp':
         return 'presentations';
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+      case 'bmp':
+        return 'images';
+      case 'mp4':
+      case 'mkv':
+      case 'avi':
+      case 'mov':
+      case 'webm':
+      case 'flv':
+      case 'wmv':
+      case 'mxf':
+      case '3gp':
+        return 'video';
+      case 'mp3':
+      case 'm4a':
+      case 'aac':
+      case 'flac':
+      case 'wav':
+      case 'wma':
+      case 'ogg':
+      case 'opus':
+      case 'aiff':
+        return 'audio';
       case 'java':
       case 'py':
       case 'sh':
@@ -1441,14 +1494,33 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       case 'xml':
       case 'log':
         return 'code';
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-      case 'gif':
-      case 'webp':
-        return 'scans';
       default:
         return 'other';
+    }
+  }
+
+  Set<String> _getFileTypesForCategory(String category) {
+    switch (category) {
+      case 'pdf':
+        return {'pdf'};
+      case 'documents':
+        return {'doc', 'docx', 'odt', 'rtf', 'txt'};
+      case 'spreadsheets':
+        return {'xlsx', 'xls', 'ods', 'csv'};
+      case 'presentations':
+        return {'ppt', 'pptx', 'odp'};
+      case 'images':
+        return {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'};
+      case 'video':
+        return {'mp4', 'mkv', 'avi', 'mov', 'webm', 'flv', 'wmv', 'mxf', '3gp'};
+      case 'audio':
+        return {'mp3', 'm4a', 'aac', 'flac', 'wav', 'wma', 'ogg', 'opus', 'aiff'};
+      case 'code':
+        return {'java', 'py', 'sh', 'html', 'md', 'json', 'xml', 'log'};
+      case 'scans':
+        return {}; // Scans are OCR-processed files, handled separately
+      default:
+        return {};
     }
   }
 
@@ -1483,6 +1555,39 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         iconData = Icons.slideshow;
         color = theme.colorScheme.error;
         break;
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+      case 'bmp':
+        iconData = Icons.image;
+        color = theme.colorScheme.secondary;
+        break;
+      case 'mp4':
+      case 'mkv':
+      case 'avi':
+      case 'mov':
+      case 'webm':
+      case 'flv':
+      case 'wmv':
+      case 'mxf':
+      case '3gp':
+        iconData = Icons.videocam;
+        color = theme.colorScheme.error;
+        break;
+      case 'mp3':
+      case 'm4a':
+      case 'aac':
+      case 'flac':
+      case 'wav':
+      case 'wma':
+      case 'ogg':
+      case 'opus':
+      case 'aiff':
+        iconData = Icons.music_note;
+        color = theme.colorScheme.secondary;
+        break;
       case 'java':
       case 'py':
       case 'sh':
@@ -1493,14 +1598,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       case 'log':
         iconData = Icons.code;
         color = theme.colorScheme.primary;
-        break;
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-      case 'gif':
-      case 'webp':
-        iconData = Icons.document_scanner;
-        color = theme.colorScheme.secondary;
         break;
       default:
         iconData = Icons.insert_drive_file;
