@@ -20,6 +20,28 @@
 
 <br>
 
+## The Problem
+
+In today's world, **privacy is becoming a myth**. Every document app on the Play Store comes bundled with hundreds of trackers. Before you can even view a file, you're hit with intrusive ads — breaking focus, wasting your time, and eroding your experience.
+
+Most document solutions rely on cloud-based infrastructure, introducing unnecessary data exposure risks. Your reading habits are tracked. Your device becomes a surveillance point.
+
+## The Solution: Fadocx
+
+**Zero trackers. Zero ads. Zero compromise.**
+
+Fadocx does one thing exceptionally: **view your documents privately, on your device, the way software should work.**
+
+Every file you import is saved to **isolated private storage** — completely hidden from your file manager, inaccessible to other apps, under your complete control. Open **PDFs, Office documents, spreadsheets, presentations, images, videos, audio, and code** with native-quality rendering — all 100% offline, 100% locally.
+
+**Extract text from images with on-device OCR.** Organize by category. Search within files. Track reading time. Everything happens on your phone. Nothing leaves your phone. **No cloud. No tracking. No surveillance.**
+
+And it's **100% open source** — fully auditable, transparent, and built by [FadSec Lab](https://github.com/fadsec-lab) with privacy-first principles as the foundation.
+
+This is what a document viewer should be. This is Fadocx.
+
+<br>
+
 ## `>_` 📱 Screenshots
 
 <div align="center">
@@ -80,9 +102,16 @@
 </details>
 
 <details>
-<summary><strong>🖼️ Images & Code Files</strong></summary>
+<summary><strong>🖼️ Images, Audio & Video</strong></summary>
 
-- **Images**: PNG, JPG, GIF, WEBP, BMP, SVG
+- **Images**: PNG, JPG, GIF, WEBP, BMP, SVG — view with real frame extraction from files
+- **Video**: MP4, MKV, AVI, MOV, WEBM, FLV, WMV, 3GP, MXF — video preview with frame thumbnails
+- **Audio**: MP3, M4A, AAC, FLAC, WAV, WMA, OGG, OPUS, AIFF
+</details>
+
+<details>
+<summary><strong>💻 Code Files</strong></summary>
+
 - **Code/Data**: Java, Python, Shell, HTML, JSON, XML, Markdown, Log
 - Syntax highlighting with color-coded rendering
 - Adjustable font size, word wrap, and reading mode
@@ -115,7 +144,7 @@
 <details>
 <summary><strong>📚 Library with Category Folders</strong></summary>
 
-- Files are auto-organized into categories (PDF, Docs, Sheets, Slides, Code, Scans, Other) with fast filters and sorting
+- Files are auto-organized into categories (PDF, Docs, Sheets, Slides, Images, Video, Audio, Code, Scans, Other) with fast filters and sorting
 - Files are stored in Fadocx's private app storage — no reliance on public folders
 - Browse by category with dedicated chip filters
 - Search by file name or type
