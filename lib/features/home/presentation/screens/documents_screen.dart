@@ -17,6 +17,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fadocx/features/home/presentation/providers/thumbnail_provider.dart';
 import 'package:fadocx/features/home/presentation/widgets/file_action_bottom_sheet.dart';
+import 'package:fadocx/core/services/storage_service.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
 
 final log = Logger();
@@ -420,9 +421,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
     // Filter by category
     if (_selectedCategory != 'all') {
-      final categoryFileTypes = _getFileTypesForCategory(_selectedCategory);
       filteredFiles = filteredFiles
-          .where((f) => categoryFileTypes.contains(f.fileType.toLowerCase()))
+          .where((f) => _getCategoryFromFile(f) == _selectedCategory)
           .toList();
     }
 
@@ -831,7 +831,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     };
 
     for (final file in files) {
-      final category = _getCategoryFromFileType(file.fileType);
+      final category = _getCategoryFromFile(file);
       counts[category] = (counts[category] ?? 0) + 1;
     }
 
@@ -1439,89 +1439,42 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     );
   }
 
-  String _getCategoryFromFileType(String fileType) {
-    switch (fileType.toLowerCase()) {
-      case 'pdf':
-        return 'pdf';
-      case 'doc':
-      case 'docx':
-      case 'odt':
-      case 'rtf':
-      case 'txt':
-        return 'documents';
-      case 'xlsx':
-      case 'xls':
-      case 'ods':
-      case 'csv':
-        return 'spreadsheets';
-      case 'ppt':
-      case 'pptx':
-      case 'odp':
-        return 'presentations';
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-      case 'gif':
-      case 'webp':
-      case 'bmp':
-        return 'images';
-      case 'mp4':
-      case 'mkv':
-      case 'avi':
-      case 'mov':
-      case 'webm':
-      case 'flv':
-      case 'wmv':
-      case 'mxf':
-      case '3gp':
-        return 'video';
-      case 'mp3':
-      case 'm4a':
-      case 'aac':
-      case 'flac':
-      case 'wav':
-      case 'wma':
-      case 'ogg':
-      case 'opus':
-      case 'aiff':
-        return 'audio';
-      case 'java':
-      case 'py':
-      case 'sh':
-      case 'html':
-      case 'md':
-      case 'json':
-      case 'xml':
-      case 'log':
-        return 'code';
-      default:
-        return 'other';
-    }
+  String _getCategoryFromFile(RecentFile file) {
+    final normalizedPath = file.filePath.toLowerCase().replaceAll('\\', '/');
+    final folderCategory = _getCategoryFromPath(normalizedPath);
+    return folderCategory ?? 'other';
   }
 
-  Set<String> _getFileTypesForCategory(String category) {
-    switch (category) {
-      case 'pdf':
-        return {'pdf'};
-      case 'documents':
-        return {'doc', 'docx', 'odt', 'rtf', 'txt'};
-      case 'spreadsheets':
-        return {'xlsx', 'xls', 'ods', 'csv'};
-      case 'presentations':
-        return {'ppt', 'pptx', 'odp'};
-      case 'images':
-        return {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'};
-      case 'video':
-        return {'mp4', 'mkv', 'avi', 'mov', 'webm', 'flv', 'wmv', 'mxf', '3gp'};
-      case 'audio':
-        return {'mp3', 'm4a', 'aac', 'flac', 'wav', 'wma', 'ogg', 'opus', 'aiff'};
-      case 'code':
-        return {'java', 'py', 'sh', 'html', 'md', 'json', 'xml', 'log'};
-      case 'scans':
-        return {}; // Scans are OCR-processed files, handled separately
-      default:
-        return {};
+  String? _getCategoryFromPath(String normalizedPath) {
+    if (normalizedPath.contains('/${StorageService.scansFolder.toLowerCase()}/') ||
+        normalizedPath.endsWith('/${StorageService.scansFolder.toLowerCase()}')) {
+      return 'scans';
     }
+    if (normalizedPath.contains('/${StorageService.pdfsFolder.toLowerCase()}/')) {
+      return 'pdf';
+    }
+    if (normalizedPath.contains('/${StorageService.documentsFolder.toLowerCase()}/')) {
+      return 'documents';
+    }
+    if (normalizedPath.contains('/${StorageService.spreadsheetsFolder.toLowerCase()}/')) {
+      return 'spreadsheets';
+    }
+    if (normalizedPath.contains('/${StorageService.presentationsFolder.toLowerCase()}/')) {
+      return 'presentations';
+    }
+    if (normalizedPath.contains('/${StorageService.imagesFolder.toLowerCase()}/')) {
+      return 'images';
+    }
+    if (normalizedPath.contains('/${StorageService.audioFolder.toLowerCase()}/')) {
+      return 'audio';
+    }
+    if (normalizedPath.contains('/${StorageService.videoFolder.toLowerCase()}/')) {
+      return 'video';
+    }
+    if (normalizedPath.contains('/${StorageService.codeFolder.toLowerCase()}/')) {
+      return 'code';
+    }
+    return null;
   }
 
   Widget _getFileIcon(String fileType, {double size = 24}) {
