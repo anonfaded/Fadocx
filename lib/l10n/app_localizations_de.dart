@@ -21,8 +21,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get recentFiles => 'Zuletzt geöffnet';
 
   @override
-  String get noRecentFiles =>
-      'Keine zuletzt geöffneten Dateien. Öffnen Sie ein Dokument.';
+  String get noRecentFiles => 'Keine zuletzt geöffneten Dateien. Öffnen Sie ein Dokument.';
 
   @override
   String get openFile => 'Datei öffnen';
@@ -196,8 +195,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get emptyTitle => 'Keine Dokumente';
 
   @override
-  String get emptyMessage =>
-      'Beginnen Sie, indem Sie ein Dokument von Ihrem Gerät öffnen';
+  String get emptyMessage => 'Beginnen Sie, indem Sie ein Dokument von Ihrem Gerät öffnen';
 
   @override
   String get startBrowsing => 'Durchsuchen starten';
@@ -206,12 +204,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get languageChanged => 'Sprache zu Deutsch geändert';
 
   @override
-  String get privacyDescription =>
-      'Fadocx ist eine Dokumentanzeige. Ihre Dateien werden lokal auf Ihrem Gerät gespeichert und niemals an einen Server übertragen.';
+  String get privacyDescription => 'Fadocx ist eine Dokumentanzeige. Ihre Dateien werden lokal auf Ihrem Gerät gespeichert und niemals an einen Server übertragen.';
 
   @override
-  String get aboutDescription =>
-      'Fadocx v1.0.0 - Ihr privater Dokumentviewer. Mit Fokus auf Ihre Privatsphäre.';
+  String get aboutDescription => 'Fadocx v1.0.0 - Ihr privater Dokumentviewer. Mit Fokus auf Ihre Privatsphäre.';
 
   @override
   String get tableRows => 'Zeilen';
@@ -244,12 +240,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get slidesCount => 'Folien';
 
   @override
-  String get pptUnsupported =>
-      'PPT-Datei wurde analysiert, enthält aber keine Folien';
+  String get pptUnsupported => 'PPT-Datei wurde analysiert, enthält aber keine Folien';
 
   @override
-  String get odpUnsupported =>
-      'ODP-Datei wurde analysiert, enthält aber keine Folien oder lesbaren Inhalte';
+  String get odpUnsupported => 'ODP-Datei wurde analysiert, enthält aber keine Folien oder lesbaren Inhalte';
 
   @override
   String get noTextContent => 'Kein Textinhalt gefunden';
@@ -270,8 +264,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get openWithSystemApp => 'Mit System-App öffnen';
 
   @override
-  String get systemAppNotImplemented =>
-      'Öffnen mit System-App ist noch nicht implementiert';
+  String get systemAppNotImplemented => 'Öffnen mit System-App ist noch nicht implementiert';
 
   @override
   String get type => 'Typ';
@@ -280,26 +273,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get fileNotFoundMessage => 'Datei nicht gefunden';
 
   @override
-  String get fileTooLarge =>
-      'Dateigröße überschreitet maximales Limit (100 MB)';
+  String get fileTooLarge => 'Dateigröße überschreitet maximales Limit (100 MB)';
 
   @override
   String get errorLoadingFile => 'Fehler beim Laden der Datei';
 
   @override
-  String get docxPreviewNotSupported =>
-      'DOCX-Vorschau wird noch nicht vollständig unterstützt';
+  String get docxPreviewNotSupported => 'DOCX-Vorschau wird noch nicht vollständig unterstützt';
 
   @override
-  String get docParseError =>
-      'DOC-Datei konnte nicht analysiert werden. Versuchen Sie, in DOCX umzuwandeln.';
+  String get docParseError => 'DOC-Datei konnte nicht analysiert werden. Versuchen Sie, in DOCX umzuwandeln.';
 
   @override
   String get xlsxParseError => 'XLSX-Datei konnte nicht analysiert werden';
 
   @override
-  String get xlsParseError =>
-      'XLS-Datei konnte nicht analysiert werden. Versuchen Sie, sie in XLSX umzuwandeln.';
+  String get xlsParseError => 'XLS-Datei konnte nicht analysiert werden. Versuchen Sie, sie in XLSX umzuwandeln.';
 
   @override
   String get csvParseError => 'CSV-Datei konnte nicht analysiert werden';
@@ -362,6 +351,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get categorySlides => 'Folien';
 
   @override
+  String get categoryImages => 'Bilder';
+
+  @override
+  String get categoryAudio => 'Audio';
+
+  @override
+  String get categoryVideo => 'Videos';
+
+  @override
   String get categoryCode => 'Quellcode';
 
   @override
@@ -397,8 +395,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get becomeAPatron => 'Werde ein Patron';
 
   @override
-  String get patreonDescription =>
-      'Deine Unterstützung hilft Fadocx und FadCam zu wachsen. Patreon-Abonnenten erhalten exklusive Vorteile, darunter Premium-Funktionen und frühen Zugriff auf alle FadSec Lab Apps.\n\nFür mehr Infos besuche Patreon über den Link unten und prüfe die verfügbaren Stufen samt Vorteilen.';
+  String get patreonDescription => 'Deine Unterstützung hilft Fadocx und FadCam zu wachsen. Patreon-Abonnenten erhalten exklusive Vorteile, darunter Premium-Funktionen und frühen Zugriff auf alle FadSec Lab Apps.\n\nFür mehr Infos besuche Patreon über den Link unten und prüfe die verfügbaren Stufen samt Vorteilen.';
 
   @override
   String get discordTitle => 'Tritt unserem Discord bei';
@@ -521,8 +518,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeWelcomeTitle => 'Willkommen bei Fadocx';
 
   @override
-  String get homeWelcomeSubtitle =>
-      'Erkunden Sie Beispieldateien oder importieren Sie Ihre eigenen Dokumente';
+  String get homeWelcomeSubtitle => 'Erkunden Sie Beispieldateien oder importieren Sie Ihre eigenen Dokumente';
 
   @override
   String get homeExploreSamples => 'Beispieldateien erkunden';
@@ -546,8 +542,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeImportDocument => 'Dokument importieren';
 
   @override
-  String get homeImportDocumentDesc =>
-      'Dateien vom Gerät durchsuchen und importieren';
+  String get homeImportDocumentDesc => 'Dateien vom Gerät durchsuchen und importieren';
 
   @override
   String get onboardingSkip => 'Überspringen';
@@ -562,8 +557,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get onboardingSlide1Title => 'Willkommen bei Fadocx';
 
   @override
-  String get onboardingSlide1Tagline =>
-      'Ihr privater Alles-in-einem-Dokumentenbegleiter';
+  String get onboardingSlide1Tagline => 'Ihr privater Alles-in-einem-Dokumentenbegleiter';
 
   @override
   String get onboardingSlide1Bullet1 => 'Privater Dokumentviewer';
@@ -593,15 +587,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get onboardingSlide3Title => 'Bereit zu beginnen?';
 
   @override
-  String get onboardingSlide3Bullet1 =>
-      'Öffnen Sie ein Dokument aus Ihrem Gerät';
+  String get onboardingSlide3Bullet1 => 'Öffnen Sie ein Dokument aus Ihrem Gerät';
 
   @override
   String get onboardingSlide3Bullet2 => 'Oder wählen Sie Beispiele zum Testen';
 
   @override
-  String get onboardingSlide3Bullet3 =>
-      'Weitere Informationen in den Einstellungen';
+  String get onboardingSlide3Bullet3 => 'Weitere Informationen in den Einstellungen';
 
   @override
   String get homeStatDocuments => 'Dokumente';
@@ -700,8 +692,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeFileNameLabel => 'Dateiname';
 
   @override
-  String get homeFileAlreadyExists =>
-      'Datei mit diesem Namen existiert bereits';
+  String get homeFileAlreadyExists => 'Datei mit diesem Namen existiert bereits';
 
   @override
   String homeRenamedTo(String name) {
@@ -726,8 +717,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeChooseLocation => 'Ort wählen';
 
   @override
-  String get homeChooseLocationDesc =>
-      'Wählen Sie ein benutzerdefiniertes Speicherverzeichnis';
+  String get homeChooseLocationDesc => 'Wählen Sie ein benutzerdefiniertes Speicherverzeichnis';
 
   @override
   String homeSavedToDownloads(String name) {
@@ -859,26 +849,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get browseImport => 'Importieren';
 
   @override
-  String get browseAllFilesAccessRequired =>
-      'Für das Durchsuchen von Dokumenten auf deinem Gerät ist Zugriff auf alle Dateien erforderlich';
+  String get browseAllFilesAccessRequired => 'Für das Durchsuchen von Dokumenten auf deinem Gerät ist Zugriff auf alle Dateien erforderlich';
 
   @override
   String get browsePermissionRequired => 'Berechtigung erforderlich';
 
   @override
-  String get browseAllFilesAccessDenied =>
-      'Für das Durchsuchen und Lesen von Dokumenten auf deinem Gerät ist Zugriff auf alle Dateien erforderlich. Bitte erteile diese Berechtigung, um fortzufahren.';
+  String get browseAllFilesAccessDenied => 'Für das Durchsuchen und Lesen von Dokumenten auf deinem Gerät ist Zugriff auf alle Dateien erforderlich. Bitte erteile diese Berechtigung, um fortzufahren.';
 
   @override
   String get browseOpenSettings => 'Einstellungen öffnen';
 
   @override
-  String get browseAccessStillDisabled =>
-      'Der Zugriff auf alle Dateien ist weiterhin deaktiviert. Bitte aktiviere ihn in den Einstellungen, um fortzufahren.';
+  String get browseAccessStillDisabled => 'Der Zugriff auf alle Dateien ist weiterhin deaktiviert. Bitte aktiviere ihn in den Einstellungen, um fortzufahren.';
 
   @override
-  String get browseNoDirectories =>
-      'Keine Dokumentordner auf dem Gerät gefunden';
+  String get browseNoDirectories => 'Keine Dokumentordner auf dem Gerät gefunden';
 
   @override
   String browseErrorPrefix(String error) {
@@ -937,8 +923,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get trashDeleteTypeConfirm =>
-      'DELETE (Großbuchstaben) eingeben zum Bestätigen:';
+  String get trashDeleteTypeConfirm => 'DELETE (Großbuchstaben) eingeben zum Bestätigen:';
 
   @override
   String get trashDeleteHint => 'DELETE';
@@ -975,92 +960,79 @@ class AppLocalizationsDe extends AppLocalizations {
   String get whatsNewDocAndSheets => 'Dokumente & Tabellen';
 
   @override
-  String get whatsNewDocAndSheetsDesc =>
-      'Zeige PDFs, Word-Dokumente, Excel-Tabellen und mehr an – alles lokal auf deinem Gerät.';
+  String get whatsNewDocAndSheetsDesc => 'Zeige PDFs, Word-Dokumente, Excel-Tabellen und mehr an – alles lokal auf deinem Gerät.';
 
   @override
   String get whatsNewOcrAi => 'Intelligentes OCR & KI auf dem Gerät';
 
   @override
-  String get whatsNewOcrAiDesc =>
-      'Extrahiere Text aus Bildern mit fortschrittlichem OCR auf dem Gerät. Mehrere Sprachen werden unterstützt.';
+  String get whatsNewOcrAiDesc => 'Extrahiere Text aus Bildern mit fortschrittlichem OCR auf dem Gerät. Mehrere Sprachen werden unterstützt.';
 
   @override
   String get whatsNewSyntaxHighlighting => 'Syntaxhervorhebung';
 
   @override
-  String get whatsNewSyntaxHighlightingDesc =>
-      'Schöne Codehervorhebung für über 50 Programmiersprachen.';
+  String get whatsNewSyntaxHighlightingDesc => 'Schöne Codehervorhebung für über 50 Programmiersprachen.';
 
   @override
   String get whatsNewReadingStats => 'Lesestatistik-Dashboard';
 
   @override
-  String get whatsNewReadingStatsDesc =>
-      'Verfolge deinen Lesefortschritt mit detaillierten Statistiken und Zeitmessung.';
+  String get whatsNewReadingStatsDesc => 'Verfolge deinen Lesefortschritt mit detaillierten Statistiken und Zeitmessung.';
 
   @override
   String get whatsNewLibraryCategories => 'Bibliothek mit Kategorieordnern';
 
   @override
-  String get whatsNewLibraryCategoriesDesc =>
-      'Organisiere deine Dokumente nach Typ mit intelligenter automatischer Kategorisierung.';
+  String get whatsNewLibraryCategoriesDesc => 'Organisiere deine Dokumente nach Typ mit intelligenter automatischer Kategorisierung.';
 
   @override
   String get whatsNewFileManagement => 'Dateiverwaltung';
 
   @override
-  String get whatsNewFileManagementDesc =>
-      'Benenne deine Dokumente um, dupliziere, exportiere und lösche sie ganz einfach.';
+  String get whatsNewFileManagementDesc => 'Benenne deine Dokumente um, dupliziere, exportiere und lösche sie ganz einfach.';
 
   @override
   String get whatsNewThemes => 'Helle & dunkle Designs';
 
   @override
-  String get whatsNewThemesDesc =>
-      'Wähle den Look, der zu dir passt – Dunkelmodus für die Nacht, Hellmodus für den Tag.';
+  String get whatsNewThemesDesc => 'Wähle den Look, der zu dir passt – Dunkelmodus für die Nacht, Hellmodus für den Tag.';
 
   @override
   String get whatsNewFadDrive => 'FadDrive Integration';
 
   @override
-  String get whatsNewFadDriveDesc =>
-      'Cloud-Synchronisierung für deine Dokumente – greife überall und jederzeit darauf zu.';
+  String get whatsNewFadDriveDesc => 'Cloud-Synchronisierung für deine Dokumente – greife überall und jederzeit darauf zu.';
 
   @override
   String get whatsNewEditing => 'Dokumentbearbeitung';
 
   @override
-  String get whatsNewEditingDesc =>
-      'Nimm schnelle Änderungen direkt in Fadocx an deinen Dokumenten vor.';
+  String get whatsNewEditingDesc => 'Nimm schnelle Änderungen direkt in Fadocx an deinen Dokumenten vor.';
 
   @override
   String get whatsNewBookmarks => 'Lesezeichen & Anmerkungen';
 
   @override
-  String get whatsNewBookmarksDesc =>
-      'Markiere wichtige Seiten und füge Anmerkungen für später hinzu.';
+  String get whatsNewBookmarksDesc => 'Markiere wichtige Seiten und füge Anmerkungen für später hinzu.';
 
   @override
   String get whatsNewConversion => 'Dokumentkonvertierung';
 
   @override
-  String get whatsNewConversionDesc =>
-      'Konvertiere zwischen Formaten wie PDF, DOCX und mehr.';
+  String get whatsNewConversionDesc => 'Konvertiere zwischen Formaten wie PDF, DOCX und mehr.';
 
   @override
   String get whatsNewAmoled => 'AMOLED-Schwarz-Design';
 
   @override
-  String get whatsNewAmoledDesc =>
-      'Rein schwarzes Design für AMOLED-Displays – spart Akku im Dunkelmodus.';
+  String get whatsNewAmoledDesc => 'Rein schwarzes Design für AMOLED-Displays – spart Akku im Dunkelmodus.';
 
   @override
   String get whatsNewMoreOcr => 'Mehr OCR-Sprachen';
 
   @override
-  String get whatsNewMoreOcrDesc =>
-      'Unterstützung für zusätzliche OCR-Sprachen und verbesserte Erkennungsgenauigkeit.';
+  String get whatsNewMoreOcrDesc => 'Unterstützung für zusätzliche OCR-Sprachen und verbesserte Erkennungsgenauigkeit.';
 
   @override
   String get whatsNewOfflineFirst => 'Offline-First';
@@ -1069,8 +1041,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get whatsNewThankYou => 'Danke, dass du Fadocx nutzt';
 
   @override
-  String get whatsNewThankYouDesc =>
-      'Wenn du Fadocx nützlich findest, unterstütze seine Entwicklung. Dein Beitrag hilft uns, weiterhin datenschutzfreundliche Werkzeuge zu bauen.';
+  String get whatsNewThankYouDesc => 'Wenn du Fadocx nützlich findest, unterstütze seine Entwicklung. Dein Beitrag hilft uns, weiterhin datenschutzfreundliche Werkzeuge zu bauen.';
 
   @override
   String get drawerWhatNew => 'Neuigkeiten';
@@ -1109,8 +1080,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get fileActionCopyText => 'Text kopieren';
 
   @override
-  String get fileActionCopyTextDesc =>
-      'Extrahierten Text in Zwischenablage kopieren';
+  String get fileActionCopyTextDesc => 'Extrahierten Text in Zwischenablage kopieren';
 
   @override
   String get fileActionConvert => 'Konvertieren';
@@ -1134,22 +1104,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get updateAvailableTitle => 'Update verfügbar';
 
   @override
-  String get updateAvailableSubtitle =>
-      'Eine neue Version von Fadocx ist zum Download bereit';
+  String get updateAvailableSubtitle => 'Eine neue Version von Fadocx ist zum Download bereit';
 
   @override
   String get updateStableRelease => 'Stabile Version';
 
   @override
-  String get updateStableDesc =>
-      'Stabile und getestete Version für den Produktionseinsatz';
+  String get updateStableDesc => 'Stabile und getestete Version für den Produktionseinsatz';
 
   @override
   String get updateBetaRelease => 'Beta-Version';
 
   @override
-  String get updateBetaDesc =>
-      'Früher Zugriff auf neue Funktionen, kann Fehler enthalten';
+  String get updateBetaDesc => 'Früher Zugriff auf neue Funktionen, kann Fehler enthalten';
 
   @override
   String get updateMaybeLater => 'Vielleicht später';
@@ -1164,8 +1131,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get updateVisitGithub => 'GitHub besuchen';
 
   @override
-  String get updateBetaInfo =>
-      'Die Fadocx-Beta ist eine eigenständige App, die neben der stabilen Version installiert werden kann. Sie beeinträchtigt weder Ihre stabile App noch deren Daten.\n\nInstallieren Sie die Beta, um neue Funktionen zu testen, bevor sie die stabile Version erreichen.';
+  String get updateBetaInfo => 'Die Fadocx-Beta ist eine eigenständige App, die neben der stabilen Version installiert werden kann. Sie beeinträchtigt weder Ihre stabile App noch deren Daten.\n\nInstallieren Sie die Beta, um neue Funktionen zu testen, bevor sie die stabile Version erreichen.';
 
   @override
   String get updateBannerStable => 'Stabiles Update';
@@ -1219,23 +1185,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsStorageOther => 'Sonstiges';
 
   @override
-  String get settingsStorageInfo =>
-      'Dokumente werden in einem privaten Ordner auf deinem Gerät gespeichert und können nicht von anderen Apps aufgerufen werden';
+  String get settingsStorageInfo => 'Dokumente werden in einem privaten Ordner auf deinem Gerät gespeichert und können nicht von anderen Apps aufgerufen werden';
 
   @override
-  String get settingsStoragePrivateFolderInfo =>
-      'Dokumente werden in einem privaten Ordner gespeichert, der vor anderen Apps und Dateimanagern verborgen ist. Nur Fadocx kann darauf zugreifen.';
+  String get settingsStoragePrivateFolderInfo => 'Dokumente werden in einem privaten Ordner gespeichert, der vor anderen Apps und Dateimanagern verborgen ist. Nur Fadocx kann darauf zugreifen.';
 
   @override
-  String get settingsStorageDeleteInfo =>
-      'Lösche Dokumente in der Gefahrenzone der Einstellungen';
+  String get settingsStorageDeleteInfo => 'Lösche Dokumente in der Gefahrenzone der Einstellungen';
 
   @override
   String get settingsStorageEmpty => 'Keine Dokumente';
 
   @override
-  String get settingsStorageFailedLoad =>
-      'Speicherdaten konnten nicht geladen werden';
+  String get settingsStorageFailedLoad => 'Speicherdaten konnten nicht geladen werden';
 
   @override
   String get settingsUpdates => 'Aktualisierungen';
@@ -1244,15 +1206,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsAutoUpdateCheck => 'Automatische Update-Prüfung';
 
   @override
-  String get settingsAutoUpdateCheckDesc =>
-      'Beim Start der App nach Updates suchen';
+  String get settingsAutoUpdateCheckDesc => 'Beim Start der App nach Updates suchen';
 
   @override
   String get settingsReplayOnboarding => 'Einführung wiederholen';
 
   @override
-  String get settingsReplayOnboardingDesc =>
-      'Einführungsfolien beim nächsten Start anzeigen';
+  String get settingsReplayOnboardingDesc => 'Einführungsfolien beim nächsten Start anzeigen';
 
   @override
   String get settingsEnabled => 'Aktiviert';
@@ -1300,8 +1260,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsResetSettings => 'Einstellungen zurücksetzen';
 
   @override
-  String get settingsResetSettingsDesc =>
-      'Alle Einstellungen auf Standard zurücksetzen';
+  String get settingsResetSettingsDesc => 'Alle Einstellungen auf Standard zurücksetzen';
 
   @override
   String get settingsResetDone => 'Einstellungen zurückgesetzt';
@@ -1322,8 +1281,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsCheckingUpdates => 'Prüfung auf Updates…';
 
   @override
-  String get settingsNoInternet =>
-      'Keine Internetverbindung. Überprüfen Sie Ihr Netzwerk und versuchen Sie es erneut.';
+  String get settingsNoInternet => 'Keine Internetverbindung. Überprüfen Sie Ihr Netzwerk und versuchen Sie es erneut.';
 
   @override
   String get settingsUpToDate => 'Sie sind auf dem neuesten Stand';
@@ -1350,8 +1308,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsCopyInfo => 'Informationen kopieren';
 
   @override
-  String settingsVersionClipboardInfo(
-      String appName, String version, String buildNumber, String packageName) {
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
     return '$appName v$version (Build $buildNumber)\nPaket: $packageName';
   }
 
@@ -1359,8 +1316,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsShareApp => 'Mit Freunden teilen';
 
   @override
-  String get settingsShareMessage =>
-      'Schau dir Fadocx an!\n\nAll-in-One-Dokumentbetrachter: PDF, Office, Tabellen, Präsentationen, Codedateien und OCR-Texterkennung — komplett offline, ohne Tracking, Open Source.\n\nhttps://github.com/anonfaded/Fadocx';
+  String get settingsShareMessage => 'Schau dir Fadocx an!\n\nAll-in-One-Dokumentbetrachter: PDF, Office, Tabellen, Präsentationen, Codedateien und OCR-Texterkennung — komplett offline, ohne Tracking, Open Source.\n\nhttps://github.com/anonfaded/Fadocx';
 
   @override
   String get settingsShareVia => 'Teilen über...';
@@ -1369,8 +1325,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsShareWhatsApp => 'WhatsApp';
 
   @override
-  String get settingsWhatsAppNotInstalled =>
-      'WhatsApp ist auf diesem Gerät nicht installiert';
+  String get settingsWhatsAppNotInstalled => 'WhatsApp ist auf diesem Gerät nicht installiert';
 
   @override
   String get settingsPrivacyOffline => '100 % offline';
@@ -1388,12 +1343,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsPrivacyNoAds => 'Keine Werbung';
 
   @override
-  String get settingsPrivacyByDesign =>
-      'Wir glauben an Datenschutz durch Design.';
+  String get settingsPrivacyByDesign => 'Wir glauben an Datenschutz durch Design.';
 
   @override
-  String get settingsPrivacyTransparency =>
-      'Fadocx wurde mit Transparenz gebaut. Ihre Dokumente sind Ihre Angelegenheit – nicht unsere.';
+  String get settingsPrivacyTransparency => 'Fadocx wurde mit Transparenz gebaut. Ihre Dokumente sind Ihre Angelegenheit – nicht unsere.';
 
   @override
   String get settingsViewSourceCode => 'Quellcode anzeigen';
@@ -1429,8 +1382,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsIn => 'innerhalb';
 
   @override
-  String get settingsCopyright =>
-      '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
+  String get settingsCopyright => '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
 
   @override
   String settingsTypeToConfirm(String text) {
@@ -1441,24 +1393,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get confirm => 'Bestätigen';
 
   @override
-  String get settingsPrivacyOfflineDesc =>
-      'Die gesamte Verarbeitung findet auf Ihrem Gerät statt. Internet nicht erforderlich.';
+  String get settingsPrivacyOfflineDesc => 'Die gesamte Verarbeitung findet auf Ihrem Gerät statt. Internet nicht erforderlich.';
 
   @override
-  String get settingsPrivacyLocalStorageDesc =>
-      'Ihre Dokumente bleiben auf Ihrem Gerät. Nichts wird hochgeladen.';
+  String get settingsPrivacyLocalStorageDesc => 'Ihre Dokumente bleiben auf Ihrem Gerät. Nichts wird hochgeladen.';
 
   @override
-  String get settingsPrivacyOnDeviceDesc =>
-      'Verwendet OpenCV + Tesseract für OCR. KI läuft lokal.';
+  String get settingsPrivacyOnDeviceDesc => 'Verwendet OpenCV + Tesseract für OCR. KI läuft lokal.';
 
   @override
-  String get settingsPrivacyOpenSourceDesc =>
-      'Der Code ist öffentlich. Überprüfen Sie ihn selbst auf GitHub.';
+  String get settingsPrivacyOpenSourceDesc => 'Der Code ist öffentlich. Überprüfen Sie ihn selbst auf GitHub.';
 
   @override
-  String get settingsPrivacyNoAdsDesc =>
-      'Keine Anzeigen. Keine Verfolgung. Keine Analytik. Keine Crash-Logs. Null Telemetrie.';
+  String get settingsPrivacyNoAdsDesc => 'Keine Anzeigen. Keine Verfolgung. Keine Analytik. Keine Crash-Logs. Null Telemetrie.';
 
   @override
   String get settingsFadcamDesc => 'Screen Capture & Forensics';
@@ -1500,12 +1447,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get viewerSidebarBookmarks => 'Lesezeichen';
 
   @override
-  String get viewerSidebarNotesDesc =>
-      'Notizen und Anmerkungen zu PDF-Seiten hinzufügen';
+  String get viewerSidebarNotesDesc => 'Notizen und Anmerkungen zu PDF-Seiten hinzufügen';
 
   @override
-  String get viewerSidebarBookmarksDesc =>
-      'Speichern und organisieren Sie Ihre Lieblingsseiten';
+  String get viewerSidebarBookmarksDesc => 'Speichern und organisieren Sie Ihre Lieblingsseiten';
 
   @override
   String viewerCellCopied(String value) {
@@ -1597,8 +1542,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get viewerCopyDocumentText =>
-      'Dies kopiert den gesamten Dokumentinhalt in die Zwischenablage.';
+  String get viewerCopyDocumentText => 'Dies kopiert den gesamten Dokumentinhalt in die Zwischenablage.';
 
   @override
   String viewerWordsLines(num words, num lines) {
@@ -1629,8 +1573,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get viewerCopyExtractedTitle => 'Extrahierten Text kopieren';
 
   @override
-  String get viewerCopyExtractedDesc =>
-      'Text kopieren, der per OCR aus diesem Bild extrahiert wurde.';
+  String get viewerCopyExtractedDesc => 'Text kopieren, der per OCR aus diesem Bild extrahiert wurde.';
 
   @override
   String viewerCopiedWordsChars(num words, num chars) {
@@ -1638,20 +1581,16 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get viewerErrorAccessText =>
-      'Fehler beim Zugriff auf extrahierten Text';
+  String get viewerErrorAccessText => 'Fehler beim Zugriff auf extrahierten Text';
 
   @override
-  String get viewerNoTextForImage =>
-      'Für dieses Bild ist kein extrahierter Text verfügbar';
+  String get viewerNoTextForImage => 'Für dieses Bild ist kein extrahierter Text verfügbar';
 
   @override
-  String get viewerExtractingAllPages =>
-      'Text wird aus allen Seiten extrahiert...';
+  String get viewerExtractingAllPages => 'Text wird aus allen Seiten extrahiert...';
 
   @override
-  String get viewerTextExtractionUnavailable =>
-      'Textextraktion nicht verfügbar';
+  String get viewerTextExtractionUnavailable => 'Textextraktion nicht verfügbar';
 
   @override
   String get viewerNoPdfText => 'Kein Text in dieser PDF gefunden';
@@ -1695,8 +1634,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get viewerCopyValue => 'Wert kopieren';
 
   @override
-  String get viewerTapCellToSeeValue =>
-      'Zelle antippen, um den Wert anzuzeigen';
+  String get viewerTapCellToSeeValue => 'Zelle antippen, um den Wert anzuzeigen';
 
   @override
   String get viewerToggleFullscreen => 'Vollbild umschalten';
@@ -1729,12 +1667,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get viewerEditWithEngine => 'Mit Fadocx Engine bearbeiten';
 
   @override
-  String get viewerEditWithEngineDesc =>
-      'Öffnen Sie diese Tabellenkalkulation in der Fadocx-Rendering-Engine für eine originalgetreue visuelle Vorschau mit vollständiger Formatierung, Diagrammen und Layouttreue.';
+  String get viewerEditWithEngineDesc => 'Öffnen Sie diese Tabellenkalkulation in der Fadocx-Rendering-Engine für eine originalgetreue visuelle Vorschau mit vollständiger Formatierung, Diagrammen und Layouttreue.';
 
   @override
-  String get viewerEditWithEngineNote =>
-      'Hinweis: Interaktive Bearbeitung kommt in einem zukünftigen Update.';
+  String get viewerEditWithEngineNote => 'Hinweis: Interaktive Bearbeitung kommt in einem zukünftigen Update.';
 
   @override
   String get viewerNotNow => 'Nicht jetzt';
@@ -1783,8 +1719,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scannerDocumentDetected => 'Dokument erkannt – bitte ruhig halten';
 
   @override
-  String get scannerKeepDocumentFlat =>
-      'Halte das Dokument gerade und flach für beste Ergebnisse';
+  String get scannerKeepDocumentFlat => 'Halte das Dokument gerade und flach für beste Ergebnisse';
 
   @override
   String get scannerUpload => 'Hochladen';
@@ -1809,8 +1744,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scannerCameraUnavailable => 'Kamera nicht verfügbar';
 
   @override
-  String get scannerCameraUnavailableDesc =>
-      'Kamera konnte nicht initialisiert werden';
+  String get scannerCameraUnavailableDesc => 'Kamera konnte nicht initialisiert werden';
 
   @override
   String get scannerAnalysisComplete => 'Analyse abgeschlossen';
@@ -1828,8 +1762,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scannerNoScansYet => 'Noch keine Scans';
 
   @override
-  String get scannerNoScansDesc =>
-      'Erfasse ein Dokument, um hier extrahierten Text zu sehen';
+  String get scannerNoScansDesc => 'Erfasse ein Dokument, um hier extrahierten Text zu sehen';
 
   @override
   String get scannerExtractedText => 'Extrahierter Text';
@@ -1936,15 +1869,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pdfNoTextFound => 'Kein Text im PDF gefunden';
 
   @override
-  String get pdfFullTextCopied =>
-      'Vollständiger PDF-Text in die Zwischenablage kopiert';
+  String get pdfFullTextCopied => 'Vollständiger PDF-Text in die Zwischenablage kopiert';
 
   @override
   String get pdfPasswordRequired => 'PDF-Passwort erforderlich';
 
   @override
-  String get pdfPasswordDesc =>
-      'Dieses PDF ist passwortgeschützt. Geben Sie das Passwort ein, um es zu entsperren.';
+  String get pdfPasswordDesc => 'Dieses PDF ist passwortgeschützt. Geben Sie das Passwort ein, um es zu entsperren.';
 
   @override
   String get pdfPasswordLabel => 'Passwort';
@@ -1956,8 +1887,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pdfSearchHint => 'PDF durchsuchen...';
 
   @override
-  String get pdfTextCannotBeExtracted =>
-      'Text kann von dieser Seite nicht extrahiert werden';
+  String get pdfTextCannotBeExtracted => 'Text kann von dieser Seite nicht extrahiert werden';
 
   @override
   String get pdfLoadingPageTexts => 'Seitentexte werden geladen...';
@@ -2023,8 +1953,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get mediaPlay => 'Abspielen';
 
   @override
-  String get audioPlaybackNote =>
-      'Für die Audiowiedergabe ist eine zusätzliche Bibliothek erforderlich.';
+  String get audioPlaybackNote => 'Für die Audiowiedergabe ist eine zusätzliche Bibliothek erforderlich.';
 
   @override
   String sheetNoData(String sheetName) {
