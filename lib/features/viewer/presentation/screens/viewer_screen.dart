@@ -42,6 +42,14 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   static const int _readingWordsPerMinute = 200;
   static const double _kSidebarBottomOffset = 88;
   static const double _kSidebarRadius = 24.0;
+  static const IconData _chevronLeftNoMirror = IconData(
+    0xe15e,
+    fontFamily: 'MaterialIcons',
+  );
+  static const IconData _chevronRightNoMirror = IconData(
+    0xe15f,
+    fontFamily: 'MaterialIcons',
+  );
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
@@ -1248,25 +1256,25 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                           Align(
                             alignment:
                                 Directionality.of(context) == TextDirection.rtl
-                                     ? Alignment.centerRight
-                                     : Alignment.centerLeft,
-                             child: IconButton(
-                               icon: Icon(
-                                 Directionality.of(context) == TextDirection.rtl
-                                     ? Icons.chevron_right
-                                     : Icons.chevron_left,
-                               ),
-                               onPressed: () => context.pop(),
-                               tooltip: _l10n.back,
-                               iconSize: 20,
-                               constraints: const BoxConstraints(
-                                 minWidth: 32,
-                                 minHeight: 32,
-                               ),
-                               padding: EdgeInsets.zero,
-                             ),
-                           ),
-                           Align(
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
+                            child: IconButton(
+                              icon: Icon(
+                                Directionality.of(context) == TextDirection.rtl
+                                    ? _chevronRightNoMirror
+                                    : _chevronLeftNoMirror,
+                              ),
+                              onPressed: () => context.pop(),
+                              tooltip: _l10n.back,
+                              iconSize: 20,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              padding: EdgeInsets.zero,
+                            ),
+                          ),
+                          Align(
                             alignment: Alignment.centerRight,
                             child: _buildResetZoomButton(),
                           ),
@@ -2262,20 +2270,30 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             final pos = value.position;
             final dur = value.duration;
             final isPlaying = value.isPlaying;
-            final posMs = dur.inMilliseconds > 0 ? pos.inMilliseconds.clamp(0, dur.inMilliseconds).toDouble() : 0.0;
-            final durMs = dur.inMilliseconds > 0 ? dur.inMilliseconds.toDouble() : 1.0;
+            final posMs = dur.inMilliseconds > 0
+                ? pos.inMilliseconds.clamp(0, dur.inMilliseconds).toDouble()
+                : 0.0;
+            final durMs =
+                dur.inMilliseconds > 0 ? dur.inMilliseconds.toDouble() : 1.0;
 
             return Row(
               children: [
                 IconButton(
-                  icon: Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 20),
+                  icon: Icon(
+                      isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      size: 20),
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints:
+                      const BoxConstraints(minWidth: 32, minHeight: 32),
                   onPressed: media.togglePlay,
                 ),
                 Text(
                   MediaViewerState.formatDuration(
-                    _sliderDragValue != null ? Duration(milliseconds: _sliderDragValue!.toInt()) : pos,
+                    _sliderDragValue != null
+                        ? Duration(milliseconds: _sliderDragValue!.toInt())
+                        : pos,
                   ),
                   style: theme.textTheme.labelSmall,
                 ),
@@ -2295,16 +2313,22 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                     },
                   ),
                 ),
-                Text(MediaViewerState.formatDuration(dur), style: theme.textTheme.labelSmall),
+                Text(MediaViewerState.formatDuration(dur),
+                    style: theme.textTheme.labelSmall),
                 const SizedBox(width: 4),
                 ValueListenableBuilder<bool>(
                   valueListenable: media.loopNotifier,
                   builder: (context, isLooping, child) {
                     return IconButton(
-                      icon: Icon(isLooping ? Icons.repeat_one_rounded : Icons.repeat_rounded,
-                          size: 18, color: isLooping ? theme.colorScheme.primary : null),
+                      icon: Icon(
+                          isLooping
+                              ? Icons.repeat_one_rounded
+                              : Icons.repeat_rounded,
+                          size: 18,
+                          color: isLooping ? theme.colorScheme.primary : null),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
                       onPressed: media.toggleLoop,
                     );
                   },
@@ -2508,7 +2532,8 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
             child: _buildTile(
               icon: Icons.speed,
               label: l10n.viewerPlaybackSpeed,
-              onTap: () => _showSpeedDialog(context, _mediaViewerKey.currentState),
+              onTap: () =>
+                  _showSpeedDialog(context, _mediaViewerKey.currentState),
             ),
           ),
           const SizedBox(width: 8),
@@ -2809,9 +2834,12 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
 
       path.moveTo(_x(0, size), 0);
       path.cubicTo(
-        _x(0, size), radius * 0.4,
-        _x(radius * 0.1, size), radius,
-        _x(radius, size), radius,
+        _x(0, size),
+        radius * 0.4,
+        _x(radius * 0.1, size),
+        radius,
+        _x(radius, size),
+        radius,
       );
       path.lineTo(_x(sidebarWidth - 16, size), radius);
       path.arcToPoint(
@@ -2827,9 +2855,12 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
       );
       path.lineTo(_x(radius, size), size.height - radius);
       path.cubicTo(
-        _x(radius * 0.1, size), size.height - radius,
-        _x(0, size), size.height - radius * 0.4,
-        _x(0, size), size.height,
+        _x(radius * 0.1, size),
+        size.height - radius,
+        _x(0, size),
+        size.height - radius * 0.4,
+        _x(0, size),
+        size.height,
       );
       path.lineTo(_x(0, size), 0);
       path.close();
@@ -2871,9 +2902,12 @@ class _SidebarClipper extends CustomClipper<Path> {
 
     path.moveTo(_x(0, size), 0);
     path.cubicTo(
-      _x(0, size), radius * 0.4,
-      _x(radius * 0.1, size), radius,
-      _x(radius, size), radius,
+      _x(0, size),
+      radius * 0.4,
+      _x(radius * 0.1, size),
+      radius,
+      _x(radius, size),
+      radius,
     );
     path.lineTo(_x(sidebarWidth - 16, size), radius);
     path.arcToPoint(
@@ -2889,9 +2923,12 @@ class _SidebarClipper extends CustomClipper<Path> {
     );
     path.lineTo(_x(radius, size), size.height - radius);
     path.cubicTo(
-      _x(radius * 0.1, size), size.height - radius,
-      _x(0, size), size.height - radius * 0.4,
-      _x(0, size), size.height,
+      _x(radius * 0.1, size),
+      size.height - radius,
+      _x(0, size),
+      size.height - radius * 0.4,
+      _x(0, size),
+      size.height,
     );
     path.lineTo(_x(0, size), 0);
     path.close();
