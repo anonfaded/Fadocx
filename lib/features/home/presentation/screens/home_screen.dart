@@ -2437,8 +2437,6 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    final isPresentation = _isPresentationFormat(widget.file.fileType);
-
     // Watch BOTH: the cache and the generation provider
     // This way when generation completes and saves, we automatically refresh
     final thumbnail = ref.watch(thumbnailProvider(widget.file.id));
@@ -2456,7 +2454,7 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
 
     return thumbnail.when(
       data: (bytes) {
-        if (bytes != null && !isPresentation) {
+        if (bytes != null) {
           return _buildIsometricThumbnail(
             Image.memory(
               bytes,
@@ -2468,13 +2466,13 @@ class _RecentFileThumbnailState extends ConsumerState<_RecentFileThumbnail> {
             ),
           );
         }
-        return _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation));
+        return _buildIsometricThumbnail(_buildThumbPlaceholder(_isPresentationFormat(widget.file.fileType)));
       },
       loading: () =>
-          _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation)),
+          _buildIsometricThumbnail(_buildThumbPlaceholder(_isPresentationFormat(widget.file.fileType))),
       error: (error, stack) {
         log.e('🖼️  [Thumbnail Widget] Error loading thumbnail: $error');
-        return _buildIsometricThumbnail(_buildThumbPlaceholder(isPresentation));
+        return _buildIsometricThumbnail(_buildThumbPlaceholder(_isPresentationFormat(widget.file.fileType)));
       },
     );
   }

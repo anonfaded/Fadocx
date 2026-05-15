@@ -71,6 +71,10 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
     'documents': [],
     'spreadsheets': [],
     'presentations': [],
+    'images': [],
+    'audio': [],
+    'video': [],
+    'code': [],
     'other': [],
   };
 
@@ -416,6 +420,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       );
     }
 
+    final categoryCounts = _buildCategoryCounts();
+    final orderedCategories = _getSortedCategories(categoryCounts);
+
     return Column(
       children: [
         // Category chips - iOS-style pill
@@ -429,12 +436,19 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 children: [
-_buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps),
-                   _buildCategoryChip('pdf', AppLocalizations.of(context)!.categoryPdfs, Icons.picture_as_pdf),
-                   _buildCategoryChip('documents', AppLocalizations.of(context)!.categoryDocs, Icons.description),
-                   _buildCategoryChip('spreadsheets', AppLocalizations.of(context)!.categorySheets, Icons.table_chart),
-                   _buildCategoryChip('presentations', AppLocalizations.of(context)!.categorySlides, Icons.slideshow),
-                   _buildCategoryChip('other', AppLocalizations.of(context)!.categoryOther, Icons.insert_drive_file),
+                  _buildCategoryChip(
+                    'all',
+                    AppLocalizations.of(context)!.categoryAll,
+                    Icons.apps,
+                    count: _documentsByCategory['all']?.length ?? 0,
+                  ),
+                  for (final category in orderedCategories)
+                    _buildCategoryChip(
+                      category,
+                      _getCategoryLabel(context, category),
+                      _getCategoryIcon(category),
+                      count: categoryCounts[category] ?? 0,
+                    ),
                 ],
               ),
             ),
@@ -469,9 +483,8 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
   }
 
   Widget _buildCategoryChip(
-      String categoryKey, String label, IconData icon) {
+      String categoryKey, String label, IconData icon, {required int count}) {
     final isActive = _selectedCategory == categoryKey;
-    final count = _documentsByCategory[categoryKey]?.length ?? 0;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -543,6 +556,96 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
         ),
       ),
     );
+  }
+
+  Map<String, int> _buildCategoryCounts() {
+    final counts = <String, int>{
+      'pdf': 0,
+      'documents': 0,
+      'spreadsheets': 0,
+      'presentations': 0,
+      'images': 0,
+      'audio': 0,
+      'video': 0,
+      'code': 0,
+      'other': 0,
+    };
+
+    for (final file in _documentsByCategory['all'] ?? const <DeviceDocument>[]) {
+      counts[file.category] = (counts[file.category] ?? 0) + 1;
+    }
+
+    return counts;
+  }
+
+  List<String> _getSortedCategories(Map<String, int> counts) {
+    const categories = [
+      'pdf',
+      'documents',
+      'spreadsheets',
+      'presentations',
+      'images',
+      'audio',
+      'video',
+      'code',
+      'other',
+    ];
+
+    final sorted = List<String>.from(categories);
+    sorted.sort((a, b) {
+      final countDiff = (counts[b] ?? 0).compareTo(counts[a] ?? 0);
+      if (countDiff != 0) return countDiff;
+      return categories.indexOf(a).compareTo(categories.indexOf(b));
+    });
+
+    return sorted.where((category) => (counts[category] ?? 0) > 0).toList();
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'documents':
+        return Icons.description;
+      case 'spreadsheets':
+        return Icons.table_chart;
+      case 'presentations':
+        return Icons.slideshow;
+      case 'images':
+        return Icons.image_outlined;
+      case 'audio':
+        return Icons.audiotrack;
+      case 'video':
+        return Icons.videocam_outlined;
+      case 'code':
+        return Icons.code;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  String _getCategoryLabel(BuildContext context, String category) {
+    final l = AppLocalizations.of(context)!;
+    switch (category) {
+      case 'pdf':
+        return l.categoryPdfs;
+      case 'documents':
+        return l.categoryDocs;
+      case 'spreadsheets':
+        return l.categorySheets;
+      case 'presentations':
+        return l.categorySlides;
+      case 'images':
+        return l.categoryImages;
+      case 'audio':
+        return l.categoryAudio;
+      case 'video':
+        return l.categoryVideo;
+      case 'code':
+        return l.categoryCode;
+      default:
+        return l.categoryOther;
+    }
   }
 
   Widget _buildDocumentsView() {
@@ -964,6 +1067,63 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
         iconData = Icons.slideshow;
         color = AppColors.categorySlide;
         break;
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+      case 'bmp':
+      case 'tif':
+      case 'tiff':
+      case 'heic':
+      case 'heif':
+      case 'avif':
+        iconData = Icons.image_outlined;
+        color = Theme.of(context).colorScheme.tertiary;
+        break;
+      case 'aac':
+      case 'mp3':
+      case 'wav':
+      case 'ogg':
+      case 'flac':
+      case 'm4a':
+      case 'wma':
+      case 'opus':
+      case 'aiff':
+        iconData = Icons.audiotrack;
+        color = Theme.of(context).colorScheme.secondary;
+        break;
+      case 'mp4':
+      case 'avi':
+      case 'mkv':
+      case 'mov':
+      case 'wmv':
+      case 'flv':
+      case 'webm':
+      case '3gp':
+      case 'm4v':
+      case 'mpg':
+      case 'mpeg':
+      case 'fmp4':
+        iconData = Icons.videocam_outlined;
+        color = Theme.of(context).colorScheme.primary;
+        break;
+      case 'java':
+      case 'py':
+      case 'sh':
+      case 'html':
+      case 'md':
+      case 'log':
+      case 'json':
+      case 'xml':
+      case 'atom':
+        iconData = Icons.code;
+        color = Theme.of(context).colorScheme.primary;
+        break;
+      case 'fadrec':
+        iconData = Icons.document_scanner_outlined;
+        color = Theme.of(context).colorScheme.primary;
+        break;
       default:
         iconData = Icons.insert_drive_file;
         color = AppColors.categoryDefault;
@@ -972,7 +1132,7 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
     return Icon(iconData, color: color, size: size);
   }
 
-  String _getCategory(String extension) {
+  String _getCategoryFromExtension(String extension) {
     switch (extension.toLowerCase()) {
       case 'pdf':
         return 'pdf';
@@ -981,16 +1141,8 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
       case 'odt':
       case 'rtf':
       case 'txt':
-      case 'java':
-      case 'py':
-      case 'sh':
-      case 'html':
-      case 'md':
-      case 'log':
       case 'epub':
       case 'ott':
-      case 'json':
-      case 'xml':
         return 'documents';
       case 'xlsx':
       case 'xls':
@@ -1001,6 +1153,84 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
       case 'pptx':
       case 'odp':
         return 'presentations';
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+      case 'bmp':
+      case 'tif':
+      case 'tiff':
+      case 'heic':
+      case 'heif':
+      case 'avif':
+      case 'svg':
+        return 'images';
+      case 'aac':
+      case 'mp3':
+      case 'wav':
+      case 'ogg':
+      case 'flac':
+      case 'm4a':
+      case 'wma':
+      case 'opus':
+      case 'aiff':
+        return 'audio';
+      case 'mp4':
+      case 'avi':
+      case 'mkv':
+      case 'mov':
+      case 'wmv':
+      case 'flv':
+      case 'webm':
+      case '3gp':
+      case 'm4v':
+      case 'mpg':
+      case 'mpeg':
+      case 'fmp4':
+        return 'video';
+      case 'ico':
+      case 'psd':
+      case 'atom':
+      case 'dart':
+      case 'kt':
+      case 'kts':
+      case 'js':
+      case 'ts':
+      case 'jsx':
+      case 'tsx':
+      case 'c':
+      case 'cpp':
+      case 'h':
+      case 'hpp':
+      case 'cs':
+      case 'php':
+      case 'rb':
+      case 'swift':
+      case 'go':
+      case 'rs':
+      case 'sql':
+      case 'yaml':
+      case 'yml':
+      case 'toml':
+      case 'gradle':
+      case 'properties':
+      case 'ini':
+      case 'conf':
+      case 'bat':
+      case 'cmd':
+      case 'ps1':
+      case 'r':
+      case 'java':
+      case 'py':
+      case 'sh':
+      case 'html':
+      case 'md':
+      case 'log':
+      case 'json':
+      case 'xml':
+      case 'fadrec':
+        return 'code';
       default:
         return 'other';
     }
@@ -1279,8 +1509,49 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
         'ico',
         'psd',
         'atom',
+        'svg',
+        'png',
+        'jpg',
+        'jpeg',
+        'gif',
+        'webp',
+        'bmp',
+        'tif',
+        'tiff',
+        'heic',
+        'heif',
+        'avif',
         'aac', 'mp3', 'wav', 'ogg', 'flac', 'm4a', 'wma', 'opus', 'aiff',
         'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', '3gp', 'm4v', 'mpg', 'mpeg', 'fmp4',
+        'dart',
+        'kt',
+        'kts',
+        'js',
+        'ts',
+        'jsx',
+        'tsx',
+        'c',
+        'cpp',
+        'h',
+        'hpp',
+        'cs',
+        'php',
+        'rb',
+        'swift',
+        'go',
+        'rs',
+        'sql',
+        'yaml',
+        'yml',
+        'toml',
+        'gradle',
+        'properties',
+        'ini',
+        'conf',
+        'bat',
+        'cmd',
+        'ps1',
+        'r',
       };
 
       for (final entity in entities) {
@@ -1309,7 +1580,7 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
                   extension: ext,
                   modified: stat.modified,
                   fileSizeBytes: stat.size,
-                  category: _getCategory(ext),
+                  category: _getCategoryFromExtension(ext),
                 );
                 docs.add(doc);
                 log.i('    ✓ Added: $entityName (${doc.displaySize})');
@@ -1387,6 +1658,36 @@ _buildCategoryChip('all', AppLocalizations.of(context)!.categoryAll, Icons.apps)
           'ico',
           'psd',
           'atom',
+          'svg',
+          'dart',
+          'kt',
+          'kts',
+          'js',
+          'ts',
+          'jsx',
+          'tsx',
+          'c',
+          'cpp',
+          'h',
+          'hpp',
+          'cs',
+          'php',
+          'rb',
+          'swift',
+          'go',
+          'rs',
+          'sql',
+          'yaml',
+          'yml',
+          'toml',
+          'gradle',
+          'properties',
+          'ini',
+          'conf',
+          'bat',
+          'cmd',
+          'ps1',
+          'r',
           'aac', 'mp3', 'wav', 'ogg', 'flac', 'm4a', 'wma', 'opus', 'aiff',
           'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', '3gp', 'm4v', 'mpg', 'mpeg', 'fmp4',
         ],

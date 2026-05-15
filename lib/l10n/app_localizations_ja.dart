@@ -204,12 +204,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageChanged => '言語を日本語に変更しました';
 
   @override
-  String get privacyDescription =>
-      'Fadocx はドキュメントビューアーです。ファイルは端末内に保存され、サーバーへ送信されることはありません。';
+  String get privacyDescription => 'Fadocx はドキュメントビューアーです。ファイルは端末内に保存され、サーバーへ送信されることはありません。';
 
   @override
-  String get aboutDescription =>
-      'Fadocx v1.0.0 - あなたのプライベートドキュメントビューアー。プライバシーを尊重して構築されました。';
+  String get aboutDescription => 'Fadocx v1.0.0 - あなたのプライベートドキュメントビューアー。プライバシーを尊重して構築されました。';
 
   @override
   String get tableRows => '行';
@@ -353,6 +351,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get categorySlides => 'スライド';
 
   @override
+  String get categoryImages => '画像';
+
+  @override
+  String get categoryAudio => '音声';
+
+  @override
+  String get categoryVideo => '動画';
+
+  @override
   String get categoryCode => 'コード';
 
   @override
@@ -388,8 +395,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get becomeAPatron => 'パトロンになる';
 
   @override
-  String get patreonDescription =>
-      'あなたの支援は Fadocx と FadCam の成長を支えます。Patreon の支援者は、プレミアム機能や FadSec Lab のすべてのアプリでの先行アクセスなど、限定特典を利用できます。\n\n詳しくは下のリンクから Patreon を開き、利用可能なプランと特典を確認してください。';
+  String get patreonDescription => 'あなたの支援は Fadocx と FadCam の成長を支えます。Patreon の支援者は、プレミアム機能や FadSec Lab のすべてのアプリでの先行アクセスなど、限定特典を利用できます。\n\n詳しくは下のリンクから Patreon を開き、利用可能なプランと特典を確認してください。';
 
   @override
   String get discordTitle => 'Discord に参加';
@@ -843,22 +849,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get browseImport => 'インポート';
 
   @override
-  String get browseAllFilesAccessRequired =>
-      '端末上のドキュメントを参照するには、すべてのファイルへのアクセス権が必要です';
+  String get browseAllFilesAccessRequired => '端末上のドキュメントを参照するには、すべてのファイルへのアクセス権が必要です';
 
   @override
   String get browsePermissionRequired => '権限が必要です';
 
   @override
-  String get browseAllFilesAccessDenied =>
-      '端末上のドキュメントを参照・読み取るには、すべてのファイルへのアクセス権が必要です。続行するには権限を許可してください。';
+  String get browseAllFilesAccessDenied => '端末上のドキュメントを参照・読み取るには、すべてのファイルへのアクセス権が必要です。続行するには権限を許可してください。';
 
   @override
   String get browseOpenSettings => '設定を開く';
 
   @override
-  String get browseAccessStillDisabled =>
-      'すべてのファイルへのアクセスはまだ無効です。続行するには設定で有効にしてください。';
+  String get browseAccessStillDisabled => 'すべてのファイルへのアクセスはまだ無効です。続行するには設定で有効にしてください。';
 
   @override
   String get browseNoDirectories => '端末上にドキュメントディレクトリが見つかりません';
@@ -957,8 +960,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get whatsNewDocAndSheets => 'ドキュメントと表計算';
 
   @override
-  String get whatsNewDocAndSheetsDesc =>
-      'PDF、Word 文書、Excel シートなどを、すべて端末上でローカル表示できます。';
+  String get whatsNewDocAndSheetsDesc => 'PDF、Word 文書、Excel シートなどを、すべて端末上でローカル表示できます。';
 
   @override
   String get whatsNewOcrAi => '高性能 OCR とオンデバイス AI';
@@ -970,8 +972,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get whatsNewSyntaxHighlighting => 'シンタックスハイライト';
 
   @override
-  String get whatsNewSyntaxHighlightingDesc =>
-      '50 以上のプログラミング言語に対応した美しいコードハイライト。';
+  String get whatsNewSyntaxHighlightingDesc => '50 以上のプログラミング言語に対応した美しいコードハイライト。';
 
   @override
   String get whatsNewReadingStats => '読書統計ダッシュボード';
@@ -1034,15 +1035,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get whatsNewMoreOcrDesc => 'OCR 言語の追加対応と認識精度の向上。';
 
   @override
-  String get whatsNewOfflineFirst =>
-      'プライバシー重視のオフラインファースト文書ビューア。アカウント不要、トラッキングなし、インターネット不要。';
+  String get whatsNewOfflineFirst => 'プライバシー重視のオフラインファースト文書ビューア。アカウント不要、トラッキングなし、インターネット不要。';
 
   @override
   String get whatsNewThankYou => 'Fadocx をご利用いただきありがとうございます';
 
   @override
-  String get whatsNewThankYouDesc =>
-      'Fadocx に価値を感じたら、開発支援をご検討ください。あなたの貢献が、プライバシー第一のツール開発を支えます。';
+  String get whatsNewThankYouDesc => 'Fadocx に価値を感じたら、開発支援をご検討ください。あなたの貢献が、プライバシー第一のツール開発を支えます。';
 
   @override
   String get drawerWhatNew => '新機能';
@@ -1132,8 +1131,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get updateVisitGithub => 'GitHubにアクセス';
 
   @override
-  String get updateBetaInfo =>
-      'Fadocx ベータ版は安定版と並行してインストールできる独立したアプリです。安定版アプリやそのデータには影響しません。\n\n安定版に届く前に新機能を試すには、ベータ版をインストールしてください。';
+  String get updateBetaInfo => 'Fadocx ベータ版は安定版と並行してインストールできる独立したアプリです。安定版アプリやそのデータには影響しません。\n\n安定版に届く前に新機能を試すには、ベータ版をインストールしてください。';
 
   @override
   String get updateBannerStable => '安定版更新';
@@ -1187,12 +1185,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsStorageOther => 'その他';
 
   @override
-  String get settingsStorageInfo =>
-      'ドキュメントは端末内のプライベートフォルダーに保存され、他のアプリからはアクセスできません';
+  String get settingsStorageInfo => 'ドキュメントは端末内のプライベートフォルダーに保存され、他のアプリからはアクセスできません';
 
   @override
-  String get settingsStoragePrivateFolderInfo =>
-      'ドキュメントは他のアプリやファイルマネージャーから見えないプライベートフォルダーに保存されています。アクセスできるのは Fadocx のみです。';
+  String get settingsStoragePrivateFolderInfo => 'ドキュメントは他のアプリやファイルマネージャーから見えないプライベートフォルダーに保存されています。アクセスできるのは Fadocx のみです。';
 
   @override
   String get settingsStorageDeleteInfo => '設定の危険ゾーンからドキュメントを削除してください';
@@ -1312,8 +1308,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsCopyInfo => '情報をコピー';
 
   @override
-  String settingsVersionClipboardInfo(
-      String appName, String version, String buildNumber, String packageName) {
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
     return '$appName v$version (Build $buildNumber)\nパッケージ: $packageName';
   }
 
@@ -1321,8 +1316,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsShareApp => '友だちと共有';
 
   @override
-  String get settingsShareMessage =>
-      'Fadocx をチェック！\n\nPDF、Office、スプレッドシート、プレゼンテーション、コードファイル、OCR テキスト抽出に対応したオールインワンドキュメントビューア。完全オフライン、トラッキングなし、オープンソース。\n\nhttps://github.com/anonfaded/Fadocx';
+  String get settingsShareMessage => 'Fadocx をチェック！\n\nPDF、Office、スプレッドシート、プレゼンテーション、コードファイル、OCR テキスト抽出に対応したオールインワンドキュメントビューア。完全オフライン、トラッキングなし、オープンソース。\n\nhttps://github.com/anonfaded/Fadocx';
 
   @override
   String get settingsShareVia => '共有方法...';
@@ -1352,8 +1346,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsPrivacyByDesign => '私たちは設計段階からのプライバシーを重視します。';
 
   @override
-  String get settingsPrivacyTransparency =>
-      'Fadocxは透明性を持って構築されました。あなたのドキュメントはあなたのもの – 私たちのものではありません。';
+  String get settingsPrivacyTransparency => 'Fadocxは透明性を持って構築されました。あなたのドキュメントはあなたのもの – 私たちのものではありません。';
 
   @override
   String get settingsViewSourceCode => 'ソースコードを表示';
@@ -1389,8 +1382,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsIn => '内';
 
   @override
-  String get settingsCopyright =>
-      '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
+  String get settingsCopyright => '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
 
   @override
   String settingsTypeToConfirm(String text) {
@@ -1401,39 +1393,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String get confirm => '確認';
 
   @override
-  String get settingsPrivacyOfflineDesc =>
-      'すべての処理はあなたのデバイスで行われます。インターネットは不要です。';
+  String get settingsPrivacyOfflineDesc => 'すべての処理はあなたのデバイスで行われます。インターネットは不要です。';
 
   @override
-  String get settingsPrivacyLocalStorageDesc =>
-      'あなたのドキュメントはあなたのデバイスに保存されます。何もアップロードされません。';
+  String get settingsPrivacyLocalStorageDesc => 'あなたのドキュメントはあなたのデバイスに保存されます。何もアップロードされません。';
 
   @override
-  String get settingsPrivacyOnDeviceDesc =>
-      'OCRにOpenCV+Tesseractを使用します。AIはローカルで実行されます。';
+  String get settingsPrivacyOnDeviceDesc => 'OCRにOpenCV+Tesseractを使用します。AIはローカルで実行されます。';
 
   @override
-  String get settingsPrivacyOpenSourceDesc =>
-      'コードは公開されています。GitHubで自分で確認してください。';
+  String get settingsPrivacyOpenSourceDesc => 'コードは公開されています。GitHubで自分で確認してください。';
 
   @override
   String get settingsPrivacyNoAdsDesc => '広告なし。追跡なし。分析なし。クラッシュログなし。テレメトリーゼロ。';
 
   @override
-  String get settingsFadcamDesc =>
-      'プライバシー重視の Android マルチメディアスイート。バックグラウンド動画録画、ドライブレコーダー、画面録画、ライブ配信、リモート操作に対応。広告なし、オープンソース。';
+  String get settingsFadcamDesc => 'プライバシー重視の Android マルチメディアスイート。バックグラウンド動画録画、ドライブレコーダー、画面録画、ライブ配信、リモート操作に対応。広告なし、オープンソース。';
 
   @override
-  String get settingsQuranCliDesc =>
-      '聖クルアーンのためのターミナルコンパニオン。読んで、聞いて、動画編集用の字幕を生成できます。';
+  String get settingsQuranCliDesc => '聖クルアーンのためのターミナルコンパニオン。読んで、聞いて、動画編集用の字幕を生成できます。';
 
   @override
-  String get settingsFadcryptDesc =>
-      '高度で洗練されたクロスプラットフォームのアプリロッカー。ファイル、フォルダー、アプリを AES-256-GCM の軍用レベル暗号化で保護。オープンソース、完全無料、テレメトリなし。';
+  String get settingsFadcryptDesc => '高度で洗練されたクロスプラットフォームのアプリロッカー。ファイル、フォルダー、アプリを AES-256-GCM の軍用レベル暗号化で保護。オープンソース、完全無料、テレメトリなし。';
 
   @override
-  String get settingsFadcatDesc =>
-      '軽量で高機能なクロスプラットフォーム Android logcat 代替ツール。Android Studio の重さなし。対応アーキテクチャ向け ADB 同梱、GUI・CLI・MCP サーバーモードで動作。';
+  String get settingsFadcatDesc => '軽量で高機能なクロスプラットフォーム Android logcat 代替ツール。Android Studio の重さなし。対応アーキテクチャ向け ADB 同梱、GUI・CLI・MCP サーバーモードで動作。';
 
   @override
   String get settingsMacosComingSoon => 'macOS は近日対応予定';
@@ -1683,8 +1667,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get viewerEditWithEngine => 'Fadocx Engine で編集';
 
   @override
-  String get viewerEditWithEngineDesc =>
-      'このスプレッドシートを Fadocx レンダリングエンジンで開き、完全な書式、グラフ、レイアウト再現性を備えた忠実なプレビューを表示します。';
+  String get viewerEditWithEngineDesc => 'このスプレッドシートを Fadocx レンダリングエンジンで開き、完全な書式、グラフ、レイアウト再現性を備えた忠実なプレビューを表示します。';
 
   @override
   String get viewerEditWithEngineNote => '注: インタラクティブ編集は今後のアップデートで対応予定です。';

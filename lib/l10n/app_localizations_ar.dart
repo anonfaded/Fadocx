@@ -204,12 +204,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get languageChanged => 'تم تغيير اللغة إلى العربية';
 
   @override
-  String get privacyDescription =>
-      'Fadocx عارض مستندات. تُحفظ ملفاتك محلياً على جهازك ولا تُرسل أبداً إلى أي خادم.';
+  String get privacyDescription => 'Fadocx عارض مستندات. تُحفظ ملفاتك محلياً على جهازك ولا تُرسل أبداً إلى أي خادم.';
 
   @override
-  String get aboutDescription =>
-      'Fadocx v1.0.0 - عارض مستندات خاص بك. بناؤه باحترام خصوصيتك.';
+  String get aboutDescription => 'Fadocx v1.0.0 - عارض مستندات خاص بك. بناؤه باحترام خصوصيتك.';
 
   @override
   String get tableRows => 'صفوف';
@@ -245,8 +243,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pptUnsupported => 'تم تحليل ملف PPT لكنه لا يحتوي على شرائح';
 
   @override
-  String get odpUnsupported =>
-      'تم تحليل ملف ODP لكنه لا يحتوي على شرائح أو محتوى قابل للقراءة';
+  String get odpUnsupported => 'تم تحليل ملف ODP لكنه لا يحتوي على شرائح أو محتوى قابل للقراءة';
 
   @override
   String get noTextContent => 'لم يتم العثور على محتوى نصي';
@@ -354,6 +351,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get categorySlides => 'الشرائح';
 
   @override
+  String get categoryImages => 'الصور';
+
+  @override
+  String get categoryAudio => 'الصوت';
+
+  @override
+  String get categoryVideo => 'الفيديو';
+
+  @override
   String get categoryCode => 'الكود';
 
   @override
@@ -389,8 +395,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get becomeAPatron => 'كن راعياً';
 
   @override
-  String get patreonDescription =>
-      'دعمك يساعد Fadocx وFadCam على الاستمرار في النمو. مشتركو Patreon يحصلون على مزايا حصرية تشمل ميزات مميزة ووصولاً مبكراً عبر جميع تطبيقات FadSec Lab.\n\nلمزيد من المعلومات، زر Patreon من الرابط أدناه واطلع على الباقات المتاحة ومزاياها.';
+  String get patreonDescription => 'دعمك يساعد Fadocx وFadCam على الاستمرار في النمو. مشتركو Patreon يحصلون على مزايا حصرية تشمل ميزات مميزة ووصولاً مبكراً عبر جميع تطبيقات FadSec Lab.\n\nلمزيد من المعلومات، زر Patreon من الرابط أدناه واطلع على الباقات المتاحة ومزاياها.';
 
   @override
   String get discordTitle => 'انضم إلى Discord الخاص بنا';
@@ -513,8 +518,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeWelcomeTitle => 'مرحباً بك في Fadocx';
 
   @override
-  String get homeWelcomeSubtitle =>
-      'استكشف ملفات الأمثلة أو استورد مستنداتك الخاصة للبدء';
+  String get homeWelcomeSubtitle => 'استكشف ملفات الأمثلة أو استورد مستنداتك الخاصة للبدء';
 
   @override
   String get homeExploreSamples => 'استكشاف ملفات الأمثلة';
@@ -845,26 +849,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get browseImport => 'استيراد';
 
   @override
-  String get browseAllFilesAccessRequired =>
-      'مطلوب إذن الوصول إلى جميع الملفات لتصفح المستندات على جهازك';
+  String get browseAllFilesAccessRequired => 'مطلوب إذن الوصول إلى جميع الملفات لتصفح المستندات على جهازك';
 
   @override
   String get browsePermissionRequired => 'الإذن مطلوب';
 
   @override
-  String get browseAllFilesAccessDenied =>
-      'مطلوب إذن الوصول إلى جميع الملفات لتصفح وقراءة المستندات على جهازك. يرجى منح هذا الإذن للمتابعة.';
+  String get browseAllFilesAccessDenied => 'مطلوب إذن الوصول إلى جميع الملفات لتصفح وقراءة المستندات على جهازك. يرجى منح هذا الإذن للمتابعة.';
 
   @override
   String get browseOpenSettings => 'فتح الإعدادات';
 
   @override
-  String get browseAccessStillDisabled =>
-      'ما زال الوصول إلى جميع الملفات معطلاً. يرجى تفعيله من الإعدادات للمتابعة.';
+  String get browseAccessStillDisabled => 'ما زال الوصول إلى جميع الملفات معطلاً. يرجى تفعيله من الإعدادات للمتابعة.';
 
   @override
-  String get browseNoDirectories =>
-      'لم يتم العثور على مجلدات مستندات على الجهاز';
+  String get browseNoDirectories => 'لم يتم العثور على مجلدات مستندات على الجهاز';
 
   @override
   String browseErrorPrefix(String error) {
@@ -960,71 +960,61 @@ class AppLocalizationsAr extends AppLocalizations {
   String get whatsNewDocAndSheets => 'المستندات والجداول';
 
   @override
-  String get whatsNewDocAndSheetsDesc =>
-      'اعرض ملفات PDF ومستندات Word وجداول Excel والمزيد، كل ذلك محلياً على جهازك.';
+  String get whatsNewDocAndSheetsDesc => 'اعرض ملفات PDF ومستندات Word وجداول Excel والمزيد، كل ذلك محلياً على جهازك.';
 
   @override
   String get whatsNewOcrAi => 'OCR ذكي وذكاء اصطناعي على الجهاز';
 
   @override
-  String get whatsNewOcrAiDesc =>
-      'استخرج النص من الصور باستخدام OCR متقدم على الجهاز. دعم لعدة لغات.';
+  String get whatsNewOcrAiDesc => 'استخرج النص من الصور باستخدام OCR متقدم على الجهاز. دعم لعدة لغات.';
 
   @override
   String get whatsNewSyntaxHighlighting => 'تمييز الصياغة';
 
   @override
-  String get whatsNewSyntaxHighlightingDesc =>
-      'تمييز جميل للشيفرة لأكثر من 50 لغة برمجة.';
+  String get whatsNewSyntaxHighlightingDesc => 'تمييز جميل للشيفرة لأكثر من 50 لغة برمجة.';
 
   @override
   String get whatsNewReadingStats => 'لوحة إحصاءات القراءة';
 
   @override
-  String get whatsNewReadingStatsDesc =>
-      'تابع تقدم قراءتك مع إحصاءات مفصلة وتتبع للوقت.';
+  String get whatsNewReadingStatsDesc => 'تابع تقدم قراءتك مع إحصاءات مفصلة وتتبع للوقت.';
 
   @override
   String get whatsNewLibraryCategories => 'مكتبة بمجلدات حسب الفئة';
 
   @override
-  String get whatsNewLibraryCategoriesDesc =>
-      'نظّم مستنداتك حسب النوع مع تصنيف ذكي تلقائي.';
+  String get whatsNewLibraryCategoriesDesc => 'نظّم مستنداتك حسب النوع مع تصنيف ذكي تلقائي.';
 
   @override
   String get whatsNewFileManagement => 'إدارة الملفات';
 
   @override
-  String get whatsNewFileManagementDesc =>
-      'أعد التسمية وكرر وصدّر واحذف مستنداتك بسهولة.';
+  String get whatsNewFileManagementDesc => 'أعد التسمية وكرر وصدّر واحذف مستنداتك بسهولة.';
 
   @override
   String get whatsNewThemes => 'الوضع الفاتح والداكن';
 
   @override
-  String get whatsNewThemesDesc =>
-      'اختر المظهر الذي يناسبك، الوضع الداكن لليل والفاتح للنهار.';
+  String get whatsNewThemesDesc => 'اختر المظهر الذي يناسبك، الوضع الداكن لليل والفاتح للنهار.';
 
   @override
   String get whatsNewFadDrive => 'دمج FadDrive';
 
   @override
-  String get whatsNewFadDriveDesc =>
-      'مزامنة سحابية لمستنداتك للوصول إليها من أي مكان وفي أي وقت.';
+  String get whatsNewFadDriveDesc => 'مزامنة سحابية لمستنداتك للوصول إليها من أي مكان وفي أي وقت.';
 
   @override
   String get whatsNewEditing => 'تحرير المستندات';
 
   @override
-  String get whatsNewEditingDesc =>
-      'أجرِ تعديلات سريعة على مستنداتك داخل Fadocx.';
+  String get whatsNewEditingDesc => 'أجرِ تعديلات سريعة على مستنداتك داخل Fadocx.';
 
   @override
   String get whatsNewBookmarks => 'الإشارات المرجعية والتعليقات';
 
   @override
-  String get whatsNewBookmarksDesc =>
-      'ضع علامة على الصفحات المهمة وأضف تعليقات للرجوع إليها لاحقاً.';
+  String get whatsNewBookmarksDesc => 'ضع علامة على الصفحات المهمة وأضف تعليقات للرجوع إليها لاحقاً.';
 
   @override
   String get whatsNewConversion => 'تحويل المستندات';
@@ -1036,8 +1026,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get whatsNewAmoled => 'سمة AMOLED السوداء';
 
   @override
-  String get whatsNewAmoledDesc =>
-      'سمة سوداء نقية لشاشات AMOLED لتوفير البطارية في الوضع الداكن.';
+  String get whatsNewAmoledDesc => 'سمة سوداء نقية لشاشات AMOLED لتوفير البطارية في الوضع الداكن.';
 
   @override
   String get whatsNewMoreOcr => 'المزيد من لغات OCR';
@@ -1046,15 +1035,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get whatsNewMoreOcrDesc => 'دعم لغات OCR إضافية ودقة تعرف محسنة.';
 
   @override
-  String get whatsNewOfflineFirst =>
-      'عارض مستندات يعمل دون اتصال أولاً ومبني للخصوصية. لا حسابات ولا تتبع ولا حاجة للإنترنت.';
+  String get whatsNewOfflineFirst => 'عارض مستندات يعمل دون اتصال أولاً ومبني للخصوصية. لا حسابات ولا تتبع ولا حاجة للإنترنت.';
 
   @override
   String get whatsNewThankYou => 'شكراً لاستخدامك Fadocx';
 
   @override
-  String get whatsNewThankYouDesc =>
-      'إذا وجدت قيمة في Fadocx ففكر في دعم تطويره. مساهمتك تساعدنا على الاستمرار في بناء أدوات تضع الخصوصية أولاً.';
+  String get whatsNewThankYouDesc => 'إذا وجدت قيمة في Fadocx ففكر في دعم تطويره. مساهمتك تساعدنا على الاستمرار في بناء أدوات تضع الخصوصية أولاً.';
 
   @override
   String get drawerWhatNew => 'ما الجديد';
@@ -1129,8 +1116,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get updateBetaRelease => 'إصدار بيتا';
 
   @override
-  String get updateBetaDesc =>
-      'وصول مبكر إلى الميزات الجديدة، قد تحتوي على أخطاء';
+  String get updateBetaDesc => 'وصول مبكر إلى الميزات الجديدة، قد تحتوي على أخطاء';
 
   @override
   String get updateMaybeLater => 'ربما لاحقاً';
@@ -1145,8 +1131,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get updateVisitGithub => 'زيارة GitHub';
 
   @override
-  String get updateBetaInfo =>
-      'تطبيق Fadocx بيتا مستقل ويمكن تثبيته بجانب الإصدار المستقر. لن يتداخل مع التطبيق المستقر أو بياناته.\n\nثبّت البيتا لاختبار الميزات الجديدة قبل وصولها إلى الإصدار المستقر.';
+  String get updateBetaInfo => 'تطبيق Fadocx بيتا مستقل ويمكن تثبيته بجانب الإصدار المستقر. لن يتداخل مع التطبيق المستقر أو بياناته.\n\nثبّت البيتا لاختبار الميزات الجديدة قبل وصولها إلى الإصدار المستقر.';
 
   @override
   String get updateBannerStable => 'تحديث مستقر';
@@ -1200,16 +1185,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsStorageOther => 'أخرى';
 
   @override
-  String get settingsStorageInfo =>
-      'تُخزَّن المستندات في مجلد خاص على جهازك ولا يمكن للتطبيقات الأخرى الوصول إليها';
+  String get settingsStorageInfo => 'تُخزَّن المستندات في مجلد خاص على جهازك ولا يمكن للتطبيقات الأخرى الوصول إليها';
 
   @override
-  String get settingsStoragePrivateFolderInfo =>
-      'تُخزَّن المستندات في مجلد خاص مخفي عن التطبيقات الأخرى ومديري الملفات. لا يمكن الوصول إليها إلا من خلال Fadocx.';
+  String get settingsStoragePrivateFolderInfo => 'تُخزَّن المستندات في مجلد خاص مخفي عن التطبيقات الأخرى ومديري الملفات. لا يمكن الوصول إليها إلا من خلال Fadocx.';
 
   @override
-  String get settingsStorageDeleteInfo =>
-      'احذف المستندات من منطقة الخطر في الإعدادات';
+  String get settingsStorageDeleteInfo => 'احذف المستندات من منطقة الخطر في الإعدادات';
 
   @override
   String get settingsStorageEmpty => 'لا توجد مستندات';
@@ -1224,15 +1206,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsAutoUpdateCheck => 'التحقق التلقائي من التحديثات';
 
   @override
-  String get settingsAutoUpdateCheckDesc =>
-      'تحقق من التحديثات عند تشغيل التطبيق';
+  String get settingsAutoUpdateCheckDesc => 'تحقق من التحديثات عند تشغيل التطبيق';
 
   @override
   String get settingsReplayOnboarding => 'إعادة تشغيل المقدمة';
 
   @override
-  String get settingsReplayOnboardingDesc =>
-      'عرض شرائح المقدمة عند تشغيل التطبيق التالي';
+  String get settingsReplayOnboardingDesc => 'عرض شرائح المقدمة عند تشغيل التطبيق التالي';
 
   @override
   String get settingsEnabled => 'مُفعَّل';
@@ -1280,8 +1260,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsResetSettings => 'إعادة تعيين الإعدادات';
 
   @override
-  String get settingsResetSettingsDesc =>
-      'استعادة جميع الإعدادات إلى الافتراضية';
+  String get settingsResetSettingsDesc => 'استعادة جميع الإعدادات إلى الافتراضية';
 
   @override
   String get settingsResetDone => 'تمت إعادة تعيين الإعدادات';
@@ -1302,8 +1281,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsCheckingUpdates => 'جارٍ التحقق من التحديثات…';
 
   @override
-  String get settingsNoInternet =>
-      'لا توجد اتصالية بالإنترنت. تحقق من شبكتك وحاول مرة أخرى.';
+  String get settingsNoInternet => 'لا توجد اتصالية بالإنترنت. تحقق من شبكتك وحاول مرة أخرى.';
 
   @override
   String get settingsUpToDate => 'أنت محدث';
@@ -1330,8 +1308,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsCopyInfo => 'نسخ المعلومات';
 
   @override
-  String settingsVersionClipboardInfo(
-      String appName, String version, String buildNumber, String packageName) {
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
     return '$appName v$version (الإصدار $buildNumber)\nالحزمة: $packageName';
   }
 
@@ -1339,8 +1316,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsShareApp => 'شارك مع الأصدقاء';
 
   @override
-  String get settingsShareMessage =>
-      'جرّب Fadocx!\n\nعارض مستندات متكامل: PDF وملفات Office والجداول والعروض التقديمية وملفات البرمجة واستخراج النص عبر OCR، بالكامل دون اتصال، بدون تتبع، ومفتوح المصدر.\n\nhttps://github.com/anonfaded/Fadocx';
+  String get settingsShareMessage => 'جرّب Fadocx!\n\nعارض مستندات متكامل: PDF وملفات Office والجداول والعروض التقديمية وملفات البرمجة واستخراج النص عبر OCR، بالكامل دون اتصال، بدون تتبع، ومفتوح المصدر.\n\nhttps://github.com/anonfaded/Fadocx';
 
   @override
   String get settingsShareVia => 'مشاركة عبر...';
@@ -1370,8 +1346,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsPrivacyByDesign => 'نؤمن بالخصوصية حسب التصميم.';
 
   @override
-  String get settingsPrivacyTransparency =>
-      'تم بناء Fadocx بشفافية. مستنداتك هي شأنك الخاص - وليس شأننا.';
+  String get settingsPrivacyTransparency => 'تم بناء Fadocx بشفافية. مستنداتك هي شأنك الخاص - وليس شأننا.';
 
   @override
   String get settingsViewSourceCode => 'عرض الكود المصدري';
@@ -1407,8 +1382,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsIn => 'في';
 
   @override
-  String get settingsCopyright =>
-      '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
+  String get settingsCopyright => '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
 
   @override
   String settingsTypeToConfirm(String text) {
@@ -1419,40 +1393,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirm => 'تأكيد';
 
   @override
-  String get settingsPrivacyOfflineDesc =>
-      'كل المعالجة تحدث على جهازك. لا إنترنت مطلوب.';
+  String get settingsPrivacyOfflineDesc => 'كل المعالجة تحدث على جهازك. لا إنترنت مطلوب.';
 
   @override
-  String get settingsPrivacyLocalStorageDesc =>
-      'مستنداتك تبقى على جهازك. لا شيء يتم تحميله.';
+  String get settingsPrivacyLocalStorageDesc => 'مستنداتك تبقى على جهازك. لا شيء يتم تحميله.';
 
   @override
-  String get settingsPrivacyOnDeviceDesc =>
-      'يستخدم OpenCV + Tesseract للـ OCR. الذكاء الاصطناعي يعمل محلياً.';
+  String get settingsPrivacyOnDeviceDesc => 'يستخدم OpenCV + Tesseract للـ OCR. الذكاء الاصطناعي يعمل محلياً.';
 
   @override
-  String get settingsPrivacyOpenSourceDesc =>
-      'الكود عام. اختبره بنفسك على GitHub.';
+  String get settingsPrivacyOpenSourceDesc => 'الكود عام. اختبره بنفسك على GitHub.';
 
   @override
-  String get settingsPrivacyNoAdsDesc =>
-      'بدون إعلانات. بدون تتبع. بدون تحليلات. بدون سجلات أعطال. صفر تلميترية.';
+  String get settingsPrivacyNoAdsDesc => 'بدون إعلانات. بدون تتبع. بدون تحليلات. بدون سجلات أعطال. صفر تلميترية.';
 
   @override
-  String get settingsFadcamDesc =>
-      'حزمة وسائط متعددة خاصة لأندرويد: تسجيل فيديو في الخلفية، كاميرا سيارة، تسجيل الشاشة، بث مباشر وتحكم عن بعد، بدون إعلانات ومفتوحة المصدر.';
+  String get settingsFadcamDesc => 'حزمة وسائط متعددة خاصة لأندرويد: تسجيل فيديو في الخلفية، كاميرا سيارة، تسجيل الشاشة، بث مباشر وتحكم عن بعد، بدون إعلانات ومفتوحة المصدر.';
 
   @override
-  String get settingsQuranCliDesc =>
-      'رفيقك الطرفي للقرآن الكريم: اقرأ، استمع، وأنشئ ترجمات لتحرير الفيديو!';
+  String get settingsQuranCliDesc => 'رفيقك الطرفي للقرآن الكريم: اقرأ، استمع، وأنشئ ترجمات لتحرير الفيديو!';
 
   @override
-  String get settingsFadcryptDesc =>
-      'تطبيق قفل متقدم وأنيق متعدد المنصات يحمي الملفات والمجلدات والتطبيقات بتشفير AES-256-GCM العسكري. مفتوح المصدر ومجاني تماماً وبدون تتبع!';
+  String get settingsFadcryptDesc => 'تطبيق قفل متقدم وأنيق متعدد المنصات يحمي الملفات والمجلدات والتطبيقات بتشفير AES-256-GCM العسكري. مفتوح المصدر ومجاني تماماً وبدون تتبع!';
 
   @override
-  String get settingsFadcatDesc =>
-      'بديل Android logcat خفيف وغني بالميزات ومتعدد المنصات، بدون ثقل Android Studio. يتضمن ADB للبنى المدعومة ويعمل بواجهة رسومية أو سطر أوامر أو وضع خادم MCP.';
+  String get settingsFadcatDesc => 'بديل Android logcat خفيف وغني بالميزات ومتعدد المنصات، بدون ثقل Android Studio. يتضمن ADB للبنى المدعومة ويعمل بواجهة رسومية أو سطر أوامر أو وضع خادم MCP.';
 
   @override
   String get settingsMacosComingSoon => 'macOS قريباً';
@@ -1482,8 +1447,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewerSidebarBookmarks => 'إشارات مرجعية';
 
   @override
-  String get viewerSidebarNotesDesc =>
-      'أضف ملاحظات وتعليقات توضيحية إلى صفحات PDF';
+  String get viewerSidebarNotesDesc => 'أضف ملاحظات وتعليقات توضيحية إلى صفحات PDF';
 
   @override
   String get viewerSidebarBookmarksDesc => 'احفظ ونظّم صفحاتك المفضلة';
@@ -1578,8 +1542,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get viewerCopyDocumentText =>
-      'سيتم نسخ محتوى المستند بالكامل إلى الحافظة.';
+  String get viewerCopyDocumentText => 'سيتم نسخ محتوى المستند بالكامل إلى الحافظة.';
 
   @override
   String viewerWordsLines(num words, num lines) {
@@ -1610,8 +1573,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewerCopyExtractedTitle => 'نسخ النص المستخرج';
 
   @override
-  String get viewerCopyExtractedDesc =>
-      'انسخ النص المستخرج من هذه الصورة عبر OCR.';
+  String get viewerCopyExtractedDesc => 'انسخ النص المستخرج من هذه الصورة عبر OCR.';
 
   @override
   String viewerCopiedWordsChars(num words, num chars) {
@@ -1705,12 +1667,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewerEditWithEngine => 'تحرير بمحرك Fadocx';
 
   @override
-  String get viewerEditWithEngineDesc =>
-      'افتح جدول البيانات هذا في محرك عرض Fadocx لمعاينة مرئية دقيقة بكامل التنسيق والرسوم والتخطيط.';
+  String get viewerEditWithEngineDesc => 'افتح جدول البيانات هذا في محرك عرض Fadocx لمعاينة مرئية دقيقة بكامل التنسيق والرسوم والتخطيط.';
 
   @override
-  String get viewerEditWithEngineNote =>
-      'ملاحظة: التحرير التفاعلي قادم في تحديث مستقبلي.';
+  String get viewerEditWithEngineNote => 'ملاحظة: التحرير التفاعلي قادم في تحديث مستقبلي.';
 
   @override
   String get viewerNotNow => 'ليس الآن';
@@ -1759,8 +1719,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scannerDocumentDetected => 'تم اكتشاف المستند - أثبته';
 
   @override
-  String get scannerKeepDocumentFlat =>
-      'أبقِ المستند مستقيماً ومسطحاً للحصول على أفضل النتائج';
+  String get scannerKeepDocumentFlat => 'أبقِ المستند مستقيماً ومسطحاً للحصول على أفضل النتائج';
 
   @override
   String get scannerUpload => 'رفع';
@@ -1916,8 +1875,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pdfPasswordRequired => 'مطلوب كلمة مرور PDF';
 
   @override
-  String get pdfPasswordDesc =>
-      'هذا الـ PDF محمي بكلمة مرور. أدخل كلمة المرور لفتحه.';
+  String get pdfPasswordDesc => 'هذا الـ PDF محمي بكلمة مرور. أدخل كلمة المرور لفتحه.';
 
   @override
   String get pdfPasswordLabel => 'كلمة المرور';

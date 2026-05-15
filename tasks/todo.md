@@ -76,6 +76,25 @@ Replace ALL hardcoded English strings across the app with AppLocalizations keys,
 - Home drawer main group and row chips now use lower light-mode alpha so the drawer cards do not wash out on bright themes.
 - Home drawer needed a lower base surface tier, not just lower alpha, to stay distinct in light mode.
 - Home drawer and update banner now use the same neutral gray shell family as Settings instead of a white/light base layer.
+- Scan action card binary strip was anchored too far left inside the black wedge and its motion was too subtle to read as active animation.
+- Recentered the binary strip in the wedge and increased the per-cell motion/swap cadence so the scan card reads as alive again.
+- Scan card binary animation now uses 2 columns again and follows the same scrolling motion model as the import card instead of a static-looking three-column layout.
+- Scan card binary rain now uses discrete 0/1 toggles per cell instead of a crossfade, so the digits read as a proper rain effect.
+- Scan card rain still looked synchronized because every cell shared the same global toggle step; each cell now has its own phase offset.
+- Scan card flip cadence was still a bit too quick, so the binary swap speed has been reduced while keeping the downward rain motion.
+- Library category root cause: scan files were bucketed by extension only, so scanned PNGs in the `Scans` folder were counted and filtered as `images`.
+- Library category filter now uses the same path-aware scan detection as the counts, so scanned files land under `Scans` instead of `Images`.
+- Library category classifier now keys off the managed storage folder first (`PDFs`, `Documents`, `Spreadsheets`, `Presentations`, `Images`, `Audio`, `Video`, `Code`, `Scans`) and only falls back to extension for legacy paths.
+- First-release cleanup: removed the extension fallback entirely so Library categories now resolve only from the managed folder path; unknown paths fall into `other`.
+- Scan category rule tightened: scans are classified strictly from the `Scans` folder path, not from the `Fadocx_scanned_` filename prefix.
+- Import/browse screen now exposes the full category set again (`Images`, `Audio`, `Video`, `Code`, `Scans`) instead of only the older document chips.
+- Browse screen scanning now classifies files by managed folder path first and then falls back to extension-based grouping for loose device files, so the chip counts and filters stay aligned.
+- Added localized ARB labels and regenerated the localization layer so the new import chips compile in every supported language.
+- Import browser should stay scoped to device document categories; `Scans` was removed because that bucket belongs to Library, not the import screen.
+- Home recent-files thumbnails now render actual presentation previews for `ppt`, `pptx`, and `odp` when thumbnail bytes exist instead of forcing the placeholder card.
+- Code-like extensions were still being routed into `Documents` at save time, so the Library code chip stayed undercounted until `StorageService` learned the full code extension set.
+- Browse/import screen should stay extension-based; code-like extensions were landing in `Docs`, so the browse classifier now maps them to `Code` instead of following the Library folder contract.
+- Browse chips are now count-sorted so the busiest categories float left instead of being locked to a fixed visual order.
 
 ## Naming Convention for .arb keys
 - Common/shared: camelCase (e.g., `cancel`, `delete`, `copy`)

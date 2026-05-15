@@ -85,7 +85,6 @@ class StorageService {
       case 'json':
       case 'xml':
       case 'atom':
-        return codeFolder;
       case 'epub':
       case 'ott':
         return documentsFolder;

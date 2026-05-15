@@ -22,3 +22,20 @@
 - For drawer cards, tone down only the light-mode shell alpha first. If the main group is too bright, matching row chips alone will not fix the hierarchy.
 - When a drawer still reads too bright after alpha tuning, move the shell to a lower surface tier (`surfaceContainerLowest`) instead of continuing to shave opacity off the same layer.
 - If the user wants the drawer to match Settings, keep the drawer shell on the same gray family as Settings rather than switching it to a white base layer. Surface identity matters more than raw contrast tweaks.
+- For animated wedge effects, tune both anchor position and motion density. A repeating painter can still look stuck if the visible content sits too far from the active region or the swap cadence is too low.
+- If a custom animation should match an existing card, copy the working motion model first. Reusing the same scrolling structure is safer than inventing a new column-swap pattern and hoping it reads as motion.
+- For binary-rain effects, keep the digit change discrete. Crossfading between 0 and 1 often reads like a fading label rather than rain, especially when the background already scrolls.
+- Even with discrete binary digits, a global step makes the whole field feel synchronized. Give each cell its own phase so the rain has local randomness.
+- If the rain motion is right but the digit flip feels busy, slow the toggle cadence separately from the vertical drift. Those two timings do not have to match.
+- When a category is derived from storage semantics, use the same path-aware classifier for both counts and filters. Extension-only filters will split the same file into different chips and views.
+- If the app stores files inside managed category folders, classify by the folder name before the file extension. The extension is only a fallback for legacy paths, not the primary source of truth.
+- If the release already controls storage layout, do not keep a fallback classifier around "just in case". It can hide bad data and make the UI drift from the actual directory structure.
+- When a folder name is the storage contract, do not infer that category from a filename prefix. The folder path is stable; the filename is just payload.
+- If an import browser scans arbitrary device storage, keep the managed-folder check first but preserve a fallback for loose files. Library can be folder-only; the browser cannot.
+- When a screen has its own category chips, do not assume the Library set covers it. The import browser needs its own full chip list and icon mapping.
+- Do not gate real thumbnails behind a format-specific placeholder just because the file is a presentation. If bytes exist, render them; only fall back when generation fails or returns null.
+- Keep Library-only buckets out of the device import browser. A shared label can read as a storage category in one screen and a navigation mistake in another.
+- When Library categories look wrong, check the storage router before the UI classifier. If the save-time folder is wrong, folder-based filtering will faithfully mirror the mistake.
+- Device import/browse screens should classify by extension, not by the Library folder contract. The browse screen is a source scanner, not a managed-storage view.
+- For browse screens, code-like extensions such as `html`, `json`, `xml`, `sh`, `py`, and `java` should stay in the `Code` bucket even when they are plain text files.
+- If chip order feels random, sort the visible chips by count instead of hard-coding the order. Static category rows age badly once file mixes change.
