@@ -234,11 +234,9 @@ class ThumbnailGenerationService {
             : 'SCAN • ${fileType.toUpperCase()}';
 
         return _renderCanvas((canvas, size) {
-          _paintShadowBackground(canvas, size, ThumbnailColors.scanCyan);
-
           final cardRect = ui.RRect.fromRectAndRadius(
-            ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
-            const ui.Radius.circular(22),
+            ui.Rect.fromLTWH(0, 0, size.width, size.height),
+            ui.Radius.zero,
           );
           final cardBg = brightness == ui.Brightness.dark ? _darkCardBg : _lightCardBg;
           canvas.drawRRect(cardRect, ui.Paint()..color = cardBg);
@@ -247,10 +245,10 @@ class ThumbnailGenerationService {
           
           // Draw image first (fills entire card area)
           final imageAreaRect = ui.Rect.fromLTWH(
-            18,
-            18,
-            size.width - 36,
-            size.height - 36,
+            0,
+            headerHeight,
+            size.width,
+            size.height - headerHeight,
           );
           
           // Calculate scale to fit image in the card
@@ -289,8 +287,8 @@ class ThumbnailGenerationService {
 
           // Draw header banner on top of image
           final headerRect = ui.RRect.fromRectAndRadius(
-            ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight),
-            const ui.Radius.circular(22),
+            ui.Rect.fromLTWH(0, 0, size.width, headerHeight),
+            ui.Radius.zero,
           );
           _paintPreviewHeader(
             canvas,
@@ -321,17 +319,15 @@ class ThumbnailGenerationService {
     ui.Brightness brightness = ui.Brightness.light,
   }) async {
     return _renderCanvas((canvas, size) {
-      _paintShadowBackground(canvas, size, accent);
-
       final cardRect = ui.RRect.fromRectAndRadius(
-        ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
-        const ui.Radius.circular(22),
+        ui.Rect.fromLTWH(0, 0, size.width, size.height),
+        ui.Radius.zero,
       );
       final cardBg = brightness == ui.Brightness.dark ? _darkCardBg : _lightCardBg;
       canvas.drawRRect(cardRect, ui.Paint()..color = cardBg);
 
       final headerHeight = _compactHeaderHeight;
-      final headerRect = ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight);
+      final headerRect = ui.Rect.fromLTWH(0, 0, size.width, headerHeight);
       _paintPreviewHeader(
         canvas,
         rect: headerRect,
@@ -339,10 +335,10 @@ class ThumbnailGenerationService {
         text: meta,
       );
 
-      final contentTop = 18.0 + headerHeight;
-      final contentHeight = size.height - 36 - headerHeight;
-      final contentWidth = size.width - 36;
-      final centerX = 18.0 + contentWidth / 2;
+      final contentTop = 0.0 + headerHeight;
+      final contentHeight = size.height - headerHeight;
+      final contentWidth = size.width;
+      final centerX = 0.0 + contentWidth / 2;
       final centerY = contentTop + contentHeight / 2;
 
       canvas.drawCircle(
@@ -370,7 +366,7 @@ class ThumbnailGenerationService {
         text: label,
         top: centerY + 30,
         maxWidth: contentWidth,
-        left: 18,
+        left: 0,
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
@@ -470,11 +466,9 @@ class ThumbnailGenerationService {
 
     try {
       return _renderCanvas((canvas, size) {
-        _paintShadowBackground(canvas, size, ThumbnailColors.pdfRed);
-
         final cardRect = ui.RRect.fromRectAndRadius(
-          ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
-          const ui.Radius.circular(22),
+          ui.Rect.fromLTWH(0, 0, size.width, size.height),
+          ui.Radius.zero,
         );
         final pdfCardBg = brightness == ui.Brightness.dark ? _darkCardBg : _lightCardBg;
         canvas.drawRRect(
@@ -482,8 +476,8 @@ class ThumbnailGenerationService {
 
         final headerHeight = _compactHeaderHeight;
         final headerRect = ui.RRect.fromRectAndRadius(
-          ui.Rect.fromLTWH(18, 18, size.width - 36, headerHeight),
-          const ui.Radius.circular(22),
+          ui.Rect.fromLTWH(0, 0, size.width, headerHeight),
+          ui.Radius.zero,
         );
         _paintPreviewHeader(
           canvas,
@@ -496,9 +490,9 @@ class ThumbnailGenerationService {
           ),
         );
 
-        final imageTop = 18.0 + headerHeight;
-        final imageAreaHeight = size.height - 36 - headerHeight;
-        final imageAreaWidth = size.width - 36;
+        final imageTop = 0.0 + headerHeight;
+        final imageAreaHeight = size.height - headerHeight;
+        final imageAreaWidth = size.width;
 
         final scale = imageAreaWidth / pageImage.width;
         final visibleSourceHeight =
@@ -511,7 +505,7 @@ class ThumbnailGenerationService {
         );
         final drawWidth = imageAreaWidth;
         final drawHeight = imageAreaHeight;
-        final drawLeft = 18.0;
+        final drawLeft = 0.0;
         final drawTop = imageTop;
 
         canvas.drawImageRect(
@@ -727,11 +721,9 @@ class ThumbnailGenerationService {
     ui.Brightness brightness = ui.Brightness.light,
   }) {
     return _renderCanvas((canvas, size) {
-      _paintShadowBackground(canvas, size, accent);
-
       final pageRect = ui.RRect.fromRectAndRadius(
-        ui.Rect.fromLTWH(20, 20, size.width - 40, size.height - 40),
-        const ui.Radius.circular(22),
+        ui.Rect.fromLTWH(0, 0, size.width, size.height),
+        ui.Radius.zero,
       );
       final pageBg = brightness == ui.Brightness.dark ? _darkPageBg : _lightPageBg;
       canvas.drawRRect(
@@ -739,8 +731,8 @@ class ThumbnailGenerationService {
 
       final headerHeight = _compactHeaderHeight;
       final headerRect = ui.RRect.fromRectAndRadius(
-        ui.Rect.fromLTWH(20, 20, size.width - 40, headerHeight),
-        const ui.Radius.circular(22),
+        ui.Rect.fromLTWH(0, 0, size.width, headerHeight),
+        ui.Radius.zero,
       );
       _paintPreviewHeader(
         canvas,
@@ -752,9 +744,9 @@ class ThumbnailGenerationService {
       _paintText(
         canvas,
         text: label,
-        left: 44,
-        top: 100,
-        maxWidth: size.width - 88,
+        left: 8,
+        top: headerHeight + 12,
+        maxWidth: size.width - 16,
         style: TextStyle(
           color: _uiColor(accent),
           fontSize: 18,
@@ -769,9 +761,9 @@ class ThumbnailGenerationService {
           canvas,
           text: text,
           language: language,
-          left: 44,
-          top: 134,
-          maxWidth: size.width - 88,
+          left: 8,
+          top: headerHeight + 48,
+          maxWidth: size.width - 16,
           maxLines: 16,
           baseStyle: TextStyle(
             color: brightness == ui.Brightness.dark ? _darkText : _lightText,
@@ -785,9 +777,9 @@ class ThumbnailGenerationService {
         _paintText(
           canvas,
           text: text,
-          left: 44,
-          top: 134,
-          maxWidth: size.width - 88,
+          left: 8,
+          top: headerHeight + 48,
+          maxWidth: size.width - 16,
           maxLines: 16,
           style: TextStyle(
             color: brightness == ui.Brightness.dark ? _darkText : _lightText,
@@ -856,19 +848,17 @@ class ThumbnailGenerationService {
     ui.Brightness brightness = ui.Brightness.light,
   }) {
     return _renderCanvas((canvas, size) {
-      _paintShadowBackground(canvas, size, accent);
-
       final cardRect = ui.RRect.fromRectAndRadius(
-        ui.Rect.fromLTWH(18, 18, size.width - 36, size.height - 36),
-        const ui.Radius.circular(22),
+        ui.Rect.fromLTWH(0, 0, size.width, size.height),
+        ui.Radius.zero,
       );
       final sheetCardBg = brightness == ui.Brightness.dark ? _darkCardBg : _lightCardBg;
       canvas.drawRRect(
           cardRect, ui.Paint()..color = sheetCardBg);
 
       final topBandRect = ui.RRect.fromRectAndRadius(
-        ui.Rect.fromLTWH(18, 18, size.width - 36, _compactHeaderHeight),
-        const ui.Radius.circular(22),
+        ui.Rect.fromLTWH(0, 0, size.width, _compactHeaderHeight),
+        ui.Radius.zero,
       );
 
       final firstSheet = sheets.first;
@@ -892,10 +882,10 @@ class ThumbnailGenerationService {
         text: '$label • $sheetName • $dataRowCount rows',
       );
 
-      final gridLeft = 18.0;
-      final gridTop = 80.0;
-      final gridWidth = size.width - 36;
-      final gridHeight = size.height - 104;
+      final gridLeft = 0.0;
+      final gridTop = 56.0;
+      final gridWidth = size.width;
+      final gridHeight = size.height - 56;
       final serialColWidth = 30.0;
       final dataGridWidth = gridWidth - serialColWidth;
       final dataColWidth = dataGridWidth / visibleColCount;
@@ -1034,11 +1024,9 @@ class ThumbnailGenerationService {
     IconData? icon,
   }) {
     return _renderCanvas((canvas, size) {
-      _paintShadowBackground(canvas, size, accent);
-
       final cardRect = ui.RRect.fromRectAndRadius(
-        ui.Rect.fromLTWH(26, 32, size.width - 52, size.height - 64),
-        const ui.Radius.circular(26),
+        ui.Rect.fromLTWH(0, 0, size.width, size.height),
+        ui.Radius.zero,
       );
       final placeholderBg = brightness == ui.Brightness.dark ? _darkPlaceholderBg : _lightPlaceholderBg;
       canvas.drawRRect(
@@ -1118,26 +1106,6 @@ class ThumbnailGenerationService {
     }
 
     return byteData.buffer.asUint8List();
-  }
-
-  static void _paintShadowBackground(
-    ui.Canvas canvas,
-    ui.Size size,
-    ColorRgb accent,
-  ) {
-    canvas.drawRect(
-      ui.Rect.fromLTWH(0, 0, size.width, size.height),
-      ui.Paint()..color = _uiColor(accent, alpha: 18),
-    );
-
-    final shadowRect = ui.RRect.fromRectAndRadius(
-      ui.Rect.fromLTWH(22, 26, size.width - 44, size.height - 52),
-      const ui.Radius.circular(26),
-    );
-    canvas.drawRRect(
-      shadowRect,
-      ui.Paint()..color = const ui.Color(0x1A000000),
-    );
   }
 
   static void _paintText(
