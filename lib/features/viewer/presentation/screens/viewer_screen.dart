@@ -114,14 +114,10 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
   }
 
   EdgeInsets _contentOverlayPadding(BuildContext context) {
-    if (_isSpreadsheet()) {
-      return EdgeInsets.only(
-        top: _controlsVisible ? _topOverlayHeight(context) : 0.0,
-        bottom:
-            _bottomPanelController.value > 0.3 ? _bottomOverlayHeight() : 0.0,
-      );
-    }
-    return EdgeInsets.zero;
+    return EdgeInsets.only(
+      top: _controlsVisible ? _topOverlayHeight(context) : 0.0,
+      bottom: _bottomPanelController.value > 0.3 ? _bottomOverlayHeight() : 0.0,
+    );
   }
 
   Future<void> _setFullscreen(bool enabled) async {
@@ -2016,7 +2012,7 @@ class _ViewerScreenState extends ConsumerState<ViewerScreen>
                           Expanded(
                             child: Text(
                               _sheetCellValue.isEmpty
-                                  ? 'Tap a cell to see value'
+                                  ? l10n.viewerTapCellToSeeValue
                                   : _sheetCellValue,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

@@ -1605,6 +1605,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get viewerCopyValue => 'نسخ القيمة';
 
   @override
+  String get viewerTapCellToSeeValue => 'मान देखने के लिए किसी सेल पर टैप करें';
+
+  @override
   String get viewerToggleFullscreen => 'تبديل ملء الشاشة';
 
   @override
@@ -1885,6 +1888,28 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get textDocSearchNextResult => 'अगला परिणाम';
+
+  @override
+  String get textDocSearchPrompt => 'दस्तावेज़ में खोजें';
+
+  @override
+  String textDocSearchSearching(num linesChecked, num totalLines) {
+    return 'खोज जारी है $linesChecked/$totalLines';
+  }
+
+  @override
+  String textDocSearchResults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count परिणाम',
+      one: '1 परिणाम',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get textDocSearchNoMatches => 'कोई मिलान नहीं मिला';
 
   @override
   String get imageFailedToLoad => 'छवि लोड नहीं हो सकी';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:fadocx/features/viewer/domain/entities/sheet_entity.dart';
 import 'package:fadocx/l10n/app_localizations.dart';
 
@@ -16,7 +17,8 @@ class ProfessionalSheetViewer extends StatefulWidget {
   });
 
   @override
-  State<ProfessionalSheetViewer> createState() => _ProfessionalSheetViewerState();
+  State<ProfessionalSheetViewer> createState() =>
+      _ProfessionalSheetViewerState();
 }
 
 class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
@@ -121,6 +123,11 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
   double get _totalW =>
       List.generate(_headers.length, _colW).fold(0.0, (a, b) => a + b);
 
+  String _formatNumber(BuildContext context, int value) {
+    final locale = Localizations.localeOf(context);
+    return NumberFormat.decimalPattern(locale.toLanguageTag()).format(value);
+  }
+
   // ── Selection ──────────────────────────────────────────
   void _toggleRow(int r) {
     setState(() {
@@ -197,16 +204,30 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
 
   /// Public method to scroll to cell - called from viewer screen search
   void scrollToCell(int row, int col) {
-    if (row < 0 || col < 0 || row >= _rows.length || col >= _headers.length) return;
+    if (row < 0 || col < 0 || row >= _rows.length || col >= _headers.length) {
+      return;
+    }
     final targetY = row * _cellH;
     if (_vDataController.hasClients) {
-      _vDataController.animateTo(targetY.clamp(0.0, _vDataController.position.maxScrollExtent), duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+      _vDataController.animateTo(
+          targetY.clamp(0.0, _vDataController.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut);
     }
     final targetX = col * _colW(col);
     if (_hController.hasClients) {
-      _hController.animateTo(targetX.clamp(0.0, _hController.position.maxScrollExtent), duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+      _hController.animateTo(
+          targetX.clamp(0.0, _hController.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut);
     }
-    setState(() { _selCellRow = row; _selCellCol = col; _selRow = null; _selCol = null; _selectAll = false; });
+    setState(() {
+      _selCellRow = row;
+      _selCellCol = col;
+      _selRow = null;
+      _selCol = null;
+      _selectAll = false;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _notifySelection());
   }
 
@@ -214,14 +235,20 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
     if (widget.onSelectionChanged == null) return;
     if (_selectAll) {
       final allData = _rows.map((r) => r.join(',')).join('\n');
-      widget.onSelectionChanged!('All (${_rows.length}×${_headers.length})', allData);
+      widget.onSelectionChanged!(
+        'All (${_formatNumber(context, _rows.length)}×${_formatNumber(context, _headers.length)})',
+        allData,
+      );
     } else if (_selCellRow != null && _selCellCol != null) {
       final cellRef = '${_headers[_selCellCol!]}${_selCellRow! + 1}';
       final value = _rows[_selCellRow!][_selCellCol!];
       widget.onSelectionChanged!(cellRef, value);
     } else if (_selRow != null) {
       final rowValues = _rows[_selRow!].join(', ');
-      widget.onSelectionChanged!('Row ${_selRow! + 1}', rowValues);
+      widget.onSelectionChanged!(
+        'Row ${_formatNumber(context, _selRow! + 1)}',
+        rowValues,
+      );
     } else if (_selCol != null) {
       final colValues = _rows.map((r) => r[_selCol!]).join(', ');
       widget.onSelectionChanged!('Col ${_headers[_selCol!]}', colValues);
@@ -262,7 +289,6 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
     setState(() => _resizingCol = null);
   }
 
-
   @override
   void dispose() {
     _vRowController.removeListener(_syncRowToData);
@@ -276,7 +302,9 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
   @override
   Widget build(BuildContext context) {
     if (_rows.isEmpty) {
-      return Center(child: Text(AppLocalizations.of(context)!.sheetNoData(widget.sheet.name)));
+      return Center(
+          child: Text(
+              AppLocalizations.of(context)!.sheetNoData(widget.sheet.name)));
     }
 
     final colors = _ThemeColors.of(context);
@@ -318,7 +346,7 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
                           cacheExtent: 800,
                           padding: EdgeInsets.zero,
                           itemBuilder: (ctx, i) => _RowHdrCell(
-                            label: '${i + 1}',
+                            label: _formatNumber(ctx, i + 1),
                             h: ch,
                             colors: colors,
                             sel: _selRow == i || _selectAll,
@@ -427,7 +455,6 @@ class _ProfessionalSheetViewerState extends State<ProfessionalSheetViewer> {
           }),
         ),
       );
-
 }
 
 // ── Row header cell ──────────────────────────────────────

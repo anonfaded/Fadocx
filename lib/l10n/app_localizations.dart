@@ -2969,6 +2969,12 @@ abstract class AppLocalizations {
   /// **'Copy value'**
   String get viewerCopyValue;
 
+  /// No description provided for @viewerTapCellToSeeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a cell to see value'**
+  String get viewerTapCellToSeeValue;
+
   /// No description provided for @viewerToggleFullscreen.
   ///
   /// In en, this message translates to:
@@ -3472,6 +3478,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next result'**
   String get textDocSearchNextResult;
+
+  /// No description provided for @textDocSearchPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in document'**
+  String get textDocSearchPrompt;
+
+  /// No description provided for @textDocSearchSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching {linesChecked}/{totalLines}'**
+  String textDocSearchSearching(num linesChecked, num totalLines);
+
+  /// No description provided for @textDocSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{count} results}}'**
+  String textDocSearchResults(num count);
+
+  /// No description provided for @textDocSearchNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches found'**
+  String get textDocSearchNoMatches;
 
   /// No description provided for @imageFailedToLoad.
   ///

@@ -1605,6 +1605,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get viewerCopyValue => 'Copiar valor';
 
   @override
+  String get viewerTapCellToSeeValue => 'Toque numa célula para ver o valor';
+
+  @override
   String get viewerToggleFullscreen => 'Alternar tela cheia';
 
   @override
@@ -1885,6 +1888,28 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get textDocSearchNextResult => 'Próximo resultado';
+
+  @override
+  String get textDocSearchPrompt => 'Pesquisar no documento';
+
+  @override
+  String textDocSearchSearching(num linesChecked, num totalLines) {
+    return 'Pesquisando $linesChecked/$totalLines';
+  }
+
+  @override
+  String textDocSearchResults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count resultados',
+      one: '1 resultado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get textDocSearchNoMatches => 'Nenhuma correspondência encontrada';
 
   @override
   String get imageFailedToLoad => 'Falha ao carregar a imagem';
