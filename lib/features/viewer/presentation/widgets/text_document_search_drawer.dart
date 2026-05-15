@@ -45,6 +45,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Padding(
@@ -55,7 +56,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                 controller: searchController,
                 onChanged: onQueryChanged,
                 decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.textDocSearchHint,
+                  hintText: l10n.textDocSearchHint,
                   prefixIcon: Icon(
                     Icons.search,
                     size: 20,
@@ -86,8 +87,11 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                   if (searchController.text.isNotEmpty)
                     Text(
                       isSearching
-                          ? 'Searching $linesChecked/$totalLines'
-                          : '${results.length} result${results.length == 1 ? '' : 's'}',
+                          ? l10n.textDocSearchSearching(
+                              linesChecked,
+                              totalLines,
+                            )
+                          : l10n.textDocSearchResults(results.length),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.primary,
@@ -102,7 +106,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                       padding: const EdgeInsets.all(4),
                       constraints:
                           const BoxConstraints(minWidth: 28, minHeight: 28),
-                      tooltip: AppLocalizations.of(context)!.textDocSearchPrevResult,
+                      tooltip: l10n.textDocSearchPrevResult,
                     ),
                     Text(
                       '${activeResultIndex + 1}/${results.length}',
@@ -118,7 +122,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
                       padding: const EdgeInsets.all(4),
                       constraints:
                           const BoxConstraints(minWidth: 28, minHeight: 28),
-                      tooltip: AppLocalizations.of(context)!.textDocSearchNextResult,
+                      tooltip: l10n.textDocSearchNextResult,
                     ),
                   ],
                 ],
@@ -163,6 +167,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
   }
 
   Widget _buildPromptState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -177,7 +182,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Search in document',
+              l10n.textDocSearchPrompt,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.outline,
@@ -190,6 +195,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
   }
 
   Widget _buildNoResultsState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -204,7 +210,7 @@ class TextDocumentSearchDrawer extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No matches found',
+              l10n.textDocSearchNoMatches,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.outline,

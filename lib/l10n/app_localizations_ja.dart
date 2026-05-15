@@ -1605,6 +1605,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get viewerCopyValue => '値をコピー';
 
   @override
+  String get viewerTapCellToSeeValue => '値を表示するにはセルをタップ';
+
+  @override
   String get viewerToggleFullscreen => '全画面表示を切り替え';
 
   @override
@@ -1885,6 +1888,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get textDocSearchNextResult => '次の結果';
+
+  @override
+  String get textDocSearchPrompt => '文書内を検索';
+
+  @override
+  String textDocSearchSearching(num linesChecked, num totalLines) {
+    return '$linesChecked/$totalLines を検索中';
+  }
+
+  @override
+  String textDocSearchResults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件の結果',
+      one: '1 件の結果',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get textDocSearchNoMatches => '一致する結果はありません';
 
   @override
   String get imageFailedToLoad => '画像の読み込みに失敗しました';

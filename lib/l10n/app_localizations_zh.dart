@@ -1605,6 +1605,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get viewerCopyValue => '复制值';
 
   @override
+  String get viewerTapCellToSeeValue => '点按单元格以查看值';
+
+  @override
   String get viewerToggleFullscreen => '切换全屏';
 
   @override
@@ -1885,6 +1888,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get textDocSearchNextResult => '下一个结果';
+
+  @override
+  String get textDocSearchPrompt => '在文档中搜索';
+
+  @override
+  String textDocSearchSearching(num linesChecked, num totalLines) {
+    return '正在搜索 $linesChecked/$totalLines';
+  }
+
+  @override
+  String textDocSearchResults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个结果',
+      one: '1 个结果',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get textDocSearchNoMatches => '未找到匹配项';
 
   @override
   String get imageFailedToLoad => '加载图片失败';

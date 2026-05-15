@@ -1605,6 +1605,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get viewerCopyValue => 'ویلیو کاپی کریں';
 
   @override
+  String get viewerTapCellToSeeValue => 'قدر دیکھنے کے لیے کسی سیل پر ٹیپ کریں';
+
+  @override
   String get viewerToggleFullscreen => 'فل اسکرین ٹوگل کریں';
 
   @override
@@ -1885,6 +1888,28 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get textDocSearchNextResult => 'اگلا نتیجہ';
+
+  @override
+  String get textDocSearchPrompt => 'دستاویز میں تلاش کریں';
+
+  @override
+  String textDocSearchSearching(num linesChecked, num totalLines) {
+    return '$linesChecked/$totalLines تلاش ہو رہی ہے';
+  }
+
+  @override
+  String textDocSearchResults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نتائج',
+      one: '1 نتیجہ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get textDocSearchNoMatches => 'کوئی مماثلت نہیں ملی';
 
   @override
   String get imageFailedToLoad => 'تصویر لوڈ نہیں ہو سکی';

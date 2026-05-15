@@ -1605,6 +1605,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get viewerCopyValue => 'نسخ القيمة';
 
   @override
+  String get viewerTapCellToSeeValue => 'اضغط على خلية لعرض القيمة';
+
+  @override
   String get viewerToggleFullscreen => 'تبديل ملء الشاشة';
 
   @override
@@ -1885,6 +1888,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get textDocSearchNextResult => 'النتيجة التالية';
+
+  @override
+  String get textDocSearchPrompt => 'ابحث في المستند';
+
+  @override
+  String textDocSearchSearching(num linesChecked, num totalLines) {
+    return 'جارٍ البحث $linesChecked/$totalLines';
+  }
+
+  @override
+  String textDocSearchResults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نتائج',
+      one: 'نتيجة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get textDocSearchNoMatches => 'لم يتم العثور على تطابقات';
 
   @override
   String get imageFailedToLoad => 'فشل تحميل الصورة';

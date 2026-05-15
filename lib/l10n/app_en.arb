@@ -493,6 +493,7 @@
   "viewerAllPagesLower": "all pages",
   "viewerCopied": "Copied",
   "viewerCopyValue": "Copy value",
+  "viewerTapCellToSeeValue": "Tap a cell to see value",
   "viewerToggleFullscreen": "Toggle fullscreen",
   "viewerInvert": "Invert",
   "viewerText": "Text",
@@ -972,6 +973,23 @@
       }
     }
   },
+  "@textDocSearchSearching": {
+    "placeholders": {
+      "linesChecked": {
+        "type": "num"
+      },
+      "totalLines": {
+        "type": "num"
+      }
+    }
+  },
+  "@textDocSearchResults": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "@viewerCellValue": {
     "placeholders": {
       "cell": {
@@ -1070,6 +1088,10 @@
   "textDocSearchHint": "Search text...",
   "textDocSearchPrevResult": "Previous result",
   "textDocSearchNextResult": "Next result",
+  "textDocSearchPrompt": "Search in document",
+  "textDocSearchSearching": "Searching {linesChecked}/{totalLines}",
+  "textDocSearchResults": "{count, plural, =1{1 result} other{{count} results}}",
+  "textDocSearchNoMatches": "No matches found",
   "imageFailedToLoad": "Failed to load image",
   "mediaLoading": "Loading media...",
   "mediaFailedToPlay": "Failed to play media",

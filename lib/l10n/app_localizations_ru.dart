@@ -1605,6 +1605,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get viewerCopyValue => 'Копировать значение';
 
   @override
+  String get viewerTapCellToSeeValue => 'Нажмите ячейку, чтобы увидеть значение';
+
+  @override
   String get viewerToggleFullscreen => 'Переключить полноэкранный режим';
 
   @override
@@ -1885,6 +1888,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get textDocSearchNextResult => 'Следующий результат';
+
+  @override
+  String get textDocSearchPrompt => 'Поиск в документе';
+
+  @override
+  String textDocSearchSearching(num linesChecked, num totalLines) {
+    return 'Поиск $linesChecked/$totalLines';
+  }
+
+  @override
+  String textDocSearchResults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count результатов',
+      one: '1 результат',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get textDocSearchNoMatches => 'Совпадений не найдено';
 
   @override
   String get imageFailedToLoad => 'Не удалось загрузить изображение';

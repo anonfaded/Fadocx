@@ -1605,6 +1605,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewerCopyValue => 'Copy value';
 
   @override
+  String get viewerTapCellToSeeValue => 'Tap a cell to see value';
+
+  @override
   String get viewerToggleFullscreen => 'Toggle fullscreen';
 
   @override
@@ -1885,6 +1888,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get textDocSearchNextResult => 'Next result';
+
+  @override
+  String get textDocSearchPrompt => 'Search in document';
+
+  @override
+  String textDocSearchSearching(num linesChecked, num totalLines) {
+    return 'Searching $linesChecked/$totalLines';
+  }
+
+  @override
+  String textDocSearchResults(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get textDocSearchNoMatches => 'No matches found';
 
   @override
   String get imageFailedToLoad => 'Failed to load image';
