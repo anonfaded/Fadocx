@@ -119,6 +119,7 @@
   "categoryScans": "اسکینز",
   "categoryOther": "دیگر",
   "categoryPresentations": "پریزنٹیشنز",
+  "updatesAvailableTitle": "{count, plural, =1{دستیاب اپ ڈیٹ} other{دستیاب اپ ڈیٹس}}",
   "supportDevelopment": "ڈویلپمنٹ سپورٹ کریں",
   "visitPatreon": "Patreon وزٹ کریں",
   "copyLink": "لنک کاپی کریں",

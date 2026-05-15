@@ -119,6 +119,7 @@
   "categoryScans": "स्कैन",
   "categoryOther": "अन्य",
   "categoryPresentations": "प्रेजेंटेशन",
+  "updatesAvailableTitle": "{count, plural, =1{उपलब्ध अपडेट} other{उपलब्ध अपडेट}}",
   "supportDevelopment": "विकास का समर्थन करें",
   "visitPatreon": "Patreon खोलें",
   "copyLink": "लिंक कॉपी करें",

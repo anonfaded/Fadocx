@@ -436,7 +436,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         }
       },
       child: widget.tabMode
-          ? _buildBody()
+          ? SizedBox.expand(child: _buildBody())
           : Scaffold(
               key: _scaffoldKey,
               body: Stack(
@@ -2741,48 +2741,65 @@ class _BinaryDigitsPainter extends CustomPainter {
 
     final textPainter = TextPainter(textDirection: textDirection);
 
-    // Seamless binary sequence
-    const binarySequence = '0110101001101011010110100110';
-    const spacing = 12.0;
-    const colWidth = 15.0;
+    const rows = 16;
+    const cols = 2;
+    const rowSpacing = 13.0;
+    const colSpacing = 14.0;
+    const leftBase = 0.74;
+    const topBase = 10.0;
+    const switchSpeed = 1.8;
+    const digits = ['0', '1'];
 
-    // Slow animation - progress moves downward continuously
-    final totalHeight = spacing * 20; // Enough rows to cover size.height
-    final scrollOffset = progress * totalHeight;
+    int cellSeed(int row, int col) => (row * 31) + (col * 17);
+    double cellPhase(int row, int col) {
+      final seed = cellSeed(row, col);
+      return ((seed % 100) / 100.0) * 0.85;
+    }
 
-    // Draw in 2 columns with offset so they don't sync
-    for (int col = 0; col < 2; col++) {
-      // Offset second column by half spacing for async animation
-      final colOffset = col == 0 ? 0 : spacing / 2;
+    String digitFor(int row, int col, int step) {
+      return digits[(row + col + step + cellSeed(row, col)) % 2];
+    }
 
-      for (int row = 0; row < 20; row++) {
-        // Static digit assignment per row/column - remove progress shift to stop swapping
-        final digitIndex =
-            ((row + col * 13) + (progress * binarySequence.length).round()) %
-                binarySequence.length;
-        final digit = binarySequence[digitIndex];
+    final cycle = progress * switchSpeed;
 
-        // Y position moves downward smoothly with wrapping
-        double yPos = (row * spacing + colOffset + scrollOffset) % totalHeight;
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < cols; col++) {
+        final phase = cellPhase(row, col);
+        final cellProgress = cycle + phase;
+        final swapStep = cellProgress.floor();
+        final swapT = cellProgress - swapStep.toDouble();
+        final nextStep = swapStep + 1;
+        final currentDigit = digitFor(row, col, swapStep);
+        final nextDigit = digitFor(row, col, nextStep);
 
-        final xPos = x((size.width * 0.82) + (col * colWidth));
+        final xPos = x((size.width * leftBase) + (col * colSpacing));
+        final yPos = topBase + (row * rowSpacing);
 
-        // Fade in/out at edges for seamless effect
-        final distanceFromCenter = (yPos - size.height / 2).abs();
-        final opacity =
-            (1 - (distanceFromCenter / (size.height / 2))).clamp(0.0, 1.0);
+        final fade = ((yPos - size.height / 2).abs() / (size.height / 2))
+            .clamp(0.0, 1.0);
+        final baseOpacity = (1 - fade).clamp(0.0, 1.0);
 
-        textPainter.text = TextSpan(
-          text: digit,
-          style: textStyle.copyWith(
-            color: Colors.white.withValues(alpha: opacity * 0.75),
-          ),
-        );
-        textPainter.layout();
-        textPainter.paint(
-          canvas,
-          Offset(xPos - textPainter.width / 2, yPos - textPainter.height / 2),
-        );
+        void paintDigit(String digit, double localOffset, double opacity) {
+          if (opacity <= 0) return;
+          textPainter.text = TextSpan(
+            text: digit,
+            style: textStyle.copyWith(
+              color: Colors.white.withValues(alpha: opacity * 0.78),
+            ),
+          );
+          textPainter.layout();
+          textPainter.paint(
+            canvas,
+            Offset(
+              xPos - textPainter.width / 2,
+              yPos - textPainter.height / 2 + localOffset,
+            ),
+          );
+        }
+
+        final move = Curves.easeInOut.transform(swapT);
+        paintDigit(currentDigit, -move * 2.5, baseOpacity * (1 - move));
+        paintDigit(nextDigit, (1 - move) * 2.5, baseOpacity * move);
       }
     }
 

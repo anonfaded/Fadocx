@@ -364,10 +364,10 @@ class SettingsScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest.withValues(alpha: 0.92),
+        color: colorScheme.surfaceContainerLow.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.42),
         ),
       ),
       child: Column(children: children),
@@ -375,12 +375,13 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildDangerGroup(BuildContext context, List<Widget> children) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.03),
+        color: colorScheme.surfaceContainerLow.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.red.withValues(alpha: 0.2),
+          color: Colors.red.withValues(alpha: 0.35),
         ),
       ),
       child: Column(children: children),
@@ -392,7 +393,7 @@ class SettingsScreen extends ConsumerWidget {
       height: 1,
       indent: 56,
       color:
-          Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
+          Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.48),
     );
   }
 
@@ -876,62 +877,52 @@ class SettingsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color:
+                      colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.system_update_outlined,
+                  size: 20,
+                  color: colorScheme.primary,
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.75,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.settingsAutoUpdateCheck,
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.system_update_outlined,
-                    size: 20,
-                    color: colorScheme.primary,
-                  ),
+                    Text(
+                      l10n.settingsAutoUpdateCheckDesc,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.settingsAutoUpdateCheck,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      Text(
-                        l10n.settingsAutoUpdateCheckDesc,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
+              ),
+              SizedBox(
+                width: 48,
+                child: Switch(
+                  value: enabled,
+                  onChanged: (value) {
+                    ref
+                        .read(settingsMutatorProvider)
+                        .updateAutoUpdateCheck(value);
+                  },
                 ),
-                SizedBox(
-                  width: 48,
-                  child: Switch(
-                    value: enabled,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsMutatorProvider)
-                          .updateAutoUpdateCheck(value);
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -948,62 +939,52 @@ class SettingsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color:
+                      colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.auto_stories_outlined,
+                  size: 20,
+                  color: colorScheme.primary,
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.75,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.settingsReplayOnboarding,
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.auto_stories_outlined,
-                    size: 20,
-                    color: colorScheme.primary,
-                  ),
+                    Text(
+                      l10n.settingsReplayOnboardingDesc,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.settingsReplayOnboarding,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      Text(
-                        l10n.settingsReplayOnboardingDesc,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
+              ),
+              SizedBox(
+                width: 48,
+                child: Switch(
+                  value: show,
+                  onChanged: (value) {
+                    ref
+                        .read(settingsMutatorProvider)
+                        .updateShowOnboardingNextLaunch(value);
+                  },
                 ),
-                SizedBox(
-                  width: 48,
-                  child: Switch(
-                    value: show,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsMutatorProvider)
-                          .updateShowOnboardingNextLaunch(value);
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1214,45 +1195,35 @@ class SettingsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.75,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.cloud_download_outlined,
-                    size: 20,
-                    color: colorScheme.primary,
-                  ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color:
+                      colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    l10n.settingsCheckForUpdates,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
+                child: Icon(
+                  Icons.cloud_download_outlined,
                   size: 20,
-                  color: colorScheme.onSurfaceVariant,
+                  color: colorScheme.primary,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  l10n.settingsCheckForUpdates,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
           ),
         ),
       ),
@@ -2310,6 +2281,7 @@ class _SettingsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -2323,16 +2295,14 @@ class _SettingsRow extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.5),
+                  color:
+                      colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
                   size: 20,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.primary,
                 ),
               ),
               const SizedBox(width: 16),
@@ -2363,14 +2333,14 @@ class _SettingsRow extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                    color:
+                        colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     l10n.comingSoon,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onTertiaryContainer,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                   ),
                 ),
@@ -2422,6 +2392,7 @@ class _DangerRowState extends State<_DangerRow> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -2435,7 +2406,8 @@ class _DangerRowState extends State<_DangerRow> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
+                  color:
+                      colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(widget.icon, size: 20, color: Colors.red),

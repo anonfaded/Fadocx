@@ -119,6 +119,7 @@
   "categoryScans": "Сканы",
   "categoryOther": "Прочее",
   "categoryPresentations": "Презентации",
+  "updatesAvailableTitle": "{count, plural, =1{Доступно обновление} other{Доступны обновления}}",
   "supportDevelopment": "Поддержать разработку",
   "visitPatreon": "Открыть Patreon",
   "copyLink": "Копировать ссылку",

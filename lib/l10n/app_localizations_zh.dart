@@ -363,6 +363,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get categoryPresentations => '演示文稿';
 
   @override
+  String updatesAvailableTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '可用更新',
+      one: '可用更新',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get supportDevelopment => '支持开发';
 
   @override
@@ -375,8 +386,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get becomeAPatron => '成为赞助者';
 
   @override
-  String get patreonDescription =>
-      '你的支持能帮助 Fadocx 和 FadCam 持续成长。Patreon 订阅者可解锁专属福利，包括高级功能以及 FadSec Lab 全部应用的抢先体验。\n\n想了解更多，请通过下方链接访问 Patreon，并查看可用档位及其福利。';
+  String get patreonDescription => '你的支持能帮助 Fadocx 和 FadCam 持续成长。Patreon 订阅者可解锁专属福利，包括高级功能以及 FadSec Lab 全部应用的抢先体验。\n\n想了解更多，请通过下方链接访问 Patreon，并查看可用档位及其福利。';
 
   @override
   String get discordTitle => '加入我们的 Discord';
@@ -935,8 +945,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get whatsNewDocAndSheets => '文档与电子表格';
 
   @override
-  String get whatsNewDocAndSheetsDesc =>
-      '查看 PDF、Word 文档、Excel 表格等内容，全部本地处理，保存在你的设备上。';
+  String get whatsNewDocAndSheetsDesc => '查看 PDF、Word 文档、Excel 表格等内容，全部本地处理，保存在你的设备上。';
 
   @override
   String get whatsNewOcrAi => '智能 OCR 与本地 AI';
@@ -1017,8 +1026,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get whatsNewThankYou => '感谢使用 Fadocx';
 
   @override
-  String get whatsNewThankYouDesc =>
-      '如果你觉得 Fadocx 有价值，欢迎支持它的开发。你的贡献能帮助我们继续打造以隐私为先的工具。';
+  String get whatsNewThankYouDesc => '如果你觉得 Fadocx 有价值，欢迎支持它的开发。你的贡献能帮助我们继续打造以隐私为先的工具。';
 
   @override
   String get drawerWhatNew => '最新动态';
@@ -1108,8 +1116,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get updateVisitGithub => '访问 GitHub';
 
   @override
-  String get updateBetaInfo =>
-      'Fadocx 测试版是一个独立应用，可以与稳定版同时安装。它不会影响您的稳定版应用或其数据。\n\n安装测试版可在新功能进入稳定版前进行试用。';
+  String get updateBetaInfo => 'Fadocx 测试版是一个独立应用，可以与稳定版同时安装。它不会影响您的稳定版应用或其数据。\n\n安装测试版可在新功能进入稳定版前进行试用。';
 
   @override
   String get updateBannerStable => '稳定更新';
@@ -1166,8 +1173,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsStorageInfo => '文档存储在设备上的私有文件夹中，其他应用无法访问';
 
   @override
-  String get settingsStoragePrivateFolderInfo =>
-      '文档存储在私有文件夹中，对其他应用和文件管理器隐藏。只有 Fadocx 可以访问。';
+  String get settingsStoragePrivateFolderInfo => '文档存储在私有文件夹中，对其他应用和文件管理器隐藏。只有 Fadocx 可以访问。';
 
   @override
   String get settingsStorageDeleteInfo => '请在设置中的危险区域删除文档';
@@ -1287,8 +1293,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsCopyInfo => '复制信息';
 
   @override
-  String settingsVersionClipboardInfo(
-      String appName, String version, String buildNumber, String packageName) {
+  String settingsVersionClipboardInfo(String appName, String version, String buildNumber, String packageName) {
     return '$appName v$version（构建 $buildNumber）\n包名：$packageName';
   }
 
@@ -1296,8 +1301,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsShareApp => '分享给朋友';
 
   @override
-  String get settingsShareMessage =>
-      '来看看 Fadocx！\n\n一体化文档查看器：支持 PDF、Office、电子表格、演示文稿、代码文件和 OCR 文本提取，完全离线、无跟踪、开源。\n\nhttps://github.com/anonfaded/Fadocx';
+  String get settingsShareMessage => '来看看 Fadocx！\n\n一体化文档查看器：支持 PDF、Office、电子表格、演示文稿、代码文件和 OCR 文本提取，完全离线、无跟踪、开源。\n\nhttps://github.com/anonfaded/Fadocx';
 
   @override
   String get settingsShareVia => '通过以下方式分享...';
@@ -1363,8 +1367,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsIn => '在';
 
   @override
-  String get settingsCopyright =>
-      '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
+  String get settingsCopyright => '© 2024 – 2026 FadSec Lab · GPLv3 · fadseclab.com';
 
   @override
   String settingsTypeToConfirm(String text) {
@@ -1381,8 +1384,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsPrivacyLocalStorageDesc => '您的文档保留在您的设备上。不上传任何内容。';
 
   @override
-  String get settingsPrivacyOnDeviceDesc =>
-      '使用 OpenCV + Tesseract 进行 OCR。AI 在本地运行。';
+  String get settingsPrivacyOnDeviceDesc => '使用 OpenCV + Tesseract 进行 OCR。AI 在本地运行。';
 
   @override
   String get settingsPrivacyOpenSourceDesc => '代码是公开的。自己在 GitHub 上验证。';
@@ -1391,19 +1393,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsPrivacyNoAdsDesc => '无广告。无跟踪。无分析。无崩溃日志。零遥测。';
 
   @override
-  String get settingsFadcamDesc =>
-      '注重隐私的 Android 多媒体套件：后台录像、行车记录仪、录屏、直播与远程控制，无广告且开源。';
+  String get settingsFadcamDesc => '注重隐私的 Android 多媒体套件：后台录像、行车记录仪、录屏、直播与远程控制，无广告且开源。';
 
   @override
   String get settingsQuranCliDesc => '你的《古兰经》终端伙伴：阅读、聆听，并为视频剪辑生成字幕！';
 
   @override
-  String get settingsFadcryptDesc =>
-      '高级且优雅的跨平台应用锁工具，文件、文件夹和应用全部采用军用级 AES-256-GCM 加密保护。开源、完全免费、无遥测！';
+  String get settingsFadcryptDesc => '高级且优雅的跨平台应用锁工具，文件、文件夹和应用全部采用军用级 AES-256-GCM 加密保护。开源、完全免费、无遥测！';
 
   @override
-  String get settingsFadcatDesc =>
-      '轻量、功能丰富、跨平台的 Android logcat 替代工具，无需臃肿的 Android Studio。内置适配架构的 ADB，可运行于 GUI、CLI 或 MCP 服务器模式。';
+  String get settingsFadcatDesc => '轻量、功能丰富、跨平台的 Android logcat 替代工具，无需臃肿的 Android Studio。内置适配架构的 ADB，可运行于 GUI、CLI 或 MCP 服务器模式。';
 
   @override
   String get settingsMacosComingSoon => 'macOS 即将推出';
@@ -1653,8 +1652,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get viewerEditWithEngine => '使用 Fadocx Engine 编辑';
 
   @override
-  String get viewerEditWithEngineDesc =>
-      '在 Fadocx 渲染引擎中打开此电子表格，以获得包含完整格式、图表和布局保真度的视觉预览。';
+  String get viewerEditWithEngineDesc => '在 Fadocx 渲染引擎中打开此电子表格，以获得包含完整格式、图表和布局保真度的视觉预览。';
 
   @override
   String get viewerEditWithEngineNote => '注意：交互式编辑将在未来更新中推出。';

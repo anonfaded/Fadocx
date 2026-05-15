@@ -363,6 +363,17 @@ class AppLocalizationsUr extends AppLocalizations {
   String get categoryPresentations => 'پریزنٹیشنز';
 
   @override
+  String updatesAvailableTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'دستیاب اپ ڈیٹس',
+      one: 'دستیاب اپ ڈیٹ',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get supportDevelopment => 'ڈویلپمنٹ سپورٹ کریں';
 
   @override
