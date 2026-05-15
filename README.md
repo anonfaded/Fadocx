@@ -40,6 +40,9 @@ And it's **100% open source** — fully auditable, transparent, and built by [Fa
 
 This is what a document viewer should be. This is Fadocx.
 
+> [!Note]
+> 🔜 **iOS coming soon** — Fadocx for Apple devices is planned for a future release. Stay tuned!
+
 <br>
 
 ## `>_` 📱 Screenshots
@@ -78,9 +81,9 @@ This is what a document viewer should be. This is Fadocx.
 
 <br>
 
-<img src="graphic_assets/screenshots/docx_preview.png" width="200" alt="DOCX"> <img src="graphic_assets/screenshots/ppt_preview.png" width="200" alt="PPT">
+<img src="graphic_assets/screenshots/docx_preview.png" width="200" alt="DOCX"> <img src="graphic_assets/screenshots/ppt_preview.png" width="200" alt="PPT"> <img src="graphic_assets/screenshots/video_preview.png" width="200" alt="Video Player">
 
-<sub>**DOCX** — Formatted document rendering via LibreOfficeKit</sub> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <sub>**PPT** — Presentation rendering with slide navigation</sub>
+<sub>**DOCX** — Formatted document rendering via LibreOfficeKit</sub> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <sub>**PPT** — Presentation rendering with slide navigation</sub> &nbsp;&nbsp;&nbsp;&nbsp; <sub>**Video Player** — Playback speed control and loop mode</sub>
 
 </div>
 
@@ -241,7 +244,8 @@ We welcome contributions! Before starting any work:
 2. **Fork & Implement** — Work on your changes in a fork.
 3. **Submit a PR** — Link your pull request to the related issue with a clear description.
 
-## `>_` Build
+<details>
+<summary><strong>Build & Development</strong></summary>
 
 ### System Requirements
 
@@ -313,6 +317,7 @@ flutter run --flavor prod
 flutter run --flavor beta
 ```
 
+</details>
 
 ## `>_` License
 
