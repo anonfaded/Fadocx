@@ -41,7 +41,7 @@ And it's **100% open source** — fully auditable, transparent, and built by [Fa
 This is what a document viewer should be. This is Fadocx.
 
 > [!Note]
-> 🔜 **iOS coming soon** — Fadocx for Apple devices is planned for a future release. Stay tuned!
+> **iOS coming soon** — Fadocx for Apple devices is planned for a future release. Stay tuned!
 
 <br>
 
