@@ -88,6 +88,15 @@ class _MainShellState extends ConsumerState<MainShell>
     }
   }
 
+  void _openSidebar() {
+    if (_sidebarOpen) return;
+    setState(() {
+      _sidebarOpen = true;
+      _sidebarDragOffset = 0.0;
+    });
+    _sidebarController.forward();
+  }
+
   void _closeSidebar() {
     setState(() => _sidebarOpen = false);
     _sidebarController.reverse();
@@ -282,8 +291,8 @@ class _MainShellState extends ConsumerState<MainShell>
               Text(
                 AppLocalizations.of(context)!.navLibrary,
                 style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  fontWeight: FontWeight.w600,
+                ),
               )
             else
               IconButton(
@@ -311,8 +320,8 @@ class _MainShellState extends ConsumerState<MainShell>
                   ),
                   onChanged: (v) {
                     _librarySearchDebounce?.cancel();
-                    _librarySearchDebounce = Timer(
-                        const Duration(milliseconds: 200), () {
+                    _librarySearchDebounce =
+                        Timer(const Duration(milliseconds: 200), () {
                       ref.read(librarySearchProvider.notifier).update(v);
                     });
                   },
@@ -320,7 +329,8 @@ class _MainShellState extends ConsumerState<MainShell>
               ),
             if (!_libraryIsSearching) const Spacer(),
             IconButton(
-              icon: Icon(_libraryIsSearching ? Icons.clear : Icons.search, size: 20),
+              icon: Icon(_libraryIsSearching ? Icons.clear : Icons.search,
+                  size: 20),
               onPressed: () {
                 if (_libraryIsSearching) {
                   _librarySearchController.clear();
@@ -380,16 +390,18 @@ class _MainShellState extends ConsumerState<MainShell>
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity == null) return;
-        final velocity = details.primaryVelocity!;
+        final isRTL = Directionality.of(context) == TextDirection.rtl;
+        final velocity =
+            isRTL ? -details.primaryVelocity! : details.primaryVelocity!;
         if (velocity < -300) {
-          // Swipe left → next tab
+          // Forward swipe: LTR left, RTL right.
           if (_currentPage < 2) _switchToPage(_currentPage + 1);
         } else if (velocity > 300) {
-          // Swipe right → previous tab, or drawer on Home
+          // Back swipe: LTR right, RTL left. On Home, reveal side drawer.
           if (_currentPage > 0) {
             _switchToPage(_currentPage - 1);
           } else {
-            _toggleSidebar();
+            _openSidebar();
           }
         }
       },
@@ -418,8 +430,7 @@ class _MainShellState extends ConsumerState<MainShell>
             _lastBackPress = DateTime.now();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content:
-                    Text(AppLocalizations.of(context)!.homePressBackExit),
+                content: Text(AppLocalizations.of(context)!.homePressBackExit),
                 duration: _backPressExitDuration,
               ),
             );
@@ -469,8 +480,7 @@ class _MainShellState extends ConsumerState<MainShell>
             AnimatedBuilder(
               animation: _sidebarController,
               builder: (context, child) {
-                final isRTL =
-                    Directionality.of(context) == TextDirection.rtl;
+                final isRTL = Directionality.of(context) == TextDirection.rtl;
                 return Positioned(
                   top: _kSidebarTopOffset - _kSidebarRadius,
                   bottom: _kSidebarBottomOffset - _kSidebarRadius,
@@ -515,12 +525,10 @@ class _MainShellState extends ConsumerState<MainShell>
     return GestureDetector(
       onTap: () {},
       behavior: HitTestBehavior.opaque,
-      onHorizontalDragUpdate: (details) =>
-          _handleSidebarDragUpdate(details),
+      onHorizontalDragUpdate: (details) => _handleSidebarDragUpdate(details),
       onHorizontalDragEnd: _handleSidebarDragEnd,
       child: Transform.translate(
-        offset:
-            Offset(isRTL ? -_sidebarDragOffset : _sidebarDragOffset, 0),
+        offset: Offset(isRTL ? -_sidebarDragOffset : _sidebarDragOffset, 0),
         child: SizedBox(
           width: width + 20,
           child: ClipPath(
@@ -600,9 +608,12 @@ class _SidebarClipper extends CustomClipper<Path> {
 
     path.moveTo(_x(0, size), 0);
     path.cubicTo(
-      _x(0, size), radius * 0.4,
-      _x(radius * 0.1, size), radius,
-      _x(radius, size), radius,
+      _x(0, size),
+      radius * 0.4,
+      _x(radius * 0.1, size),
+      radius,
+      _x(radius, size),
+      radius,
     );
     path.lineTo(_x(sidebarWidth - 16, size), radius);
     path.arcToPoint(
@@ -618,9 +629,12 @@ class _SidebarClipper extends CustomClipper<Path> {
     );
     path.lineTo(_x(radius, size), size.height - radius);
     path.cubicTo(
-      _x(radius * 0.1, size), size.height - radius,
-      _x(0, size), size.height - radius * 0.4,
-      _x(0, size), size.height,
+      _x(radius * 0.1, size),
+      size.height - radius,
+      _x(0, size),
+      size.height - radius * 0.4,
+      _x(0, size),
+      size.height,
     );
     path.lineTo(_x(0, size), 0);
     path.close();
@@ -665,9 +679,12 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
 
       path.moveTo(_x(0, size), 0);
       path.cubicTo(
-        _x(0, size), radius * 0.4,
-        _x(radius * 0.1, size), radius,
-        _x(radius, size), radius,
+        _x(0, size),
+        radius * 0.4,
+        _x(radius * 0.1, size),
+        radius,
+        _x(radius, size),
+        radius,
       );
       path.lineTo(_x(sidebarWidth - 16, size), radius);
       path.arcToPoint(
@@ -683,9 +700,12 @@ class _InvertedCornerSidebarPainter extends CustomPainter {
       );
       path.lineTo(_x(radius, size), size.height - radius);
       path.cubicTo(
-        _x(radius * 0.1, size), size.height - radius,
-        _x(0, size), size.height - radius * 0.4,
-        _x(0, size), size.height,
+        _x(radius * 0.1, size),
+        size.height - radius,
+        _x(0, size),
+        size.height - radius * 0.4,
+        _x(0, size),
+        size.height,
       );
       path.lineTo(_x(0, size), 0);
       path.close();
