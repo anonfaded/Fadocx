@@ -257,6 +257,7 @@
   "homeFileLastModified": "最終更新",
   "homeFileInTrash": "ゴミ箱内",
   "homeFileInfoCopied": "ファイル情報をコピーしました",
+  "homeCopyFileInfoPrompt": "ファイル情報をコピー",
   "homeCopySuffix": " (コピー)",
   "homeCopySuffixCounter": " (コピー {counter})",
   "@homeCopySuffixCounter": {
@@ -465,7 +466,7 @@
     }
   },
   "whatsNewTitle": "新機能",
-  "whatsNewWhatsIncluded": "含まれる内容",
+  "whatsNewHighlights": "ハイライト",
   "whatsNewPlanned": "予定中",
   "whatsNewReleasedToday": "本日公開",
   "whatsNewReleasedYesterday": "昨日公開",
@@ -477,6 +478,7 @@
       }
     }
   },
+  "whatsNewSupportedLanguages": "対応言語",
   "whatsNewDocAndSheets": "ドキュメントと表計算",
   "whatsNewDocAndSheetsDesc": "PDF、Word 文書、Excel シートなどを、すべて端末上でローカル表示できます。",
   "whatsNewOcrAi": "高性能 OCR とオンデバイス AI",

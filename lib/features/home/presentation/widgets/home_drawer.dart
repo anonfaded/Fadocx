@@ -177,6 +177,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         // Header
@@ -224,24 +225,38 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               const SizedBox(height: 12),
 
               // Main drawer group
-              Material(
-                color: colorScheme.surfaceContainerLow.withValues(alpha: 0.96),
-                borderRadius: BorderRadius.circular(12),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  children: [
-                    _buildDrawerCard(
-                      context,
-                      icon: Icons.auto_awesome,
-                      title: AppLocalizations.of(context)!.drawerWhatNew,
-                      onTap: () {
-                        widget.onClose?.call();
-                        context.push(RouteNames.whatsNew);
-                      },
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? colorScheme.surfaceContainerLow.withValues(alpha: 0.96)
+                      : Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant.withValues(
+                      alpha: isDark ? 0.28 : 0.42,
                     ),
-                    _drawerDivider(context),
-                    _buildRecentFilesToggle(context),
-                  ],
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Column(
+                      children: [
+                        _buildDrawerCard(
+                          context,
+                          icon: Icons.auto_awesome,
+                          title: AppLocalizations.of(context)!.drawerWhatNew,
+                          onTap: () {
+                            widget.onClose?.call();
+                            context.push(RouteNames.whatsNew);
+                          },
+                        ),
+                        _drawerDivider(context),
+                        _buildRecentFilesToggle(context),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -325,6 +340,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
     Color? trailingColor,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -335,7 +351,11 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                color: isDark
+                    ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.9)
+                    : colorScheme.surfaceContainerHigh.withValues(
+                        alpha: 0.9,
+                      ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
@@ -386,6 +406,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
 
   Widget _buildRecentFilesToggle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Consumer(
       builder: (context, ref, _) {
         final showRecentFiles = ref.watch(showRecentFilesProvider);
@@ -402,8 +423,11 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color:
-                        colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                    color: isDark
+                        ? colorScheme.surfaceContainerHigh
+                            .withValues(alpha: 0.9)
+                        : colorScheme.surfaceContainerHigh
+                            .withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(

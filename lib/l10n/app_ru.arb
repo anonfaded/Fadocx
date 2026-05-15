@@ -257,6 +257,7 @@
   "homeFileLastModified": "Последнее изменение",
   "homeFileInTrash": "В корзине",
   "homeFileInfoCopied": "Информация о файле скопирована",
+  "homeCopyFileInfoPrompt": "Скопировать информацию о файле",
   "homeCopySuffix": " (копия)",
   "homeCopySuffixCounter": " (копия {counter})",
   "@homeCopySuffixCounter": {
@@ -465,7 +466,7 @@
     }
   },
   "whatsNewTitle": "Что нового",
-  "whatsNewWhatsIncluded": "Что входит",
+  "whatsNewHighlights": "Основное",
   "whatsNewPlanned": "Запланировано",
   "whatsNewReleasedToday": "Выпущено сегодня",
   "whatsNewReleasedYesterday": "Выпущено вчера",
@@ -477,6 +478,7 @@
       }
     }
   },
+  "whatsNewSupportedLanguages": "Поддерживаемые языки",
   "whatsNewDocAndSheets": "Документы и таблицы",
   "whatsNewDocAndSheetsDesc": "Просматривайте PDF, документы Word, таблицы Excel и многое другое — всё локально на вашем устройстве.",
   "whatsNewOcrAi": "Интеллектуальный OCR и ИИ на устройстве",

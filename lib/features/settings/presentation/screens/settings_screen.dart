@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:fadocx/config/theme/theme_provider.dart';
 import 'package:fadocx/config/routing/app_router.dart';
+import 'package:fadocx/core/presentation/widgets/connected_sheet_group.dart';
 import 'package:fadocx/core/presentation/widgets/floating_dock_scaffold.dart';
 import 'package:fadocx/core/presentation/widgets/update_available_sheet.dart';
 import 'package:fadocx/core/presentation/widgets/link_tile.dart';
@@ -1005,7 +1006,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               _handle(context),
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
                 child: Text(
                   l10n.settingsChooseTheme,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -1013,43 +1014,133 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                 ),
               ),
-              _ThemeOption(
-                icon: Icons.dark_mode,
-                title: AppLocalizations.of(context)!.themeDark,
-                isSelected: current == ThemeMode.dark,
-                onTap: () {
-                  ref
-                      .read(themeModeProvider.notifier)
-                      .setThemeMode(ThemeMode.dark);
-                  ref.read(settingsMutatorProvider).updateTheme('dark');
-                  Navigator.pop(context);
-                },
+              ConnectedSheetGroup(
+                children: [
+                  ConnectedSheetRow(
+                    leading: SheetIconChip.icon(
+                      icon: Icons.dark_mode,
+                      color: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHigh
+                          .withValues(alpha: 0.9),
+                    ),
+                    title: l10n.themeDark,
+                    trailing: Icon(
+                      current == ThemeMode.dark
+                          ? Icons.check_circle
+                          : Icons.circle_outlined,
+                      color: current == ThemeMode.dark
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline,
+                    ),
+                    onTap: () {
+                      ref
+                          .read(themeModeProvider.notifier)
+                          .setThemeMode(ThemeMode.dark);
+                      ref.read(settingsMutatorProvider).updateTheme('dark');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ConnectedSheetRow(
+                    leading: SheetIconChip.icon(
+                      icon: Icons.light_mode,
+                      color: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHigh
+                          .withValues(alpha: 0.9),
+                    ),
+                    title: l10n.themeLight,
+                    trailing: Icon(
+                      current == ThemeMode.light
+                          ? Icons.check_circle
+                          : Icons.circle_outlined,
+                      color: current == ThemeMode.light
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline,
+                    ),
+                    onTap: () {
+                      ref
+                          .read(themeModeProvider.notifier)
+                          .setThemeMode(ThemeMode.light);
+                      ref.read(settingsMutatorProvider).updateTheme('light');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ConnectedSheetRow(
+                    leading: SheetIconChip.icon(
+                      icon: Icons.settings_brightness,
+                      color: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHigh
+                          .withValues(alpha: 0.9),
+                    ),
+                    title: l10n.themeSystem,
+                    trailing: Icon(
+                      current == ThemeMode.system
+                          ? Icons.check_circle
+                          : Icons.circle_outlined,
+                      color: current == ThemeMode.system
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline,
+                    ),
+                    onTap: () {
+                      ref
+                          .read(themeModeProvider.notifier)
+                          .setThemeMode(ThemeMode.system);
+                      ref.read(settingsMutatorProvider).updateTheme('system');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ConnectedSheetRow(
+                    leading: SheetIconChip.icon(
+                      icon: Icons.dark_mode_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHigh
+                          .withValues(alpha: 0.9),
+                    ),
+                    title: l10n.whatsNewAmoled,
+                    detail: Text(l10n.whatsNewAmoledDesc),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            l10n.comingSoon,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.circle_outlined,
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ],
+                    ),
+                    onTap: () {},
+                  ),
+                ],
               ),
-              _ThemeOption(
-                icon: Icons.light_mode,
-                title: AppLocalizations.of(context)!.themeLight,
-                isSelected: current == ThemeMode.light,
-                onTap: () {
-                  ref
-                      .read(themeModeProvider.notifier)
-                      .setThemeMode(ThemeMode.light);
-                  ref.read(settingsMutatorProvider).updateTheme('light');
-                  Navigator.pop(context);
-                },
-              ),
-              _ThemeOption(
-                icon: Icons.settings_brightness,
-                title: AppLocalizations.of(context)!.themeSystem,
-                isSelected: current == ThemeMode.system,
-                onTap: () {
-                  ref
-                      .read(themeModeProvider.notifier)
-                      .setThemeMode(ThemeMode.system);
-                  ref.read(settingsMutatorProvider).updateTheme('system');
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
             ],
           ),
         ),
@@ -1089,91 +1180,228 @@ class SettingsScreen extends ConsumerWidget {
               ),
               Flexible(
                 child: SingleChildScrollView(
-                  child: Column(
+                  child: ConnectedSheetGroup(
                     children: [
-                      _LanguageOption(
-                        flag: '🇬🇧',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇬🇧',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageEnglish,
-                        subtitle: 'English',
-                        isSelected: currentCode == 'en',
+                        detail: const Text('English'),
+                        trailing: Icon(
+                          currentCode == 'en'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'en'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('en'),
                       ),
-                      _LanguageOption(
-                        flag: '🇵🇰',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇵🇰',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageUrdu,
-                        subtitle: 'Urdu',
-                        isSelected: currentCode == 'ur',
+                        detail: const Text('Urdu'),
+                        trailing: Icon(
+                          currentCode == 'ur'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'ur'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('ur'),
                       ),
-                      _LanguageOption(
-                        flag: '🇸🇦',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇸🇦',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageArabic,
-                        subtitle: 'Arabic',
-                        isSelected: currentCode == 'ar',
+                        detail: const Text('Arabic'),
+                        trailing: Icon(
+                          currentCode == 'ar'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'ar'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('ar'),
                       ),
-                      Divider(
-                          height: 1,
-                          indent: 16,
-                          endIndent: 16,
-                          color: Theme.of(context).colorScheme.outlineVariant),
-                      _LanguageOption(
-                        flag: '🇨🇳',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇨🇳',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageChinese,
-                        subtitle: 'Chinese',
-                        isSelected: currentCode == 'zh',
+                        detail: const Text('Chinese'),
+                        trailing: Icon(
+                          currentCode == 'zh'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'zh'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('zh'),
                       ),
-                      _LanguageOption(
-                        flag: '🇫🇷',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇫🇷',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageFrench,
-                        subtitle: 'French',
-                        isSelected: currentCode == 'fr',
+                        detail: const Text('French'),
+                        trailing: Icon(
+                          currentCode == 'fr'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'fr'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('fr'),
                       ),
-                      _LanguageOption(
-                        flag: '🇩🇪',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇩🇪',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageGerman,
-                        subtitle: 'German',
-                        isSelected: currentCode == 'de',
+                        detail: const Text('German'),
+                        trailing: Icon(
+                          currentCode == 'de'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'de'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('de'),
                       ),
-                      _LanguageOption(
-                        flag: '🇮🇳',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇮🇳',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageHindi,
-                        subtitle: 'Hindi',
-                        isSelected: currentCode == 'hi',
+                        detail: const Text('Hindi'),
+                        trailing: Icon(
+                          currentCode == 'hi'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'hi'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('hi'),
                       ),
-                      _LanguageOption(
-                        flag: '🇯🇵',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇯🇵',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageJapanese,
-                        subtitle: 'Japanese',
-                        isSelected: currentCode == 'ja',
+                        detail: const Text('Japanese'),
+                        trailing: Icon(
+                          currentCode == 'ja'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'ja'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('ja'),
                       ),
-                      _LanguageOption(
-                        flag: '🇧🇷',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇧🇷',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languagePortuguese,
-                        subtitle: 'Portuguese',
-                        isSelected: currentCode == 'pt',
+                        detail: const Text('Portuguese'),
+                        trailing: Icon(
+                          currentCode == 'pt'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'pt'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('pt'),
                       ),
-                      _LanguageOption(
-                        flag: '🇷🇺',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇷🇺',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageRussian,
-                        subtitle: 'Russian',
-                        isSelected: currentCode == 'ru',
+                        detail: const Text('Russian'),
+                        trailing: Icon(
+                          currentCode == 'ru'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'ru'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('ru'),
                       ),
-                      _LanguageOption(
-                        flag: '🇪🇸',
+                      ConnectedSheetRow(
+                        leading: SheetIconChip.emoji(
+                          emoji: '🇪🇸',
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.9),
+                        ),
                         title: l10n.languageSpanish,
-                        subtitle: 'Spanish',
-                        isSelected: currentCode == 'es',
+                        detail: const Text('Spanish'),
+                        trailing: Icon(
+                          currentCode == 'es'
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: currentCode == 'es'
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
                         onTap: () => pickLang('es'),
                       ),
-                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
@@ -1598,7 +1826,7 @@ class SettingsScreen extends ConsumerWidget {
                     height: 48,
                     child: FilledButton.icon(
                       onPressed: () => _openWhatsApp(context),
-                      icon: const Icon(Icons.chat),
+                      icon: const Icon(SimpleIcons.whatsapp),
                       label: Text(l10n.settingsShareWhatsApp),
                     ),
                   ),
@@ -2497,80 +2725,6 @@ class _DangerRowState extends State<_DangerRow> {
           );
         },
       ),
-    );
-  }
-}
-
-class _ThemeOption extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ThemeOption({
-    required this.icon,
-    required this.title,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: Theme.of(context).colorScheme.primary),
-      ),
-      title: Text(title),
-      trailing: isSelected
-          ? Icon(Icons.check_circle,
-              color: Theme.of(context).colorScheme.primary)
-          : Icon(Icons.circle_outlined,
-              color: Theme.of(context).colorScheme.outline),
-      onTap: onTap,
-    );
-  }
-}
-
-class _LanguageOption extends StatelessWidget {
-  final String flag;
-  final String title;
-  final String? subtitle;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _LanguageOption({
-    required this.flag,
-    required this.title,
-    this.subtitle,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Text(flag, style: const TextStyle(fontSize: 28)),
-      title: Text(title),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            )
-          : null,
-      trailing: isSelected
-          ? Icon(Icons.check_circle,
-              color: Theme.of(context).colorScheme.primary)
-          : Icon(Icons.circle_outlined,
-              color: Theme.of(context).colorScheme.outline),
-      onTap: onTap,
     );
   }
 }

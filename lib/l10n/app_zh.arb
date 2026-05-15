@@ -257,6 +257,7 @@
   "homeFileLastModified": "最后修改",
   "homeFileInTrash": "在回收站中",
   "homeFileInfoCopied": "文件信息已复制",
+  "homeCopyFileInfoPrompt": "复制文件信息",
   "homeCopySuffix": "（副本）",
   "homeCopySuffixCounter": "（副本 {counter}）",
   "@homeCopySuffixCounter": {
@@ -465,7 +466,7 @@
     }
   },
   "whatsNewTitle": "最新动态",
-  "whatsNewWhatsIncluded": "包含内容",
+  "whatsNewHighlights": "亮点",
   "whatsNewPlanned": "计划中",
   "whatsNewReleasedToday": "今天发布",
   "whatsNewReleasedYesterday": "昨天发布",
@@ -477,6 +478,7 @@
       }
     }
   },
+  "whatsNewSupportedLanguages": "支持的语言",
   "whatsNewDocAndSheets": "文档与电子表格",
   "whatsNewDocAndSheetsDesc": "查看 PDF、Word 文档、Excel 表格等内容，全部本地处理，保存在你的设备上。",
   "whatsNewOcrAi": "智能 OCR 与本地 AI",

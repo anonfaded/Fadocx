@@ -257,6 +257,7 @@
   "homeFileLastModified": "अंतिम संशोधन",
   "homeFileInTrash": "ट्रैश में",
   "homeFileInfoCopied": "फ़ाइल जानकारी कॉपी हो गई",
+  "homeCopyFileInfoPrompt": "फ़ाइल जानकारी कॉपी करें",
   "homeCopySuffix": " (कॉपी)",
   "homeCopySuffixCounter": " (कॉपी {counter})",
   "@homeCopySuffixCounter": {
@@ -465,7 +466,7 @@
     }
   },
   "whatsNewTitle": "क्या नया है",
-  "whatsNewWhatsIncluded": "क्या शामिल है",
+  "whatsNewHighlights": "मुख्य बातें",
   "whatsNewPlanned": "योजनाबद्ध",
   "whatsNewReleasedToday": "आज जारी किया गया",
   "whatsNewReleasedYesterday": "कल जारी किया गया",
@@ -477,6 +478,7 @@
       }
     }
   },
+  "whatsNewSupportedLanguages": "समर्थित भाषाएं",
   "whatsNewDocAndSheets": "दस्तावेज़ और स्प्रेडशीट",
   "whatsNewDocAndSheetsDesc": "PDF, Word दस्तावेज़, Excel स्प्रेडशीट और बहुत कुछ देखें — सब कुछ आपके डिवाइस पर स्थानीय रूप से।",
   "whatsNewOcrAi": "स्मार्ट OCR और ऑन-डिवाइस AI",
