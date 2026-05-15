@@ -37,6 +37,9 @@ Replace ALL hardcoded English strings across the app with AppLocalizations keys,
 - Mirrored the document thumbnail tilt in both Home recent files and Library list items by flipping the rotation sign from `Directionality`; loading skeleton now matches the final RTL/LTR tilt too.
 - Analyzer verification after the tilt change: `flutter analyze` reports `No issues found!`.
 - Library selection mode now exposes an explicit batch delete action next to select-all, single-file delete now confirms before trashing, and the shared file-action sheet is dismissible by outside tap again.
+- Settings updates section now uses descriptive subtitles, and the replay onboarding toggle moved into About with consistent icon/background styling.
+- Added `settingsAutoUpdateCheckDesc` across all supported locales and regenerated Flutter localizations successfully.
+- Settings screen now uses distinct gray layers for section groups and row cards so the hierarchy reads better against the page background.
 
 ## Naming Convention for .arb keys
 - Common/shared: camelCase (e.g., `cancel`, `delete`, `copy`)

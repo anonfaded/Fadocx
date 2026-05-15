@@ -559,6 +559,7 @@
   "settingsStorageFailedLoad": "Échec du chargement des données de stockage",
   "settingsUpdates": "Mises à jour",
   "settingsAutoUpdateCheck": "Vérification automatique des mises à jour",
+  "settingsAutoUpdateCheckDesc": "Rechercher des mises à jour au lancement de l'application",
   "settingsReplayOnboarding": "Revoir l'introduction",
   "settingsReplayOnboardingDesc": "Afficher les diapositives d'introduction au prochain lancement",
   "settingsEnabled": "Activé",

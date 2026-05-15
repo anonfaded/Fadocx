@@ -144,18 +144,6 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
               _divider(context),
-              Consumer(
-                builder: (context, ref, _) {
-                  final settings = ref.watch(appSettingsProvider);
-                  final show = settings.when(
-                    data: (s) => s?.showOnboardingNextLaunch ?? false,
-                    loading: () => false,
-                    error: (_, __) => false,
-                  );
-                  return _buildOnboardingReplayRow(context, ref, show);
-                },
-              ),
-              _divider(context),
               _buildCheckUpdatesRow(context, ref),
             ]),
             const SizedBox(height: 24),
@@ -183,6 +171,18 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => packageInfoAsync.whenData(
                   (info) => _showVersionInfo(context, info),
                 ),
+              ),
+              _divider(context),
+              Consumer(
+                builder: (context, ref, _) {
+                  final settings = ref.watch(appSettingsProvider);
+                  final show = settings.when(
+                    data: (s) => s?.showOnboardingNextLaunch ?? false,
+                    loading: () => false,
+                    error: (_, __) => false,
+                  );
+                  return _buildOnboardingReplayRow(context, ref, show);
+                },
               ),
               _divider(context),
               _SettingsRow(
@@ -361,12 +361,13 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildSettingsGroup(BuildContext context, List<Widget> children) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: colorScheme.surfaceContainerLowest.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.08),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
       child: Column(children: children),
@@ -390,7 +391,8 @@ class SettingsScreen extends ConsumerWidget {
     return Divider(
       height: 1,
       indent: 56,
-      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.08),
+      color:
+          Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
     );
   }
 
@@ -867,61 +869,69 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildAutoUpdateRow(
       BuildContext context, WidgetRef ref, bool enabled) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.system_update_outlined,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerLow.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.settingsAutoUpdateCheck,
-                      style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.75,
                     ),
-                    Text(
-                      enabled ? l10n.settingsEnabled : l10n.settingsDisabled,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                  ],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.system_update_outlined,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: 48,
-                child: Switch(
-                  value: enabled,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsMutatorProvider)
-                        .updateAutoUpdateCheck(value);
-                  },
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.settingsAutoUpdateCheck,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      Text(
+                        l10n.settingsAutoUpdateCheckDesc,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  width: 48,
+                  child: Switch(
+                    value: enabled,
+                    onChanged: (value) {
+                      ref
+                          .read(settingsMutatorProvider)
+                          .updateAutoUpdateCheck(value);
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -931,61 +941,69 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildOnboardingReplayRow(
       BuildContext context, WidgetRef ref, bool show) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .tertiaryContainer
-                      .withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.auto_stories,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.tertiary,
-                ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerLow.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.settingsReplayOnboarding,
-                      style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.75,
                     ),
-                    Text(
-                      show ? l10n.settingsEnabled : l10n.settingsDisabled,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                  ],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.auto_stories_outlined,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: 48,
-                child: Switch(
-                  value: show,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsMutatorProvider)
-                        .updateShowOnboardingNextLaunch(value);
-                  },
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.settingsReplayOnboarding,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      Text(
+                        l10n.settingsReplayOnboardingDesc,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  width: 48,
+                  child: Switch(
+                    value: show,
+                    onChanged: (value) {
+                      ref
+                          .read(settingsMutatorProvider)
+                          .updateShowOnboardingNextLaunch(value);
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1188,6 +1206,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildCheckUpdatesRow(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1195,37 +1214,45 @@ class SettingsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerLow.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.75,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.cloud_download_outlined,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
                 ),
-                child: Icon(
-                  Icons.cloud_download_outlined,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    l10n.settingsCheckForUpdates,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
                   size: 20,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  l10n.settingsCheckForUpdates,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

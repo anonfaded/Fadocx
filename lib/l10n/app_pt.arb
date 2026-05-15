@@ -559,6 +559,7 @@
   "settingsStorageFailedLoad": "Falha ao carregar dados de armazenamento",
   "settingsUpdates": "Atualizações",
   "settingsAutoUpdateCheck": "Verificação automática de atualizações",
+  "settingsAutoUpdateCheckDesc": "Verificar atualizações ao abrir o app",
   "settingsReplayOnboarding": "Repetir introdução",
   "settingsReplayOnboardingDesc": "Mostrar slides de introdução no próximo início",
   "settingsEnabled": "Ativado",

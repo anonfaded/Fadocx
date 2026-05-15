@@ -1180,10 +1180,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsAutoUpdateCheck => 'خودکار اپ ڈیٹ چیک';
 
   @override
+  String get settingsAutoUpdateCheckDesc => 'ایپ کھلنے پر اپ ڈیٹس چیک کریں';
+
+  @override
   String get settingsReplayOnboarding => 'آن بورڈنگ دوبارہ دکھائیں';
 
   @override
-  String get settingsReplayOnboardingDesc => 'اگلی لانچ پر تعارفی سلائیڈز دکھائیں';
+  String get settingsReplayOnboardingDesc => 'اگلی ایپ لانچ پر آن بورڈنگ سلائیڈز دکھائیں';
 
   @override
   String get settingsEnabled => 'فعال';
