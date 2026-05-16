@@ -1,130 +1,134 @@
-<!-- Context: project-intelligence/decisions | Priority: high | Version: 1.0 | Updated: 2025-01-12 -->
+<!-- Context: project-intelligence/decisions | Priority: critical | Version: 2.0 | Updated: 2026-05-16 -->
 
-# Decisions Log
+# Decisions Log — Fadocx
 
-> Record major architectural and business decisions with full context. This prevents "why was this done?" debates.
-
-## Quick Reference
-
-- **Purpose**: Document decisions so future team members understand context
-- **Format**: Each decision as a separate entry
-- **Status**: Decided | Pending | Under Review | Deprecated
-
-## Decision Template
-
-```markdown
-## [Decision Title]
-
-**Date**: YYYY-MM-DD
-**Status**: [Decided/Pending/Under Review/Deprecated]
-**Owner**: [Who owns this decision]
-
-### Context
-[What situation prompted this decision? What was the problem or opportunity?]
-
-### Decision
-[What was decided? Be specific about the choice made.]
-
-### Rationale
-[Why this decision? What were the alternatives and why were they rejected?]
-
-### Alternatives Considered
-| Alternative | Pros | Cons | Why Rejected? |
-|-------------|------|------|---------------|
-| [Alt 1] | [Pros] | [Cons] | [Why not chosen] |
-| [Alt 2] | [Pros] | [Cons] | [Why not chosen] |
-
-### Impact
-**Positive**: [What this enables or improves]
-**Negative**: [What trade-offs or limitations this creates]
-**Risk**: [What could go wrong]
-
-### Related
-- [Links to related decisions, PRs, issues, or documentation]
-```
+**Purpose**: Record major technical decisions with context so future contributors understand the "why."
+**Last Updated**: 2026-05-16
 
 ---
 
-## Decision: [Title]
+## Decision: Flutter as Cross-Platform Framework
 
-**Date**: YYYY-MM-DD
-**Status**: [Status]
-**Owner**: [Owner]
+**Date**: 2024 | **Status**: Decided
 
-### Context
-[What was happening? Why did we need to decide?]
+**Context**: Need cross-platform viewer (Android first, iOS/Desktop planned).
 
-### Decision
-[What we decided]
+**Decision**: Flutter + Dart.
 
-### Rationale
-[Why this was the right choice]
+**Rationale**: Single codebase, hot reload, strong CustomPaint for complex UI.
 
-### Alternatives Considered
-| Alternative | Pros | Cons | Why Rejected? |
-|-------------|------|------|---------------|
-| [Option A] | [Good things] | [Bad things] | [Reason] |
-| [Option B] | [Good things] | [Bad things] | [Reason] |
+**Alternatives**: Native Android (Android-only), React Native (weak custom painting), Web PWA (no native file access).
 
-### Impact
-- **Positive**: [What we gain]
-- **Negative**: [What we trade off]
-- **Risk**: [What to watch for]
-
-### Related
-- [Link to PR #000]
-- [Link to issue #000]
-- [Link to documentation]
+**Impact**: ✅ Fast dev, cross-platform ready | ❌ Large APK | ⚠️ Flutter web/desktop maturity
 
 ---
 
-## Decision: [Title]
+## Decision: pdfrx for PDF Rendering
 
-**Date**: YYYY-MM-DD
-**Status**: [Status]
-**Owner**: [Owner]
+**Date**: 2024 | **Status**: Decided
 
-### Context
-[What was happening?]
+**Context**: Need PDF rendering with text extraction, navigation, search.
 
-### Decision
-[What we decided]
+**Decision**: `pdfrx` package.
 
-### Rationale
-[Why this was right]
+**Rationale**: Mature, text extraction support (word count, reading time, spotlight search).
 
-### Alternatives Considered
-| Alternative | Pros | Cons | Why Rejected? |
-|-------------|------|------|---------------|
-| [Option A] | [Good things] | [Bad things] | [Reason] |
+**Alternatives**: native_pdf_view (no text extraction), syncfusion (commercial license), custom (months of work).
 
-### Impact
-- **Positive**: [What we gain]
-- **Negative**: [What we trade off]
+**Impact**: ✅ Fast rendering, text extraction | ❌ LayoutBuilder null checks (worked around with GlobalKey) | ⚠️ WASM modules for web (removed)
 
-### Related
-- [Link]
+---
+
+## Decision: Embedded LibreOfficeKit for Office Documents
+
+**Date**: 2024 | **Status**: Decided
+
+**Context**: Need desktop-quality rendering for DOCX, PPTX, ODF.
+
+**Decision**: Embed LibreOfficeKit via platform channels.
+
+**Rationale**: Only open-source solution with full formatting fidelity.
+
+**Alternatives**: Dart parser (loses formatting), cloud API (violates offline-first), text-only (poor UX).
+
+**Impact**: ✅ Desktop-quality rendering | ❌ APK ~346MB, arm64-only | ⚠️ Complex native library maintenance
+
+---
+
+## Decision: Hive for Local Storage
+
+**Date**: 2024 | **Status**: Decided
+
+**Context**: Need fast local storage for settings, recent files, thumbnails.
+
+**Decision**: Hive with code-generated adapters.
+
+**Rationale**: NoSQL key-value, fast, zero native deps, type-safe codegen.
+
+**Alternatives**: SQLite (overkill), SharedPreferences (primitives only), Isar (less mature).
+
+**Impact**: ✅ Fast startup, type-safe | ❌ Must run `build_runner` after `@HiveField` changes | ⚠️ Silent data loss if adapter not regenerated
+
+---
+
+## Decision: Riverpod for State Management
+
+**Date**: 2024 | **Status**: Decided
+
+**Context**: Need reactive state management across features.
+
+**Decision**: Riverpod `Notifier`/`AsyncNotifier` (not `StateNotifier`).
+
+**Rationale**: Compile-time safety, no BuildContext, autoDispose, testable.
+
+**Alternatives**: Provider (runtime errors), Bloc (boilerplate), GetX (anti-patterns).
+
+**Impact**: ✅ Clean composition, autoDispose | ❌ Learning curve | ⚠️ Provider invalidation bugs
+
+---
+
+## Decision: arm64-v8a Architecture Only
+
+**Date**: 2024 | **Status**: Decided
+
+**Context**: LibreOffice native libs only compiled for arm64-v8a.
+
+**Decision**: arm64-v8a only. Drop armeabi-v7a and x86_64.
+
+**Rationale**: LibreOffice native code doesn't exist for other architectures.
+
+**Alternatives**: Multi-arch (LOKit won't work), fallback parsers (poor UX).
+
+**Impact**: ✅ Smaller APK, simpler build | ❌ Excludes 32-bit devices, Chromebooks | ⚠️ ~5% devices unsupported
+
+---
+
+## Decision: No Telemetry or Analytics
+
+**Date**: 2024 | **Status**: Decided
+
+**Context**: Need usage insights without compromising privacy.
+
+**Decision**: Zero telemetry. No analytics, no crash reporting.
+
+**Rationale**: Core brand promise is "zero tracking."
+
+**Alternatives**: Firebase (Google tracking), Sentry (external server), local log files (✅ accepted).
+
+**Impact**: ✅ Complete privacy, auditable | ❌ Harder to debug production | ⚠️ Silent failures undetected
 
 ---
 
 ## Deprecated Decisions
 
-Decisions that were later overturned (for historical context):
-
-| Decision | Date | Replaced By | Why |
-|----------|------|-------------|-----|
-| [Old decision] | [Date] | [New decision] | [Reason] |
-
-## Onboarding Checklist
-
-- [ ] Understand the philosophy behind major architectural choices
-- [ ] Know why certain technologies were chosen over alternatives
-- [ ] Understand trade-offs that were made
-- [ ] Know where to find decision context when questions arise
-- [ ] Understand what decisions are pending and why
+| Decision | Replaced By | Why |
+|----------|-------------|-----|
+| DOCX via `docx_to_text` | Native LOKit + Dart fallback | Lost formatting |
+| Excel via `excel` Dart pkg | Apache POI native | Slow on large spreadsheets |
+| pdfrx WASM modules | `dart run pdfrx:remove_wasm_modules` | Only needed for web |
 
 ## Related Files
 
-- `technical-domain.md` - Technical implementation affected by these decisions
-- `business-tech-bridge.md` - How decisions connect business and technical
-- `living-notes.md` - Current open questions that may become decisions
+- `technical-domain.md` — Technologies affected by these decisions
+- `business-tech-bridge.md` — How decisions serve business goals
+- `living-notes.md` — Current issues stemming from these decisions

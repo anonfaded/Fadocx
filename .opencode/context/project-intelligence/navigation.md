@@ -1,30 +1,30 @@
-<!-- Context: project-intelligence/nav | Priority: high | Version: 1.0 | Updated: 2025-01-12 -->
+<!-- Context: project-intelligence/nav | Priority: high | Version: 2.0 | Updated: 2026-05-16 -->
 
-# Project Intelligence
+# Project Intelligence — Fadocx
 
-> Start here for quick project understanding. These files bridge business and technical domains.
+> Start here for quick project understanding. All files populated with actual Fadocx context.
 
 ## Structure
 
 ```
 .opencode/context/project-intelligence/
 ├── navigation.md              # This file - quick overview
-├── business-domain.md         # Business context and problem statement
-├── technical-domain.md        # Stack, architecture, technical decisions
-├── business-tech-bridge.md    # How business needs map to solutions
-├── decisions-log.md           # Major decisions with rationale
-└── living-notes.md            # Active issues, debt, open questions
+├── business-domain.md         # Privacy-first document viewer mission (v2.0)
+├── technical-domain.md        # Flutter, Riverpod, Hive, LOKit stack (v2.0)
+├── business-tech-bridge.md    # Privacy needs → technical implementations (v2.0)
+├── decisions-log.md           # 7 major decisions + 3 deprecated (v2.0)
+└── living-notes.md            # 5 tech debt items, 4 open questions (v2.0)
 ```
 
 ## Quick Routes
 
 | What You Need | File | Description |
 |---------------|------|-------------|
-| Understand the "why" | `business-domain.md` | Problem, users, value proposition |
-| Understand the "how" | `technical-domain.md` | Stack, architecture, integrations |
-| See the connection | `business-tech-bridge.md` | Business → technical mapping |
-| Know the context | `decisions-log.md` | Why decisions were made |
-| Current state | `living-notes.md` | Active issues and open questions |
+| Understand the "why" | `business-domain.md` | Privacy-first mission, target users, roadmap |
+| Understand the "how" | `technical-domain.md` | Flutter stack, Riverpod, Hive, format routing |
+| See the connection | `business-tech-bridge.md` | Offline requirement → architecture decisions |
+| Know the context | `decisions-log.md` | Why pdfrx, LOKit, Hive, arm64-only, no telemetry |
+| Current state | `living-notes.md` | Tech debt, open questions, known issues, gotchas |
 | All of the above | Read all files in order | Full project intelligence |
 
 ## Usage
@@ -38,6 +38,7 @@
 - Business focus → `business-domain.md`
 - Technical focus → `technical-domain.md`
 - Decision context → `decisions-log.md`
+- Current issues → `living-notes.md`
 
 ## Integration
 
