@@ -119,3 +119,6 @@ android/key.properties
 # android/app/src/main/assets/share/
 
 .tmp/*
+
+# Local task tracking (not for repo)
+tasks/
