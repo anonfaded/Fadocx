@@ -1,0 +1,3 @@
+• Initial release: all-in-one document viewer for PDF, Office, spreadsheets, presentations, code files, and OCR text extraction.
+• Fully offline, zero tracking, open-source.
+• Private storage, category browsing, search, reading stats, recent files, trash, restore, and native-quality rendering.

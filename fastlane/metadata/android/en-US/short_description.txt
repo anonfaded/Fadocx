@@ -1,0 +1,1 @@
+Document viewer for PDFs, Office files, and OCR text extraction.
