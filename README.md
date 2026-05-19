@@ -45,6 +45,12 @@ This is what a document viewer should be. This is Fadocx.
 
 <br>
 
+## `>_` Featured In
+
+- **Article featuring Fadocx** [LinuxEasy](https://www.linuxeasy.org/fadocx-visualizzatore-documenti-open-android/)
+
+<br>
+
 ## `>_` 📱 Screenshots
 
 <div align="center">
