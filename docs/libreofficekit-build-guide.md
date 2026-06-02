@@ -1,7 +1,35 @@
 # LibreOfficeKit Android Build Guide
 
 ## Overview
-Build LibreOffice core for Android to produce `liblo-native-code.so` for Fadocx document viewing and editing.
+Build LibreOffice core for Android to produce the LibreOfficeKit native runtime used by Fadocx document viewing.
+
+Fadocx does not only need `liblo-native-code.so`. The Android app packages the full arm64 runtime set under
+`android/app/src/main/jniLibs/arm64-v8a/`, including LibreOfficeKit plus its NSS/NSPR, SQLite, and C++ runtime
+dependencies. F-Droid reproducible builds must account for every library in this directory, not just the main
+LibreOfficeKit library.
+
+Current required `jniLibs/arm64-v8a` files:
+
+| File | Role | Expected source |
+|---|---|---|
+| `liblo-native-code.so` | LibreOfficeKit Android native library | LibreOffice core Android build |
+| `libc++_shared.so` | Android C++ runtime | Android NDK r27c |
+| `libfreebl3.so` | NSS crypto backend | LibreOffice bundled/external NSS build |
+| `libnspr4.so` | NSPR runtime | LibreOffice bundled/external NSPR build |
+| `libnss3.so` | NSS runtime | LibreOffice bundled/external NSS build |
+| `libnssckbi.so` | NSS root certificate module | LibreOffice bundled/external NSS build |
+| `libnssdbm3.so` | NSS DBM module | LibreOffice bundled/external NSS build |
+| `libnssutil3.so` | NSS utility runtime | LibreOffice bundled/external NSS build |
+| `libplc4.so` | NSPR support library | LibreOffice bundled/external NSPR build |
+| `libplds4.so` | NSPR support library | LibreOffice bundled/external NSPR build |
+| `libsmime3.so` | NSS S/MIME runtime | LibreOffice bundled/external NSS build |
+| `libsoftokn3.so` | NSS software token module | LibreOffice bundled/external NSS build |
+| `libsqlite3.so` | SQLite runtime used by LibreOffice | LibreOffice bundled/external SQLite build |
+| `libssl3.so` | NSS SSL runtime | LibreOffice bundled/external NSS build |
+
+These files are tracked with Git LFS in the app repository for normal app builds. For F-Droid, the LFS copies should
+be treated only as reference outputs; the build recipe should rebuild or source them reproducibly, then copy the
+freshly built files into `android/app/src/main/jniLibs/arm64-v8a/` before running the Flutter/Gradle build.
 
 ## Prerequisites
 
@@ -91,21 +119,48 @@ For armv7 (second ABI), use `--with-distro=LibreOfficeAndroidArmv7`.
 make -j$(nproc)
 ```
 
-Duration: 2-6 hours. Output: `liblo-native-code.so` in build directory.
+Duration: 2-6 hours. The primary output is `liblo-native-code.so`, with dependent runtime libraries available from
+the LibreOffice Android build tree and/or the Android NDK.
 
 ## Step 7 — Extract Artifacts
 
 ```bash
 find . -name "liblo-native-code.so" -type f
-find instdir/ -name "*.so" -type f -exec ls -lh {} \;
+find . -name "*.so" -type f -exec ls -lh {} \;
 ```
+
+Copy the full required runtime set into the app:
+
+```bash
+mkdir -p /path/to/Fadocx/android/app/src/main/jniLibs/arm64-v8a
+
+# Copy the LibreOfficeKit output.
+cp /path/to/liblo-native-code.so \
+  /path/to/Fadocx/android/app/src/main/jniLibs/arm64-v8a/
+
+# Copy the runtime dependency set from the LibreOffice build outputs and NDK.
+# Verify every required file listed in the table above exists after copying.
+ls -lh /path/to/Fadocx/android/app/src/main/jniLibs/arm64-v8a/*.so
+```
+
+For F-Droid automation, this extraction step must be scripted in fdroiddata or an srclib so the final APK is built
+from source-produced libraries instead of Git LFS binaries.
 
 ## Step 8 — Smoke Test
 
-1. Copy `liblo-native-code.so` into Android app `jniLibs/arm64-v8a/`
+1. Confirm all required `jniLibs/arm64-v8a/*.so` files are real ELF binaries, not Git LFS pointer files.
 2. Load via JNI: `System.loadLibrary("lo-native-code")`
 3. Call `libreofficekit_hook_2()` then `documentLoad()` on a test DOCX
 4. Verify page count returns
+
+Pointer check:
+
+```bash
+file android/app/src/main/jniLibs/arm64-v8a/*.so
+```
+
+Every entry should report an Android/ARM64 shared object. If any file reports `ASCII text`, it is still a Git LFS
+pointer and has not been populated or rebuilt.
 
 ## Troubleshooting
 
