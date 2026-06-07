@@ -95,9 +95,17 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
   }
 
   String _getShortPath(String fullPath) {
-    final home = Platform.isAndroid ? '/storage/emulated/0' : Platform.environment['HOME'] ?? '';
-    if (fullPath.startsWith(home)) {
-      return '~${fullPath.substring(home.length)}';
+    if (Platform.isAndroid) {
+      final home = '/storage/emulated/0';
+      if (fullPath.startsWith(home)) {
+        return '~${fullPath.substring(home.length)}';
+      }
+    } else if (Platform.isIOS) {
+      // On iOS, show last 2 path components (category + filename dir)
+      final parts = fullPath.split('/');
+      if (parts.length > 2) {
+        return '.../${parts[parts.length - 2]}/${parts.last}';
+      }
     }
     return fullPath;
   }
@@ -112,7 +120,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _openedManageAllFilesSettings) {
+    if (!Platform.isIOS && state == AppLifecycleState.resumed && _openedManageAllFilesSettings) {
       _openedManageAllFilesSettings = false;
       _recheckManageExternalStoragePermission();
     }
@@ -1240,6 +1248,13 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
     log.i('📋 Checking file access permissions...');
     
     try {
+      // iOS: Sandboxed — no permissions needed, scan app documents directory
+      if (Platform.isIOS) {
+        log.i('✓ iOS sandbox — no file permissions needed');
+        await _scanDeviceForDocuments();
+        return;
+      }
+
       if (await Permission.manageExternalStorage.isGranted) {
         log.i('✓ MANAGE_EXTERNAL_STORAGE already granted');
         await _scanDeviceForDocuments();
@@ -1324,6 +1339,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
   }
 
   Future<void> _recheckManageExternalStoragePermission() async {
+    if (Platform.isIOS) return; // iOS: no external storage concept
+
     try {
       final status = await Permission.manageExternalStorage.status;
       final legacyStorageStatus = await Permission.storage.status;
@@ -1346,7 +1363,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
   }
 
   Future<void> _scanDeviceForDocuments() async {
-    log.i('🔍 Starting device document scan...');
+    log.i('🔍 Starting document scan...');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -1356,14 +1373,27 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
       final allDocs = <DeviceDocument>[];
       final pathsToScan = <Directory>[];
 
-      // Try to get Downloads directory
-      try {
-        final downloads = await getDownloadsDirectory();
-        if (downloads != null) {
-          pathsToScan.add(downloads);
+      if (Platform.isIOS) {
+        // iOS: Scan the app's Documents sandbox directory
+        try {
+          final docsDir = await getApplicationDocumentsDirectory();
+          if (await docsDir.exists()) {
+            pathsToScan.add(docsDir);
+            log.i('✓ Added iOS Documents sandbox: ${docsDir.path}');
+          }
+        } catch (e) {
+          log.d('⚠️  Could not get iOS documents dir: $e');
         }
-      } catch (e) {
-        log.d('⚠️  Could not get downloads dir: $e');
+      } else {
+        // Android: Try to get Downloads directory
+        try {
+          final downloads = await getDownloadsDirectory();
+          if (downloads != null) {
+            pathsToScan.add(downloads);
+          }
+        } catch (e) {
+          log.d('⚠️  Could not get downloads dir: $e');
+        }
       }
 
       // Try to get Fadocx samples directory
@@ -1377,17 +1407,19 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
         log.d('⚠️  Could not get Fadocx samples dir: $e');
       }
 
-      // Try to get common user documents paths
-      final commonDocPaths = [
-        '/storage/emulated/0/Documents',
-        '/storage/emulated/0/Download',
-      ];
+      // Android: Try to get common user documents paths
+      if (!Platform.isIOS) {
+        final commonDocPaths = [
+          '/storage/emulated/0/Documents',
+          '/storage/emulated/0/Download',
+        ];
 
-      for (final path in commonDocPaths) {
-        final dir = Directory(path);
-        final exists = await dir.exists();
-        if (exists && !pathsToScan.any((d) => d.path == path)) {
-          pathsToScan.add(dir);
+        for (final path in commonDocPaths) {
+          final dir = Directory(path);
+          final exists = await dir.exists();
+          if (exists && !pathsToScan.any((d) => d.path == path)) {
+            pathsToScan.add(dir);
+          }
         }
       }
 

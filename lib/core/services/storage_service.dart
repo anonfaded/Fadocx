@@ -17,12 +17,18 @@ class StorageService {
   static const String trashFolder =
       'Trash'; // Normal visible folder for deleted files
 
-  /// Single source of truth: App's external scoped storage
-  /// Path: /storage/emulated/0/Android/data/{package}/files/
-  /// Uses getExternalStorageDirectories() from path_provider
-  /// This maps to Context.getExternalFilesDirs() on Android
+  /// Single source of truth: App's scoped storage
+  /// Android: /storage/emulated/0/Android/data/{package}/files/
+  /// iOS:     /var/mobile/Containers/Data/App/{uuid}/Documents/
+  /// Uses getExternalStorageDirectories() on Android, getApplicationDocumentsDirectory() on iOS
   static Future<Directory> _getStorageDir() async {
-    // getExternalStorageDirectories() returns app-specific external storage
+    if (Platform.isIOS) {
+      final docsDir = await getApplicationDocumentsDirectory();
+      log.i('Using iOS documents directory: ${docsDir.path}');
+      return docsDir;
+    }
+
+    // Android: getExternalStorageDirectories() returns app-specific external storage
     // On Android API 19+: /storage/emulated/0/Android/data/{package}/files/
     // It returns a list where the first item is the primary external storage
     final externalDirs = await getExternalStorageDirectories();

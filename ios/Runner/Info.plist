@@ -49,5 +49,57 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>NSCameraUsageDescription</key>
+		<string>Fadocx needs camera access to scan documents and capture images for OCR.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Fadocx needs photo library access to import images for OCR and document processing.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Fadocx needs permission to save processed documents and images.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Fadocx needs microphone access for video recording with audio.</string>
+		<key>UIFileSharingEnabled</key>
+		<true/>
+		<key>LSSupportsOpeningDocumentsInPlace</key>
+		<true/>
+		<key>CFBundleDocumentTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeName</key>
+				<string>PDF Document</string>
+				<key>LSHandlerRank</key>
+				<string>Default</string>
+				<key>LSItemContentTypes</key>
+				<array>
+					<string>com.adobe.pdf</string>
+				</array>
+			</dict>
+			<dict>
+				<key>CFBundleTypeName</key>
+				<string>Microsoft Office Documents</string>
+				<key>LSHandlerRank</key>
+				<string>Default</string>
+				<key>LSItemContentTypes</key>
+				<array>
+					<string>org.openxmlformats.spreadsheetml.sheet</string>
+					<string>org.openxmlformats.wordprocessingml.document</string>
+					<string>org.openxmlformats.presentationml.presentation</string>
+					<string>com.microsoft.word.doc</string>
+					<string>com.microsoft.excel.xls</string>
+					<string>com.microsoft.powerpoint.ppt</string>
+					<string>public.comma-separated-values-text</string>
+					<string>public.plain-text</string>
+				</array>
+			</dict>
+			<dict>
+				<key>CFBundleTypeName</key>
+				<string>Images</string>
+				<key>LSHandlerRank</key>
+				<string>Default</string>
+				<key>LSItemContentTypes</key>
+				<array>
+					<string>public.image</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>

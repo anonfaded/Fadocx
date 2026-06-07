@@ -1,5 +1,5 @@
 name: fadocx
-description: "Offline-first document viewer for Android, macOS, Windows, and Linux"
+description: "Offline-first document viewer for iOS, Android, macOS, Windows, and Linux"
 publish_to: 'none'
 
 version: 1.0.0+1
