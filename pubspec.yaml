@@ -37,15 +37,15 @@ dependencies:
   # =========================
   # ROUTING
   # =========================
-  go_router: ^17.2.1
+  go_router: ^18.1.0
 
   # =========================
   # FILE SYSTEM
   # =========================
-  file_picker: ^11.0.2
+  file_picker: ^13.1.0
   path_provider: ^2.1.5
-  permission_handler: ^12.0.1
-  open_file: ^3.5.11
+  permission_handler: ^13.0.2
+  open_file: ^4.0.0
 
   # =========================
   # PDF VIEWER
@@ -60,7 +60,7 @@ dependencies:
   # LEGACY FORMATS (DOC, XLS) & OPENOFFICE
   # =========================
   archive: ^4.0.9  # For ODP, ODS, ODT, DOCX, PPTX (zip-based)
-  xml: ^6.6.1  # For parsing ODF/OOXML
+  xml: ^7.1.0  # For parsing ODF/OOXML
 
   # =========================
   # XLSX
@@ -82,8 +82,8 @@ dependencies:
   # =========================
   # UI
   # =========================
-  google_fonts: ^8.0.2
-  cupertino_icons: ^1.0.8  # Required for CupertinoIcons font
+  google_fonts: ^9.0.0
+  cupertino_icons: ^2.0.0  # Required for CupertinoIcons font
 
   # =========================
   # INTERNATIONALIZATION
@@ -93,11 +93,11 @@ dependencies:
   intl: ^0.20.2
   pdfrx: ^2.2.24
   flutter_launcher_icons: ^0.14.4
-  package_info_plus: ^9.0.1
+  package_info_plus: ^10.2.2
   highlight: ^0.7.0
   url_launcher: ^6.3.2
-  share_plus: ^10.1.4
-  simple_icons: ^14.6.1
+  share_plus: ^13.3.1
+  simple_icons: ^16.23.0
   video_player: ^2.11.1
 
 dev_dependencies:

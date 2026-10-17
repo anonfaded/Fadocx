@@ -322,11 +322,10 @@ class ScannerNotifier extends Notifier<ScannerState> {
     if (state.isProcessing) return;
 
     try {
-      final result = await FilePicker.pickFiles(
+      final result = await FilePicker.pickFile(
         type: FileType.image,
-        allowMultiple: false,
       );
-      final imagePath = result?.files.single.path;
+      final imagePath = result?.path;
       if (imagePath == null || imagePath.isEmpty) return;
 
       await _processExistingImage(imagePath);

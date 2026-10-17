@@ -1691,19 +1691,18 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen>
           'aac', 'mp3', 'wav', 'ogg', 'flac', 'm4a', 'wma', 'opus', 'aiff',
           'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', '3gp', 'm4v', 'mpg', 'mpeg', 'fmp4',
         ],
-        allowMultiple: true,
       );
 
-      if (result != null && result.files.isNotEmpty) {
+      if (result.isNotEmpty) {
         setState(() {
-          for (final file in result.files) {
+          for (final file in result) {
             if (file.path != null) {
               _selectedFilePaths.add(file.path!);
               log.d('  ✓ Selected: ${file.name}');
             }
           }
         });
-        log.i('✅ Added ${result.files.length} files via file picker');
+        log.i('✅ Added ${result.length} files via file picker');
       } else {
         log.i('ℹ️  File picker cancelled by user');
       }
